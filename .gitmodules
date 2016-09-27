@@ -1,0 +1,3 @@
+[submodule "schemas"]
+	path = schemas
+	url = https://github.com/oasis-open/cti-stix2-json-schemas
