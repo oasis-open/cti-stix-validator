@@ -15,8 +15,6 @@ install_requires = [
 setup(
     name='stix2-validator',
     description='APIs and scripts for validating STIX 2.0 documents.',
-    author='The MITRE Corporation',
-    author_email='stix@mitre.org',
     url='http://stixproject.github.io/',
     version='0.0.1',
     packages=find_packages(),
