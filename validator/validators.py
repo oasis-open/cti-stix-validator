@@ -160,7 +160,7 @@ def cve(instance):
             if 'source_name' not in ref:
                 # Since this field is required, schemas will already catch the error
                 return
-                
+
             if ref['source_name'] == 'cve' and 'external_id' not in ref or \
                     re.match('^CVE-\d{4}-(0\d{3}|[1-9]\d{3,})$', ref['external_id']) is None:
                 return JSONError("A CVE 'external_reference' must have an "
@@ -436,8 +436,9 @@ def relationships_strict(instance):
     if (instance['type'] != 'relationship'):
         return
 
-    if 'relationship_type' not in instance:
-        # Since this field is required, schemas will already catch the error
+    if ('relationship_type' not in instance or 'source_ref' not in instance or
+            'target_ref' not in instance):
+        # Since these fields are required, schemas will already catch the error
         return
 
     r_type = instance['relationship_type']
