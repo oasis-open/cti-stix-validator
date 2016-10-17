@@ -433,7 +433,9 @@ def relationships_strict(instance):
     """Ensure that only the relationship types defined in the specification are
     used.
     """
-    if (instance['type'] != 'relationship'):
+    # Don't check objects that aren't relationships or are custom objects
+    if (instance['type'] != 'relationship' or
+            instance['type'] not in enums.TYPES):
         return
 
     if ('relationship_type' not in instance or 'source_ref' not in instance or
