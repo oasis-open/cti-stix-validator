@@ -123,11 +123,16 @@ def cybox(instance):
 
 
 def capec(instance):
-    """If CAPEC is used in an attack pattern's external reference,
-    ensure a CAPEC id is also used.
+    """If CAPEC is used in an attack pattern's external reference, ensure a 
+    proper CAPEC id is also used.
     """
     if instance['type'] == 'attack-pattern' and 'external_references' in instance:
         for ref in instance['external_references']:
+
+            if 'source_name' not in ref:
+                # Since this field is required, schemas will already catch the error
+                return
+
             if ref['source_name'] == 'capec' and 'external_id' not in ref or \
                     re.match('^CAPEC-\d+$', ref['external_id']) is None:
                 return JSONError("A CAPEC 'external_reference' must have an "
@@ -146,11 +151,16 @@ def custom_property_names(instance):
 
 
 def cve(instance):
-    """If CAPEC is used in an attack pattern's external reference,
-    ensure a CAPEC id is also used.
+    """If CVE is used in an attack pattern's external reference, ensure a 
+    proper CVE id is also used.
     """
     if instance['type'] == 'vulnerability' and 'external_references' in instance:
         for ref in instance['external_references']:
+
+            if 'source_name' not in ref:
+                # Since this field is required, schemas will already catch the error
+                return
+
             if ref['source_name'] == 'cve' and 'external_id' not in ref or \
                     re.match('^CVE-\d{4}-(0\d{3}|[1-9]\d{3,})$', ref['external_id']) is None:
                 return JSONError("A CVE 'external_reference' must have an "
@@ -300,6 +310,10 @@ def kill_chain_phase_names(instance):
     if instance['type'] in enums.KILL_CHAIN_PHASE_USES and 'kill_chain_phases' in instance:
         for phase in instance['kill_chain_phases']:
 
+            if 'kill_chain_name' not in phase:
+                # Since this field is required, schemas will already catch the error
+                return
+
             chain_name = phase['kill_chain_name']
             if not chain_name.islower() or '_' in chain_name or ' ' in chain_name:
                 return JSONError("kill_chain_name (%s) should be all lowercase"
@@ -419,8 +433,14 @@ def relationships_strict(instance):
     """Ensure that only the relationship types defined in the specification are
     used.
     """
+    # Don't check objects that aren't relationships or are custom objects
     if (instance['type'] != 'relationship' or
             instance['type'] not in enums.TYPES):
+        return
+
+    if ('relationship_type' not in instance or 'source_ref' not in instance or
+            'target_ref' not in instance):
+        # Since these fields are required, schemas will already catch the error
         return
 
     r_type = instance['relationship_type']
