@@ -115,7 +115,6 @@ def _get_arg_parser():
         "-s",
         "--schemas",
         dest="schema_dir",
-        default='schemas/',
         help="Schema directory. If not provided, the STIX schemas bundled "
              "with this script will be used."
     )
@@ -178,7 +177,6 @@ def main():
     # Parse command line arguments
     parser = _get_arg_parser()
     args = parser.parse_args()
-    args.schema_dir = os.path.abspath(os.path.dirname(__file__) + args.schema_dir)
 
     options = ValidationOptions(args)
 

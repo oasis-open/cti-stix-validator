@@ -1,3 +1,3 @@
 [submodule "schemas"]
-	path = schemas
+	path = stix2validator/schemas/
 	url = https://github.com/oasis-open/cti-stix2-json-schemas

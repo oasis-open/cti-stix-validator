@@ -2,6 +2,7 @@
 """
 
 # builtin
+import os
 import re
 from collections import deque
 
@@ -39,7 +40,7 @@ class ValidationOptions(object):
 
     """
     def __init__(self, cmd_args=None, verbose=False, files=None,
-                 recursive=False, schema_dir="schemas/", ignored="",
+                 recursive=False, schema_dir=None, ignored="",
                  enabled="", lax=False, strict_types=False):
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
@@ -62,6 +63,11 @@ class ValidationOptions(object):
             self.strict_types = strict_types
             self.ignored = ignored
             self.enabled = enabled
+
+        # If no schema directory given, use default bundled with this package
+        if not self.schema_dir:
+            self.schema_dir = os.path.abspath(os.path.dirname(__file__) +
+                                              '/schemas/')
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names

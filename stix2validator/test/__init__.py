@@ -3,7 +3,7 @@ import os
 from .. import validate_string
 from ..validators import ValidationOptions
 
-SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../../schemas")
+SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 
 
 class ValidatorTest(unittest.TestCase):
