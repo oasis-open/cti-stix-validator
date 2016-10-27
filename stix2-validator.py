@@ -9,9 +9,9 @@ import argparse
 import sys
 import textwrap
 from argparse import RawDescriptionHelpFormatter
-from validator import *
-from validator import codes
-from validator.validators import ValidationOptions
+from stix2validator import *
+from stix2validator import codes
+from stix2validator.validators import ValidationOptions
 
 
 CODES_TABLE = """
