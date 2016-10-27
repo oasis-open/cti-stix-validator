@@ -18,7 +18,7 @@ setup(
     url='http://stixproject.github.io/',
     version='0.0.1',
     packages=find_packages(),
-    scripts=['validator.py'],
+    scripts=['stix2-validator.py'],
     include_package_data=True,
     install_requires=install_requires,
     long_description=readme,
