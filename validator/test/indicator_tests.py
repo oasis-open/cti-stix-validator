@@ -52,12 +52,13 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_string(indicator, self.options).schema_results
         self.assertEqual(results.is_valid, False)
 
-    def test_cybox_version(self):
-        indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern_lang_version'] = "2.0"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options).schema_results
-        self.assertEqual(results.is_valid, False)
+    # TODO: Update this test once RC3 has settled and schemas are updated
+    # def test_cybox_version(self):
+    #     indicator = copy.deepcopy(self.valid_indicator)
+    #     indicator['pattern_lang_version'] = "2.0"
+    #     indicator = json.dumps(indicator)
+    #     results = validate_string(indicator, self.options).schema_results
+    #     self.assertEqual(results.is_valid, False)
 
     def test_custom_property_name_invalid_character(self):
         indicator = copy.deepcopy(self.valid_indicator)

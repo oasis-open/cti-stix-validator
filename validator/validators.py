@@ -39,7 +39,7 @@ class ValidationOptions(object):
 
     """
     def __init__(self, cmd_args=None, verbose=False, files=None,
-                 recursive=False, schema_dir=None, ignored="",
+                 recursive=False, schema_dir="schemas/", ignored="",
                  enabled="", lax=False, strict_types=False):
         if cmd_args is not None:
             self.verbose = cmd_args.verbose

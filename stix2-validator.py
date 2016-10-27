@@ -190,7 +190,7 @@ def main():
         results = run_validation(options)
 
         # Print validation results
-        output.print_results(results, options)
+        output.print_results(results)
 
         # Determine exit status code and exit.
         code = codes.get_code(results)

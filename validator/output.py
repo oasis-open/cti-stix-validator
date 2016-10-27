@@ -99,15 +99,12 @@ def print_schema_results(results, level=0):
         print_level(_RED + "[!] %s", level + 1, error)
 
 
-def print_results(results, options):
-    """Prints `results` to stdout. If ``options.json_output`` is set, the
-    results are printed in JSON format.
+def print_results(results):
+    """Prints `results` to stdout.
 
     Args:
         results: A dictionary of ValidationResults instances. The key is the
             file path to the validated document.
-        options: An instance of ``ValidationOptions`` which contains output
-            options.
 
     """
     if not hasattr(results, 'items'):

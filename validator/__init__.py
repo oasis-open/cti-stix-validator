@@ -12,7 +12,7 @@ from six import python_2_unicode_compatible
 
 # internal
 from . import output
-from .validators import CustomDraft4Validator
+from .validators import ValidationOptions, CustomDraft4Validator
 
 
 class ValidationError(Exception):
@@ -276,7 +276,7 @@ def run_validation(options):
     return results
 
 
-def validate_file(fn, options):
+def validate_file(fn, options=None):
     """Validates the input document `fn` according to the options passed in.
 
     If any exceptions are raised during validation, no further validation
@@ -296,6 +296,9 @@ def validate_file(fn, options):
     with open(fn) as instance_file:
         instance = json.load(instance_file)
 
+    if not options:
+        options = ValidationOptions()
+
     try:
         if options.files:
             results.schema_results = schema_validate(instance, options)
@@ -313,7 +316,7 @@ def validate_file(fn, options):
     return results
 
 
-def validate_string(string, options):
+def validate_string(string, options=None):
     """Validates the input `string` according to the options passed in.
 
     If any exceptions are raised during validation, no further validation
@@ -330,6 +333,9 @@ def validate_string(string, options):
     results = FileResults("input string")
     output.info("Performing JSON schema validation on input string: " + string)
     instance = json.loads(string)
+
+    if not options:
+        options = ValidationOptions()
 
     try:
         results.schema_results = schema_validate(instance, options)
