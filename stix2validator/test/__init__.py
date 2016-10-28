@@ -28,7 +28,7 @@ class ValidatorTest(unittest.TestCase):
                     ValidationOptions constructor.
         """
         options = ValidationOptions(schema_dir=SCHEMA_DIR, **kwargs)
-        results = validate_string(instance, options).schema_results
+        results = validate_string(instance, options)
         self.assertTrue(results.is_valid)
 
     def assertFalseWithOptions(self, instance, **kwargs):
@@ -41,5 +41,5 @@ class ValidatorTest(unittest.TestCase):
                     ValidationOptions constructor.
         """
         options = ValidationOptions(schema_dir=SCHEMA_DIR, **kwargs)
-        results = validate_string(instance, options).schema_results
+        results = validate_string(instance, options)
         self.assertEqual(results.is_valid, False)

@@ -29,14 +29,14 @@ class IdentityTestCases(ValidatorTest):
     valid_report = json.loads(VALID_REPORT)
 
     def test_wellformed_report(self):
-        results = validate_string(VALID_REPORT, self.options).schema_results
+        results = validate_string(VALID_REPORT, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_report_label(self):
         report = copy.deepcopy(self.valid_report)
         report['labels'] = ["something"]
         report = json.dumps(report)
-        results = validate_string(report, self.options).schema_results
+        results = validate_string(report, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(report, 'report-label')

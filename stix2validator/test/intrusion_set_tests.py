@@ -24,21 +24,21 @@ class IntrusionSetTestCases(ValidatorTest):
     valid_intrusion_set = json.loads(VALID_INTRUSION_SET)
 
     def test_wellformed_intrusion_set(self):
-        results = validate_string(VALID_INTRUSION_SET, self.options).schema_results
+        results = validate_string(VALID_INTRUSION_SET, self.options)
         self.assertTrue(results.is_valid)
 
     def test_country(self):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['country'] = "USA"
         intrusion_set = json.dumps(intrusion_set)
-        results = validate_string(intrusion_set, self.options).schema_results
+        results = validate_string(intrusion_set, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_vocab_attack_motivation(self):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['primary_motivation'] = "selfishness"
         intrusion_set = json.dumps(intrusion_set)
-        results = validate_string(intrusion_set, self.options).schema_results
+        results = validate_string(intrusion_set, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(intrusion_set, 'attack-motivation')
@@ -47,7 +47,7 @@ class IntrusionSetTestCases(ValidatorTest):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['resource_level'] = "high"
         intrusion_set = json.dumps(intrusion_set)
-        results = validate_string(intrusion_set, self.options).schema_results
+        results = validate_string(intrusion_set, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(intrusion_set, 'attack-resource-level')

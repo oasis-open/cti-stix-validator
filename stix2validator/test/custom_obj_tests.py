@@ -21,7 +21,7 @@ class CustomObjectTestCases(ValidatorTest):
     valid_custom_object = json.loads(VALID_CUSTOM_OBJECT)
 
     def test_wellformed_custom_object(self):
-        results = validate_string(VALID_CUSTOM_OBJECT, self.options).schema_results
+        results = validate_string(VALID_CUSTOM_OBJECT, self.options)
         self.assertTrue(results.is_valid)
 
     def test_no_type(self):
@@ -34,28 +34,28 @@ class CustomObjectTestCases(ValidatorTest):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['id']
         custom_obj = json.dumps(custom_obj)
-        results = validate_string(custom_obj, self.options).schema_results
+        results = validate_string(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_no_created(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['created']
         custom_obj = json.dumps(custom_obj)
-        results = validate_string(custom_obj, self.options).schema_results
+        results = validate_string(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_no_modified(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['modified']
         custom_obj = json.dumps(custom_obj)
-        results = validate_string(custom_obj, self.options).schema_results
+        results = validate_string(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_no_version(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['version']
         custom_obj = json.dumps(custom_obj)
-        results = validate_string(custom_obj, self.options).schema_results
+        results = validate_string(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_invalid_type_name(self):
@@ -63,13 +63,13 @@ class CustomObjectTestCases(ValidatorTest):
         custom_obj['type'] = "corpo_ration"
         custom_obj['id'] = "corpo_ration--4527e5de-8572-446a-a57a-706f15467461"
         custom_obj_string = json.dumps(custom_obj)
-        results = validate_string(custom_obj_string, self.options).schema_results
+        results = validate_string(custom_obj_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         custom_obj['type'] = "corpor@tion"
         custom_obj['id'] = "corpor@tion--4527e5de-8572-446a-a57a-706f15467461"
         custom_obj_string = json.dumps(custom_obj)
-        results = validate_string(custom_obj_string, self.options).schema_results
+        results = validate_string(custom_obj_string, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_invalid_type_name_lax(self):
@@ -77,7 +77,7 @@ class CustomObjectTestCases(ValidatorTest):
         custom_obj['type'] = "x-corporation"
         custom_obj['id'] = "x-corporation--4527e5de-8572-446a-a57a-706f15467461"
         custom_obj_string = json.dumps(custom_obj)
-        results = validate_string(custom_obj_string, self.options).schema_results
+        results = validate_string(custom_obj_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.assertTrueWithOptions(custom_obj_string, enabled='custom-object-prefix-lax')
@@ -89,7 +89,7 @@ class CustomObjectTestCases(ValidatorTest):
         custom_obj['type'] = "x-corp-oration"
         custom_obj['id'] = "x-corp-oration--4527e5de-8572-446a-a57a-706f15467461"
         custom_obj_string = json.dumps(custom_obj)
-        results = validate_string(custom_obj_string, self.options).schema_results
+        results = validate_string(custom_obj_string, self.options)
         self.assertTrue(results.is_valid)
 
     def test_strict_types(self):

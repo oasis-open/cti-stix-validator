@@ -108,7 +108,7 @@ def print_results(results):
 
     """
     if not hasattr(results, 'items'):
-        results_arr = {'result': results}
+        results_arr = {'': results}
         results = results_arr
 
     level = 0
@@ -116,7 +116,7 @@ def print_results(results):
         print("=" * 80)
         print_level("[-] Results: %s", level, fn)
 
-        if result.schema_results is not None:
-            print_schema_results(result.schema_results, level)
+        if result.errors is not None:
+            print_schema_results(result, level)
         if result.fatal is not None:
             print_fatal_results(result.fatal, level)

@@ -23,14 +23,14 @@ class ThreatActorTestCases(ValidatorTest):
     valid_threat_actor = json.loads(VALID_THREAT_ACTOR)
 
     def test_wellformed_threat_actor(self):
-        results = validate_string(VALID_THREAT_ACTOR, self.options).schema_results
+        results = validate_string(VALID_THREAT_ACTOR, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_attack_motivation(self):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
         threat_actor['primary_motivation'] = "selfishness"
         threat_actor = json.dumps(threat_actor)
-        results = validate_string(threat_actor, self.options).schema_results
+        results = validate_string(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(threat_actor, 'attack-motivation')
@@ -39,7 +39,7 @@ class ThreatActorTestCases(ValidatorTest):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
         threat_actor['resource_level'] = "high"
         threat_actor = json.dumps(threat_actor)
-        results = validate_string(threat_actor, self.options).schema_results
+        results = validate_string(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(threat_actor, 'attack-resource-level')
@@ -48,7 +48,7 @@ class ThreatActorTestCases(ValidatorTest):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
         threat_actor['labels'] += ["anonymous"]
         threat_actor = json.dumps(threat_actor)
-        results = validate_string(threat_actor, self.options).schema_results
+        results = validate_string(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(threat_actor, 'threat-actor-label')
@@ -57,7 +57,7 @@ class ThreatActorTestCases(ValidatorTest):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
         threat_actor['roles'] = ["contributor"]
         threat_actor = json.dumps(threat_actor)
-        results = validate_string(threat_actor, self.options).schema_results
+        results = validate_string(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(threat_actor, 'threat-actor-role')
@@ -66,7 +66,7 @@ class ThreatActorTestCases(ValidatorTest):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
         threat_actor['sophistication'] = "high"
         threat_actor = json.dumps(threat_actor)
-        results = validate_string(threat_actor, self.options).schema_results
+        results = validate_string(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(threat_actor,
