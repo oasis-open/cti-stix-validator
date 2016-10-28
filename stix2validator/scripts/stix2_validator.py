@@ -9,14 +9,12 @@ import argparse
 import sys
 import textwrap
 from argparse import RawDescriptionHelpFormatter
-from validator import *
-from validator import codes
-from validator.validators import ValidationOptions
+from stix2validator import *
+from stix2validator import codes
+from stix2validator.validators import ValidationOptions
 
 
-EXAMPLES_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'tests')
-
-CODES_TABLE ="""
+CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
 the validator performs, along with the code to use with the --enable or
 --disable options. By default, the validator checks all of them.
@@ -101,11 +99,9 @@ def _get_arg_parser():
     parser.add_argument(
         "files",
         metavar="FILES",
-        nargs="*",
-        default=[EXAMPLES_DIR],
+        nargs="+",
         help="A whitespace separated list of STIX files or directories of "
-             "STIX files to validate. If none is given, the tests/ directory "
-             "will be recursively validated."
+             "STIX files to validate."
     )
     parser.add_argument(
         "-r",
@@ -119,7 +115,6 @@ def _get_arg_parser():
         "-s",
         "--schemas",
         dest="schema_dir",
-        default='schemas/',
         help="Schema directory. If not provided, the STIX schemas bundled "
              "with this script will be used."
     )
@@ -182,11 +177,6 @@ def main():
     # Parse command line arguments
     parser = _get_arg_parser()
     args = parser.parse_args()
-    args.schema_dir = os.path.abspath(os.path.dirname(__file__) + args.schema_dir)
-
-    # If validating the tests directory, look in its subdirectories
-    if args.files == [EXAMPLES_DIR]:
-        args.recursive = True
 
     options = ValidationOptions(args)
 
@@ -198,7 +188,7 @@ def main():
         results = run_validation(options)
 
         # Print validation results
-        output.print_results(results, options)
+        output.print_results(results)
 
         # Determine exit status code and exit.
         code = codes.get_code(results)

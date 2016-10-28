@@ -12,7 +12,7 @@ from six import python_2_unicode_compatible
 
 # internal
 from . import output
-from .validators import CustomDraft4Validator
+from .validators import ValidationOptions, CustomDraft4Validator
 
 
 class ValidationError(Exception):
@@ -63,26 +63,6 @@ class SchemaError(ValidationError):
 
 
 
-class FileResults(object):
-    """Stores all validation results for given file.
-
-    Args:
-        fn: The filename/path for the file that was validated.
-
-    Attributes:
-        fn: The filename/path for the file that was validated.
-        schema_results: JSON schema validation results.
-        best_practice_results: STIX Best Practice validation results.
-        profile_resutls: STIX Profile validation results.
-        fatal: Fatal error.
-
-    """
-    def __init__(self, fn=None):
-        self.fn = fn
-        self.schema_results = None
-        self.fatal = None
-
-
 class BaseResults(object):
     """Base class for all validation result types.
     """
@@ -121,17 +101,22 @@ class ValidationResults(BaseResults):
 
     Args:
         is_valid: The validation result.
-        errors: A list of exception strings reported from the JSON validation
+        errors: A list of exception strings reported by the JSON validation
             engine.
+        fatal: A fatal error.
+        fn: The filename/path for the file that was validated; None if a string
+            was validated.
 
     Attributes:
         is_valid: ``True`` if the validation was successful and ``False``
             otherwise.
 
     """
-    def __init__(self, is_valid, errors=None):
+    def __init__(self, is_valid=False, errors=None, fatal=None, fn=None):
         super(ValidationResults, self).__init__(is_valid)
         self.errors = errors
+        self.fatal = fatal
+        self.fn = fn
 
     @property
     def errors(self):
@@ -276,7 +261,7 @@ def run_validation(options):
     return results
 
 
-def validate_file(fn, options):
+def validate_file(fn, options=None):
     """Validates the input document `fn` according to the options passed in.
 
     If any exceptions are raised during validation, no further validation
@@ -287,18 +272,21 @@ def validate_file(fn, options):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of FileResults.
+        An instance of ValidationResults.
 
     """
-    results = FileResults(fn)
+    results = ValidationResults(fn=fn)
     output.info("Performing JSON schema validation on %s" % fn)
 
     with open(fn) as instance_file:
         instance = json.load(instance_file)
 
+    if not options:
+        options = ValidationOptions(files=fn)
+
     try:
         if options.files:
-            results.schema_results = schema_validate(instance, options)
+            results = schema_validate(instance, options)
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
         msg = ("File '{fn}' was schema-invalid. No further validation "
@@ -310,10 +298,13 @@ def validate_file(fn, options):
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
 
+    if results.errors or results.fatal:
+        results.is_valid = False
+
     return results
 
 
-def validate_string(string, options):
+def validate_string(string, options=None):
     """Validates the input `string` according to the options passed in.
 
     If any exceptions are raised during validation, no further validation
@@ -324,20 +315,26 @@ def validate_string(string, options):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of FileResults.
+        An instance of ValidationResults.
 
     """
-    results = FileResults("input string")
+    results = ValidationResults(fn="input string")
     output.info("Performing JSON schema validation on input string: " + string)
     instance = json.loads(string)
 
+    if not options:
+        options = ValidationOptions()
+
     try:
-        results.schema_results = schema_validate(instance, options)
+        results = schema_validate(instance, options)
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
         msg = ("String was schema-invalid. No further validation "
                "will be performed.")
         output.info(msg.format(string=string))
+
+    if results.errors or results.fatal:
+        results.is_valid = False
 
     return results
 

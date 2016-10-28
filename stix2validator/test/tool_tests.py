@@ -28,14 +28,14 @@ class ToolTestCases(ValidatorTest):
     valid_tool = json.loads(VALID_TOOL)
 
     def test_wellformed_tool(self):
-        results = validate_string(VALID_TOOL, self.options).schema_results
+        results = validate_string(VALID_TOOL, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_tool_label(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['labels'] += ["multi-purpose"]
         tool = json.dumps(tool)
-        results = validate_string(tool, self.options).schema_results
+        results = validate_string(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool, 'tool-label')
@@ -44,17 +44,17 @@ class ToolTestCases(ValidatorTest):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['kill_chain_name'] = "Something"
         tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options).schema_results
+        results = validate_string(tool_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['kill_chain_name'] = "some thing"
         tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options).schema_results
+        results = validate_string(tool_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['kill_chain_name'] = "some_thing"
         tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options).schema_results
+        results = validate_string(tool_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool_string, 'kill-chain-names')
@@ -63,17 +63,17 @@ class ToolTestCases(ValidatorTest):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['phase_name'] = "Something"
         tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options).schema_results
+        results = validate_string(tool_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['phase_name'] = "some thing"
         tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options).schema_results
+        results = validate_string(tool_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['phase_name'] = "some_thing"
         tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options).schema_results
+        results = validate_string(tool_string, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool_string, 'kill-chain-names')

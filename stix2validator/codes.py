@@ -27,15 +27,15 @@ def get_code(results):
     inspecting the results returned from validating file(s).
     Status codes are binary OR'd together, so exit codes can communicate
     multiple error conditions.
-    
+
     """
     status = EXIT_SUCCESS
 
     for result in itervalues(results):
-        schema = result.schema_results
+        error = result.errors
         fatal = result.fatal
 
-        if schema and not schema.is_valid:
+        if error:
             status |= EXIT_SCHEMA_INVALID
         if fatal:
             status |= EXIT_VALIDATION_ERROR

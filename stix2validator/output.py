@@ -99,19 +99,16 @@ def print_schema_results(results, level=0):
         print_level(_RED + "[!] %s", level + 1, error)
 
 
-def print_results(results, options):
-    """Prints `results` to stdout. If ``options.json_output`` is set, the
-    results are printed in JSON format.
+def print_results(results):
+    """Prints `results` to stdout.
 
     Args:
         results: A dictionary of ValidationResults instances. The key is the
             file path to the validated document.
-        options: An instance of ``ValidationOptions`` which contains output
-            options.
 
     """
     if not hasattr(results, 'items'):
-        results_arr = {'result': results}
+        results_arr = {'': results}
         results = results_arr
 
     level = 0
@@ -119,7 +116,7 @@ def print_results(results, options):
         print("=" * 80)
         print_level("[-] Results: %s", level, fn)
 
-        if result.schema_results is not None:
-            print_schema_results(result.schema_results, level)
+        if result.errors is not None:
+            print_schema_results(result, level)
         if result.fatal is not None:
             print_fatal_results(result.fatal, level)
