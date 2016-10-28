@@ -38,11 +38,11 @@ The validator also color-codes its output to make it easier to tell at a glance 
 
 **As A Script**
 
-The validator comes with a bundled script: `stix2-validator.py`. You can use it to validate a JSON file containing STIX content:
+The validator comes with a bundled script which you can use to validate a JSON file containing STIX content:
 
 ::
 
-  $ stix-validator.py <stix_file.json>
+  $ stix2_validator <stix_file.json>
 
 **As A Library**
 

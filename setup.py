@@ -18,7 +18,11 @@ setup(
     url='http://stixproject.github.io/',
     version='0.0.1',
     packages=find_packages(),
-    scripts=['stix2-validator.py'],
+    entry_points={
+        'console_scripts': [
+            'stix2_validator = stix2validator.scripts.stix2_validator:main',
+        ],
+    },
     include_package_data=True,
     install_requires=install_requires,
     long_description=readme,
