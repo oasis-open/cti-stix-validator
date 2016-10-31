@@ -529,6 +529,13 @@ PROPERTIES = {
 }
 
 
+# List of relationship types common to all object types
+COMMON_RELATIONSHIPS = [
+    'derived-from',
+    'duplicate-of',
+    'related-to'
+]
+
 # Mapping of official STIX objects to their official relationships
 RELATIONSHIPS = {
     'attack-pattern': {

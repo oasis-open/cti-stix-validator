@@ -385,6 +385,9 @@ def relationships_strict(instance):
     r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
     r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
 
+    if r_type in enums.COMMON_RELATIONSHIPS:
+        return
+
     if r_source not in enums.RELATIONSHIPS:
         return JSONError("'%s' is not a valid relationship source object."
                          % r_source, "relationship_type",
