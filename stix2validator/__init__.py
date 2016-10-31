@@ -438,7 +438,8 @@ def schema_validate(instance, options):
         chained_errors = chain(some_errors, more_errors)
         errors = sorted(chained_errors, key=lambda e: e.path)
     except schema_exceptions.RefResolutionError:
-        raise SchemaInvalidError('Invalid JSON schema: a JSON reference failed to resolve')
+        raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
+                                 'failed to resolve')
 
     if len(errors) == 0:
         return ValidationResults(True)
@@ -446,14 +447,27 @@ def schema_validate(instance, options):
     # Prepare the list of errors
     error_list = []
     for error in errors:
-        if error.path:
-            error_path = error.path.popleft() + ": "
-        else:
-            error_path = ""
+        error_loc = ''
+        try:
+            error_loc = error.instance['id'] + ': '
+        except TypeError:
+            if error.path:
+                if len(error.path) == 1:
+                    error_loc = error.path.popleft()
+                else:
+                    while len(error.path) > 0:
+                        path_elem = error.path.popleft()
+                        if type(path_elem) is int:
+                            error_loc += '[' + str(path_elem) + ']'
+                            if len(error.path) > 0:
+                                error_loc += '/'
+                        else:
+                            error_loc += path_elem
+                error_loc += ': '
 
         if options.verbose:
-            error_list.append(SchemaError(error_path + str(error)))
+            error_list.append(SchemaError(error_loc + str(error)))
         else:
-            error_list.append(SchemaError(error_path + error.message))
+            error_list.append(SchemaError(error_loc + error.message))
 
     return ValidationResults(False, error_list)
