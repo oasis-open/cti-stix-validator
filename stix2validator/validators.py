@@ -164,7 +164,7 @@ def timestamp_precision(instance):
 def custom_object_prefix_strict(instance):
     """Ensure custom objects follow strict naming style conventions.
     """
-    if instance['type'] not in enums.TYPES and not re.match("^x\-.+\-.+$", instance['id']):
+    if instance['type'] not in enums.TYPES and not re.match("^x\-.+\-.+$", instance['type']):
         return JSONError("Custom object type '%s' should start with 'x-' "
                          "followed by a source unique identifier (like a"
                          "domain name with dots replaced by dashes), a dash "
@@ -176,7 +176,7 @@ def custom_object_prefix_lax(instance):
     """Ensure custom objects follow lenient naming style conventions
     for forward-compatibility.
     """
-    if instance['type'] not in enums.TYPES and not re.match("^x\-.+$", instance['id']):
+    if instance['type'] not in enums.TYPES and not re.match("^x\-.+$", instance['type']):
         return JSONError("Custom object type '%s' should start with 'x-' in "
                          "order to be compatible with future versions of the "
                          "STIX 2 specification." % instance['type'],

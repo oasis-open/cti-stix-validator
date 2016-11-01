@@ -16,7 +16,7 @@ VALID_INDICATOR = """
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
     "pattern": "file-object.hashes.md5 = '3773a88f65a5e780c8dff9cdc3a056f3'",
-    "pattern_lang": "cybox",
+    "pattern_lang": "stix",
     "pattern_lang_version": "1.0",
     "valid_from": "2016-04-06T20:03:48Z",
     "valid_from_precision": "full"

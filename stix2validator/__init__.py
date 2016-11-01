@@ -450,7 +450,7 @@ def schema_validate(instance, options):
         error_loc = ''
         try:
             error_loc = error.instance['id'] + ': '
-        except TypeError:
+        except (TypeError, KeyError) as e:
             if error.path:
                 while len(error.path) > 0:
                     path_elem = error.path.popleft()
