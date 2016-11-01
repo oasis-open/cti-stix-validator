@@ -452,17 +452,12 @@ def schema_validate(instance, options):
             error_loc = error.instance['id'] + ': '
         except TypeError:
             if error.path:
-                if len(error.path) == 1:
-                    error_loc = error.path.popleft()
-                else:
-                    while len(error.path) > 0:
-                        path_elem = error.path.popleft()
-                        if type(path_elem) is int:
-                            error_loc += '[' + str(path_elem) + ']'
-                            if len(error.path) > 0:
-                                error_loc += '/'
-                        else:
-                            error_loc += path_elem
+                while len(error.path) > 0:
+                    path_elem = error.path.popleft()
+                    if type(path_elem) is not int:
+                        error_loc += path_elem
+                    elif len(error.path) > 0:
+                        error_loc += '[' + str(path_elem) + ']/'
                 error_loc += ': '
 
         if options.verbose:

@@ -84,12 +84,12 @@ class ValidationOptions(object):
 class JSONError(schema_exceptions.ValidationError):
     """Wrapper for errors thrown by iter_errors() in the jsonschema module.
     """
-    def __init__(self, msg=None, instance_type=None, check_code=None):
+    def __init__(self, msg=None, instance_id=None, check_code=None):
         if check_code is not None:
             # Get code number code from name
             code = list(CHECK_CODES.keys())[list(CHECK_CODES.values()).index(check_code)]
             msg = '{%s} %s' % (code, msg)
-        super(JSONError, self).__init__(msg, path=deque([instance_type]))
+        super(JSONError, self).__init__(msg, path=deque([instance_id, 0]))
 
 
 # Checks for MUST Requirements
@@ -100,7 +100,7 @@ def modified_created(instance):
     if 'modified' in instance and 'created' in instance and \
             instance['modified'] < instance['created']:
         return JSONError("'modified' (%s) must be later or equal to 'created' (%s)"
-            % (instance['modified'], instance['created']), instance['type'])
+            % (instance['modified'], instance['created']), instance['id'])
 
 
 def version(instance):
@@ -111,11 +111,11 @@ def version(instance):
         if instance['version'] == 1 and instance['modified'] != instance['created']:
             return JSONError("'version' is 1, but 'created' (%s) is not "
                 "equal to 'modified' (%s)" 
-                % (instance['created'], instance['modified']), instance['type'])
+                % (instance['created'], instance['modified']), instance['id'])
         elif instance['version'] > 1 and instance['modified'] <= instance['created']:
             return JSONError("'version' is greater than 1, but 'modified'"
                 " (%s) is not greater than 'created' (%s)" 
-                % (instance['modified'], instance['created']), instance['type'])
+                % (instance['modified'], instance['created']), instance['id'])
 
 
 def id_type(instance):
@@ -124,7 +124,7 @@ def id_type(instance):
     """
     t = instance['type']
     if not re.search("%s\-\-" % t, instance['id']):
-        return JSONError("'id' must be prefixed by %s--." % t, t)
+        return JSONError("'id' must be prefixed by %s--." % t, instance['id'])
 
 
 def timestamp_precision(instance):
@@ -138,7 +138,8 @@ def timestamp_precision(instance):
 
         ts_field = precision_matches.group(1)
         if ts_field not in instance:
-            return JSONError("There is no corresponding %s field" % ts_field, prop_name)
+            return JSONError("There is no corresponding %s field for %s"
+                             % (ts_field, prop_name), instance['id'])
 
         pattern = ""
         if instance[prop_name] == 'year':
@@ -153,8 +154,9 @@ def timestamp_precision(instance):
             pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00(\\.0+)?Z$"
 
         if not re.match(pattern, instance[ts_field]):
-            return JSONError("Timestamp is not the correct format for '%s' "
-                             "precision." % instance[prop_name], ts_field)
+            return JSONError("%s timestamp is not the correct format for '%s' "
+                             "precision." % (ts_field, instance[prop_name]),
+                             instance['id'])
 
 
 # Checks for SHOULD Requirements
@@ -162,23 +164,23 @@ def timestamp_precision(instance):
 def custom_object_prefix_strict(instance):
     """Ensure custom objects follow strict naming style conventions.
     """
-    if instance['type'] not in enums.TYPES and not re.match("^x\-.+\-.+$", instance['type']):
-        return JSONError("Custom objects should have a type that starts with "
-                         "'x-' followed by a source unique identifier (like "
-                         "a domain name with dots replaced by dashes), a dash "
-                         "and then the name.", instance['type'],
-                         'custom-object-prefix')
+    if instance['type'] not in enums.TYPES and not re.match("^x\-.+\-.+$", instance['id']):
+        return JSONError("Custom object type '%s' should start with 'x-' "
+                         "followed by a source unique identifier (like a"
+                         "domain name with dots replaced by dashes), a dash "
+                         "and then the name." % instance['type'],
+                         instance['id'], 'custom-object-prefix')
 
 
 def custom_object_prefix_lax(instance):
     """Ensure custom objects follow lenient naming style conventions
     for forward-compatibility.
     """
-    if instance['type'] not in enums.TYPES and not re.match("^x\-.+$", instance['type']):
-        return JSONError("Custom objects should have a type that starts with "
-                         "'x-' in order to be compatible with future versions"
-                         " of the STIX 2 specification.", instance['type'],
-                         'custom-object-prefix')
+    if instance['type'] not in enums.TYPES and not re.match("^x\-.+$", instance['id']):
+        return JSONError("Custom object type '%s' should start with 'x-' in "
+                         "order to be compatible with future versions of the "
+                         "STIX 2 specification." % instance['type'],
+                         instance['id'], 'custom-object-prefix')
 
 
 def custom_property_prefix_strict(instance):
@@ -191,11 +193,12 @@ def custom_property_prefix_strict(instance):
                 prop_name not in enums.PROPERTIES[instance['type']] and
                 not re.match("^x_.+_.+$", prop_name)):
 
-            return JSONError("Custom properties should have a type that starts"
-                             " with 'x_' followed by a source unique "
+            return JSONError("Custom property '%s' should have a type that "
+                             "starts with 'x_' followed by a source unique "
                              "identifier (like a domain name with dots "
-                             "replaced by dashes), a dash and then the name.",
-                             prop_name, 'custom-property-prefix')
+                             "replaced by dashes), a dash and then the name." %
+                             prop_name, instance['id'],
+                             'custom-property-prefix')
 
 
 def custom_property_prefix_lax(instance):
@@ -209,10 +212,11 @@ def custom_property_prefix_lax(instance):
                 prop_name not in enums.PROPERTIES[instance['type']] and
                 not re.match("^x_.+$", prop_name)):
 
-            return JSONError("Custom properties should have a type that starts"
-                             " with 'x_' in order to be compatible with future"
-                             " versions of the STIX 2 specification.",
-                             prop_name, 'custom-property-prefix')
+            return JSONError("Custom property '%s' should have a type that "
+                             "starts with 'x_' in order to be compatible with "
+                             "future versions of the STIX 2 specification." %
+                             prop_name, instance['id'],
+                             'custom-property-prefix')
 
 
 def open_vocab_values(instance):
@@ -234,10 +238,10 @@ def open_vocab_values(instance):
 
             for v in values:
                 if not v.islower() or '_' in v or ' ' in v:
-                    return JSONError("Open vocabulary value (%s) should be all"
+                    return JSONError("Open vocabulary value '%s' should be all"
                                      " lowercase and use dashes instead of"
                                      " spaces or underscores as word"
-                                     " separators." % v, instance['type'],
+                                     " separators." % v, instance['id'],
                                      'open-vocab-format')
 
 
@@ -254,17 +258,17 @@ def kill_chain_phase_names(instance):
 
             chain_name = phase['kill_chain_name']
             if not chain_name.islower() or '_' in chain_name or ' ' in chain_name:
-                return JSONError("kill_chain_name (%s) should be all lowercase"
+                return JSONError("kill_chain_name '%s' should be all lowercase"
                                  " and use dashes instead of spaces or "
                                  "underscores as word separators." % chain_name,
-                                 instance['type'], 'kill-chain-names')
+                                 instance['id'], 'kill-chain-names')
 
             phase_name = phase['phase_name']
             if not phase_name.islower() or '_' in phase_name or ' ' in phase_name:
-                return JSONError("phase_name (%s) should be all lowercase and "
+                return JSONError("phase_name '%s' should be all lowercase and "
                                  "use dashes instead of spaces or underscores "
                                  "as word separators." % phase_name,
-                                 instance['type'], 'kill-chain-names')
+                                 instance['id'], 'kill-chain-names')
 
 
 def check_vocab(instance, vocab, code):
@@ -290,8 +294,8 @@ def check_vocab(instance, vocab, code):
                 if not is_in:
                     vocab_name = vocab.replace('_', '-').lower()
                     return JSONError("%s contains a value not in the %s-ov "
-                                     "vocabulary." % (prop, vocab_name), prop,
-                                     code)
+                                     "vocabulary." % (prop, vocab_name),
+                                     instance['id'], code)
 
 
 def vocab_attack_motivation(instance):
@@ -362,9 +366,9 @@ def vocab_marking_definition(instance):
             'definition_type' in instance and not
             instance['definition_type'] in enums.MARKING_DEFINITION_TYPES):
 
-        return JSONError("Marking definition's `definition_type` should be one"
-                         " of %s." % enums.MARKING_DEFINITION_TYPES,
-                         instance['type'], 'marking-definition-type')
+        return JSONError("Marking definition `definition_type` should be one "
+                         "of: %s." % ', '.join(enums.MARKING_DEFINITION_TYPES),
+                         instance['id'], 'marking-definition-type')
 
 
 def relationships_strict(instance):
@@ -390,18 +394,17 @@ def relationships_strict(instance):
 
     if r_source not in enums.RELATIONSHIPS:
         return JSONError("'%s' is not a valid relationship source object."
-                         % r_source, "relationship_type",
-                         'relationship-types')
+                         % r_source, instance['id'], 'relationship-types')
 
     if r_type not in enums.RELATIONSHIPS[r_source]:
         return JSONError("'%s' is not a valid relationship type for '%s' "
-                         "objects." % (r_type, r_source), "relationship_type",
+                         "objects." % (r_type, r_source), instance['id'],
                          'relationship-types')
 
     if r_target not in enums.RELATIONSHIPS[r_source][r_type]:
         return JSONError("'%s' is not a valid relationship target object for "
                          "'%s' objects with the '%s' relationship."
-                         % (r_target, r_source, r_type), "relationship_type",
+                         % (r_target, r_source, r_type), instance['id'],
                          'relationship-types')
 
 
@@ -410,8 +413,8 @@ def types_strict(instance):
     from the specification.
     """
     if instance['type'] not in enums.TYPES:
-        return JSONError("Object type should be one of those detailed in the"
-                         " specification.", instance['type'])
+        return JSONError("Object type '%s' is not one of those detailed in the"
+                         " specification." % instance['type'], instance['id'])
 
 
 # Mapping of check code numbers to names
