@@ -81,9 +81,13 @@ class NewlinesHelpFormatter(RawDescriptionHelpFormatter):
         return txt
 
 
-def _get_arg_parser():
+def _get_arg_parser(is_script=True):
     """Initializes and returns an argparse.ArgumentParser instance for this
     application.
+
+    Args:
+        is_script: Whether the arguments are intended for use in a stand-alone
+            script or imported into another tool.
 
     Returns:
         Instance of ``argparse.ArgumentParser``
@@ -96,13 +100,14 @@ def _get_arg_parser():
     )
 
     # Input options
-    parser.add_argument(
-        "files",
-        metavar="FILES",
-        nargs="+",
-        help="A whitespace separated list of STIX files or directories of "
-             "STIX files to validate."
-    )
+    if is_script:
+        parser.add_argument(
+            "files",
+            metavar="FILES",
+            nargs="+",
+            help="A whitespace separated list of STIX files or directories of "
+                 "STIX files to validate."
+        )
     parser.add_argument(
         "-r",
         "--recursive",
