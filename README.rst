@@ -31,6 +31,26 @@ The only exception to this is the mandatory requirement that an object's 'type' 
 
 The validator also color-codes its output to make it easier to tell at a glance whether validation passed.
 
+.. _install:
+
+`Installation`
+,,,,,,,
+
+The easiest way to install the STIX validator is with pip:
+
+::
+
+  $ pip install git+https://github.com/oasis-open/cti-stix-validator.git
+
+Note that if you clone or download the repository and install it that way instead, you will need to set up the submodules before you install it:
+
+::
+
+  $ git clone https://github.com/oasis-open/cti-stix-validator.git
+  $ cd cti-stix-validator/
+  $ git submodule update --init --recursive
+  $ python setup.py install
+
 .. _usage:
 
 `Usage`
