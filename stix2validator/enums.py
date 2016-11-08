@@ -78,7 +78,7 @@ MALWARE_LABEL_OV = [
     "ransomware",
     "remote-access-trojan",
     "resource-exploitation",
-    "rogue-antivirus",
+    "rogue-security-software",
     "rootkit",
     "screen-capture",
     "spyware",
@@ -87,7 +87,7 @@ MALWARE_LABEL_OV = [
     "worm"
 ]
 PATTERN_LANG_OV = [
-    "cybox",
+    "stix",
     "openioc",
     "snort",
     "yara"
@@ -381,7 +381,7 @@ PROPERTIES = {
         'first_observed',
         'last_observed',
         'number_observed',
-        'cybox'
+        'objects'
     ],
     "report": [
         'type',
@@ -528,6 +528,13 @@ PROPERTIES = {
     ]
 }
 
+
+# List of relationship types common to all object types
+COMMON_RELATIONSHIPS = [
+    'derived-from',
+    'duplicate-of',
+    'related-to'
+]
 
 # Mapping of official STIX objects to their official relationships
 RELATIONSHIPS = {

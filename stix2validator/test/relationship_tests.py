@@ -81,5 +81,14 @@ class RelationshipTestCases(ValidatorTest):
         results = validate_string(relationship, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_relationship_types_common(self):
+        relationship = copy.deepcopy(self.valid_relationship)
+        relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
+        relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
+        relationship['relationship_type'] = "related-to"
+        relationship = json.dumps(relationship)
+        results = validate_string(relationship, self.options)
+        self.assertTrue(results.is_valid)
+
 if __name__ == "__main__":
     unittest.main()
