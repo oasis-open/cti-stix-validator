@@ -110,21 +110,12 @@ def version(instance):
             'created' in instance:
         if instance['version'] == 1 and instance['modified'] != instance['created']:
             return JSONError("'version' is 1, but 'created' (%s) is not "
-                "equal to 'modified' (%s)" 
+                "equal to 'modified' (%s)"
                 % (instance['created'], instance['modified']), instance['id'])
         elif instance['version'] > 1 and instance['modified'] <= instance['created']:
             return JSONError("'version' is greater than 1, but 'modified'"
                 " (%s) is not greater than 'created' (%s)" 
                 % (instance['modified'], instance['created']), instance['id'])
-
-
-def id_type(instance):
-    """Ensure that an object's id` starts with its type.
-    Checking of the UUID portion of the id is handled in the JSON schemas.
-    """
-    t = instance['type']
-    if not re.search("%s\-\-" % t, instance['id']):
-        return JSONError("'id' must be prefixed by %s--." % t, instance['id'])
 
 
 def timestamp_precision(instance):
@@ -164,7 +155,9 @@ def timestamp_precision(instance):
 def custom_object_prefix_strict(instance):
     """Ensure custom objects follow strict naming style conventions.
     """
-    if instance['type'] not in enums.TYPES and not re.match("^x\-.+\-.+$", instance['type']):
+    if (instance['type'] not in enums.TYPES and
+            instance['type'] not in enums.RESERVED_OBJECTS and
+            not re.match("^x\-.+\-.+$", instance['type'])):
         return JSONError("Custom object type '%s' should start with 'x-' "
                          "followed by a source unique identifier (like a"
                          "domain name with dots replaced by dashes), a dash "
@@ -176,7 +169,9 @@ def custom_object_prefix_lax(instance):
     """Ensure custom objects follow lenient naming style conventions
     for forward-compatibility.
     """
-    if instance['type'] not in enums.TYPES and not re.match("^x\-.+$", instance['type']):
+    if (instance['type'] not in enums.TYPES and
+            instance['type'] not in enums.RESERVED_OBJECTS and
+            not re.match("^x\-.+$", instance['type'])):
         return JSONError("Custom object type '%s' should start with 'x-' in "
                          "order to be compatible with future versions of the "
                          "STIX 2 specification." % instance['type'],
@@ -191,6 +186,7 @@ def custom_property_prefix_strict(instance):
     for prop_name in instance.keys():
         if (instance['type'] in enums.PROPERTIES and
                 prop_name not in enums.PROPERTIES[instance['type']] and
+                prop_name not in enums.RESERVED_PROPERTIES and
                 not re.match("^x_.+_.+$", prop_name)):
 
             return JSONError("Custom property '%s' should have a type that "
@@ -210,6 +206,7 @@ def custom_property_prefix_lax(instance):
     for prop_name in instance.keys():
         if (instance['type'] in enums.PROPERTIES and
                 prop_name not in enums.PROPERTIES[instance['type']] and
+                prop_name not in enums.RESERVED_PROPERTIES and
                 not re.match("^x_.+$", prop_name)):
 
             return JSONError("Custom property '%s' should have a type that "
@@ -393,17 +390,18 @@ def relationships_strict(instance):
         return
 
     if r_source not in enums.RELATIONSHIPS:
-        return JSONError("'%s' is not a valid relationship source object."
-                         % r_source, instance['id'], 'relationship-types')
+        return JSONError("'%s' is not a suggested relationship source object "
+                         "for the '%s' relationship." % (r_source, r_type),
+                         instance['id'], 'relationship-types')
 
     if r_type not in enums.RELATIONSHIPS[r_source]:
-        return JSONError("'%s' is not a valid relationship type for '%s' "
+        return JSONError("'%s' is not a suggested relationship type for '%s' "
                          "objects." % (r_type, r_source), instance['id'],
                          'relationship-types')
 
     if r_target not in enums.RELATIONSHIPS[r_source][r_type]:
-        return JSONError("'%s' is not a valid relationship target object for "
-                         "'%s' objects with the '%s' relationship."
+        return JSONError("'%s' is not a suggested relationship target object "
+                         "for '%s' objects with the '%s' relationship."
                          % (r_target, r_source, r_type), instance['id'],
                          'relationship-types')
 
@@ -546,7 +544,6 @@ class CustomDraft4Validator(Draft4Validator):
         validator_list = [
             modified_created,
             version,
-            id_type,
             timestamp_precision
         ]
 

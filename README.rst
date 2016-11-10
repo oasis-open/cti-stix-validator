@@ -34,7 +34,7 @@ The validator also color-codes its output to make it easier to tell at a glance 
 .. _install:
 
 `Installation`
-,,,,,,,
+,,,,,,,,,,,,,,
 
 The easiest way to install the STIX validator is with pip:
 

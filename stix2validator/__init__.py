@@ -4,14 +4,16 @@ import os
 import json
 from itertools import chain
 import fnmatch
+import re
 
 # external
 from jsonschema import RefResolver
 from jsonschema import exceptions as schema_exceptions
-from six import python_2_unicode_compatible
+from six import python_2_unicode_compatible, text_type
 
 # internal
 from . import output
+from . import enums
 from .validators import ValidationOptions, CustomDraft4Validator
 
 
@@ -49,7 +51,7 @@ class SchemaError(ValidationError):
         super(SchemaError, self).__init__()
 
         if error:
-            self.message = str(error)
+            self.message = text_type(error)
         else:
             self.message = None
 
@@ -59,7 +61,103 @@ class SchemaError(ValidationError):
         return {'message': self.message}
 
     def __str__(self):
-        return str(self.message)
+        return text_type(self.message)
+
+
+def pretty_error(error, verbose=False):
+    """Returns an error message that is easier to read and more useful.
+    """
+    import logging
+    error_loc = ''
+    try:
+        error_loc = error.instance['id'] + ': '
+    except (TypeError, KeyError):
+        if error.path:
+            while len(error.path) > 0:
+                path_elem = error.path.popleft()
+                if type(path_elem) is not int:
+                    error_loc += path_elem
+                elif len(error.path) > 0:
+                    error_loc += '[' + text_type(path_elem) + ']/'
+            error_loc += ': '
+
+    # Get error message and remove ugly u'' prefixes
+    if verbose:
+        msg = text_type(error)
+    else:
+        msg = error.message
+    msg = re.sub(r"(^| )(|\[|\(|\{)u'", r"\g<1>\g<2>'", msg)
+
+    # logging.error("----------")
+    # logging.error(text_type(type(error)))
+    # logging.error(error.path)
+    logging.error(error.schema)
+    # logging.error(error.absolute_schema_path)
+    logging.error(error.instance)
+    logging.error(str(type(error.instance)))
+    # logging.error(error.context)
+    logging.error(error.schema_path)
+    logging.error(error.validator)
+    logging.error(error.validator_value)
+    # logging.error(error.schema['title'])
+    # logging.error(msg)
+    logging.error(repr(error.schema))
+
+    # Don't reword error messages from our validators,
+    # only the default error messages from the jsonschema library
+    if repr(error.schema) == '<unset>':
+        return error_loc + msg
+
+    # Reword error messages containing regexes
+    if error.validator == 'pattern' and 'title' in error.schema:
+        if error.schema['title'] == 'type':
+            msg = re.sub(r"match '.+'$", 'match the \'type\' field format '
+                         '(lowercase ASCII a-z, 0-9, and hypens only - and no '
+                         'two hyphens in a row)', msg)
+        elif error.schema['title'] == 'identifier':
+            msg = re.sub(r"match '.+'$", 'match the id format '
+                         '([object-type]--[UUIDv4])', msg)
+        elif error.schema['title'] == 'id':
+            msg = re.sub(r"match '.+'$", 'start with \'' +
+                         error.validator_value[1:-2] + '--\'', msg)
+        elif error.schema['title'] == 'timestamp':
+            msg = re.sub(r"match '.+'$", 'match the timestamp format '
+                         '(YYYY-MM-DDTHH:mm:ss[.s+]Z)', msg)
+        elif error.schema['title'] == 'relationship_type':
+            msg = re.sub(r"does not match '.+'$", 'contains invalid '
+                         'characters', msg)
+        elif error.schema['title'] == 'url':
+            msg = re.sub(r"match '.+'$", 'match the format '
+                         'of a URL', msg)
+    # Reword 'is not valid under any of the given schemas' errors
+    elif type(error.instance) is list and len(error.instance) == 0:
+        msg = re.sub(r"\[\] is not valid .+$", 'empty arrays are not allowed',
+                     msg)
+    # Reword custom property errors
+    elif 'title' in error.schema and error.schema['title'] == 'core':
+        if error.validator == 'additionalProperties':
+            msg = re.sub(r"Additional .+$", 'Custom properties must match the '
+                         'proper format (lowercase ASCII a-z, 0-9, and '
+                         'underscores)', msg)
+        elif error.validator == 'not' and 'anyOf' in error.validator_value:
+            msg = re.sub(r".+", "Contains a reserved property ('%s')"
+                         % "', '".join(enums.RESERVED_PROPERTIES), msg)
+    # Reword external reference error
+    elif error.validator == 'oneOf':
+        error.schema_path.rotate(2)
+        if error.schema_path.pop() == 'external_references':
+            msg = "If the external reference is a CVE, 'source_name' must be" \
+                  " 'cve' and 'external_id' must be in the CVE format " \
+                  "(CVE-YYYY-NNNN+). If the external reference is a CAPEC, " \
+                  "'source_name' must be 'capec' and 'external_id' must be " \
+                  "in the CAPEC format (CAPEC-N+)."
+    # Reword enum errors
+    elif error.validator == 'not':
+        if 'enum' in error.validator_value:
+            msg = re.sub(r"\{.+\} is not allowed for '(.+)'$", r"'\g<1>' is "
+                         "not an allowed value", msg)
+
+    return error_loc + msg
 
 
 
@@ -167,7 +265,7 @@ class ValidationErrorResults(BaseResults):
     """
     def __init__(self, error):
         self._is_valid = False
-        self.error = str(error)
+        self.error = text_type(error)
         self.exception = error
 
     def as_dict(self):
@@ -447,22 +545,7 @@ def schema_validate(instance, options):
     # Prepare the list of errors
     error_list = []
     for error in errors:
-        error_loc = ''
-        try:
-            error_loc = error.instance['id'] + ': '
-        except (TypeError, KeyError) as e:
-            if error.path:
-                while len(error.path) > 0:
-                    path_elem = error.path.popleft()
-                    if type(path_elem) is not int:
-                        error_loc += path_elem
-                    elif len(error.path) > 0:
-                        error_loc += '[' + str(path_elem) + ']/'
-                error_loc += ': '
-
-        if options.verbose:
-            error_list.append(SchemaError(error_loc + str(error)))
-        else:
-            error_list.append(SchemaError(error_loc + error.message))
+        msg = pretty_error(error, options.verbose)
+        error_list.append(SchemaError(msg))
 
     return ValidationResults(False, error_list)
