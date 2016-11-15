@@ -88,21 +88,6 @@ def pretty_error(error, verbose=False):
         msg = error.message
     msg = re.sub(r"(^| )(|\[|\(|\{)u'", r"\g<1>\g<2>'", msg)
 
-    # logging.error("----------")
-    # logging.error(text_type(type(error)))
-    # logging.error(error.path)
-    logging.error(error.schema)
-    # logging.error(error.absolute_schema_path)
-    logging.error(error.instance)
-    logging.error(str(type(error.instance)))
-    # logging.error(error.context)
-    logging.error(error.schema_path)
-    logging.error(error.validator)
-    logging.error(error.validator_value)
-    # logging.error(error.schema['title'])
-    # logging.error(msg)
-    logging.error(repr(error.schema))
-
     # Don't reword error messages from our validators,
     # only the default error messages from the jsonschema library
     if repr(error.schema) == '<unset>':
@@ -138,24 +123,28 @@ def pretty_error(error, verbose=False):
         if error.validator == 'additionalProperties':
             msg = re.sub(r"Additional .+$", 'Custom properties must match the '
                          'proper format (lowercase ASCII a-z, 0-9, and '
-                         'underscores)', msg)
+                         'underscores; 3-250 characters)', msg)
         elif error.validator == 'not' and 'anyOf' in error.validator_value:
             msg = re.sub(r".+", "Contains a reserved property ('%s')"
                          % "', '".join(enums.RESERVED_PROPERTIES), msg)
     # Reword external reference error
     elif error.validator == 'oneOf':
-        error.schema_path.rotate(2)
-        if error.schema_path.pop() == 'external_references':
+        if 'external_references' in error.schema_path:
             msg = "If the external reference is a CVE, 'source_name' must be" \
                   " 'cve' and 'external_id' must be in the CVE format " \
                   "(CVE-YYYY-NNNN+). If the external reference is a CAPEC, " \
                   "'source_name' must be 'capec' and 'external_id' must be " \
                   "in the CAPEC format (CAPEC-N+)."
-    # Reword enum errors
+    # Reword forbidden enum value errors
     elif error.validator == 'not':
         if 'enum' in error.validator_value:
             msg = re.sub(r"\{.+\} is not allowed for '(.+)'$", r"'\g<1>' is "
                          "not an allowed value", msg)
+        elif ('target_ref' in error.schema_path or
+                    'source_ref' in error.schema_path):
+                msg = ("Relationships cannot link bundles, marking definitions"
+                       ", sightings, or other relationships. This field must "
+                       "contain the id of an SDO.")
 
     return error_loc + msg
 

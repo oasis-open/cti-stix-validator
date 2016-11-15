@@ -129,7 +129,7 @@ def timestamp_precision(instance):
 
         ts_field = precision_matches.group(1)
         if ts_field not in instance:
-            return JSONError("There is no corresponding %s field for %s"
+            return JSONError("There is no corresponding '%s' field for %s"
                              % (ts_field, prop_name), instance['id'])
 
         pattern = ""
@@ -372,7 +372,7 @@ def relationships_strict(instance):
     """Ensure that only the relationship types defined in the specification are
     used.
     """
-    # Don't check objects that aren't relationships or are custom objects
+    # Don't check objects that aren't relationships or that are custom objects
     if (instance['type'] != 'relationship' or
             instance['type'] not in enums.TYPES):
         return
@@ -386,7 +386,10 @@ def relationships_strict(instance):
     r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
     r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
 
-    if r_type in enums.COMMON_RELATIONSHIPS:
+    if (r_type in enums.COMMON_RELATIONSHIPS or
+            r_source in enums.DENIED_RELATIONSHIPS or
+            r_target in enums.DENIED_RELATIONSHIPS):
+        # Schemas will already catch relationships not allowed by spec
         return
 
     if r_source not in enums.RELATIONSHIPS:
@@ -446,9 +449,7 @@ CHECK_CODES = {
 CHECKS = {
     'all': [
         custom_object_prefix_strict,
-        custom_object_prefix_lax,
         custom_property_prefix_strict,
-        custom_property_prefix_lax,
         open_vocab_values,
         kill_chain_phase_names,
         vocab_attack_motivation,
@@ -468,9 +469,7 @@ CHECKS = {
     ],
     'format-checks': [
         custom_object_prefix_strict,
-        custom_object_prefix_lax,
         custom_property_prefix_strict,
-        custom_property_prefix_lax,
         open_vocab_values,
         kill_chain_phase_names
     ],
@@ -558,8 +557,7 @@ class CustomDraft4Validator(Draft4Validator):
 
         # Default: enable all
         if not options.ignored and not options.enabled:
-            validator_list.extend(CHECKS['format-checks'])
-            validator_list.extend(CHECKS['approved-values'])
+            validator_list.extend(CHECKS['all'])
             return validator_list
 
         # --disable
