@@ -528,6 +528,27 @@ PROPERTIES = {
     ]
 }
 
+# Reserved properties and objects
+RESERVED_PROPERTIES = [
+    'confidence',
+    'severity',
+    'action',
+    'usernames',
+    'phone_numbers',
+    'addresses'
+]
+RESERVED_OBJECTS = [
+    'incident',
+    'infrastructure'
+]
+
+
+DENIED_RELATIONSHIPS = [
+    'bundle',
+    'marking-definition',
+    'sighting',
+    'relationship'
+]
 
 # List of relationship types common to all object types
 COMMON_RELATIONSHIPS = [

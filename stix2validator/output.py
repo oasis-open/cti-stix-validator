@@ -96,8 +96,7 @@ def print_schema_results(results, level=0):
         return
 
     for error in results.errors:
-        err = text_type(error).replace(' u\'', ' \'')
-        print_level(_RED + "[!] %s", level + 1, err)
+        print_level(_RED + "[!] %s", level + 1, error)
 
 
 def print_results(results):

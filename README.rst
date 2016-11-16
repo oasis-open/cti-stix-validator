@@ -34,7 +34,7 @@ The validator also color-codes its output to make it easier to tell at a glance 
 .. _install:
 
 `Installation`
-,,,,,,,
+,,,,,,,,,,,,,,
 
 The easiest way to install the STIX validator is with pip:
 
@@ -70,8 +70,7 @@ You can also use this library to integrate STIX validation into your own tools. 
 
 .. code:: python
 
-  from stix2validator import validate_file
-  from stix2validator.output import print_results
+  from stix2validator import validate_file, print_results
 
   results = validate_file("stix_file.json")
   print_results(results)
@@ -80,8 +79,7 @@ You can also validate a JSON string, and check if the input passed validation:
 
 .. code:: python
 
-  from stix2validator import validate_string
-  from stix2validator.output import print_results
+  from stix2validator import validate_string, print_results
 
   stix_json_string = "..."
   results = validate_string(stix_json_string)
