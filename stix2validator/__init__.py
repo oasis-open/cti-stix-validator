@@ -15,6 +15,7 @@ from six import python_2_unicode_compatible, text_type
 from . import output
 from . import enums
 from .validators import ValidationOptions, CustomDraft4Validator
+from .output import print_results # Expose it to the stix2validator namespace
 
 
 class ValidationError(Exception):
