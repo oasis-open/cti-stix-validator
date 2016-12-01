@@ -192,6 +192,7 @@ class ValidationResults(BaseResults):
         errors: A list of exception strings reported by the JSON validation
             engine.
         fatal: A fatal error.
+        warnings: A list of warning strings reported by our custom validators.
         fn: The filename/path for the file that was validated; None if a string
             was validated.
 
@@ -200,10 +201,12 @@ class ValidationResults(BaseResults):
             otherwise.
 
     """
-    def __init__(self, is_valid=False, errors=None, fatal=None, fn=None):
+    def __init__(self, is_valid=False, errors=None, fatal=None, warnings=None,
+                 fn=None):
         super(ValidationResults, self).__init__(is_valid)
         self.errors = errors
         self.fatal = fatal
+        self.warnings = warnings
         self.fn = fn
 
     @property
@@ -523,13 +526,18 @@ def schema_validate(instance, options):
     try:
         some_errors = validator.iter_errors(instance)
         more_errors = validator.iter_errors_more(instance)
-        chained_errors = chain(some_errors, more_errors)
-        errors = sorted(chained_errors, key=lambda e: e.path)
+        if options.strict:
+            chained_errors = chain(some_errors, more_errors)
+            errors = sorted(chained_errors, key=lambda e: e.path)
+            warnings = None
+        else:
+            errors = some_errors
+            warnings = [pretty_error(x, options.verbose) for x in more_errors]
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
                                  'failed to resolve')
 
-    if len(errors) == 0:
+    if not errors and not warnings:
         return ValidationResults(True)
 
     # Prepare the list of errors
@@ -538,4 +546,10 @@ def schema_validate(instance, options):
         msg = pretty_error(error, options.verbose)
         error_list.append(SchemaError(msg))
 
-    return ValidationResults(False, error_list)
+    if error_list:
+        valid = False
+    else:
+        valid = True
+
+    return ValidationResults(is_valid=valid, errors=error_list,
+                             warnings=warnings)

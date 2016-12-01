@@ -31,17 +31,15 @@ class ValidationOptions(object):
             validated.
         recursive: Recursively descend into input directories.
         schema_dir: A user-defined schema directory to validate against.
-        lax: Specifies that only mandatory requirements, not ones which are
-            merely recommended, should be checked.
-        lax_prefix: Specifies that less strict requirements for custom object
-            and property names should be used.
+        strict: Specifies that recommended requirements should produce errors
+            instead of mere warnings.
         strict_types: Specifies that no custom object types be used, only
             those detailed in the STIX specification.
 
     """
     def __init__(self, cmd_args=None, verbose=False, files=None,
                  recursive=False, schema_dir=None, ignored="",
-                 enabled="", lax=False, strict_types=False):
+                 enabled="", strict=False, strict_types=False):
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
             self.files = cmd_args.files
@@ -49,7 +47,7 @@ class ValidationOptions(object):
             self.schema_dir = cmd_args.schema_dir
             self.ignored = cmd_args.ignored
             self.enabled = cmd_args.enabled
-            self.lax = cmd_args.lax
+            self.strict = cmd_args.strict
             self.strict_types = cmd_args.strict_types
         else:
             # input options
@@ -59,7 +57,7 @@ class ValidationOptions(object):
 
             # output options
             self.verbose = verbose
-            self.lax = lax
+            self.strict = strict
             self.strict_types = strict_types
             self.ignored = ignored
             self.enabled = enabled
@@ -550,10 +548,10 @@ class CustomDraft4Validator(Draft4Validator):
         if options.strict_types:
             validator_list.append(types_strict)
 
-        # --lax
-        # If only checking MUST requirements, the list is complete
-        if options.lax:
-            return validator_list
+        # # --strict
+        # # If only checking MUST requirements, the list is complete
+        # if not options.strict:
+        #     return validator_list
 
         # Default: enable all
         if not options.ignored and not options.enabled:

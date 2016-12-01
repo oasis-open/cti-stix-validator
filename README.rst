@@ -25,7 +25,7 @@ The STIX validator checks that STIX JSON content conforms to the requirements sp
 
 `Additions to Statement of Purpose`
 -----------------------------------
-Some requirements in the STIX 2.0 specification are mandatory; others are merely recommended. The validator checks documents against the mandatory requirements using JSON schemas. Some of the mandatory requirements cannot be implemented in JSON Schema, however, so the validator uses Python functions to check these. The recommended requirements are all checked by Python functions, and options can be set to ignore all or some of these recommended "best practices." 
+The STIX 2.0 specification contains two types of requirements: mandatory "MUST" requirements, and recommended "SHOULD" best requirements. The validator checks documents against the "MUST" requirements using JSON schemas. Some of these mandatory requirements cannot be implemented in JSON Schema, however, so the validator uses Python functions to check them. The recommended, "SHOULD" requirements are all checked by Python functions, and options may be used to ignore some or all of these recommended "best practices."
 
 The only exception to this is the mandatory requirement that an object's 'type' be one of those defined by a STIX Object in the specification. This rules out custom objects, so this check was made optional.
 
@@ -42,7 +42,7 @@ The easiest way to install the STIX validator is with pip:
 
   $ pip install git+https://github.com/oasis-open/cti-stix-validator.git
 
-Note that if you clone or download the repository and install it that way instead, you will need to set up the submodules before you install it:
+Note that if you instead install it by cloning or downloading the repository, you will need to set up the submodules before you install it:
 
 ::
 
