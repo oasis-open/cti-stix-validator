@@ -534,6 +534,7 @@ class CustomDraft4Validator(Draft4Validator):
         super(CustomDraft4Validator, self).__init__(schema, types, resolver,
                                                     format_checker)
         self.validator_list = self.list_validators(options)
+        self.shoulds_list = self.list_shoulds(options)
 
     def list_validators(self, options):
         """Construct the list of validators to be run by this validator.
@@ -548,11 +549,10 @@ class CustomDraft4Validator(Draft4Validator):
         if options.strict_types:
             validator_list.append(types_strict)
 
-        # # --strict
-        # # If only checking MUST requirements, the list is complete
-        # if not options.strict:
-        #     return validator_list
+        return validator_list
 
+    def list_shoulds(self, options):
+        validator_list = []
         # Default: enable all
         if not options.ignored and not options.enabled:
             validator_list.extend(CHECKS['all'])
@@ -616,10 +616,10 @@ class CustomDraft4Validator(Draft4Validator):
         # --enable
         if options.enabled:
             for check in options.enabled:
-                if CHECKS[check] in validator_list:
-                    continue
-
                 try:
+                    if CHECKS[check] in validator_list:
+                        continue
+
                     if type(CHECKS[check]) is list:
                         validator_list.extend(CHECKS[check])
                     else:
@@ -630,19 +630,28 @@ class CustomDraft4Validator(Draft4Validator):
 
         return validator_list
 
-    def iter_errors_more(self, instance, options=None, _schema=None):
+    def iter_errors_more(self, instance, check_musts=True):
         """Perform additional validation not possible merely with JSON schemas.
 
+        Args:
+            instance: The STIX object to be validated.
+            check_musts: If True, this function will check against the
+                additional mandatory "MUST" requirements which cannot be
+                enforced by schemas. If False, this function will check against
+                recommended "SHOULD" best practices instead. This function will
+                never check both; to do so call it twice.
         """
         # Ensure `instance` is a whole STIX object, not just a property of one
         if not (type(instance) is dict and 'id' in instance and 'type' in instance):
             return
 
-        if _schema is None:
-            _schema = self.schema
+        if check_musts:
+            validators = self.validator_list
+        else:
+            validators = self.shoulds_list
 
         # Perform validation
-        for v_function in self.validator_list:
+        for v_function in validators:
             result = v_function(instance)
             if result is not None:
                 yield result
@@ -651,5 +660,5 @@ class CustomDraft4Validator(Draft4Validator):
         for field in instance:
             if type(instance[field]) is list:
                 for obj in instance[field]:
-                    for err in self.iter_errors_more(obj, _schema):
+                    for err in self.iter_errors_more(obj, check_musts):
                         yield err
