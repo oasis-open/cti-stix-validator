@@ -31,6 +31,8 @@ class ValidationOptions(object):
             validated.
         recursive: Recursively descend into input directories.
         schema_dir: A user-defined schema directory to validate against.
+        disabled: List of "SHOULD" checks that will be skipped.
+        enabled: List of "SHOULD" checks that will be performed.
         strict: Specifies that recommended requirements should produce errors
             instead of mere warnings.
         strict_types: Specifies that no custom object types be used, only
@@ -38,14 +40,14 @@ class ValidationOptions(object):
 
     """
     def __init__(self, cmd_args=None, verbose=False, files=None,
-                 recursive=False, schema_dir=None, ignored="",
+                 recursive=False, schema_dir=None, disabled="",
                  enabled="", strict=False, strict_types=False):
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
             self.files = cmd_args.files
             self.recursive = cmd_args.recursive
             self.schema_dir = cmd_args.schema_dir
-            self.ignored = cmd_args.ignored
+            self.disabled = cmd_args.disabled
             self.enabled = cmd_args.enabled
             self.strict = cmd_args.strict
             self.strict_types = cmd_args.strict_types
@@ -59,7 +61,7 @@ class ValidationOptions(object):
             self.verbose = verbose
             self.strict = strict
             self.strict_types = strict_types
-            self.ignored = ignored
+            self.disabled = disabled
             self.enabled = enabled
 
         # If no schema directory given, use default bundled with this package
@@ -69,10 +71,10 @@ class ValidationOptions(object):
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names
-        if self.ignored:
-            self.ignored = self.ignored.split(",")
-            self.ignored = [CHECK_CODES[x] if x in CHECK_CODES else x
-                                   for x in self.ignored]
+        if self.disabled:
+            self.disabled = self.disabled.split(",")
+            self.disabled = [CHECK_CODES[x] if x in CHECK_CODES else x
+                                   for x in self.disabled]
         if self.enabled:
             self.enabled = self.enabled.split(",")
             self.enabled = [CHECK_CODES[x] if x in CHECK_CODES else x
@@ -554,63 +556,63 @@ class CustomDraft4Validator(Draft4Validator):
     def list_shoulds(self, options):
         validator_list = []
         # Default: enable all
-        if not options.ignored and not options.enabled:
+        if not options.disabled and not options.enabled:
             validator_list.extend(CHECKS['all'])
             return validator_list
 
         # --disable
-        # Add SHOULD requirements to the list unless ignored
-        if options.ignored:
-            if 'all' not in options.ignored:
-                if 'format-checks' not in options.ignored:
-                    if ('custom-object-prefix' not in options.ignored and
-                            'custom-object-prefix-lax' not in options.ignored):
+        # Add SHOULD requirements to the list unless disabled
+        if options.disabled:
+            if 'all' not in options.disabled:
+                if 'format-checks' not in options.disabled:
+                    if ('custom-object-prefix' not in options.disabled and
+                            'custom-object-prefix-lax' not in options.disabled):
                         validator_list.append(CHECKS['custom-object-prefix'])
-                    elif 'custom-object-prefix' not in options.ignored:
+                    elif 'custom-object-prefix' not in options.disabled:
                         validator_list.append(CHECKS['custom-object-prefix'])
-                    elif 'custom-object-prefix-lax' not in options.ignored:
+                    elif 'custom-object-prefix-lax' not in options.disabled:
                         validator_list.append(CHECKS['custom-object-prefix-lax'])
-                    if ('custom-property-prefix' not in options.ignored and
-                            'custom-property-prefix-lax' not in options.ignored):
+                    if ('custom-property-prefix' not in options.disabled and
+                            'custom-property-prefix-lax' not in options.disabled):
                         validator_list.append(CHECKS['custom-property-prefix'])
-                    elif 'custom-property-prefix' not in options.ignored:
+                    elif 'custom-property-prefix' not in options.disabled:
                         validator_list.append(CHECKS['custom-property-prefix'])
-                    elif 'custom-property-prefix-lax' not in options.ignored:
+                    elif 'custom-property-prefix-lax' not in options.disabled:
                         validator_list.append(CHECKS['custom-property-prefix-lax'])
-                    if 'open-vocab-format' not in options.ignored:
+                    if 'open-vocab-format' not in options.disabled:
                         validator_list.append(CHECKS['open-vocab-format'])
-                    if 'kill-chain-names' not in options.ignored:
+                    if 'kill-chain-names' not in options.disabled:
                         validator_list.append(CHECKS['kill-chain-names'])
 
-                if 'approved-values' not in options.ignored:
-                    if 'all-vocabs' not in options.ignored:
-                        if 'attack-motivation' not in options.ignored:
+                if 'approved-values' not in options.disabled:
+                    if 'all-vocabs' not in options.disabled:
+                        if 'attack-motivation' not in options.disabled:
                             validator_list.append(CHECKS['attack-motivation'])
-                        if 'attack-resource-level' not in options.ignored:
+                        if 'attack-resource-level' not in options.disabled:
                             validator_list.append(CHECKS['attack-resource-level'])
-                        if 'identity-class' not in options.ignored:
+                        if 'identity-class' not in options.disabled:
                             validator_list.append(CHECKS['identity-class'])
-                        if 'indicator-label' not in options.ignored:
+                        if 'indicator-label' not in options.disabled:
                             validator_list.append(CHECKS['indicator-label'])
-                        if 'industry-sector' not in options.ignored:
+                        if 'industry-sector' not in options.disabled:
                             validator_list.append(CHECKS['industry-sector'])
-                        if 'malware-label' not in options.ignored:
+                        if 'malware-label' not in options.disabled:
                             validator_list.append(CHECKS['malware-label'])
-                        if 'pattern-lang' not in options.ignored:
+                        if 'pattern-lang' not in options.disabled:
                             validator_list.append(CHECKS['pattern-lang'])
-                        if 'report-label' not in options.ignored:
+                        if 'report-label' not in options.disabled:
                             validator_list.append(CHECKS['report-label'])
-                        if 'threat-actor-label' not in options.ignored:
+                        if 'threat-actor-label' not in options.disabled:
                             validator_list.append(CHECKS['threat-actor-label'])
-                        if 'threat-actor-role' not in options.ignored:
+                        if 'threat-actor-role' not in options.disabled:
                             validator_list.append(CHECKS['threat-actor-role'])
-                        if 'threat-actor-sophistication' not in options.ignored:
+                        if 'threat-actor-sophistication' not in options.disabled:
                             validator_list.append(CHECKS['threat-actor-sophistication'])
-                        if 'tool-label' not in options.ignored:
+                        if 'tool-label' not in options.disabled:
                             validator_list.append(CHECKS['tool-label'])
-                        if 'marking-definition-type' not in options.ignored:
+                        if 'marking-definition-type' not in options.disabled:
                             validator_list.append(CHECKS['marking-definition-type'])
-                    if 'relationship-types' not in options.ignored:
+                    if 'relationship-types' not in options.disabled:
                         validator_list.append(CHECKS['relationship-types'])
 
         # --enable

@@ -138,11 +138,11 @@ def _get_arg_parser(is_script=True):
         "-d",
         "--disable",
         "--ignore",
-        dest="ignored",
+        dest="disabled",
         default="",
         help="A comma-separated list of recommended best practice checks to "
             "skip. By default, no checks are disabled. \n\n"
-            "Example: --ignore 212,220"
+            "Example: --disable 212,220"
     )
 
     parser.add_argument(
