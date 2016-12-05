@@ -29,7 +29,7 @@ def error(msg, status=codes.EXIT_FAILURE):
         status: The exit status code. Defaults to ``EXIT_FAILURE`` (1).
 
     """
-    sys.stderr.write("[X] %s\n" % str(msg))
+    sys.stderr.write(_RED + "[X] %s\n" % str(msg))
     sys.exit(status)
 
 

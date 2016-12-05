@@ -18,6 +18,13 @@ from .validators import ValidationOptions, CustomDraft4Validator
 from .output import print_results # Expose it to the stix2validator namespace
 
 
+class NoJSONFileFoundError(OSError):
+    """Represent a problem finding the input JSON file(s).
+
+    """
+    pass
+
+
 class ValidationError(Exception):
     """Base Exception for all validator-specific exceptions. This can be used
     directly as a generic Exception.
@@ -68,7 +75,6 @@ class SchemaError(ValidationError):
 def pretty_error(error, verbose=False):
     """Return an error message that is easier to read and more useful.
     """
-    import logging
     error_loc = ''
     try:
         error_loc = error.instance['id'] + ': '
@@ -330,6 +336,8 @@ def get_json_files(files, recursive=False):
         else:
             continue
 
+    if not json_files:
+        raise NoJSONFileFoundError("No JSON files found!")
     return json_files
 
 
@@ -343,7 +351,10 @@ def run_validation(options):
 
     """
     # The JSON files to validate
-    files = get_json_files(options.files, options.recursive)
+    try:
+        files = get_json_files(options.files, options.recursive)
+    except NoJSONFileFoundError as e:
+        output.error(e.message)
 
     results = {}
     for fn in files:
