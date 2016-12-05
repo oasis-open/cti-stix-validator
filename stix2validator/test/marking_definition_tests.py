@@ -37,7 +37,8 @@ class Marking_definitionTestCases(ValidatorTest):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         marking_definition['definition_type'] = "something"
         marking_definition = json.dumps(marking_definition)
-        self.assertTrueWithOptions(marking_definition, lax=True)
+        self.assertFalseWithOptions(marking_definition)
+        self.assertTrueWithOptions(marking_definition, strict=False)
 
 
 if __name__ == "__main__":
