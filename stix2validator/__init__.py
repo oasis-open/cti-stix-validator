@@ -18,6 +18,13 @@ from .validators import ValidationOptions, CustomDraft4Validator
 from .output import print_results # Expose it to the stix2validator namespace
 
 
+class NoJSONFileFoundError(OSError):
+    """Represent a problem finding the input JSON file(s).
+
+    """
+    pass
+
+
 class ValidationError(Exception):
     """Base Exception for all validator-specific exceptions. This can be used
     directly as a generic Exception.
@@ -26,7 +33,7 @@ class ValidationError(Exception):
 
 
 class SchemaInvalidError(ValidationError):
-    """Represents an error with the JSON Schema file itself.
+    """Represent an error with the JSON Schema file itself.
 
     """
     def __init__(self, msg=None, results=None):
@@ -39,7 +46,7 @@ class SchemaInvalidError(ValidationError):
 
 @python_2_unicode_compatible
 class SchemaError(ValidationError):
-    """Represents a JSON Schema validation error.
+    """Represent a JSON Schema validation error.
 
     Args:
         error: An error returned from JSON Schema validation.
@@ -66,9 +73,8 @@ class SchemaError(ValidationError):
 
 
 def pretty_error(error, verbose=False):
-    """Returns an error message that is easier to read and more useful.
+    """Return an error message that is easier to read and more useful.
     """
-    import logging
     error_loc = ''
     try:
         error_loc = error.instance['id'] + ': '
@@ -169,7 +175,7 @@ class BaseResults(object):
         self._is_valid = bool(value)
 
     def as_dict(self):
-        """Returns a dictionary representation of this class.
+        """Return a dictionary representation of this class.
 
         Keys:
             ``'result'``: The validation result. Values will be ``True`` or
@@ -192,6 +198,7 @@ class ValidationResults(BaseResults):
         errors: A list of exception strings reported by the JSON validation
             engine.
         fatal: A fatal error.
+        warnings: A list of warning strings reported by our custom validators.
         fn: The filename/path for the file that was validated; None if a string
             was validated.
 
@@ -200,10 +207,12 @@ class ValidationResults(BaseResults):
             otherwise.
 
     """
-    def __init__(self, is_valid=False, errors=None, fatal=None, fn=None):
+    def __init__(self, is_valid=False, errors=None, fatal=None, warnings=None,
+                 fn=None):
         super(ValidationResults, self).__init__(is_valid)
         self.errors = errors
         self.fatal = fatal
+        self.warnings = warnings
         self.fn = fn
 
     @property
@@ -273,7 +282,7 @@ def is_json(fn):
 
 
 def list_json_files(directory, recursive=False):
-    """Returns a list of file paths for JSON files within `directory`.
+    """Return a list of file paths for JSON files within `directory`.
 
     Args:
         directory: A path to a directory.
@@ -300,7 +309,7 @@ def list_json_files(directory, recursive=False):
 
 
 def get_json_files(files, recursive=False):
-    """Returns a list of files to validate from `files`. If a member of `files`
+    """Return a list of files to validate from `files`. If a member of `files`
     is a directory, its children with a ``.json`` extension will be added to
     the return value.
 
@@ -327,12 +336,14 @@ def get_json_files(files, recursive=False):
         else:
             continue
 
+    if not json_files:
+        raise NoJSONFileFoundError("No JSON files found!")
     return json_files
 
 
 
 def run_validation(options):
-    """Validates files based on command line options.
+    """Validate files based on command line options.
 
     Args:
         options: An instance of ``ValidationOptions`` containing options for
@@ -340,7 +351,10 @@ def run_validation(options):
 
     """
     # The JSON files to validate
-    files = get_json_files(options.files, options.recursive)
+    try:
+        files = get_json_files(options.files, options.recursive)
+    except NoJSONFileFoundError as e:
+        output.error(e.message)
 
     results = {}
     for fn in files:
@@ -350,7 +364,7 @@ def run_validation(options):
 
 
 def validate_file(fn, options=None):
-    """Validates the input document `fn` according to the options passed in.
+    """Validate the input document `fn` according to the options passed in.
 
     If any exceptions are raised during validation, no further validation
     will take place.
@@ -393,7 +407,7 @@ def validate_file(fn, options=None):
 
 
 def validate_string(string, options=None):
-    """Validates the input `string` according to the options passed in.
+    """Validate the input `string` according to the options passed in.
 
     If any exceptions are raised during validation, no further validation
     will take place.
@@ -428,7 +442,7 @@ def validate_string(string, options=None):
 
 
 def load_validator(schema_path, schema, options):
-    """Creates a JSON schema validator for the given schema.
+    """Create a JSON schema validator for the given schema.
 
     Args:
         schema_path: The filename of the JSON schema.
@@ -451,8 +465,8 @@ def load_validator(schema_path, schema, options):
 
 
 def find_schema(schema_dir, obj_type):
-    """Searches the `schema_dir` directory for a schema called `obj_type`.json.
-    Returns the file path of the first match it finds.
+    """Search the `schema_dir` directory for a schema called `obj_type`.json.
+    Return the file path of the first match it finds.
     """
     for root, dirnames, filenames in os.walk(schema_dir):
         for filename in fnmatch.filter(filenames, obj_type + '.json'):
@@ -460,7 +474,7 @@ def find_schema(schema_dir, obj_type):
 
 
 def load_schema(schema_path):
-    """Loads the JSON schema at the given path as a Python object.
+    """Load the JSON schema at the given path as a Python object.
 
     Args:
         schema_path: A filename for a JSON schema.
@@ -480,8 +494,8 @@ def load_schema(schema_path):
 
 
 def schema_validate(instance, options):
-    """Performs STIX JSON Schema validation against the input JSON.
-    Finds the correct schema by looking at the 'type' property of the
+    """Perform STIX JSON Schema validation against the input JSON.
+    Find the correct schema by looking at the 'type' property of the
     `instance` JSON object.
 
     Args:
@@ -523,13 +537,21 @@ def schema_validate(instance, options):
     try:
         some_errors = validator.iter_errors(instance)
         more_errors = validator.iter_errors_more(instance)
-        chained_errors = chain(some_errors, more_errors)
+        warnings = validator.iter_errors_more(instance, False)
+
+        if options.strict:
+            chained_errors = chain(some_errors, more_errors, warnings)
+            warnings = None
+        else:
+            chained_errors = chain(some_errors, more_errors)
+            warnings = [pretty_error(x, options.verbose) for x in warnings]
+
         errors = sorted(chained_errors, key=lambda e: e.path)
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
                                  'failed to resolve')
 
-    if len(errors) == 0:
+    if not errors and not warnings:
         return ValidationResults(True)
 
     # Prepare the list of errors
@@ -538,4 +560,10 @@ def schema_validate(instance, options):
         msg = pretty_error(error, options.verbose)
         error_list.append(SchemaError(msg))
 
-    return ValidationResults(False, error_list)
+    if error_list:
+        valid = False
+    else:
+        valid = True
+
+    return ValidationResults(is_valid=valid, errors=error_list,
+                             warnings=warnings)

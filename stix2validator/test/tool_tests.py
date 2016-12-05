@@ -84,9 +84,9 @@ class ToolTestCases(ValidatorTest):
         tool['labels'] += ["something-not-in-vocab"]
         tool_string = json.dumps(tool)
 
-        self.assertFalseWithOptions(tool_string, ignored='1')
-        self.assertFalseWithOptions(tool_string, ignored='2')
-        self.assertTrueWithOptions(tool_string, ignored='1,2')
+        self.assertFalseWithOptions(tool_string, disabled='1')
+        self.assertFalseWithOptions(tool_string, disabled='2')
+        self.assertTrueWithOptions(tool_string, disabled='1,2')
 
 
 if __name__ == "__main__":

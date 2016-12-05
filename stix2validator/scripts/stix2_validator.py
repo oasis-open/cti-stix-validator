@@ -138,10 +138,11 @@ def _get_arg_parser(is_script=True):
         "-d",
         "--disable",
         "--ignore",
-        dest="ignored",
+        dest="disabled",
         default="",
         help="A comma-separated list of recommended best practice checks to "
-            "skip. \n\nExample: --ignore 212,220"
+            "skip. By default, no checks are disabled. \n\n"
+            "Example: --disable 212,220"
     )
 
     parser.add_argument(
@@ -152,18 +153,16 @@ def _get_arg_parser(is_script=True):
         default="",
         help="A comma-separated list of recommended best practice checks to "
             "enable. If the --disable option is not used, no other checks will"
-            " be run. \n\nExample: --enable 250"
+            " be run. By default, all checks are enabled.\n\n"
+            "Example: --enable 250"
     )
 
     parser.add_argument(
-        "-l",
-        "--lax",
-        dest="lax",
+        "--strict",
+        dest="strict",
         action="store_true",
         default=False,
-        help="Ignore all recommended best practices and only check mandatory "
-             "requirements. This option takes precedent over --enable or "
-             "--disable. Equivalent to: --disable all"
+        help="Treat warnings as errors and fail validation if any are found."
     )
 
     parser.add_argument(

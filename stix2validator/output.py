@@ -1,10 +1,11 @@
 import sys
 from colorama import init, Fore, Style
-from six import iteritems, text_type
+from six import iteritems
 from . import codes
 
 init(autoreset=True)
 _GREEN = Fore.GREEN
+_YELLOW = Fore.YELLOW
 _RED = Fore.RED + Style.BRIGHT
 _VERBOSE = False
 
@@ -20,7 +21,7 @@ def set_level(verbose_output=False):
 
 
 def error(msg, status=codes.EXIT_FAILURE):
-    """Prints a message to the stderr prepended by '[!]' and calls
+    """Prints a message to the stderr prepended by '[X]' and calls
     ```sys.exit(status)``.
 
     Args:
@@ -28,7 +29,7 @@ def error(msg, status=codes.EXIT_FAILURE):
         status: The exit status code. Defaults to ``EXIT_FAILURE`` (1).
 
     """
-    sys.stderr.write("[!] %s\n" % str(msg))
+    sys.stderr.write(_RED + "[X] %s\n" % str(msg))
     sys.exit(status)
 
 
@@ -78,29 +79,32 @@ def print_level(fmt, level, *args):
 def print_fatal_results(results, level=0):
     """Prints fatal errors that occurred during validation runs.
     """
-    print_level(_RED + "[!] Fatal Error: %s", level, results.error)
+    print_level(_RED + "[X] Fatal Error: %s", level, results.error)
 
 
 def print_schema_results(results, level=0):
-    """Prints JSON Schema validation results to stdout.
+    """Prints JSON Schema validation errors to stdout.
 
     Args:
         results: An instance of ValidationResults.
         level: The level at which to print the results.
 
     """
-    marker = _GREEN + "[+]" if results.is_valid else _RED + "[!]"
-    print_level("%s JSON Schema: %s", level, marker, results.is_valid)
-
-    if results.is_valid:
-        return
-
     for error in results.errors:
-        print_level(_RED + "[!] %s", level + 1, error)
+        print_level(_RED + "[X] %s", level + 1, error)
+
+
+def print_warning_results(results, level=0):
+    """Prints warning messages found during validation.
+    """
+    marker = _YELLOW + "[!] "
+
+    for warning in results.warnings:
+        print_level(marker + "Warning: %s", level + 1, warning)
 
 
 def print_results(results):
-    """Prints `results` to stdout.
+    """Prints `results` (the results of validation) to stdout.
 
     Args:
         results: A dictionary of ValidationResults instances. The key is the
@@ -114,9 +118,19 @@ def print_results(results):
     level = 0
     for fn, result in sorted(iteritems(results)):
         print("=" * 80)
-        print_level("[-] Results: %s", level, fn)
+        print_level("[-] Results for: %s", level, fn)
 
-        if result.errors is not None:
+        if result.is_valid:
+            marker = _GREEN + "[+]"
+            verdict = "Valid"
+        else:
+            marker = _RED + "[X]"
+            verdict = "Invalid"
+        print_level("%s STIX JSON: %s", level, marker, verdict)
+
+        if result.warnings:
+            print_warning_results(result, level)
+        if result.errors:
             print_schema_results(result, level)
-        if result.fatal is not None:
+        if result.fatal:
             print_fatal_results(result.fatal, level)
