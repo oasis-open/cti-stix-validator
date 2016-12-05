@@ -150,6 +150,81 @@ def timestamp_precision(instance):
                              instance['id'])
 
 
+def object_marking_circular_refs(instance):
+    """Ensure that marking definitions do not contain circular references (ie.
+    they do not reference themselves in the `object_marking_refs` property).
+    """
+    if instance['type'] != 'marking-definition':
+        return
+
+    if 'object_marking_refs' in instance:
+        for ref in instance['object_marking_refs']:
+            if ref == instance['id']:
+                return JSONError("`object_marking_refs` cannot contain any "
+                                 "references to this marking definition object"
+                                 " (no circular references).", instance['id'])
+
+
+def granular_markings_circular_refs(instance):
+    """Ensure that marking definitions do not contain circular references (ie.
+    they do not reference themselves in the `granular_markings` property).
+    """
+    if instance['type'] != 'marking-definition':
+        return
+
+    if 'granular_markings' in instance:
+        for marking in instance['granular_markings']:
+            if 'marking_ref' in marking and marking['marking_ref'] == instance['id']:
+                return JSONError("`granular_markings` cannot contain any "
+                                 "references to this marking definition object"
+                                 " (no circular references).", instance['id'])
+
+
+def marking_selector_syntax(instance):
+    """Ensure selectors in granular markings refer to items which are actually
+    present in the object.
+    """
+    if 'granular_markings' not in instance:
+        return
+
+    for marking in instance['granular_markings']:
+        if 'selectors' not in marking:
+            continue
+
+        selectors = marking['selectors']
+        for selector in selectors:
+            segments = selector.split('.')
+
+            obj = instance
+            prev_segmt = None
+            for segmt in segments:
+                index_match = re.match(r"\[(\d+)\]", segmt)
+                if index_match:
+                    try:
+                        idx = int(index_match.group(1))
+                        obj = obj[idx]
+                    except IndexError as e:
+                        return JSONError("'%s' is not a valid selector because"
+                                         " %s is not a valid index."
+                                         % (selector, idx), instance['id'])
+                    except KeyError as e:
+                        return JSONError("'%s' is not a valid selector because"
+                                         " '%s' is not a list."
+                                         % (selector, prev_segmt), instance['id'])
+                else:
+                    try:
+                        obj = obj[segmt]
+                    except KeyError as e:
+                        return JSONError("'%s' is not a valid selector because"
+                                         " %s is not a property."
+                                         % (selector, e), instance['id'])
+                    except TypeError as e:
+                        return JSONError("'%s' is not a valid selector because"
+                                         " '%s' is not a property."
+                                         % (selector, segmt), instance['id'])
+                prev_segmt = segmt
+
+
 # Checks for SHOULD Requirements
 
 def custom_object_prefix_strict(instance):
@@ -544,7 +619,10 @@ class CustomDraft4Validator(Draft4Validator):
         validator_list = [
             modified_created,
             version,
-            timestamp_precision
+            timestamp_precision,
+            object_marking_circular_refs,
+            granular_markings_circular_refs,
+            marking_selector_syntax
         ]
 
         # --strict-types
