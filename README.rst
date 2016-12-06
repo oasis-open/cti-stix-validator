@@ -1,7 +1,7 @@
 ====================
 `cti-stix-validator`
 ====================
-*This is an `OASIS Open Repository <https://www.oasis-open.org/resources/open-repositories>`_. See the `Governance`_ section for more information.*
+NOTE: This is an `OASIS Open Repository <https://www.oasis-open.org/resources/open-repositories>`_. See the `Governance`_ section for more information.
 
 The STIX validator checks that STIX JSON content conforms to the requirements specified in the STIX 2.0 specification. In addition to checking conformance with the JSON schemas, the validator checks conformance with requirements that cannot be specified in JSON schema, as well as with established "best practices." This validator is non-normative; in cases of conflict with the STIX 2.0 specification, the specification takes precedence.
 
@@ -14,7 +14,7 @@ The validator also color-codes its output to make it easier to tell at a glance 
 .. _install:
 
 `Installation`
---------------
+==============
 
 The easiest way to install the STIX validator is with pip:
 
@@ -34,10 +34,10 @@ Note that if you instead install it by cloning or downloading the repository, yo
 .. _usage:
 
 `Usage`
--------
+=======
 
 As A Script
-~~~~~~~~~~~
+-----------
 
 The validator comes with a bundled script which you can use to validate a JSON file containing STIX content:
 
@@ -46,7 +46,7 @@ The validator comes with a bundled script which you can use to validate a JSON f
   $ stix2_validator <stix_file.json>
 
 As A Library
-~~~~~~~~~~~~
+------------
 
 You can also use this library to integrate STIX validation into your own tools. You can validate a JSON file:
 
@@ -80,7 +80,7 @@ You can pass in a ValidationOptions object if you want behavior other than the d
 .. _options:
 
 Checking Best Practices
-~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------
 
 The validator will always validate input against all of the mandatory "MUST" requirements from the spec. By default it will issue warnings if the input fails any of the "SHOULD" recommendations, but validation will still pass. To turn these "best practice" warnings into errors and cause validation to fail, use the :code:`--strict` option with the command-line script, or create a ValidationOptions object with :code:`strict=True` when using the library.
 
