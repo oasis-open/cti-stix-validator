@@ -88,6 +88,18 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+    def test_selectors_multiple(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['granular_markings'][0]['selectors'] = [
+          "objects.0.extensions.archive-ext.contains_refs.[5]",
+          "objects.0.addons",
+          "objects.9"
+        ]
+        observed_data = json.dumps(observed_data)
+        results = validate_string(observed_data, self.options)
+        self.assertTrue(len(results.errors) == 3)
+        self.assertFalse(results.is_valid)
+
 
 if __name__ == "__main__":
     unittest.main()

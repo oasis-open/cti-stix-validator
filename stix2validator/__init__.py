@@ -380,15 +380,16 @@ def validate_file(fn, options=None):
     results = ValidationResults(fn=fn)
     output.info("Performing JSON schema validation on %s" % fn)
 
-    with open(fn) as instance_file:
-        instance = json.load(instance_file)
-
     if not options:
         options = ValidationOptions(files=fn)
 
     try:
+        with open(fn) as instance_file:
+            instance = json.load(instance_file)
+
         if options.files:
             results = schema_validate(instance, options)
+
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
         msg = ("File '{fn}' was schema-invalid. No further validation "

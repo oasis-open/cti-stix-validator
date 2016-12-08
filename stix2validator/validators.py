@@ -5,6 +5,7 @@
 import os
 import re
 from collections import deque
+from types import GeneratorType
 
 # external
 from jsonschema import Draft4Validator
@@ -129,25 +130,25 @@ def timestamp_precision(instance):
 
         ts_field = precision_matches.group(1)
         if ts_field not in instance:
-            return JSONError("There is no corresponding '%s' field for %s"
-                             % (ts_field, prop_name), instance['id'])
+            yield JSONError("There is no corresponding '%s' field for %s"
+                            % (ts_field, prop_name), instance['id'])
+        else:
+            pattern = ""
+            if instance[prop_name] == 'year':
+                pattern = "^[0-9]{4}-01-01T00:00:00(\\.0+)?Z$"
+            elif instance[prop_name] == 'month':
+                pattern = "^[0-9]{4}-[0-9]{2}-01T00:00:00(\\.0+)?Z$"
+            elif instance[prop_name] == 'day':
+                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"
+            elif instance[prop_name] == 'hour':
+                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00(\\.0+)?Z$"
+            elif instance[prop_name] == 'minute':
+                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00(\\.0+)?Z$"
 
-        pattern = ""
-        if instance[prop_name] == 'year':
-            pattern = "^[0-9]{4}-01-01T00:00:00(\\.0+)?Z$"
-        elif instance[prop_name] == 'month':
-            pattern = "^[0-9]{4}-[0-9]{2}-01T00:00:00(\\.0+)?Z$"
-        elif instance[prop_name] == 'day':
-            pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"
-        elif instance[prop_name] == 'hour':
-            pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00(\\.0+)?Z$"
-        elif instance[prop_name] == 'minute':
-            pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00(\\.0+)?Z$"
-
-        if not re.match(pattern, instance[ts_field]):
-            return JSONError("%s timestamp is not the correct format for '%s' "
-                             "precision." % (ts_field, instance[prop_name]),
-                             instance['id'])
+            if not re.match(pattern, instance[ts_field]):
+                yield JSONError("%s timestamp is not the correct format for '%s' "
+                                "precision." % (ts_field, instance[prop_name]),
+                                instance['id'])
 
 
 def object_marking_circular_refs(instance):
@@ -160,9 +161,9 @@ def object_marking_circular_refs(instance):
     if 'object_marking_refs' in instance:
         for ref in instance['object_marking_refs']:
             if ref == instance['id']:
-                return JSONError("`object_marking_refs` cannot contain any "
-                                 "references to this marking definition object"
-                                 " (no circular references).", instance['id'])
+                yield JSONError("`object_marking_refs` cannot contain any "
+                                "references to this marking definition object"
+                                " (no circular references).", instance['id'])
 
 
 def granular_markings_circular_refs(instance):
@@ -175,9 +176,9 @@ def granular_markings_circular_refs(instance):
     if 'granular_markings' in instance:
         for marking in instance['granular_markings']:
             if 'marking_ref' in marking and marking['marking_ref'] == instance['id']:
-                return JSONError("`granular_markings` cannot contain any "
-                                 "references to this marking definition object"
-                                 " (no circular references).", instance['id'])
+                yield JSONError("`granular_markings` cannot contain any "
+                                "references to this marking definition object"
+                                " (no circular references).", instance['id'])
 
 
 def marking_selector_syntax(instance):
@@ -204,24 +205,24 @@ def marking_selector_syntax(instance):
                         idx = int(index_match.group(1))
                         obj = obj[idx]
                     except IndexError as e:
-                        return JSONError("'%s' is not a valid selector because"
-                                         " %s is not a valid index."
-                                         % (selector, idx), instance['id'])
+                        yield JSONError("'%s' is not a valid selector because"
+                                        " %s is not a valid index."
+                                        % (selector, idx), instance['id'])
                     except KeyError as e:
-                        return JSONError("'%s' is not a valid selector because"
-                                         " '%s' is not a list."
-                                         % (selector, prev_segmt), instance['id'])
+                        yield JSONError("'%s' is not a valid selector because"
+                                        " '%s' is not a list."
+                                        % (selector, prev_segmt), instance['id'])
                 else:
                     try:
                         obj = obj[segmt]
                     except KeyError as e:
-                        return JSONError("'%s' is not a valid selector because"
-                                         " %s is not a property."
-                                         % (selector, e), instance['id'])
+                        yield JSONError("'%s' is not a valid selector because"
+                                        " %s is not a property."
+                                        % (selector, e), instance['id'])
                     except TypeError as e:
-                        return JSONError("'%s' is not a valid selector because"
-                                         " '%s' is not a property."
-                                         % (selector, segmt), instance['id'])
+                        yield JSONError("'%s' is not a valid selector because"
+                                        " '%s' is not a property."
+                                        % (selector, segmt), instance['id'])
                 prev_segmt = segmt
 
 
@@ -233,11 +234,11 @@ def custom_object_prefix_strict(instance):
     if (instance['type'] not in enums.TYPES and
             instance['type'] not in enums.RESERVED_OBJECTS and
             not re.match("^x\-.+\-.+$", instance['type'])):
-        return JSONError("Custom object type '%s' should start with 'x-' "
-                         "followed by a source unique identifier (like a"
-                         "domain name with dots replaced by dashes), a dash "
-                         "and then the name." % instance['type'],
-                         instance['id'], 'custom-object-prefix')
+        yield JSONError("Custom object type '%s' should start with 'x-' "
+                        "followed by a source unique identifier (like a"
+                        "domain name with dots replaced by dashes), a dash "
+                        "and then the name." % instance['type'],
+                        instance['id'], 'custom-object-prefix')
 
 
 def custom_object_prefix_lax(instance):
@@ -247,10 +248,10 @@ def custom_object_prefix_lax(instance):
     if (instance['type'] not in enums.TYPES and
             instance['type'] not in enums.RESERVED_OBJECTS and
             not re.match("^x\-.+$", instance['type'])):
-        return JSONError("Custom object type '%s' should start with 'x-' in "
-                         "order to be compatible with future versions of the "
-                         "STIX 2 specification." % instance['type'],
-                         instance['id'], 'custom-object-prefix')
+        yield JSONError("Custom object type '%s' should start with 'x-' in "
+                        "order to be compatible with future versions of the "
+                        "STIX 2 specification." % instance['type'],
+                        instance['id'], 'custom-object-prefix')
 
 
 def custom_property_prefix_strict(instance):
@@ -264,12 +265,12 @@ def custom_property_prefix_strict(instance):
                 prop_name not in enums.RESERVED_PROPERTIES and
                 not re.match("^x_.+_.+$", prop_name)):
 
-            return JSONError("Custom property '%s' should have a type that "
-                             "starts with 'x_' followed by a source unique "
-                             "identifier (like a domain name with dots "
-                             "replaced by dashes), a dash and then the name." %
-                             prop_name, instance['id'],
-                             'custom-property-prefix')
+            yield JSONError("Custom property '%s' should have a type that "
+                            "starts with 'x_' followed by a source unique "
+                            "identifier (like a domain name with dots "
+                            "replaced by dashes), a dash and then the name." %
+                            prop_name, instance['id'],
+                            'custom-property-prefix')
 
 
 def custom_property_prefix_lax(instance):
@@ -284,11 +285,11 @@ def custom_property_prefix_lax(instance):
                 prop_name not in enums.RESERVED_PROPERTIES and
                 not re.match("^x_.+$", prop_name)):
 
-            return JSONError("Custom property '%s' should have a type that "
-                             "starts with 'x_' in order to be compatible with "
-                             "future versions of the STIX 2 specification." %
-                             prop_name, instance['id'],
-                             'custom-property-prefix')
+            yield JSONError("Custom property '%s' should have a type that "
+                            "starts with 'x_' in order to be compatible with "
+                            "future versions of the STIX 2 specification." %
+                            prop_name, instance['id'],
+                            'custom-property-prefix')
 
 
 def open_vocab_values(instance):
@@ -310,11 +311,11 @@ def open_vocab_values(instance):
 
             for v in values:
                 if not v.islower() or '_' in v or ' ' in v:
-                    return JSONError("Open vocabulary value '%s' should be all"
-                                     " lowercase and use dashes instead of"
-                                     " spaces or underscores as word"
-                                     " separators." % v, instance['id'],
-                                     'open-vocab-format')
+                    yield JSONError("Open vocabulary value '%s' should be all"
+                                    " lowercase and use dashes instead of"
+                                    " spaces or underscores as word"
+                                    " separators." % v, instance['id'],
+                                    'open-vocab-format')
 
 
 def kill_chain_phase_names(instance):
@@ -330,23 +331,23 @@ def kill_chain_phase_names(instance):
 
             chain_name = phase['kill_chain_name']
             if not chain_name.islower() or '_' in chain_name or ' ' in chain_name:
-                return JSONError("kill_chain_name '%s' should be all lowercase"
-                                 " and use dashes instead of spaces or "
-                                 "underscores as word separators." % chain_name,
-                                 instance['id'], 'kill-chain-names')
+                yield JSONError("kill_chain_name '%s' should be all lowercase"
+                                " and use dashes instead of spaces or "
+                                "underscores as word separators." % chain_name,
+                                instance['id'], 'kill-chain-names')
 
             phase_name = phase['phase_name']
             if not phase_name.islower() or '_' in phase_name or ' ' in phase_name:
-                return JSONError("phase_name '%s' should be all lowercase and "
-                                 "use dashes instead of spaces or underscores "
-                                 "as word separators." % phase_name,
-                                 instance['id'], 'kill-chain-names')
+                yield JSONError("phase_name '%s' should be all lowercase and "
+                                "use dashes instead of spaces or underscores "
+                                "as word separators." % phase_name,
+                                instance['id'], 'kill-chain-names')
 
 
 def check_vocab(instance, vocab, code):
     """Ensure that the open vocabulary specified by `vocab` is used properly.
 
-    It checks properties of objects specified in the appropriate `_USES`
+    This checks properties of objects specified in the appropriate `_USES`
     dictionary to determine which properties SHOULD use the given vocabulary,
     then checks that the values in those properties are from the vocabulary.
     """
@@ -365,9 +366,9 @@ def check_vocab(instance, vocab, code):
 
                 if not is_in:
                     vocab_name = vocab.replace('_', '-').lower()
-                    return JSONError("%s contains a value not in the %s-ov "
-                                     "vocabulary." % (prop, vocab_name),
-                                     instance['id'], code)
+                    yield JSONError("%s contains a value not in the %s-ov "
+                                    "vocabulary." % (prop, vocab_name),
+                                    instance['id'], code)
 
 
 def vocab_attack_motivation(instance):
@@ -721,7 +722,10 @@ class CustomDraft4Validator(Draft4Validator):
         # Perform validation
         for v_function in validators:
             result = v_function(instance)
-            if result is not None:
+            if isinstance(result, GeneratorType):
+                for x in result:
+                    yield x
+            elif result is not None:
                 yield result
 
         # Validate any child STIX objects
