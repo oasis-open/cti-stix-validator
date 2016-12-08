@@ -444,22 +444,7 @@ PROPERTIES = {
         'type',
         'id',
         'spec_version',
-        'attack_patterns',
-        'campaigns',
-        'courses_of_action',
-        'identities',
-        'indicators',
-        'intrusion_sets',
-        'malware',
-        'marking_definitions',
-        'observed_data',
-        'relationships',
-        'reports',
-        'sightings',
-        'threat_actors',
-        'tools',
-        'vulnerabilities',
-        'custom_objects'
+        'objects'
     ],
     "relationship": [
         'type',
