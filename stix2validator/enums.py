@@ -86,22 +86,16 @@ MALWARE_LABEL_OV = [
     "virus",
     "worm"
 ]
-PATTERN_LANG_OV = [
-    "stix",
-    "openioc",
-    "snort",
-    "yara"
-]
 REPORT_LABEL_OV = [
     "threat-report",
     "attack-pattern",
     "campaign",
+    "identity",
     "indicator",
     "malware",
     "observed-data",
     "threat-actor",
     "tool",
-    "victim-target",
     "vulnerability"
 ]
 THREAT_ACTOR_LABEL_OV = [
@@ -173,9 +167,6 @@ INDUSTRY_SECTOR_USES = {
 }
 MALWARE_LABEL_USES = {
     "malware": ["labels"]
-}
-PATTERN_LANG_USES = {
-    "indicator": ["pattern_lang"]
 }
 REPORT_LABEL_USES = {
     "report": ["labels"]
@@ -299,8 +290,6 @@ PROPERTIES = {
         'description',
         'identity_class',
         'sectors',
-        'regions',
-        'nationalities',
         'contact_information'
     ],
     "indicator": [
@@ -318,8 +307,6 @@ PROPERTIES = {
         'name',
         'description',
         'pattern',
-        'pattern_lang',
-        'pattern_lang_version',
         'valid_from',
         'valid_from_precision',
         'valid_until',
@@ -346,9 +333,7 @@ PROPERTIES = {
         'goals',
         'resource_level',
         'primary_motivation',
-        'secondary_motivations',
-        'region',
-        'country'
+        'secondary_motivations'
     ],
     "malware": [
         'type',
@@ -651,8 +636,7 @@ VOCAB_PROPERTIES = {
         'sectors'
     ],
     "indicator": [
-        'labels',
-        'pattern_lang'
+        'labels'
     ],
     "intrusion-set": [
         'resource_level',

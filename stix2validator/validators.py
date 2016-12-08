@@ -400,11 +400,6 @@ def vocab_malware_label(instance):
                        'malware-label')
 
 
-def vocab_pattern_lang(instance):
-    return check_vocab(instance, "PATTERN_LANG",
-                       'pattern-lang')
-
-
 def vocab_report_label(instance):
     return check_vocab(instance, "REPORT_LABEL",
                        'report-label')
@@ -510,7 +505,6 @@ CHECK_CODES = {
     '214': 'indicator-label',
     '215': 'industry-sector',
     '216': 'malware-label',
-    '217': 'pattern-lang',
     '218': 'report-label',
     '219': 'threat-actor-label',
     '220': 'threat-actor-role',
@@ -533,7 +527,6 @@ CHECKS = {
         vocab_indicator_label,
         vocab_industry_sector,
         vocab_malware_label,
-        vocab_pattern_lang,
         vocab_report_label,
         vocab_threat_actor_label,
         vocab_threat_actor_role,
@@ -561,7 +554,6 @@ CHECKS = {
         vocab_indicator_label,
         vocab_industry_sector,
         vocab_malware_label,
-        vocab_pattern_lang,
         vocab_report_label,
         vocab_threat_actor_label,
         vocab_threat_actor_role,
@@ -577,7 +569,6 @@ CHECKS = {
         vocab_indicator_label,
         vocab_industry_sector,
         vocab_malware_label,
-        vocab_pattern_lang,
         vocab_report_label,
         vocab_threat_actor_label,
         vocab_threat_actor_role,
@@ -591,7 +582,6 @@ CHECKS = {
     'indicator-label': vocab_indicator_label,
     'industry-sector': vocab_industry_sector,
     'malware-label': vocab_malware_label,
-    'pattern-lang': vocab_pattern_lang,
     'report-label': vocab_report_label,
     'threat-actor-label': vocab_threat_actor_label,
     'threat-actor-role': vocab_threat_actor_role,
@@ -676,8 +666,6 @@ class CustomDraft4Validator(Draft4Validator):
                             validator_list.append(CHECKS['industry-sector'])
                         if 'malware-label' not in options.disabled:
                             validator_list.append(CHECKS['malware-label'])
-                        if 'pattern-lang' not in options.disabled:
-                            validator_list.append(CHECKS['pattern-lang'])
                         if 'report-label' not in options.disabled:
                             validator_list.append(CHECKS['report-label'])
                         if 'threat-actor-label' not in options.disabled:

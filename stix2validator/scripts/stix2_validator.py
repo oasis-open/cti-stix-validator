@@ -51,8 +51,6 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | industry_sector vocabulary             |
 | 216  | malware-label               | certain property values are from the   |
 |      |                             | malware_label vocabulary               |
-| 217  | pattern-lang                | certain property values are from the   |
-|      |                             | pattern_lang vocabulary                |
 | 218  | report-label                | certain property values are from the   |
 |      |                             | report_label vocabulary                |
 | 219  | threat-actor-label          | certain property values are from the   |
