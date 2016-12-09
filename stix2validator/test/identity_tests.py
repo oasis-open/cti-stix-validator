@@ -12,8 +12,7 @@ VALID_IDENTITY = """
   "created": "2014-08-08T15:50:10.983464Z",
   "modified": "2014-08-08T15:50:10.983464Z",
   "name": "ACME Widget, Inc.",
-  "identity_class": "organization",
-  "nationalities": ["us"]
+  "identity_class": "organization"
 }
 """
 
@@ -24,13 +23,6 @@ class IdentityTestCases(ValidatorTest):
     def test_wellformed_identity(self):
         results = validate_string(VALID_IDENTITY, self.options)
         self.assertTrue(results.is_valid)
-
-    def test_invalid_nationality(self):
-        identity = copy.deepcopy(self.valid_identity)
-        identity['nationalities'] = ["USA"]
-        identity = json.dumps(identity)
-        results = validate_string(identity, self.options)
-        self.assertEqual(results.is_valid, False)
 
     def test_vocab_identity_class(self):
         identity = copy.deepcopy(self.valid_identity)

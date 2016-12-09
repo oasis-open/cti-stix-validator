@@ -137,9 +137,6 @@ Enabling supersedes disabling. Simultaneously enabling and disabling the same ch
 |  216   | malware-label               | certain property values are from the   |
 |        |                             | malware_label vocabulary               |
 +--------+-----------------------------+----------------------------------------+
-|  217   | pattern-lang                | certain property values are from the   |
-|        |                             | pattern_lang vocabulary                |
-+--------+-----------------------------+----------------------------------------+
 |  218   | report-label                | certain property values are from the   |
 |        |                             | report_label vocabulary                |
 +--------+-----------------------------+----------------------------------------+

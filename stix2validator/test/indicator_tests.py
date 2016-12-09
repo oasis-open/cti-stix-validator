@@ -16,8 +16,6 @@ VALID_INDICATOR = """
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
     "pattern": "file-object.hashes.md5 = '3773a88f65a5e780c8dff9cdc3a056f3'",
-    "pattern_lang": "stix",
-    "pattern_lang_version": "1.0",
     "valid_from": "2016-04-06T20:03:48Z",
     "valid_from_precision": "full"
 }
@@ -51,14 +49,6 @@ class IndicatorTestCases(ValidatorTest):
         indicator = json.dumps(indicator)
         results = validate_string(indicator, self.options)
         self.assertEqual(results.is_valid, False)
-
-    # TODO: Update this test once RC3 has settled and schemas are updated
-    # def test_cybox_version(self):
-    #     indicator = copy.deepcopy(self.valid_indicator)
-    #     indicator['pattern_lang_version'] = "2.0"
-    #     indicator = json.dumps(indicator)
-    #     results = validate_string(indicator, self.options)
-    #     self.assertEqual(results.is_valid, False)
 
     def test_custom_property_name_invalid_character(self):
         indicator = copy.deepcopy(self.valid_indicator)
@@ -243,15 +233,6 @@ class IndicatorTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(indicator, 'indicator-label')
-
-    def test_vocab_pattern_lang(self):
-        indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern_lang'] = "something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
-        self.assertEqual(results.is_valid, False)
-
-        self.check_ignore(indicator, 'pattern-lang')
 
 
 if __name__ == "__main__":

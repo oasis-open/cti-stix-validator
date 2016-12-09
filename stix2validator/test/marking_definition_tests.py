@@ -17,7 +17,7 @@ VALID_MARKING_DEFINITION = """
 """
 
 
-class Marking_definitionTestCases(ValidatorTest):
+class MarkingDefinitionTestCases(ValidatorTest):
     valid_marking_definition = json.loads(VALID_MARKING_DEFINITION)
 
     def test_wellformed_marking_definition(self):
@@ -39,6 +39,21 @@ class Marking_definitionTestCases(ValidatorTest):
         marking_definition = json.dumps(marking_definition)
         self.assertFalseWithOptions(marking_definition)
         self.assertTrueWithOptions(marking_definition, strict=False)
+
+    def test_object_marking_ref_circular_ref(self):
+        marking_definition = copy.deepcopy(self.valid_marking_definition)
+        marking_definition['object_marking_refs'] = ["marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da"]
+        marking_definition = json.dumps(marking_definition)
+        self.assertFalseWithOptions(marking_definition)
+
+    def test_granular_marking_circular_ref(self):
+        marking_definition = copy.deepcopy(self.valid_marking_definition)
+        marking_definition['granular_markings'] = [{
+            "marking_ref": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
+            "selectors": ["created"]
+        }]
+        marking_definition = json.dumps(marking_definition)
+        self.assertFalseWithOptions(marking_definition)
 
 
 if __name__ == "__main__":
