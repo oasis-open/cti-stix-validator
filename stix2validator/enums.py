@@ -138,6 +138,63 @@ TOOL_LABEL_OV = [
     "remote-access",
     "vulnerability-scanning"
 ]
+HASH_ALGO_OV = [
+    "MD5",
+    "MD6",
+    "RIPEMD-160",
+    "SHA-1",
+    "SHA-224",
+    "SHA-256",
+    "SHA-384",
+    "SHA-512",
+    "SHA3-224",
+    "SHA3-256",
+    "SHA3-384",
+    "SHA3-512",
+    "ssdeep",
+    "WHIRLPOOL"
+]
+ENCRYPTION_ALGO_OV = [
+    "AES128-ECB",
+    "AES128-CBC",
+    "AES128-CFB",
+    "AES128-COFB",
+    "AES128-CTR",
+    "AES128-XTS",
+    "AES128-GCM",
+    "Salsa20",
+    "Salsa12",
+    "Salsa8",
+    "ChaCha20-Poly1305",
+    "ChaCha20",
+    "DES-CBC",
+    "3DES-CBC",
+    "DES-EBC",
+    "3DES-EBC",
+    "CAST128-CBC",
+    "CAST256-CBC",
+    "RSA",
+    "DSA"
+]
+WINDOWS_PEBINARY_TYPE_OV = [
+    "exe",
+    "dll",
+    "sys"
+]
+ACCOUNT_TYPE_OV = [
+    "unix",
+    "windows local",
+    "windows domain",
+    "ldap",
+    "tacacs",
+    "radius",
+    "nis",
+    "openid",
+    "facebook",
+    "skype",
+    "twitter",
+    "kavi"
+]
 
 
 # Dictionaries mapping object types to properties that use a given vocabulary

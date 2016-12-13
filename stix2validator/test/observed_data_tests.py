@@ -100,6 +100,157 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertTrue(len(results.errors) == 3)
         self.assertFalse(results.is_valid)
 
+    def test_dict_key_uppercase(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['FOOBAR'] = {
+            "foo": "bar"
+        }
+        observed_data = json.dumps(observed_data)
+        results = validate_string(observed_data, self.options)
+        self.assertTrue(len(results.errors) == 1)
+        self.assertFalse(results.is_valid)
+
+    def test_dict_key_length(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['foofoobarfoofoobarbarfoofoobarbarbar'] = {
+            "foo": "bar"
+        }
+        observed_data = json.dumps(observed_data)
+        results = validate_string(observed_data, self.options)
+        self.assertTrue(len(results.errors) == 1)
+        self.assertFalse(results.is_valid)
+
+    def test_vocab_account_type(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1'] = {
+            "type": "user-account",
+            "user_id": "1001",
+            "account_login": "bwayne",
+            "account_type": "superhero"
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_windows_pebinary_type(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "elf"
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_encryption_algo(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['encryption_algorithm'] = "MDK"
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_file_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['hashes'] = {
+            "something": "foobar"
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_artifact_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1'] = {
+            "type": "artifact",
+            "hashes": {
+                "foo": "B4D33B0C7306351B9ED96578465C5579"
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_certificate_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1'] = {
+            "type": "x509-certificate",
+            "hashes": {
+                "foo": "B4D33B0C7306351B9ED96578465C5579"
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_pebinary_sections_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "sections": [
+                {
+                    "name": "CODE",
+                    "entropy": 0.061089,
+                    "hashes": {
+                        "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
+                    }
+                }
+            ]
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_pebinary_optional_header_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "optional_header": {
+                "hashes": {
+                    "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
+                }
+            }
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext']['optional_header']['hashes'] = {
+            "x_foo": "1C19FC56AEF2048C1CD3A5E67B099350"
+        }
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+    def test_vocab_pebinary_file_header_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "file_header_hashes": {
+                "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_vocab_pebinary_multiple_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "file_header_hashes": {
+                "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
+            },
+            "optional_header": {
+                "hashes": {
+                    "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
+                }
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        results = validate_string(observed_data, self.options)
+        self.assertTrue(len(results.errors) == 2)
+        self.assertFalse(results.is_valid)
+
+    def test_vocab_ntfs_alternate_data_streams_hashes(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['ntfs-ext'] = {
+            "alternate_data_streams": [
+                  {
+                      "type": "alternate-data-stream",
+                      "name": "second.stream",
+                      "size": 25536,
+                      "hashes": {
+                          "foo": "B4D33B0C7306351B9ED96578465C5579"
+                      }
+                  }
+              ]
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
 
 if __name__ == "__main__":
     unittest.main()

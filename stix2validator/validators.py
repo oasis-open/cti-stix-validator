@@ -4,8 +4,7 @@
 # builtin
 import os
 import re
-from collections import deque
-from types import GeneratorType
+from collections import deque, Iterable
 
 # external
 from jsonschema import Draft4Validator
@@ -480,6 +479,224 @@ def relationships_strict(instance):
                          'relationship-types')
 
 
+def has_cyber_observable_data(instance):
+    """Return True only if the given instance is an observed-data object
+    containing STIX Cyber Observable objects.
+    """
+    if (instance['type'] == 'observed-data' and
+            'objects' in instance and
+            type(instance['objects']) is dict):
+        return True
+    return False
+
+
+def test_dict_keys(item, inst_id):
+    """Recursively generate errors for incorrectly formatted cyber observable
+    dictionary keys.
+    """
+    for k, v in item.items():
+        # Skip hashes_type objects
+        if k == 'hashes' or k == 'file_header_hashes':
+            continue
+
+        if not re.match("^[^A-Z]+$", k):
+            yield JSONError("As a dictionary key for cyber observable "
+                            "objects, '%s' should be lowercase." % k,
+                            inst_id)
+        if not len(k) <= 30:
+            yield JSONError("As a dictionary key for cyber observable "
+                            "objects, '%s' should be no longer than 30 "
+                            "characters long." % k, inst_id)
+
+        if type(v) is dict:
+            for error in test_dict_keys(v, inst_id):
+                yield error
+
+
+def observable_dictionary_keys(instance):
+    """Ensure dictionaries in the cyber observable layer have lowercase keys
+    no longer than 30 characters.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for error in test_dict_keys(instance['objects'], instance['id']):
+        yield error
+
+
+def valid_hash_value(hashname):
+    """Return true if given value is a valid, recommended hash name according
+    to the STIX 2 specification.
+    """
+    if hashname in enums.HASH_ALGO_OV or re.match("^x_", hashname):
+        return True
+    else:
+        return False
+
+
+def vocab_hash_algo(instance):
+    """Ensure objects with 'hashes' properties only use values from the
+    hash-algo-ov vocabulary.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key, obj in instance['objects'].items():
+        if 'type' not in obj:
+            continue
+
+        if obj['type'] == 'file':
+            try:
+                hashes = obj['hashes']
+            except KeyError:
+                pass
+            else:
+                for h in hashes:
+                    if not (valid_hash_value(h)):
+                        yield JSONError("Object '%s' has a 'hashes' dictionary"
+                                " with a hash of type '%s', which is not a "
+                                "value in the hash-algo-ov vocabulary nor a "
+                                "custom value prepended with 'x_'."
+                                % (key, h), instance['id'])
+
+            try:
+                ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
+            except KeyError:
+                pass
+            else:
+                for datastream in ads:
+                    if 'hashes' not in datastream:
+                        continue
+                    for h in datastream['hashes']:
+                        if not (valid_hash_value(h)):
+                            yield JSONError("Object '%s' has an NTFS extension"
+                                    " with an alternate data stream that has a"
+                                    " 'hashes' dictionary with a hash of type "
+                                    "'%s', which is not a value in the "
+                                    "hash-algo-ov vocabulary nor a custom "
+                                    "value prepended with 'x_'."
+                                    % (key, h), instance['id'])
+
+            try:
+                head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
+            except KeyError:
+                pass
+            else:
+                for h in head_hashes:
+                    if not (valid_hash_value(h)):
+                        yield JSONError("Object '%s' has a Windows PE Binary "
+                                "File extension with a file header hash of "
+                                "'%s', which is not a value in the "
+                                "hash-algo-ov vocabulary nor a custom value "
+                                "prepended with 'x_'."
+                                % (key, h), instance['id'])
+
+            try:
+                hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
+            except KeyError:
+                pass
+            else:
+                for h in hashes:
+                    if not (valid_hash_value(h)):
+                        yield JSONError("Object '%s' has a Windows PE Binary "
+                                "File extension with an optional header that "
+                                "has a hash of '%s', which is not a value in "
+                                "the hash-algo-ov vocabulary nor a custom "
+                                "value prepended with 'x_'."
+                                % (key, h), instance['id'])
+
+            try:
+                sections = obj['extensions']['windows-pebinary-ext']['sections']
+            except KeyError:
+                pass
+            else:
+                for s in sections:
+                    if 'hashes' not in s:
+                        continue
+                    for h in s['hashes']:
+                        if not (valid_hash_value(h)):
+                            yield JSONError("Object '%s' has a Windows PE "
+                                    "Binary File extension with a section that"
+                                    " has a hash of '%s', which is not a value"
+                                    " in the hash-algo-ov vocabulary nor a "
+                                    "custom value prepended with 'x_'."
+                                    % (key, h), instance['id'])
+
+        elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
+            try:
+                hashes = obj['hashes']
+            except KeyError:
+                pass
+            else:
+                for h in hashes:
+                    if not (valid_hash_value(h)):
+                        yield JSONError("Object '%s' has a 'hashes' dictionary"
+                                " with a hash of type '%s', which is not a "
+                                "value in the hash-algo-ov vocabulary nor a "
+                                "custom value prepended with 'x_'."
+                                % (key, h), instance['id'])
+
+
+def vocab_encryption_algo(instance):
+    """Ensure file objects' 'encryption_algorithm' property is from the
+    encryption-algo-ov vocabulary.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key, obj in instance['objects'].items():
+        if 'type' in obj and obj['type'] == 'file':
+            try:
+                enc_algo = obj['encryption_algorithm']
+            except KeyError:
+                continue
+            if enc_algo not in enums.ENCRYPTION_ALGO_OV:
+                yield JSONError("Object '%s' has an 'encryption_algorithm' of "
+                                "'%s', which is not a value in the "
+                                "encryption-algo-ov vocabulary."
+                                % (key, enc_algo), instance['id'])
+
+
+def vocab_windows_pebinary_type(instance):
+    """Ensure file objects with the windows-pebinary-ext extension have a 
+    'pe-type' property that is from the account-type-ov vocabulary.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key, obj in instance['objects'].items():
+        if 'type' in obj and obj['type'] == 'file':
+            try:
+                pe_type = obj['extensions']['windows-pebinary-ext']['pe_type']
+            except KeyError:
+                continue
+            if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
+                yield JSONError("Object '%s' has a Windows PE Binary File "
+                        "extension with a 'pe_type' of '%s', which is not a "
+                        "value in the windows-pebinary-type-ov vocabulary."
+                        % (key, pe_type), instance['id'])
+
+
+def vocab_account_type(instance):
+    """Ensure a user-account objects' 'account-type' property is from the
+    account-type-ov vocabulary.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key, obj in instance['objects'].items():
+        if 'type' in obj and obj['type'] == 'user-account':
+            try:
+                acct_type = obj['account_type']
+            except KeyError:
+                continue
+            if acct_type not in enums.ACCOUNT_TYPE_OV:
+                yield JSONError("Object '%s' is a User Account Object "
+                        "with an 'account_type' of '%s', which is not a "
+                        "value in the account-type-ov vocabulary."
+                        % (key, acct_type), instance['id'])
+
+
 def types_strict(instance):
     """Ensure that no custom object types are used, but only the official ones
     from the specification.
@@ -624,6 +841,16 @@ class CustomDraft4Validator(Draft4Validator):
 
     def list_shoulds(self, options):
         validator_list = []
+
+        # TODO: make these optional, and add check codes to all of them
+        validator_list.extend([
+            observable_dictionary_keys,
+            vocab_hash_algo,
+            vocab_encryption_algo,
+            vocab_windows_pebinary_type,
+            vocab_account_type
+        ])
+
         # Default: enable all
         if not options.disabled and not options.enabled:
             validator_list.extend(CHECKS['all'])
@@ -722,7 +949,7 @@ class CustomDraft4Validator(Draft4Validator):
         # Perform validation
         for v_function in validators:
             result = v_function(instance)
-            if isinstance(result, GeneratorType):
+            if isinstance(result, Iterable):
                 for x in result:
                     yield x
             elif result is not None:
