@@ -251,6 +251,17 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+    def test_observable_objects_keys(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['abc'] = {
+            "type": "x509-certificate",
+            "hashes": {
+                "foo": "B4D33B0C7306351B9ED96578465C5579"
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
 
 if __name__ == "__main__":
     unittest.main()

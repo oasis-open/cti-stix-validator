@@ -697,6 +697,19 @@ def vocab_account_type(instance):
                         % (key, acct_type), instance['id'])
 
 
+def observable_object_keys(instance):
+    """Ensure observable-objects keys are non-negative integers.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key in instance['objects']:
+        if not re.match("^\d+$", key):
+            yield JSONError("'%s' is not a good key value. Observable Objects "
+                "should use non-negative integers for their keys."
+                % key, instance['id'])
+
+
 def types_strict(instance):
     """Ensure that no custom object types are used, but only the official ones
     from the specification.
@@ -848,7 +861,8 @@ class CustomDraft4Validator(Draft4Validator):
             vocab_hash_algo,
             vocab_encryption_algo,
             vocab_windows_pebinary_type,
-            vocab_account_type
+            vocab_account_type,
+            observable_object_keys
         ])
 
         # Default: enable all
