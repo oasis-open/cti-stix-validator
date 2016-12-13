@@ -490,6 +490,17 @@ def has_cyber_observable_data(instance):
     return False
 
 
+def cyber_observable_check(original_function):
+    """Decorator for functions that require cyber observable data.
+    """
+    def new_function(*args, **kwargs):
+        if not has_cyber_observable_data(args[0]):
+            return
+        for x in original_function(*args, **kwargs):
+            yield x
+    return new_function
+
+
 def test_dict_keys(item, inst_id):
     """Recursively generate errors for incorrectly formatted cyber observable
     dictionary keys.
@@ -513,13 +524,11 @@ def test_dict_keys(item, inst_id):
                 yield error
 
 
+@cyber_observable_check
 def observable_dictionary_keys(instance):
     """Ensure dictionaries in the cyber observable layer have lowercase keys
     no longer than 30 characters.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for error in test_dict_keys(instance['objects'], instance['id']):
         yield error
 
@@ -534,13 +543,11 @@ def valid_hash_value(hashname):
         return False
 
 
+@cyber_observable_check
 def vocab_hash_algo(instance):
     """Ensure objects with 'hashes' properties only use values from the
     hash-algo-ov vocabulary.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key, obj in instance['objects'].items():
         if 'type' not in obj:
             continue
@@ -637,13 +644,11 @@ def vocab_hash_algo(instance):
                                 % (key, h), instance['id'])
 
 
+@cyber_observable_check
 def vocab_encryption_algo(instance):
     """Ensure file objects' 'encryption_algorithm' property is from the
     encryption-algo-ov vocabulary.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key, obj in instance['objects'].items():
         if 'type' in obj and obj['type'] == 'file':
             try:
@@ -657,13 +662,11 @@ def vocab_encryption_algo(instance):
                                 % (key, enc_algo), instance['id'])
 
 
+@cyber_observable_check
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a 
     'pe-type' property that is from the account-type-ov vocabulary.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key, obj in instance['objects'].items():
         if 'type' in obj and obj['type'] == 'file':
             try:
@@ -677,13 +680,11 @@ def vocab_windows_pebinary_type(instance):
                         % (key, pe_type), instance['id'])
 
 
+@cyber_observable_check
 def vocab_account_type(instance):
     """Ensure a user-account objects' 'account-type' property is from the
     account-type-ov vocabulary.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key, obj in instance['objects'].items():
         if 'type' in obj and obj['type'] == 'user-account':
             try:
@@ -697,12 +698,10 @@ def vocab_account_type(instance):
                         % (key, acct_type), instance['id'])
 
 
+@cyber_observable_check
 def observable_object_keys(instance):
     """Ensure observable-objects keys are non-negative integers.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key in instance['objects']:
         if not re.match("^\d+$", key):
             yield JSONError("'%s' is not a good key value. Observable Objects "
@@ -710,12 +709,10 @@ def observable_object_keys(instance):
                 % key, instance['id'])
 
 
+@cyber_observable_check
 def custom_observable_object_prefix_strict(instance):
     """Ensure custom observable objects follow strict naming style conventions.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
                 obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
@@ -727,12 +724,10 @@ def custom_observable_object_prefix_strict(instance):
                     % obj['type'], instance['id'], 'custom-object-prefix')
 
 
+@cyber_observable_check
 def custom_observable_object_prefix_lax(instance):
     """Ensure custom observable objects follow strict naming style conventions.
     """
-    if not has_cyber_observable_data(instance):
-        return
-
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
                 obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
