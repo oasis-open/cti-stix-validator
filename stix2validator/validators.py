@@ -234,7 +234,7 @@ def custom_object_prefix_strict(instance):
             instance['type'] not in enums.RESERVED_OBJECTS and
             not re.match("^x\-.+\-.+$", instance['type'])):
         yield JSONError("Custom object type '%s' should start with 'x-' "
-                        "followed by a source unique identifier (like a"
+                        "followed by a source unique identifier (like a "
                         "domain name with dots replaced by dashes), a dash "
                         "and then the name." % instance['type'],
                         instance['id'], 'custom-object-prefix')
@@ -710,6 +710,38 @@ def observable_object_keys(instance):
                 % key, instance['id'])
 
 
+def custom_observable_object_prefix_strict(instance):
+    """Ensure custom observable objects follow strict naming style conventions.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
+                obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+                not re.match("^x\-.+\-.+$", obj['type'])):
+            yield JSONError("Custom observable object type '%s' should start "
+                    "with 'x-' followed by a source unique identifier (like a "
+                    "domain name with dots replaced by dashes), a dash and "
+                    "then the name."
+                    % obj['type'], instance['id'], 'custom-object-prefix')
+
+
+def custom_observable_object_prefix_lax(instance):
+    """Ensure custom observable objects follow strict naming style conventions.
+    """
+    if not has_cyber_observable_data(instance):
+        return
+
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
+                obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+                not re.match("^x\-.+$", obj['type'])):
+            yield JSONError("Custom observable object type '%s' should start "
+                    "with 'x-'."
+                    % obj['type'], instance['id'], 'custom-object-prefix')
+
+
 def types_strict(instance):
     """Ensure that no custom object types are used, but only the official ones
     from the specification.
@@ -862,7 +894,9 @@ class CustomDraft4Validator(Draft4Validator):
             vocab_encryption_algo,
             vocab_windows_pebinary_type,
             vocab_account_type,
-            observable_object_keys
+            observable_object_keys,
+            custom_observable_object_prefix_strict,
+            custom_observable_object_prefix_lax
         ])
 
         # Default: enable all

@@ -262,6 +262,24 @@ TYPES = [
     "marking-definition"
 ]
 
+OBSERVABLE_TYPES = [
+    "artifact",
+    "autonomous-system",
+    "directory",
+    "domain-name",
+    "email-addr",
+    "email-message",
+    "file",
+    "ipv4-addr",
+    "ipv6-addr",
+    "mac-addr",
+    "mutex",
+    "network-traffic",
+    "process",
+    "user-account",
+    "windows-registry-key",
+    "x509-certificate"
+]
 
 # List of default marking definition types
 MARKING_DEFINITION_TYPES = [
@@ -567,6 +585,9 @@ RESERVED_PROPERTIES = [
 RESERVED_OBJECTS = [
     'incident',
     'infrastructure'
+]
+OBSERVABLE_RESERVED_OBJECTS = [
+    'action'
 ]
 
 
