@@ -717,24 +717,56 @@ def custom_observable_object_prefix_strict(instance):
         if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
                 obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
                 not re.match("^x\-.+\-.+$", obj['type'])):
-            yield JSONError("Custom observable object type '%s' should start "
+            yield JSONError("Custom Observable Object type '%s' should start "
                     "with 'x-' followed by a source unique identifier (like a "
                     "domain name with dots replaced by dashes), a dash and "
                     "then the name."
-                    % obj['type'], instance['id'], 'custom-object-prefix')
+                    % obj['type'], instance['id'])
 
 
 @cyber_observable_check
 def custom_observable_object_prefix_lax(instance):
-    """Ensure custom observable objects follow strict naming style conventions.
+    """Ensure custom observable objects follow naming style conventions.
     """
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
                 obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
                 not re.match("^x\-.+$", obj['type'])):
-            yield JSONError("Custom observable object type '%s' should start "
+            yield JSONError("Custom Observable Object type '%s' should start "
                     "with 'x-'."
-                    % obj['type'], instance['id'], 'custom-object-prefix')
+                    % obj['type'], instance['id'])
+
+
+@cyber_observable_check
+def custom_object_extension_prefix_strict(instance):
+    """Ensure custom observable objects follow strict naming style conventions.
+    """
+    for key, obj in instance['objects'].items():
+        if 'extensions' not in obj:
+            continue
+        for extkey in obj['extensions']:
+            if (extkey not in enums.OBSERVABLE_OBJECT_EXTENSIONS and
+                    not re.match("^x\-.+\-.+$", extkey)):
+                yield JSONError("Custom Cyber Observable Object extension type"
+                        " '%s' should start with 'x-' followed by a source "
+                        "unique identifier (like a domain name with dots "
+                        "replaced by dashes), a dash and then the name."
+                        % extkey, instance['id'])
+
+
+@cyber_observable_check
+def custom_object_extension_prefix_lax(instance):
+    """Ensure custom observable objects follow naming style conventions.
+    """
+    for key, obj in instance['objects'].items():
+        if 'extensions' not in obj:
+            continue
+        for extkey in obj['extensions']:
+            if (extkey not in enums.OBSERVABLE_OBJECT_EXTENSIONS and
+                    not re.match("^x\-.+\-.+$", extkey)):
+                yield JSONError("Custom Cyber Observable Object extension type"
+                                " '%s' should start with 'x-'."
+                                % extkey, instance['id'])
 
 
 def types_strict(instance):
@@ -891,7 +923,9 @@ class CustomDraft4Validator(Draft4Validator):
             vocab_account_type,
             observable_object_keys,
             custom_observable_object_prefix_strict,
-            custom_observable_object_prefix_lax
+            custom_observable_object_prefix_lax,
+            custom_object_extension_prefix_strict,
+            custom_object_extension_prefix_lax
         ])
 
         # Default: enable all

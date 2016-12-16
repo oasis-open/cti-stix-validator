@@ -573,6 +573,23 @@ PROPERTIES = {
     ]
 }
 
+# Official cyber observable object extensions
+OBSERVABLE_OBJECT_EXTENSIONS = [
+    'archive-ext',
+    'ntfs-ext',
+    'pdf-ext',
+    'raster-image-ext',
+    'windows-pebinary-ext',
+    'http-request-ext',
+    'icmp-ext',
+    'socket-ext',
+    'tcp-ext',
+    'windows-process-ext',
+    'windows-service-ext',
+    'unix-account-ext',
+    'windows-registry-value-type'
+]
+
 # Reserved properties and objects
 RESERVED_PROPERTIES = [
     'confidence',
