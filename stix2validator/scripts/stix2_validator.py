@@ -139,8 +139,8 @@ def _get_arg_parser(is_script=True):
         dest="disabled",
         default="",
         help="A comma-separated list of recommended best practice checks to "
-            "skip. By default, no checks are disabled. \n\n"
-            "Example: --disable 212,220"
+             "skip. By default, no checks are disabled. \n\n"
+             "Example: --disable 212,220"
     )
 
     parser.add_argument(
@@ -150,9 +150,9 @@ def _get_arg_parser(is_script=True):
         dest="enabled",
         default="",
         help="A comma-separated list of recommended best practice checks to "
-            "enable. If the --disable option is not used, no other checks will"
-            " be run. By default, all checks are enabled.\n\n"
-            "Example: --enable 250"
+             "enable. If the --disable option is not used, no other checks "
+             "will be run. By default, all checks are enabled.\n\n"
+             "Example: --enable 250"
     )
 
     parser.add_argument(
@@ -204,6 +204,7 @@ def main():
     except Exception:
         logging.exception("Fatal error occurred")
         sys.exit(codes.EXIT_FAILURE)
+
 
 if __name__ == '__main__':
     main()

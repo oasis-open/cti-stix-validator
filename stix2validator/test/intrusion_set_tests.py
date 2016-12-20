@@ -17,7 +17,7 @@ VALID_INTRUSION_SET = """
   "aliases": ["Zookeeper"],
   "goals": ["acquisition-theft", "harassment", "damage"]
 }
-"""
+"""  # noqa
 
 
 class IntrusionSetTestCases(ValidatorTest):
