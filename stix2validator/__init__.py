@@ -542,7 +542,7 @@ def schema_validate(instance, options):
 
         if options.strict:
             chained_errors = chain(some_errors, more_errors, warnings)
-            warnings = None
+            warnings = []
         else:
             chained_errors = chain(some_errors, more_errors)
             warnings = [pretty_error(x, options.verbose) for x in warnings]

@@ -243,7 +243,6 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['0']['extensions']['ntfs-ext'] = {
             "alternate_data_streams": [
                   {
-                      "type": "alternate-data-stream",
                       "name": "second.stream",
                       "size": 25536,
                       "hashes": {
@@ -255,7 +254,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
-    def test_observable_objects_keys(self):
+    def test_observable_object_keys(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['abc'] = {
             "type": "x509-certificate",
@@ -266,19 +265,55 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
-    def test_observable_objects_types(self):
+    def test_observable_object_types(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['type'] = "foo"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
-    def test_observable_objects_extensions(self):
+    def test_observable_object_extensions(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['foobar'] = {
             "foo": "bar"
         }
         observed_data = json.dumps(observed_data)
-        self.asserFalseWithOptions(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_observable_object_custom_properties(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['foo'] = "bar"
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_observable_object_extension_custom_properties(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['archive-ext']['foo'] = "bar"
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_observable_object_embedded_custom_properties(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1'] = {
+            "type": "x509-certificate",
+            "x509_v3_extensions": {
+              "foo": "bar"
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_observable_object_extension_embedded_custom_properties(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['ntfs-ext'] = {
+            "alternate_data_streams": [
+                  {
+                      "name": "second.stream",
+                      "size": 25536,
+                      "foo": "bar"
+                  }
+              ]
+        }
+        observed_data = json.dumps(observed_data)
 
 
 if __name__ == "__main__":
