@@ -1,21 +1,18 @@
 
-# builtin
 import os
 import json
 from itertools import chain
 import fnmatch
 import re
 
-# external
 from jsonschema import RefResolver
 from jsonschema import exceptions as schema_exceptions
 from six import python_2_unicode_compatible, text_type
 
-# internal
 from . import output
 from . import enums
 from .validators import ValidationOptions, CustomDraft4Validator
-from .output import print_results # Expose it to the stix2validator namespace
+from .output import print_results  # Expose it to the stix2validator namespace
 
 
 class NoJSONFileFoundError(OSError):
@@ -148,13 +145,12 @@ def pretty_error(error, verbose=False):
             msg = re.sub(r"\{.+\} is not allowed for '(.+)'$", r"'\g<1>' is "
                          "not an allowed value", msg)
         elif ('target_ref' in error.schema_path or
-                    'source_ref' in error.schema_path):
+              'source_ref' in error.schema_path):
                 msg = ("Relationships cannot link bundles, marking definitions"
                        ", sightings, or other relationships. This field must "
                        "contain the id of an SDO.")
 
     return error_loc + msg
-
 
 
 class BaseResults(object):
@@ -274,7 +270,6 @@ class ValidationErrorResults(BaseResults):
         return d
 
 
-
 def is_json(fn):
     """Returns ``True`` if the input filename `fn` ends with a JSON extension.
     """
@@ -339,7 +334,6 @@ def get_json_files(files, recursive=False):
     if not json_files:
         raise NoJSONFileFoundError("No JSON files found!")
     return json_files
-
 
 
 def run_validation(options):

@@ -90,5 +90,6 @@ class RelationshipTestCases(ValidatorTest):
         results = validate_string(relationship, self.options)
         self.assertTrue(results.is_valid)
 
+
 if __name__ == "__main__":
     unittest.main()

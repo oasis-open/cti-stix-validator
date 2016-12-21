@@ -1,17 +1,14 @@
 """Custom jsonschema.IValidator class and validator functions.
 """
 
-# builtin
 import os
 import re
 from collections import deque, Iterable
 
-# external
 from jsonschema import Draft4Validator
 from jsonschema import exceptions as schema_exceptions
 from six import string_types
 
-# internal
 from . import enums
 
 
@@ -75,11 +72,11 @@ class ValidationOptions(object):
         if self.disabled:
             self.disabled = self.disabled.split(",")
             self.disabled = [CHECK_CODES[x] if x in CHECK_CODES else x
-                                   for x in self.disabled]
+                             for x in self.disabled]
         if self.enabled:
             self.enabled = self.enabled.split(",")
             self.enabled = [CHECK_CODES[x] if x in CHECK_CODES else x
-                                   for x in self.enabled]
+                            for x in self.enabled]
 
 
 class JSONError(schema_exceptions.ValidationError):
@@ -100,8 +97,9 @@ def modified_created(instance):
     """
     if 'modified' in instance and 'created' in instance and \
             instance['modified'] < instance['created']:
-        return JSONError("'modified' (%s) must be later or equal to 'created' (%s)"
-            % (instance['modified'], instance['created']), instance['id'])
+        msg = "'modified' (%s) must be later or equal to 'created' (%s)"
+        return JSONError(msg % (instance['modified'], instance['created']),
+                         instance['id'])
 
 
 def version(instance):
@@ -110,13 +108,13 @@ def version(instance):
     if 'version' in instance and 'modified' in instance and \
             'created' in instance:
         if instance['version'] == 1 and instance['modified'] != instance['created']:
-            return JSONError("'version' is 1, but 'created' (%s) is not "
-                "equal to 'modified' (%s)"
-                % (instance['created'], instance['modified']), instance['id'])
+            msg = "'version' is 1, but 'created' (%s) is not equal to 'modified' (%s)"
+            return JSONError(msg % (instance['created'], instance['modified']),
+                             instance['id'])
         elif instance['version'] > 1 and instance['modified'] <= instance['created']:
-            return JSONError("'version' is greater than 1, but 'modified'"
-                " (%s) is not greater than 'created' (%s)" 
-                % (instance['modified'], instance['created']), instance['id'])
+            msg = "'version' is greater than 1, but 'modified' (%s) is not greater than 'created' (%s)"
+            return JSONError(msg % (instance['modified'], instance['created']),
+                             instance['id'])
 
 
 def timestamp_precision(instance):
