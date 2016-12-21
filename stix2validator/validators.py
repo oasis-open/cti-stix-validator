@@ -843,6 +843,64 @@ def custom_observable_properties_prefix_strict(instance):
                                                 % (p, ext_prop, ext_key), instance['id'])
 
 
+@cyber_observable_check
+def custom_observable_properties_prefix_lax(instance):
+    """Ensure observable object custom properties follow naming style
+    conventions.
+    """
+    for key, obj in instance['objects'].items():
+        if 'type' not in obj:
+            continue
+        type_ = obj['type']
+
+        for prop in obj:
+            # Check objects' properties
+            if (type_ in enums.OBSERVABLE_PROPERTIES and
+                prop not in enums.OBSERVABLE_PROPERTIES[type_] and
+                    not re.match("^x\-.+\-.+$", prop)):
+                yield JSONError("Cyber Observable Object custom property '%s' "
+                                "should start with 'x-'."
+                                % prop, instance['id'])
+            # Check properties of embedded cyber observable types
+            if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
+                    prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
+                for embed_prop in obj[prop]:
+                    if embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop]:
+                        yield JSONError("Cyber Observable Object custom "
+                                        "property '%s' in the %s property of a"
+                                        " %s object should start with 'x-'."
+                                        % (embed_prop, prop, type_), instance['id'])
+
+        # Check object extensions' properties
+        if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
+            for ext_key in obj['extensions']:
+
+                if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                    for ext_prop in obj['extensions'][ext_key]:
+                        if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
+                                not re.match("^x\-.+\-.+$", ext_prop)):
+                            yield JSONError("Cyber Observable Object custom "
+                                            "property '%s' in the %s extension "
+                                            "should start with 'x-'."
+                                            % (ext_prop, ext_key), instance['id'])
+
+                if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                    for ext_prop in obj['extensions'][ext_key]:
+                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES and
+                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]): #and
+                            for embed_prop in obj['extensions'][ext_key][ext_prop]:
+                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                                    embed_prop = [embed_prop]
+                                for p in embed_prop:
+                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key][ext_prop] and
+                                            not re.match("^x\-.+\-.+$", p)):
+                                        yield JSONError("Cyber Observable Object "
+                                                "custom property '%s' in the %s "
+                                                "property of the %s extension should "
+                                                "start with 'x-'."
+                                                % (p, ext_prop, ext_key), instance['id'])
+
+
 def types_strict(instance):
     """Ensure that no custom object types are used, but only the official ones
     from the specification.
