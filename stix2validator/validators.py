@@ -90,6 +90,30 @@ class JSONError(schema_exceptions.ValidationError):
         super(JSONError, self).__init__(msg, path=deque([instance_id, 0]))
 
 
+def has_cyber_observable_data(instance):
+    """Return True only if the given instance is an observed-data object
+    containing STIX Cyber Observable objects.
+    """
+    if (instance['type'] == 'observed-data' and
+            'objects' in instance and
+            type(instance['objects']) is dict):
+        return True
+    return False
+
+
+def cyber_observable_check(original_function):
+    """Decorator for functions that require cyber observable data.
+    """
+    def new_function(*args, **kwargs):
+        if not has_cyber_observable_data(args[0]):
+            return
+        func = original_function(*args, **kwargs)
+        if isinstance(func, Iterable):
+            for x in original_function(*args, **kwargs):
+                yield x
+    return new_function
+
+
 # Checks for MUST Requirements
 
 def modified_created(instance):
@@ -222,6 +246,85 @@ def marking_selector_syntax(instance):
                                         " '%s' is not a property."
                                         % (selector, segmt), instance['id'])
                 prev_segmt = segmt
+
+
+@cyber_observable_check
+def observable_object_references(instance):
+    """Ensure certain observable object properties reference the correct type
+    of object.
+    """
+    for key, obj in instance['objects'].items():
+        if 'type' not in obj:
+            continue
+        elif obj['type'] not in enums.OBSERVABLE_PROP_REFS:
+            continue
+
+        obj_type = obj['type']
+        for obj_prop in enums.OBSERVABLE_PROP_REFS[obj_type]:
+            if obj_prop not in obj:
+                continue
+            enum_prop = enums.OBSERVABLE_PROP_REFS[obj_type][obj_prop]
+            if isinstance(enum_prop, list):
+                refs = obj[obj_prop]
+                if not isinstance(refs, list):
+                    refs = [refs]
+                for ref in refs:
+                    try:
+                        refed_obj = instance['objects'][ref]
+                    except KeyError:
+                        yield JSONError("%s in observable object '%s' can't "
+                                        "resolve reference '%s'."
+                                        % (obj_prop, key, ref), instance['id'])
+                        continue
+                    try:
+                        refed_type = refed_obj['type']
+                    except KeyError:
+                        continue
+                    enum_vals = enum_prop
+                    if refed_type not in enum_vals:
+                        if len(enum_vals) == 1:
+                            valids = "'" + enum_vals[0] + "'"
+                        else:
+                            valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
+                                                      enum_vals[-1])
+                        yield JSONError("'%s' in observable object '%s' must "
+                                        "refer to an object of type %s."
+                                        % (obj_prop, key, valids), instance['id'])
+            elif isinstance(enum_prop, dict):
+                for embedded_prop in enum_prop:
+                    if embedded_prop not in obj[obj_prop]:
+                        continue
+                    embedded_obj = obj[obj_prop][embedded_prop]
+                    for embed_obj_prop in embedded_obj:
+                        if embed_obj_prop not in enum_prop[embedded_prop]:
+                            continue
+                        refs = embedded_obj[embed_obj_prop]
+                        if not isinstance(refs, list):
+                            refs = [refs]
+                        for ref in refs:
+                            try:
+                                refed_obj = instance['objects'][ref]
+                            except KeyError:
+                                yield JSONError("%s in observable object '%s' "
+                                                "can't resolve '%s' reference "
+                                                "'%s'."
+                                                % (obj_prop, key, embed_obj_prop, ref),
+                                                instance['id'])
+                                continue
+                            try:
+                                refed_type = refed_obj['type']
+                            except KeyError:
+                                continue
+                            enum_vals = enum_prop[embedded_prop][embed_obj_prop]
+                            if refed_type not in enum_vals:
+                                if len(enum_vals) == 1:
+                                    valids = "'" + enum_vals[0] + "'"
+                                else:
+                                    valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
+                                                              enum_vals[-1])
+                                yield JSONError("'%s' in observable object '%s' must "
+                                                "refer to an object of type %s."
+                                                % (obj_prop, key, valids), instance['id'])
 
 
 # Checks for SHOULD Requirements
@@ -478,39 +581,11 @@ def relationships_strict(instance):
                          'relationship-types')
 
 
-def has_cyber_observable_data(instance):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
-    """
-    if (instance['type'] == 'observed-data' and
-            'objects' in instance and
-            type(instance['objects']) is dict):
-        return True
-    return False
-
-
-def cyber_observable_check(original_function):
-    """Decorator for functions that require cyber observable data.
-    """
-    def new_function(*args, **kwargs):
-        if not has_cyber_observable_data(args[0]):
-            return
-        func = original_function(*args, **kwargs)
-        if isinstance(func, Iterable):
-            for x in original_function(*args, **kwargs):
-                yield x
-    return new_function
-
-
 def test_dict_keys(item, inst_id):
     """Recursively generate errors for incorrectly formatted cyber observable
     dictionary keys.
     """
     for k, v in item.items():
-        # Skip hashes_type objects
-        if k == 'hashes' or k == 'file_header_hashes':
-            continue
-
         if not re.match("^[^A-Z]+$", k):
             yield JSONError("As a dictionary key for cyber observable "
                             "objects, '%s' should be lowercase." % k,
@@ -520,7 +595,7 @@ def test_dict_keys(item, inst_id):
                             "objects, '%s' should be no longer than 30 "
                             "characters long." % k, inst_id)
 
-        if type(v) is dict:
+        if type(v) is dict and k not in enums.OBSERVABLE_DICT_KEY_EXCEPTIONS:
             for error in test_dict_keys(v, inst_id):
                 yield error
 
@@ -766,7 +841,7 @@ def custom_object_extension_prefix_lax(instance):
             continue
         for ext_key in obj['extensions']:
             if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
-                    not re.match("^x\-.+\-.+$", ext_key)):
+                    not re.match("^x\-.+$", ext_key)):
                 yield JSONError("Custom Cyber Observable Object extension type"
                                 " '%s' should start with 'x-'."
                                 % ext_key, instance['id'])
@@ -797,7 +872,20 @@ def custom_observable_properties_prefix_strict(instance):
             if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
                     prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
                 for embed_prop in obj[prop]:
-                    if embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop]:
+                    if isinstance(embed_prop, dict):
+                        for embedded in embed_prop:
+                            if (embedded not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                                    not re.match("^x\-.+\-.+$", embedded)):
+                                yield JSONError("Cyber Observable Object custom "
+                                                "property '%s' in the %s property of a"
+                                                " %s object should start with 'x-' "
+                                                "followed by a source unique "
+                                                "identifier (like a domain name with "
+                                                "dots replaced by dashes), a dash and "
+                                                "then the name."
+                                                % (embedded, prop, type_), instance['id'])
+                    elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                            not re.match("^x\-.+\-.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
                                         "property '%s' in the %s property of a"
                                         " %s object should start with 'x-' "
@@ -857,7 +945,7 @@ def custom_observable_properties_prefix_lax(instance):
             # Check objects' properties
             if (type_ in enums.OBSERVABLE_PROPERTIES and
                 prop not in enums.OBSERVABLE_PROPERTIES[type_] and
-                    not re.match("^x\-.+\-.+$", prop)):
+                    not re.match("^x\-.+$", prop)):
                 yield JSONError("Cyber Observable Object custom property '%s' "
                                 "should start with 'x-'."
                                 % prop, instance['id'])
@@ -865,7 +953,16 @@ def custom_observable_properties_prefix_lax(instance):
             if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
                     prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
                 for embed_prop in obj[prop]:
-                    if embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop]:
+                    if isinstance(embed_prop, dict):
+                        for embedded in embed_prop:
+                            if (embedded not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                                    not re.match("^x\-.+$", embedded)):
+                                yield JSONError("Cyber Observable Object custom "
+                                                "property '%s' in the %s property of a"
+                                                " %s object should start with 'x-'."
+                                                % (embedded, prop, type_), instance['id'])
+                    elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                            not re.match("^x\-.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
                                         "property '%s' in the %s property of a"
                                         " %s object should start with 'x-'."
@@ -878,7 +975,7 @@ def custom_observable_properties_prefix_lax(instance):
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
                         if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
-                                not re.match("^x\-.+\-.+$", ext_prop)):
+                                not re.match("^x\-.+$", ext_prop)):
                             yield JSONError("Cyber Observable Object custom "
                                             "property '%s' in the %s extension "
                                             "should start with 'x-'."
@@ -893,7 +990,7 @@ def custom_observable_properties_prefix_lax(instance):
                                     embed_prop = [embed_prop]
                                 for p in embed_prop:
                                     if (p not in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key][ext_prop] and
-                                            not re.match("^x\-.+\-.+$", p)):
+                                            not re.match("^x\-.+$", p)):
                                         yield JSONError("Cyber Observable Object "
                                                 "custom property '%s' in the %s "
                                                 "property of the %s extension should "
@@ -1034,7 +1131,8 @@ class CustomDraft4Validator(Draft4Validator):
             timestamp_precision,
             object_marking_circular_refs,
             granular_markings_circular_refs,
-            marking_selector_syntax
+            marking_selector_syntax,
+            observable_object_references
         ]
 
         # --strict-types
@@ -1131,8 +1229,7 @@ class CustomDraft4Validator(Draft4Validator):
                     else:
                         validator_list.append(CHECKS[check])
                 except KeyError:
-                    raise schema_exceptions.ValidationError("%s is not a valid"
-                                                            " check!" % check)
+                    raise JSONError("%s is not a valid check!" % check)
 
         return validator_list
 

@@ -26,13 +26,18 @@ VALID_OBSERVED_DATA_DEFINITION = """
       "extensions": {
         "archive-ext": {
           "contains_refs": [
-            "0",
-            "1",
-            "2"
+            "1"
           ],
           "version": "5.0"
         }
       }
+    },
+    "1": {
+      "type": "file",
+      "hashes": {
+        "MD5": "A2FD2B3F4D5A1BD5E7D283299E01DCE9"
+      },
+      "name": "qwerty.dll"
     }
   },
   "granular_markings": [
@@ -126,7 +131,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_vocab_account_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1'] = {
+        observed_data['objects']['2'] = {
             "type": "user-account",
             "user_id": "1001",
             "account_login": "bwayne",
@@ -159,7 +164,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_vocab_artifact_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1'] = {
+        observed_data['objects']['2'] = {
             "type": "artifact",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
@@ -170,7 +175,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_vocab_certificate_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1'] = {
+        observed_data['objects']['2'] = {
             "type": "x509-certificate",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
@@ -293,11 +298,28 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_observable_object_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1'] = {
+        observed_data['objects']['2'] = {
             "type": "x509-certificate",
             "x509_v3_extensions": {
               "foo": "bar"
             }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_observable_object_embedded_dict_custom_properties(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "windows-registry-key",
+            "key": "hkey_local_machine\\system\\bar\\foo",
+            "values": [
+                {
+                    "name": "Foo",
+                    "data": "qwerty",
+                    "data_type": "REG_SZ",
+                    "foo": "buzz"
+                }
+            ]
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
@@ -314,6 +336,39 @@ class ObservedDataTestCases(ValidatorTest):
               ]
         }
         observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_observable_object_property_reference(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+          "type": "directory",
+          "path": "C:\\Windows\\System32",
+          "contains_refs": ['0']
+        }
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['contains_refs'] = ['999']
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['3'] = {
+          "type": "ipv4-addr",
+          "value": "203.0.113.1"
+        }
+        observed_data['objects']['2']['contains_refs'] = ['3']
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+    def test_observable_object_embedded_property_reference(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['extensions']['archive-ext']['contains_refs'][0] = '999'
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2'] = {
+          "type": "directory",
+          "path": "C:\\Windows\\System32",
+          "contains_refs": ['0']
+        }
+        observed_data['objects']['0']['extensions']['archive-ext']['contains_refs'][0] = '2'
+        self.assertFalseWithOptions(json.dumps(observed_data))
 
 
 if __name__ == "__main__":

@@ -267,7 +267,7 @@ OBSERVABLE_TYPES = [
     "autonomous-system",
     "directory",
     "domain-name",
-    "email-addr",
+    "email-address",
     "email-message",
     "file",
     "ipv4-addr",
@@ -276,6 +276,8 @@ OBSERVABLE_TYPES = [
     "mutex",
     "network-traffic",
     "process",
+    "software",
+    "url",
     "user-account",
     "windows-registry-key",
     "x509-certificate"
@@ -609,7 +611,7 @@ OBSERVABLE_PROPERTIES = {
         'value',
         'resolves_to_refs'
     ],
-    'email-addr': [
+    'email-address': [
         'type',
         'description',
         'extensions',
@@ -644,7 +646,7 @@ OBSERVABLE_PROPERTIES = {
         'size',
         'name',
         'name_enc',
-        'magic_number',
+        'magic_number_hex',
         'mime_type',
         'created',
         'modified',
@@ -764,7 +766,7 @@ OBSERVABLE_PROPERTIES = {
         'key',
         'values',
         'modified',
-        'creator_ref',
+        'creator_user_ref',
         'number_of_subkeys'
     ],
     'x509-certificate': [
@@ -879,9 +881,9 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
 OBSERVABLE_EMBEDED_PROPERTIES = {
     'email-message': {
         'body_multipart': [
-            'body'
-            'body_raw_ref'
-            'content_type'
+            'body',
+            'body_raw_ref',
+            'content_type',
             'content_disposition'
         ]
     },
@@ -987,6 +989,162 @@ OBSERVABLE_EXTENSIONS = {
         'unix-account-ext'
     ]
 }
+
+# Maping of Observable Object properties that reference other Objects
+OBSERVABLE_PROP_REFS = {
+    'directory': {
+        'contains_refs': [
+            'file',
+            'directory'
+        ]
+    },
+    'domain-name': {
+        'resolves_to_refs': [
+            'ipv4-addr',
+            'ipv6-addr',
+            'domain-name'
+        ]
+    },
+    'email-address': {
+        'belongs_to_ref': [
+            'user-account'
+        ]
+    },
+    'email-message': {
+        'from_ref': [
+            'email-address'
+        ],
+        'sender_ref': [
+            'email-address'
+        ],
+        'to_refs': [
+            'email-address'
+        ],
+        'cc_refs': [
+            'email-address'
+        ],
+        'bcc_refs': [
+            'email-address'
+        ],
+        'raw_email_ref': [
+            'artifact'
+        ],
+        'body_multipart': {
+            'body_raw_ref': [
+                'artifact',
+                'file'
+            ]
+        }
+    },
+    'file': {
+        'parent_directory_ref': [
+            'directory'
+        ],
+        'content_ref': [
+            'artifact'
+        ],
+        'extensions': {
+            'archive-ext': {
+                'contains_refs': [
+                    'file'
+                ]
+            }
+        }
+    },
+    'ipv4-addr': {
+        'resolves_to_refs': [
+            'mac-addr'
+        ],
+        'belongs_to_refs': [
+            'autonomous-system'
+        ]
+    },
+    'ipv6-addr': {
+        'resolves_to_refs': [
+            'mac-addr'
+        ],
+        'belongs_to_refs': [
+            'autonomous-system'
+        ]
+    },
+    'network-traffic': {
+        'src_ref': [
+            'ipv4-addr',
+            'ipv6-addr',
+            'mac-addr',
+            'domain-name'
+        ],
+        'dst_ref': [
+            'ipv4-addr',
+            'ipv6-addr',
+            'mac-addr',
+            'domain-name'
+        ],
+        'src_payload_ref': [
+            'artifact'
+        ],
+        'dst_payload_ref': [
+            'artifact'
+        ],
+        'encapsulates_refs': [
+            'network-traffic'
+        ],
+        'encapsulated_by_ref': [
+            'network-traffic'
+        ],
+        'extensions': {
+            'http-request-ext': {
+                'message_body_data_ref': [
+                    'artifact'
+                ]
+            }
+        }
+    },
+    'process': {
+        'opened_connection_refs': [
+            'ntwork-traffic'
+        ],
+        'creator_user_ref': [
+            'user-account'
+        ],
+        'binary_ref': [
+            'file'
+        ],
+        'parent_ref': [
+            'process'
+        ],
+        'child_refs': [
+            'process'
+        ],
+        'extensions': {
+            'windows-service-ext': {
+                'service_dll_refs': [
+                    'file'
+                ]
+            }
+        }
+    },
+    'windows-registry-key': {
+        'creator_user_ref': [
+            'user-account'
+        ]
+    }
+}
+
+# Cyber Observable Object properties of the dictionary type whose keys do not
+# fall under the requirement to be lowercase.
+OBSERVABLE_DICT_KEY_EXCEPTIONS = [
+    'hashes',
+    'file_header_hashes',
+    'request_header',
+    'additional_header_fields',
+    'document_info_dict',
+    'exif_tags',
+    'ipfix',
+    'options',
+    'environment_variables',
+    'key'
+]
 
 # Reserved properties and objects
 RESERVED_PROPERTIES = [
