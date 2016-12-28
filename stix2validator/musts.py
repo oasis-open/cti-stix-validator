@@ -32,47 +32,6 @@ def version(instance):
                              instance['id'])
 
 
-def timestamp_precision(instance):
-    """Ensure that for every precision property there is a matching timestamp
-    property that uses the proper timestamp format for the given precision.
-    """
-    for prop_name in instance.keys():
-        precision_matches = re.match("^(.*)_precision$", prop_name)
-        if not precision_matches:
-            continue
-
-        ts_field = precision_matches.group(1)
-        if ts_field not in instance:
-            yield JSONError("There is no corresponding '%s' field for %s"
-                            % (ts_field, prop_name), instance['id'])
-        else:
-            pattern = ""
-            if instance[prop_name] == 'year':
-                pattern = "^[0-9]{4}-01-01T00:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'month':
-                pattern = "^[0-9]{4}-[0-9]{2}-01T00:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'day':
-                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'hour':
-                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'minute':
-                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00(\\.0+)?Z$"
-
-            if not re.match(pattern, instance[ts_field]):
-                yield JSONError("%s timestamp is not the correct format for '%s' "
-                                "precision." % (ts_field, instance[prop_name]),
-                                instance['id'])
-
-
-def types_strict(instance):
-    """Ensure that no custom object types are used, but only the official ones
-    from the specification.
-    """
-    if instance['type'] not in enums.TYPES:
-        return JSONError("Object type '%s' is not one of those detailed in the"
-                         " specification." % instance['type'], instance['id'])
-
-
 def object_marking_circular_refs(instance):
     """Ensure that marking definitions do not contain circular references (ie.
     they do not reference themselves in the `object_marking_refs` property).
@@ -227,13 +186,21 @@ def observable_object_references(instance):
                                                 % (obj_prop, key, valids), instance['id'])
 
 
+def types_strict(instance):
+    """Ensure that no custom object types are used, but only the official ones
+    from the specification.
+    """
+    if instance['type'] not in enums.TYPES:
+        return JSONError("Object type '%s' is not one of those detailed in the"
+                         " specification." % instance['type'], instance['id'])
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
     validator_list = [
         modified_created,
         version,
-        timestamp_precision,
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,

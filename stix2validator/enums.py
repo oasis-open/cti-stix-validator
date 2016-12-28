@@ -332,7 +332,6 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
-        'first_seen_precision',
         'objective'
     ],
     "course-of-action": [
@@ -385,9 +384,7 @@ PROPERTIES = {
         'description',
         'pattern',
         'valid_from',
-        'valid_from_precision',
         'valid_until',
-        'valid_until_precision',
         'kill_chain_phases'
     ],
     "intrusion-set": [
@@ -406,7 +403,6 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
-        'first_seen_precision',
         'goals',
         'resource_level',
         'primary_motivation',
@@ -553,9 +549,7 @@ PROPERTIES = {
         'object_marking_refs',
         'granular_markings',
         'first_seen',
-        'first_seen_precision',
         'last_seen',
-        'last_seen_precision',
         'count',
         'sighting_of_ref',
         'observed_data_refs',
