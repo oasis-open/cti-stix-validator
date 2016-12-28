@@ -15,7 +15,6 @@ VALID_BUNDLE = """
       "created": "2016-08-22T14:09:00.123456Z",
       "modified": "2016-08-22T14:09:00.123456Z",
       "name": "mitre.org",
-      "version": 1,
       "identity_class": "organization"
     }
   ]

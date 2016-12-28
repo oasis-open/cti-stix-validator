@@ -11,7 +11,6 @@ VALID_OBSERVED_DATA_DEFINITION = """
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T19:58:16Z",
   "modified": "2016-04-06T19:58:16Z",
-  "version": 1,
   "first_observed": "2015-12-21T19:00:00Z",
   "last_observed": "2015-12-21T19:00:00Z",
   "number_observed": 50,

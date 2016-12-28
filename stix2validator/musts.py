@@ -17,21 +17,6 @@ def modified_created(instance):
                          instance['id'])
 
 
-def version(instance):
-    """Check constraints on 'version' property
-    """
-    if 'version' in instance and 'modified' in instance and \
-            'created' in instance:
-        if instance['version'] == 1 and instance['modified'] != instance['created']:
-            msg = "'version' is 1, but 'created' (%s) is not equal to 'modified' (%s)"
-            return JSONError(msg % (instance['created'], instance['modified']),
-                             instance['id'])
-        elif instance['version'] > 1 and instance['modified'] <= instance['created']:
-            msg = "'version' is greater than 1, but 'modified' (%s) is not greater than 'created' (%s)"
-            return JSONError(msg % (instance['modified'], instance['created']),
-                             instance['id'])
-
-
 def sighting_refs(instance):
     """Ensure that properties of Sighting objects that reference other objects
     refer to the correct type of object.
@@ -226,7 +211,6 @@ def list_musts(options):
     """
     validator_list = [
         modified_created,
-        version,
         sighting_refs,
         object_marking_circular_refs,
         granular_markings_circular_refs,

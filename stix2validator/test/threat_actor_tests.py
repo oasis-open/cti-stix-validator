@@ -11,7 +11,6 @@ VALID_THREAT_ACTOR = """
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T20:03:48Z",
   "modified": "2016-04-06T20:03:48Z",
-  "version": 1,
   "labels": ["hacker"],
   "name": "Evil Org",
   "description": "The Evil Org threat actor group"

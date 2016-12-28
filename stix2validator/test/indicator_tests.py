@@ -11,7 +11,6 @@ VALID_INDICATOR = """
     "created_by_ref": "source--f431f809-377b-45e0-aa1c-6a4751cae5ff",
     "created": "2016-04-06T20:03:48Z",
     "modified": "2016-04-06T20:03:48Z",
-    "version": 1,
     "labels": ["malicious-activity"],
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
@@ -31,20 +30,6 @@ class IndicatorTestCases(ValidatorTest):
     def test_modified_before_created(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['modified'] = "2001-04-06T20:03:48Z"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
-        self.assertEqual(results.is_valid, False)
-
-    def test_version_equal_created_and_modified(self):
-        indicator = copy.deepcopy(self.valid_indicator)
-        indicator['version'] = 2
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
-        self.assertEqual(results.is_valid, False)
-
-    def test_version_unequal_created_and_modified(self):
-        indicator = copy.deepcopy(self.valid_indicator)
-        indicator['created'] = "2001-04-06T20:03:48Z"
         indicator = json.dumps(indicator)
         results = validate_string(indicator, self.options)
         self.assertEqual(results.is_valid, False)

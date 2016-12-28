@@ -13,8 +13,7 @@ VALID_SIGHTING = """
   "first_seen": "2016-08-22T14:09:00.123456Z",
   "sighting_of_ref": "malware--36ffb872-1dd9-446e-b6f5-d58527e5b5d2",
   "observed_data_refs": ["observed-data--b67d30ff-02ac-498a-92f9-32f845f448cf"],
-  "where_sighted_refs": ["identity--f431f809-377b-45e0-aa1c-6a4751cae5ff"],
-  "version": 1
+  "where_sighted_refs": ["identity--f431f809-377b-45e0-aa1c-6a4751cae5ff"]
 }
 """
 

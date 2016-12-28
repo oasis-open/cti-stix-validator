@@ -10,7 +10,6 @@ VALID_CUSTOM_OBJECT = """
   "id": "x-example-com-customobject--4527e5de-8572-446a-a57a-706f15467461",
   "created": "2016-08-01T00:00:00Z",
   "modified": "2016-08-01T00:00:00Z",
-  "version": 1,
   "some_custom_stuff": 14,
   "other_custom_stuff": "hello"
 }
@@ -47,13 +46,6 @@ class CustomObjectTestCases(ValidatorTest):
     def test_no_modified(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['modified']
-        custom_obj = json.dumps(custom_obj)
-        results = validate_string(custom_obj, self.options)
-        self.assertEqual(results.is_valid, False)
-
-    def test_no_version(self):
-        custom_obj = copy.deepcopy(self.valid_custom_object)
-        del custom_obj['version']
         custom_obj = json.dumps(custom_obj)
         results = validate_string(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)

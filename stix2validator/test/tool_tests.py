@@ -11,7 +11,6 @@ VALID_TOOL = """
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T20:03:48Z",
   "modified": "2016-04-06T20:03:48Z",
-  "version": 1,
   "name": "VNC",
   "labels": ["remote-access"],
   "kill_chain_phases": [
