@@ -1158,7 +1158,7 @@ OBSERVABLE_RESERVED_OBJECTS = [
 ]
 
 
-DENIED_RELATIONSHIPS = [
+NON_SDOS = [
     'bundle',
     'marking-definition',
     'sighting',

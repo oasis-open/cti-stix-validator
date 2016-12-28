@@ -239,8 +239,8 @@ def relationships_strict(instance):
     r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
 
     if (r_type in enums.COMMON_RELATIONSHIPS or
-            r_source in enums.DENIED_RELATIONSHIPS or
-            r_target in enums.DENIED_RELATIONSHIPS):
+            r_source in enums.NON_SDOS or
+            r_target in enums.NON_SDOS):
         # Schemas will already catch relationships not allowed by spec
         return
 
