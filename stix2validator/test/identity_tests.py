@@ -3,7 +3,7 @@ import copy
 import json
 from . import ValidatorTest
 from .. import validate_string
-from ..validators import JSONError
+from ..errors import JSONError
 
 VALID_IDENTITY = """
 {

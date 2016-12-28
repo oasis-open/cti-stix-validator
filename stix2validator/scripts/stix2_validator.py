@@ -9,10 +9,8 @@ import argparse
 import sys
 import textwrap
 from argparse import RawDescriptionHelpFormatter
-from stix2validator import *
-from stix2validator import codes
-from stix2validator.validators import ValidationOptions
-
+from stix2validator import (codes, output, ValidationOptions, run_validation,
+                            print_results, ValidationError)
 
 CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which

@@ -1,7 +1,7 @@
 import unittest
 import os
 from .. import validate_string
-from ..validators import ValidationOptions
+from ..util import ValidationOptions
 
 SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 

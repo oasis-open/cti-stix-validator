@@ -1,333 +1,13 @@
-"""Custom jsonschema.IValidator class and validator functions.
+"""Recommended (SHOULD) requirement checking functions
 """
 
-import os
 import re
-from collections import deque, Iterable
-
-from jsonschema import Draft4Validator
-from jsonschema import exceptions as schema_exceptions
+from collections import Iterable
 from six import string_types
-
 from . import enums
+from .util import cyber_observable_check
+from .errors import JSONError
 
-
-class ValidationOptions(object):
-    """Collection of validation options which can be set via command line or
-    programmatically in a script.
-
-    It can be initialized either by passing in the result of parse_args() from
-    argparse to the cmd_args parameter, or by specifying individual options
-    with the other parameters.
-
-    Attributes:
-        cmd_args: An instance of ``argparse.Namespace`` containing options
-            supplied on the command line.
-        verbose: True if informational notes and more verbose error messages
-            should be printed to stdout/stderr.
-        files: A list of input files and directories of files to be
-            validated.
-        recursive: Recursively descend into input directories.
-        schema_dir: A user-defined schema directory to validate against.
-        disabled: List of "SHOULD" checks that will be skipped.
-        enabled: List of "SHOULD" checks that will be performed.
-        strict: Specifies that recommended requirements should produce errors
-            instead of mere warnings.
-        strict_types: Specifies that no custom object types be used, only
-            those detailed in the STIX specification.
-
-    """
-    def __init__(self, cmd_args=None, verbose=False, files=None,
-                 recursive=False, schema_dir=None, disabled="",
-                 enabled="", strict=False, strict_types=False):
-        if cmd_args is not None:
-            self.verbose = cmd_args.verbose
-            self.files = cmd_args.files
-            self.recursive = cmd_args.recursive
-            self.schema_dir = cmd_args.schema_dir
-            self.disabled = cmd_args.disabled
-            self.enabled = cmd_args.enabled
-            self.strict = cmd_args.strict
-            self.strict_types = cmd_args.strict_types
-        else:
-            # input options
-            self.files = files
-            self.recursive = recursive
-            self.schema_dir = schema_dir
-
-            # output options
-            self.verbose = verbose
-            self.strict = strict
-            self.strict_types = strict_types
-            self.disabled = disabled
-            self.enabled = enabled
-
-        # If no schema directory given, use default bundled with this package
-        if not self.schema_dir:
-            self.schema_dir = os.path.abspath(os.path.dirname(__file__) +
-                                              '/schemas/')
-
-        # Convert string of comma-separated checks to a list,
-        # and convert check code numbers to names
-        if self.disabled:
-            self.disabled = self.disabled.split(",")
-            self.disabled = [CHECK_CODES[x] if x in CHECK_CODES else x
-                             for x in self.disabled]
-        if self.enabled:
-            self.enabled = self.enabled.split(",")
-            self.enabled = [CHECK_CODES[x] if x in CHECK_CODES else x
-                            for x in self.enabled]
-
-
-class JSONError(schema_exceptions.ValidationError):
-    """Wrapper for errors thrown by iter_errors() in the jsonschema module.
-    """
-    def __init__(self, msg=None, instance_id=None, check_code=None):
-        if check_code is not None:
-            # Get code number code from name
-            code = list(CHECK_CODES.keys())[list(CHECK_CODES.values()).index(check_code)]
-            msg = '{%s} %s' % (code, msg)
-        super(JSONError, self).__init__(msg, path=deque([instance_id, 0]))
-
-
-def has_cyber_observable_data(instance):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
-    """
-    if (instance['type'] == 'observed-data' and
-            'objects' in instance and
-            type(instance['objects']) is dict):
-        return True
-    return False
-
-
-def cyber_observable_check(original_function):
-    """Decorator for functions that require cyber observable data.
-    """
-    def new_function(*args, **kwargs):
-        if not has_cyber_observable_data(args[0]):
-            return
-        func = original_function(*args, **kwargs)
-        if isinstance(func, Iterable):
-            for x in original_function(*args, **kwargs):
-                yield x
-    return new_function
-
-
-# Checks for MUST Requirements
-
-def modified_created(instance):
-    """`modified` property must be later or equal to `created` property
-    """
-    if 'modified' in instance and 'created' in instance and \
-            instance['modified'] < instance['created']:
-        msg = "'modified' (%s) must be later or equal to 'created' (%s)"
-        return JSONError(msg % (instance['modified'], instance['created']),
-                         instance['id'])
-
-
-def version(instance):
-    """Check constraints on 'version' property
-    """
-    if 'version' in instance and 'modified' in instance and \
-            'created' in instance:
-        if instance['version'] == 1 and instance['modified'] != instance['created']:
-            msg = "'version' is 1, but 'created' (%s) is not equal to 'modified' (%s)"
-            return JSONError(msg % (instance['created'], instance['modified']),
-                             instance['id'])
-        elif instance['version'] > 1 and instance['modified'] <= instance['created']:
-            msg = "'version' is greater than 1, but 'modified' (%s) is not greater than 'created' (%s)"
-            return JSONError(msg % (instance['modified'], instance['created']),
-                             instance['id'])
-
-
-def timestamp_precision(instance):
-    """Ensure that for every precision property there is a matching timestamp
-    property that uses the proper timestamp format for the given precision.
-    """
-    for prop_name in instance.keys():
-        precision_matches = re.match("^(.*)_precision$", prop_name)
-        if not precision_matches:
-            continue
-
-        ts_field = precision_matches.group(1)
-        if ts_field not in instance:
-            yield JSONError("There is no corresponding '%s' field for %s"
-                            % (ts_field, prop_name), instance['id'])
-        else:
-            pattern = ""
-            if instance[prop_name] == 'year':
-                pattern = "^[0-9]{4}-01-01T00:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'month':
-                pattern = "^[0-9]{4}-[0-9]{2}-01T00:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'day':
-                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T00:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'hour':
-                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:00:00(\\.0+)?Z$"
-            elif instance[prop_name] == 'minute':
-                pattern = "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:00(\\.0+)?Z$"
-
-            if not re.match(pattern, instance[ts_field]):
-                yield JSONError("%s timestamp is not the correct format for '%s' "
-                                "precision." % (ts_field, instance[prop_name]),
-                                instance['id'])
-
-
-def object_marking_circular_refs(instance):
-    """Ensure that marking definitions do not contain circular references (ie.
-    they do not reference themselves in the `object_marking_refs` property).
-    """
-    if instance['type'] != 'marking-definition':
-        return
-
-    if 'object_marking_refs' in instance:
-        for ref in instance['object_marking_refs']:
-            if ref == instance['id']:
-                yield JSONError("`object_marking_refs` cannot contain any "
-                                "references to this marking definition object"
-                                " (no circular references).", instance['id'])
-
-
-def granular_markings_circular_refs(instance):
-    """Ensure that marking definitions do not contain circular references (ie.
-    they do not reference themselves in the `granular_markings` property).
-    """
-    if instance['type'] != 'marking-definition':
-        return
-
-    if 'granular_markings' in instance:
-        for marking in instance['granular_markings']:
-            if 'marking_ref' in marking and marking['marking_ref'] == instance['id']:
-                yield JSONError("`granular_markings` cannot contain any "
-                                "references to this marking definition object"
-                                " (no circular references).", instance['id'])
-
-
-def marking_selector_syntax(instance):
-    """Ensure selectors in granular markings refer to items which are actually
-    present in the object.
-    """
-    if 'granular_markings' not in instance:
-        return
-
-    for marking in instance['granular_markings']:
-        if 'selectors' not in marking:
-            continue
-
-        selectors = marking['selectors']
-        for selector in selectors:
-            segments = selector.split('.')
-
-            obj = instance
-            prev_segmt = None
-            for segmt in segments:
-                index_match = re.match(r"\[(\d+)\]", segmt)
-                if index_match:
-                    try:
-                        idx = int(index_match.group(1))
-                        obj = obj[idx]
-                    except IndexError as e:
-                        yield JSONError("'%s' is not a valid selector because"
-                                        " %s is not a valid index."
-                                        % (selector, idx), instance['id'])
-                    except KeyError as e:
-                        yield JSONError("'%s' is not a valid selector because"
-                                        " '%s' is not a list."
-                                        % (selector, prev_segmt), instance['id'])
-                else:
-                    try:
-                        obj = obj[segmt]
-                    except KeyError as e:
-                        yield JSONError("'%s' is not a valid selector because"
-                                        " %s is not a property."
-                                        % (selector, e), instance['id'])
-                    except TypeError as e:
-                        yield JSONError("'%s' is not a valid selector because"
-                                        " '%s' is not a property."
-                                        % (selector, segmt), instance['id'])
-                prev_segmt = segmt
-
-
-@cyber_observable_check
-def observable_object_references(instance):
-    """Ensure certain observable object properties reference the correct type
-    of object.
-    """
-    for key, obj in instance['objects'].items():
-        if 'type' not in obj:
-            continue
-        elif obj['type'] not in enums.OBSERVABLE_PROP_REFS:
-            continue
-
-        obj_type = obj['type']
-        for obj_prop in enums.OBSERVABLE_PROP_REFS[obj_type]:
-            if obj_prop not in obj:
-                continue
-            enum_prop = enums.OBSERVABLE_PROP_REFS[obj_type][obj_prop]
-            if isinstance(enum_prop, list):
-                refs = obj[obj_prop]
-                if not isinstance(refs, list):
-                    refs = [refs]
-                for ref in refs:
-                    try:
-                        refed_obj = instance['objects'][ref]
-                    except KeyError:
-                        yield JSONError("%s in observable object '%s' can't "
-                                        "resolve reference '%s'."
-                                        % (obj_prop, key, ref), instance['id'])
-                        continue
-                    try:
-                        refed_type = refed_obj['type']
-                    except KeyError:
-                        continue
-                    enum_vals = enum_prop
-                    if refed_type not in enum_vals:
-                        if len(enum_vals) == 1:
-                            valids = "'" + enum_vals[0] + "'"
-                        else:
-                            valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
-                                                      enum_vals[-1])
-                        yield JSONError("'%s' in observable object '%s' must "
-                                        "refer to an object of type %s."
-                                        % (obj_prop, key, valids), instance['id'])
-            elif isinstance(enum_prop, dict):
-                for embedded_prop in enum_prop:
-                    if embedded_prop not in obj[obj_prop]:
-                        continue
-                    embedded_obj = obj[obj_prop][embedded_prop]
-                    for embed_obj_prop in embedded_obj:
-                        if embed_obj_prop not in enum_prop[embedded_prop]:
-                            continue
-                        refs = embedded_obj[embed_obj_prop]
-                        if not isinstance(refs, list):
-                            refs = [refs]
-                        for ref in refs:
-                            try:
-                                refed_obj = instance['objects'][ref]
-                            except KeyError:
-                                yield JSONError("%s in observable object '%s' "
-                                                "can't resolve '%s' reference "
-                                                "'%s'."
-                                                % (obj_prop, key, embed_obj_prop, ref),
-                                                instance['id'])
-                                continue
-                            try:
-                                refed_type = refed_obj['type']
-                            except KeyError:
-                                continue
-                            enum_vals = enum_prop[embedded_prop][embed_obj_prop]
-                            if refed_type not in enum_vals:
-                                if len(enum_vals) == 1:
-                                    valids = "'" + enum_vals[0] + "'"
-                                else:
-                                    valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
-                                                              enum_vals[-1])
-                                yield JSONError("'%s' in observable object '%s' must "
-                                                "refer to an object of type %s."
-                                                % (obj_prop, key, valids), instance['id'])
-
-
-# Checks for SHOULD Requirements
 
 def custom_object_prefix_strict(instance):
     """Ensure custom objects follow strict naming style conventions.
@@ -740,7 +420,7 @@ def vocab_encryption_algo(instance):
 
 @cyber_observable_check
 def vocab_windows_pebinary_type(instance):
-    """Ensure file objects with the windows-pebinary-ext extension have a 
+    """Ensure file objects with the windows-pebinary-ext extension have a
     'pe-type' property that is from the account-type-ov vocabulary.
     """
     for key, obj in instance['objects'].items():
@@ -914,7 +594,7 @@ def custom_observable_properties_prefix_strict(instance):
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
                         if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES and
-                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]): #and
+                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]):
                             for embed_prop in obj['extensions'][ext_key][ext_prop]:
                                 if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
                                     embed_prop = [embed_prop]
@@ -984,7 +664,7 @@ def custom_observable_properties_prefix_lax(instance):
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
                         if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES and
-                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]): #and
+                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]):
                             for embed_prop in obj['extensions'][ext_key][ext_prop]:
                                 if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
                                     embed_prop = [embed_prop]
@@ -997,41 +677,6 @@ def custom_observable_properties_prefix_lax(instance):
                                                 "start with 'x-'."
                                                 % (p, ext_prop, ext_key), instance['id'])
 
-
-def types_strict(instance):
-    """Ensure that no custom object types are used, but only the official ones
-    from the specification.
-    """
-    if instance['type'] not in enums.TYPES:
-        return JSONError("Object type '%s' is not one of those detailed in the"
-                         " specification." % instance['type'], instance['id'])
-
-
-# Mapping of check code numbers to names
-CHECK_CODES = {
-    '1': 'format-checks',
-    '101': 'custom-object-prefix',
-    '102': 'custom-object-prefix-lax',
-    '103': 'custom-property-prefix',
-    '104': 'custom-property-prefix-lax',
-    '111': 'open-vocab-format',
-    '121': 'kill-chain-names',
-    '2': 'approved-values',
-    '210': 'all-vocabs',
-    '211': 'attack-motivation',
-    '212': 'attack-resource-level',
-    '213': 'identity-class',
-    '214': 'indicator-label',
-    '215': 'industry-sector',
-    '216': 'malware-label',
-    '218': 'report-label',
-    '219': 'threat-actor-label',
-    '220': 'threat-actor-role',
-    '221': 'threat-actor-sophistication',
-    '222': 'tool-label',
-    '229': 'marking-definition-type',
-    '250': 'relationship-types'
-}
 
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
@@ -1111,160 +756,96 @@ CHECKS = {
 }
 
 
-class CustomDraft4Validator(Draft4Validator):
-    """Custom validator class for JSON Schema Draft 4.
-
+def list_shoulds(options):
+    """Construct the list of 'SHOULD' validators to be run by the validator.
     """
-    def __init__(self, schema, types=(), resolver=None, format_checker=None,
-                 options=ValidationOptions()):
-        super(CustomDraft4Validator, self).__init__(schema, types, resolver,
-                                                    format_checker)
-        self.validator_list = self.list_validators(options)
-        self.shoulds_list = self.list_shoulds(options)
+    validator_list = []
 
-    def list_validators(self, options):
-        """Construct the list of validators to be run by this validator.
-        """
-        validator_list = [
-            modified_created,
-            version,
-            timestamp_precision,
-            object_marking_circular_refs,
-            granular_markings_circular_refs,
-            marking_selector_syntax,
-            observable_object_references
-        ]
+    # TODO: make these optional, and add check codes to all of them
+    validator_list.extend([
+        observable_dictionary_keys,
+        vocab_hash_algo,
+        vocab_encryption_algo,
+        vocab_windows_pebinary_type,
+        vocab_account_type,
+        observable_object_keys,
+        custom_observable_object_prefix_strict,
+        custom_observable_object_prefix_lax,
+        custom_object_extension_prefix_strict,
+        custom_object_extension_prefix_lax,
+        custom_observable_properties_prefix_strict
+    ])
 
-        # --strict-types
-        if options.strict_types:
-            validator_list.append(types_strict)
-
+    # Default: enable all
+    if not options.disabled and not options.enabled:
+        validator_list.extend(CHECKS['all'])
         return validator_list
 
-    def list_shoulds(self, options):
-        validator_list = []
+    # --disable
+    # Add SHOULD requirements to the list unless disabled
+    if options.disabled:
+        if 'all' not in options.disabled:
+            if 'format-checks' not in options.disabled:
+                if ('custom-object-prefix' not in options.disabled and
+                        'custom-object-prefix-lax' not in options.disabled):
+                    validator_list.append(CHECKS['custom-object-prefix'])
+                elif 'custom-object-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-object-prefix'])
+                elif 'custom-object-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-object-prefix-lax'])
+                if ('custom-property-prefix' not in options.disabled and
+                        'custom-property-prefix-lax' not in options.disabled):
+                    validator_list.append(CHECKS['custom-property-prefix'])
+                elif 'custom-property-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-property-prefix'])
+                elif 'custom-property-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-property-prefix-lax'])
+                if 'open-vocab-format' not in options.disabled:
+                    validator_list.append(CHECKS['open-vocab-format'])
+                if 'kill-chain-names' not in options.disabled:
+                    validator_list.append(CHECKS['kill-chain-names'])
 
-        # TODO: make these optional, and add check codes to all of them
-        validator_list.extend([
-            observable_dictionary_keys,
-            vocab_hash_algo,
-            vocab_encryption_algo,
-            vocab_windows_pebinary_type,
-            vocab_account_type,
-            observable_object_keys,
-            custom_observable_object_prefix_strict,
-            custom_observable_object_prefix_lax,
-            custom_object_extension_prefix_strict,
-            custom_object_extension_prefix_lax,
-            custom_observable_properties_prefix_strict
-        ])
+            if 'approved-values' not in options.disabled:
+                if 'all-vocabs' not in options.disabled:
+                    if 'attack-motivation' not in options.disabled:
+                        validator_list.append(CHECKS['attack-motivation'])
+                    if 'attack-resource-level' not in options.disabled:
+                        validator_list.append(CHECKS['attack-resource-level'])
+                    if 'identity-class' not in options.disabled:
+                        validator_list.append(CHECKS['identity-class'])
+                    if 'indicator-label' not in options.disabled:
+                        validator_list.append(CHECKS['indicator-label'])
+                    if 'industry-sector' not in options.disabled:
+                        validator_list.append(CHECKS['industry-sector'])
+                    if 'malware-label' not in options.disabled:
+                        validator_list.append(CHECKS['malware-label'])
+                    if 'report-label' not in options.disabled:
+                        validator_list.append(CHECKS['report-label'])
+                    if 'threat-actor-label' not in options.disabled:
+                        validator_list.append(CHECKS['threat-actor-label'])
+                    if 'threat-actor-role' not in options.disabled:
+                        validator_list.append(CHECKS['threat-actor-role'])
+                    if 'threat-actor-sophistication' not in options.disabled:
+                        validator_list.append(CHECKS['threat-actor-sophistication'])
+                    if 'tool-label' not in options.disabled:
+                        validator_list.append(CHECKS['tool-label'])
+                    if 'marking-definition-type' not in options.disabled:
+                        validator_list.append(CHECKS['marking-definition-type'])
+                if 'relationship-types' not in options.disabled:
+                    validator_list.append(CHECKS['relationship-types'])
 
-        # Default: enable all
-        if not options.disabled and not options.enabled:
-            validator_list.extend(CHECKS['all'])
-            return validator_list
+    # --enable
+    if options.enabled:
+        for check in options.enabled:
+            try:
+                if CHECKS[check] in validator_list:
+                    continue
 
-        # --disable
-        # Add SHOULD requirements to the list unless disabled
-        if options.disabled:
-            if 'all' not in options.disabled:
-                if 'format-checks' not in options.disabled:
-                    if ('custom-object-prefix' not in options.disabled and
-                            'custom-object-prefix-lax' not in options.disabled):
-                        validator_list.append(CHECKS['custom-object-prefix'])
-                    elif 'custom-object-prefix' not in options.disabled:
-                        validator_list.append(CHECKS['custom-object-prefix'])
-                    elif 'custom-object-prefix-lax' not in options.disabled:
-                        validator_list.append(CHECKS['custom-object-prefix-lax'])
-                    if ('custom-property-prefix' not in options.disabled and
-                            'custom-property-prefix-lax' not in options.disabled):
-                        validator_list.append(CHECKS['custom-property-prefix'])
-                    elif 'custom-property-prefix' not in options.disabled:
-                        validator_list.append(CHECKS['custom-property-prefix'])
-                    elif 'custom-property-prefix-lax' not in options.disabled:
-                        validator_list.append(CHECKS['custom-property-prefix-lax'])
-                    if 'open-vocab-format' not in options.disabled:
-                        validator_list.append(CHECKS['open-vocab-format'])
-                    if 'kill-chain-names' not in options.disabled:
-                        validator_list.append(CHECKS['kill-chain-names'])
+                if type(CHECKS[check]) is list:
+                    validator_list.extend(CHECKS[check])
+                else:
+                    validator_list.append(CHECKS[check])
+            except KeyError:
+                raise JSONError("%s is not a valid check!" % check)
 
-                if 'approved-values' not in options.disabled:
-                    if 'all-vocabs' not in options.disabled:
-                        if 'attack-motivation' not in options.disabled:
-                            validator_list.append(CHECKS['attack-motivation'])
-                        if 'attack-resource-level' not in options.disabled:
-                            validator_list.append(CHECKS['attack-resource-level'])
-                        if 'identity-class' not in options.disabled:
-                            validator_list.append(CHECKS['identity-class'])
-                        if 'indicator-label' not in options.disabled:
-                            validator_list.append(CHECKS['indicator-label'])
-                        if 'industry-sector' not in options.disabled:
-                            validator_list.append(CHECKS['industry-sector'])
-                        if 'malware-label' not in options.disabled:
-                            validator_list.append(CHECKS['malware-label'])
-                        if 'report-label' not in options.disabled:
-                            validator_list.append(CHECKS['report-label'])
-                        if 'threat-actor-label' not in options.disabled:
-                            validator_list.append(CHECKS['threat-actor-label'])
-                        if 'threat-actor-role' not in options.disabled:
-                            validator_list.append(CHECKS['threat-actor-role'])
-                        if 'threat-actor-sophistication' not in options.disabled:
-                            validator_list.append(CHECKS['threat-actor-sophistication'])
-                        if 'tool-label' not in options.disabled:
-                            validator_list.append(CHECKS['tool-label'])
-                        if 'marking-definition-type' not in options.disabled:
-                            validator_list.append(CHECKS['marking-definition-type'])
-                    if 'relationship-types' not in options.disabled:
-                        validator_list.append(CHECKS['relationship-types'])
-
-        # --enable
-        if options.enabled:
-            for check in options.enabled:
-                try:
-                    if CHECKS[check] in validator_list:
-                        continue
-
-                    if type(CHECKS[check]) is list:
-                        validator_list.extend(CHECKS[check])
-                    else:
-                        validator_list.append(CHECKS[check])
-                except KeyError:
-                    raise JSONError("%s is not a valid check!" % check)
-
-        return validator_list
-
-    def iter_errors_more(self, instance, check_musts=True):
-        """Perform additional validation not possible merely with JSON schemas.
-
-        Args:
-            instance: The STIX object to be validated.
-            check_musts: If True, this function will check against the
-                additional mandatory "MUST" requirements which cannot be
-                enforced by schemas. If False, this function will check against
-                recommended "SHOULD" best practices instead. This function will
-                never check both; to do so call it twice.
-        """
-        # Ensure `instance` is a whole STIX object, not just a property of one
-        if not (type(instance) is dict and 'id' in instance and 'type' in instance):
-            return
-
-        if check_musts:
-            validators = self.validator_list
-        else:
-            validators = self.shoulds_list
-
-        # Perform validation
-        for v_function in validators:
-            result = v_function(instance)
-            if isinstance(result, Iterable):
-                for x in result:
-                    yield x
-            elif result is not None:
-                yield result
-
-        # Validate any child STIX objects
-        for field in instance:
-            if type(instance[field]) is list:
-                for obj in instance[field]:
-                    for err in self.iter_errors_more(obj, check_musts):
-                        yield err
+    return validator_list
