@@ -395,6 +395,23 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+    def test_network_traffic_ports(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "network-traffic",
+            "protocols": [
+                "ipv4",
+                "tcp"
+            ]
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['src_port'] = 3372
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['dst_port'] = 80
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -680,6 +680,18 @@ def custom_observable_properties_prefix_lax(instance):
 
 
 @cyber_observable_check
+def network_traffic_ports(instance):
+    """Ensure network-traffic objects contain both src_port and dst_port.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'network-traffic' and
+                ('src_port' not in obj or 'dst_port' not in obj)):
+            yield JSONError("The Network Traffic object '%s' should contain "
+                            "both the 'src_port' and 'dst_port' properties."
+                            % key, instance['id'])
+
+
+@cyber_observable_check
 def file_mime_type(instance):
     """Ensure the 'mime_type' property of file objects comes from the Template
     column in the IANA media type registry.
@@ -816,6 +828,7 @@ def list_shoulds(options):
         custom_object_extension_prefix_lax,
         custom_observable_properties_prefix_strict,
         windows_process_priority_format,
+        network_traffic_ports,
         file_mime_type
     ])
 
