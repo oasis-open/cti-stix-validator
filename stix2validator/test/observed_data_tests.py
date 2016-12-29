@@ -71,7 +71,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_selector_invalid_index(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['granular_markings'][0]['selectors'] = [
-          "objects.0.extensions.archive-ext.contains_refs.[5]"
+            "objects.0.extensions.archive-ext.contains_refs.[5]"
         ]
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
@@ -388,6 +388,12 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['2']['extensions']['windows-process-ext']['priority'] = 'HIGH_PRIORITY_CLASS'
         self.assertTrueWithOptions(json.dumps(observed_data))
+
+    def test_mime_type(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['mime_type'] = "bla"
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
 
 
 if __name__ == "__main__":

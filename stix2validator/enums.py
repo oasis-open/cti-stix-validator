@@ -1,6 +1,8 @@
 """STIX 2.0 open vocabularies and other lists
 """
 
+import requests
+from six import PY2, text_type
 
 # Enumerations of the default values of STIX open vocabularies
 ATTACK_MOTIVATION_OV = [
@@ -1282,3 +1284,41 @@ VOCAB_PROPERTIES = {
         'definition_type'
     ]
 }
+
+
+def media_types():
+    """Return a list of the IANA Media (MIME) Types, or an empty list if the
+    IANA website is unreachable.
+    Store it as a function attribute so that we only build the list once.
+    """
+    if not hasattr(media_types, 'typelist'):
+        tlist = []
+        categories = [
+            'application',
+            'audio',
+            'font',
+            'image',
+            'message',
+            'model',
+            'multipart',
+            'text',
+            'video'
+        ]
+        for cat in categories:
+            try:
+                data = requests.get('http://www.iana.org/assignments/'
+                                    'media-types/%s.csv' % cat)
+            except requests.exceptions.RequestException:
+                return []
+
+            types = []
+            for line in data.iter_lines():
+                if line:
+                    if not PY2:
+                        line = text_type(line)
+                    if line.count(',') > 0:
+                        types.append(line.split(',')[1])
+
+            tlist.extend(types)
+        media_types.typelist = tlist
+    return media_types.typelist

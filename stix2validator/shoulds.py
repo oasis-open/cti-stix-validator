@@ -7,6 +7,7 @@ from six import string_types
 from . import enums
 from .util import cyber_observable_check
 from .errors import JSONError
+from .output import info
 
 
 def custom_object_prefix_strict(instance):
@@ -679,6 +680,30 @@ def custom_observable_properties_prefix_lax(instance):
 
 
 @cyber_observable_check
+def file_mime_type(instance):
+    """Ensure the 'mime_type' property of file objects comes from the Template
+    column in the IANA media type registry.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'file' and 'mime_type' in obj):
+            if enums.media_types():
+                if obj['mime_type'] not in enums.media_types():
+                    yield JSONError("The 'mime_type' property of object '%s' "
+                                    "('%s') should be an IANA registered MIME "
+                                    "Type of the form 'type/subtype'."
+                                    % (key, obj['mime_type']), instance['id'])
+            else:
+                info("Can't reach IANA website; using regex for mime types.")
+                mime_pattern = '^(application|audio|font|image|message|model' \
+                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+'
+                if not re.match(mime_pattern, obj['mime_type']):
+                    yield JSONError("The 'mime_type' property of object '%s' "
+                                    "('%s') should be an IANA MIME Type of the"
+                                    " form 'type/subtype'."
+                                    % (key, obj['mime_type']), instance['id'])
+
+
+@cyber_observable_check
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
     """
@@ -790,7 +815,8 @@ def list_shoulds(options):
         custom_object_extension_prefix_strict,
         custom_object_extension_prefix_lax,
         custom_observable_properties_prefix_strict,
-        windows_process_priority_format
+        windows_process_priority_format,
+        file_mime_type
     ])
 
     # Default: enable all
