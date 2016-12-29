@@ -369,6 +369,26 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['0']['extensions']['archive-ext']['contains_refs'][0] = '2'
         self.assertFalseWithOptions(json.dumps(observed_data))
 
+    def test_vocab_windows_process_priority(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "process",
+            "pid": 314,
+            "name": "foobar.exe",
+            "extensions": {
+                "windows-process-ext": {
+                    "aslr_enabled": True,
+                    "dep_enabled": True,
+                    "priority": "HIGH_PRIORITY",
+                    "owner_sid": "S-1-5-21-186985262-1144665072-74031268-1309"
+                }
+            }
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['extensions']['windows-process-ext']['priority'] = 'HIGH_PRIORITY_CLASS'
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
 
 if __name__ == "__main__":
     unittest.main()

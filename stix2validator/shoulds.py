@@ -678,6 +678,22 @@ def custom_observable_properties_prefix_lax(instance):
                                                 % (p, ext_prop, ext_key), instance['id'])
 
 
+@cyber_observable_check
+def windows_process_priority_format(instance):
+    """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
+    """
+    for key, obj in instance['objects'].items():
+        if 'type' in obj and obj['type'] == 'process':
+            try:
+                priority = obj['extensions']['windows-process-ext']['priority']
+            except KeyError:
+                continue
+            if not re.match('.+_CLASS$', priority):
+                yield JSONError("The 'priority' property of object '%s' should"
+                                " end in '_CLASS'."
+                                % key, instance['id'])
+
+
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
@@ -773,7 +789,8 @@ def list_shoulds(options):
         custom_observable_object_prefix_lax,
         custom_object_extension_prefix_strict,
         custom_object_extension_prefix_lax,
-        custom_observable_properties_prefix_strict
+        custom_observable_properties_prefix_strict,
+        windows_process_priority_format
     ])
 
     # Default: enable all
