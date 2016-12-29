@@ -117,4 +117,5 @@ def cyber_observable_check(original_function):
         if isinstance(func, Iterable):
             for x in original_function(*args, **kwargs):
                 yield x
+    new_function.__name__ = original_function.__name__
     return new_function

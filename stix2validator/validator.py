@@ -25,7 +25,7 @@ class CustomDraft4Validator(Draft4Validator):
                  options=ValidationOptions()):
         super(CustomDraft4Validator, self).__init__(schema, types, resolver,
                                                     format_checker)
-        self.validator_list = musts.list_musts(options)
+        self.musts_list = musts.list_musts(options)
         self.shoulds_list = shoulds.list_shoulds(options)
 
     def iter_errors_more(self, instance, check_musts=True):
@@ -44,7 +44,7 @@ class CustomDraft4Validator(Draft4Validator):
             return
 
         if check_musts:
-            validators = self.validator_list
+            validators = self.musts_list
         else:
             validators = self.shoulds_list
 
@@ -437,8 +437,9 @@ def schema_validate(instance, options):
         raise SchemaInvalidError('Invalid JSON schema: ' + str(e))
 
     validator = load_validator(schema_path, schema, options)
+    validator_list = validator.musts_list + validator.shoulds_list
     output.info("Running the following additional checks: %s."
-                % ", ".join(x.__name__ for x in validator.validator_list))
+                % ", ".join(x.__name__ for x in validator_list))
 
     # Actual validation of JSON document
     try:
