@@ -116,6 +116,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertTrue(len(results.errors) == 1)
         self.assertFalse(results.is_valid)
 
+        self.check_ignore(observed_data, 'observable-dictionary-keys')
+
     def test_dict_key_length(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['x-s-dicts'] = {
@@ -128,6 +130,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertTrue(len(results.errors) == 1)
         self.assertFalse(results.is_valid)
 
+        self.check_ignore(observed_data, 'observable-dictionary-keys')
+
     def test_vocab_account_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
@@ -139,6 +143,8 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data, 'account-type')
+
     def test_vocab_windows_pebinary_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
@@ -147,11 +153,15 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data, 'windows-pebinary-type')
+
     def test_vocab_encryption_algo(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['encryption_algorithm'] = "MDK"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'encryption-algo')
 
     def test_vocab_file_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -160,6 +170,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_artifact_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -172,6 +184,8 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data, 'hash-algo')
+
     def test_vocab_certificate_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
@@ -182,6 +196,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_pebinary_sections_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -199,6 +215,8 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data, 'hash-algo')
+
     def test_vocab_pebinary_optional_header_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
@@ -209,6 +227,8 @@ class ObservedDataTestCases(ValidatorTest):
             }
         }
         self.assertFalseWithOptions(json.dumps(observed_data))
+
+        self.check_ignore(json.dumps(observed_data), 'hash-algo')
 
         observed_data['objects']['0']['extensions']['windows-pebinary-ext']['optional_header']['hashes'] = {
             "x_foo": "1C19FC56AEF2048C1CD3A5E67B099350"
@@ -224,6 +244,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_pebinary_multiple_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -242,6 +264,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertTrue(len(results.errors) == 2)
         self.assertFalse(results.is_valid)
 
+        self.check_ignore(observed_data, 'hash-algo')
+
     def test_vocab_ntfs_alternate_data_streams_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['ntfs-ext'] = {
@@ -258,22 +282,29 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data, 'hash-algo')
+
     def test_observable_object_keys(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['abc'] = {
             "type": "x509-certificate",
             "hashes": {
-                "foo": "B4D33B0C7306351B9ED96578465C5579"
+                "MD5": "B4D33B0C7306351B9ED96578465C5579"
             }
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'observable-object-keys')
 
     def test_observable_object_types(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['type'] = "foo"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data,
+            'custom-observable-object-prefix,custom-observable-object-prefix-lax')
 
     def test_observable_object_extensions(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -283,17 +314,26 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data,
+            'custom-object-extension-prefix,custom-object-extension-prefix-lax')
+
     def test_observable_object_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['foo'] = "bar"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data,
+            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+
     def test_observable_object_extension_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['archive-ext']['foo'] = "bar"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data,
+            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -305,6 +345,9 @@ class ObservedDataTestCases(ValidatorTest):
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data,
+            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_embedded_dict_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -323,6 +366,9 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
+        self.check_ignore(observed_data,
+            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+
     def test_observable_object_extension_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['ntfs-ext'] = {
@@ -336,6 +382,9 @@ class ObservedDataTestCases(ValidatorTest):
         }
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data,
+            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_property_reference(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -389,11 +438,15 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2']['extensions']['windows-process-ext']['priority'] = 'HIGH_PRIORITY_CLASS'
         self.assertTrueWithOptions(json.dumps(observed_data))
 
+        self.check_ignore(json.dumps(observed_data), 'windows-process-priority-format')
+
     def test_mime_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['mime_type'] = "bla"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'mime-type')
 
     def test_network_traffic_ports(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -408,6 +461,8 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['2']['src_port'] = 3372
         self.assertFalseWithOptions(json.dumps(observed_data))
+
+        self.check_ignore(json.dumps(observed_data), 'network-traffic-ports')
 
         observed_data['objects']['2']['dst_port'] = 80
         self.assertTrueWithOptions(json.dumps(observed_data))
