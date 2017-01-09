@@ -33,8 +33,30 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | correct format                         |
 | 121  | kill-chain-names            | kill-chain-phase name and phase follow |
 |      |                             | the correct format                     |
+| 141  | observable-object-keys      | observable object keys follow the      |
+|      |                             | correct format                         |
+| 142  | observable-dictionary-keys  | dictionaries in cyber observable       |
+|      |                             | objects follow the correct format      |
+| 143  | custom-observable-object-   | custom observable object names follow  |
+|      |     prefix                  | the correct format                     |
+| 144  | custom-observable-object-   | same as 144 but more lenient; no       |
+|      |     prefix-lax              | source identifier needed in prefix     |
+| 145  | custom-object-extension-    | custom observable object extension     |
+|      |     prefix                  | names follow the correct format        |
+| 146  | custom-object-extension-    | same as 145 but more lenient; no       |
+|      |     prefix-lax              | source identifier needed in prefix     |
+| 147  | custom-observable-          | observable object custom property      |
+|      |     properties-prefix       | names follow the correct format        |
+| 148  | custom-observable-          | same as 148 but more lenient; no       |
+|      |     properties-prefix-lax   | source identifier needed in prefix     |
+| 149  | windows-process-priority-   | windows-process-ext's 'priority'       |
+|      |     format                  | follows the correct format             |
 |      |                             |                                        |
 |  2   | approved-values             | all 2xx checks are run                 |
+| 201  | marking-definition-type     | marking definitions use a valid        |
+|      |                             | definition_type                        |
+| 202  | relationship-types          | relationships are among those defined  |
+|      |                             | in the specification                   |
 | 210  | all-vocabs                  | all of the following open vocabulary   |
 |      |                             | checks are run                         |
 | 211  | attack-motivation           | certain property values are from the   |
@@ -59,10 +81,20 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | threat_actor_sophistication vocabulary |
 | 222  | tool-label                  | certain property values are from the   |
 |      |                             | tool_label vocabulary                  |
-| 229  | marking-definition-type     | marking definitions use a valid        |
-|      |                             | definition_type                        |
-| 250  | relationship-types          | relationships are among those defined  |
-|      |                             | in the specification                   |
+| 241  | hash-algo                   | certain property values are from the   |
+|      |                             | hash-algo vocabulary                   |
+| 242  | encryption-algo             | certain property values are from the   |
+|      |                             | encryption-algo vocabulary             |
+| 243  | windows-pebinary-type       | certain property values are from the   |
+|      |                             | windows-pebinary-type vocabulary       |
+| 244  | account-type                | certain property values are from the   |
+|      |                             | account-type vocabulary                |
+| 270  | all-external-sources        | all of the following external source   |
+|      |                             | checks are run                         |
+| 271  | file-mime-type              | certain property values are valid IANA |
+|      |                             | MIME types                             |
+| 301  | network-traffic-ports       | network-traffic objects contain both   |
+|      |                             | src_port and dst_port                  |
 +------+-----------------------------+----------------------------------------+
 """
 

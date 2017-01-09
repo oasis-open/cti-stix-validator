@@ -78,7 +78,18 @@ CHECK_CODES = {
     '104': 'custom-property-prefix-lax',
     '111': 'open-vocab-format',
     '121': 'kill-chain-names',
+    '141': 'observable-object-keys',
+    '142': 'observable-dictionary-keys',
+    '143': 'custom-observable-object-prefix',
+    '144': 'custom-observable-object-prefix-lax',
+    '145': 'custom-object-extension-prefix',
+    '146': 'custom-object-extension-prefix-lax',
+    '147': 'custom-observable-properties-prefix',
+    '148': 'custom-observable-properties-prefix-lax',
+    '149': 'windows-process-priority-format',
     '2': 'approved-values',
+    '201': 'marking-definition-type',
+    '202': 'relationship-types',
     '210': 'all-vocabs',
     '211': 'attack-motivation',
     '212': 'attack-resource-level',
@@ -91,8 +102,13 @@ CHECK_CODES = {
     '220': 'threat-actor-role',
     '221': 'threat-actor-sophistication',
     '222': 'tool-label',
-    '229': 'marking-definition-type',
-    '250': 'relationship-types'
+    '241': 'hash-algo',
+    '242': 'encryption-algo',
+    '243': 'windows-pebinary-type',
+    '244': 'account-type',
+    '270': 'all-external-sources',
+    '271': 'file-mime-type',
+    '301': 'network-traffic-ports'
 }
 
 

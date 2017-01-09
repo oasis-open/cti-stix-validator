@@ -262,34 +262,6 @@ def relationships_strict(instance):
                          'relationship-types')
 
 
-def test_dict_keys(item, inst_id):
-    """Recursively generate errors for incorrectly formatted cyber observable
-    dictionary keys.
-    """
-    for k, v in item.items():
-        if not re.match("^[^A-Z]+$", k):
-            yield JSONError("As a dictionary key for cyber observable "
-                            "objects, '%s' should be lowercase." % k,
-                            inst_id)
-        if not len(k) <= 30:
-            yield JSONError("As a dictionary key for cyber observable "
-                            "objects, '%s' should be no longer than 30 "
-                            "characters long." % k, inst_id)
-
-        if type(v) is dict and k not in enums.OBSERVABLE_DICT_KEY_EXCEPTIONS:
-            for error in test_dict_keys(v, inst_id):
-                yield error
-
-
-@cyber_observable_check
-def observable_dictionary_keys(instance):
-    """Ensure dictionaries in the cyber observable layer have lowercase keys
-    no longer than 30 characters.
-    """
-    for error in test_dict_keys(instance['objects'], instance['id']):
-        yield error
-
-
 def valid_hash_value(hashname):
     """Return true if given value is a valid, recommended hash name according
     to the STIX 2 specification.
@@ -321,7 +293,7 @@ def vocab_hash_algo(instance):
                                 " with a hash of type '%s', which is not a "
                                 "value in the hash-algo-ov vocabulary nor a "
                                 "custom value prepended with 'x_'."
-                                % (key, h), instance['id'])
+                                % (key, h), instance['id'], 'hash-algo')
 
             try:
                 ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
@@ -339,7 +311,7 @@ def vocab_hash_algo(instance):
                                     "'%s', which is not a value in the "
                                     "hash-algo-ov vocabulary nor a custom "
                                     "value prepended with 'x_'."
-                                    % (key, h), instance['id'])
+                                    % (key, h), instance['id'], 'hash-algo')
 
             try:
                 head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
@@ -353,7 +325,7 @@ def vocab_hash_algo(instance):
                                 "'%s', which is not a value in the "
                                 "hash-algo-ov vocabulary nor a custom value "
                                 "prepended with 'x_'."
-                                % (key, h), instance['id'])
+                                % (key, h), instance['id'], 'hash-algo')
 
             try:
                 hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
@@ -367,7 +339,7 @@ def vocab_hash_algo(instance):
                                 "has a hash of '%s', which is not a value in "
                                 "the hash-algo-ov vocabulary nor a custom "
                                 "value prepended with 'x_'."
-                                % (key, h), instance['id'])
+                                % (key, h), instance['id'], 'hash-algo')
 
             try:
                 sections = obj['extensions']['windows-pebinary-ext']['sections']
@@ -384,7 +356,7 @@ def vocab_hash_algo(instance):
                                     " has a hash of '%s', which is not a value"
                                     " in the hash-algo-ov vocabulary nor a "
                                     "custom value prepended with 'x_'."
-                                    % (key, h), instance['id'])
+                                    % (key, h), instance['id'], 'hash-algo')
 
         elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
             try:
@@ -398,7 +370,7 @@ def vocab_hash_algo(instance):
                                 " with a hash of type '%s', which is not a "
                                 "value in the hash-algo-ov vocabulary nor a "
                                 "custom value prepended with 'x_'."
-                                % (key, h), instance['id'])
+                                % (key, h), instance['id'], 'hash-algo')
 
 
 @cyber_observable_check
@@ -416,7 +388,8 @@ def vocab_encryption_algo(instance):
                 yield JSONError("Object '%s' has an 'encryption_algorithm' of "
                                 "'%s', which is not a value in the "
                                 "encryption-algo-ov vocabulary."
-                                % (key, enc_algo), instance['id'])
+                                % (key, enc_algo), instance['id'],
+                                'encryption-algo')
 
 
 @cyber_observable_check
@@ -434,7 +407,8 @@ def vocab_windows_pebinary_type(instance):
                 yield JSONError("Object '%s' has a Windows PE Binary File "
                         "extension with a 'pe_type' of '%s', which is not a "
                         "value in the windows-pebinary-type-ov vocabulary."
-                        % (key, pe_type), instance['id'])
+                        % (key, pe_type), instance['id'],
+                        'windows-pebinary-type')
 
 
 @cyber_observable_check
@@ -452,7 +426,7 @@ def vocab_account_type(instance):
                 yield JSONError("Object '%s' is a User Account Object "
                         "with an 'account_type' of '%s', which is not a "
                         "value in the account-type-ov vocabulary."
-                        % (key, acct_type), instance['id'])
+                        % (key, acct_type), instance['id'], 'account-type')
 
 
 @cyber_observable_check
@@ -463,7 +437,36 @@ def observable_object_keys(instance):
         if not re.match("^\d+$", key):
             yield JSONError("'%s' is not a good key value. Observable Objects "
                 "should use non-negative integers for their keys."
-                % key, instance['id'])
+                % key, instance['id'], 'observable-object-keys')
+
+
+def test_dict_keys(item, inst_id):
+    """Recursively generate errors for incorrectly formatted cyber observable
+    dictionary keys.
+    """
+    for k, v in item.items():
+        if not re.match("^[^A-Z]+$", k):
+            yield JSONError("As a dictionary key for cyber observable "
+                            "objects, '%s' should be lowercase." % k,
+                            inst_id, 'observable-dictionary-keys')
+        if not len(k) <= 30:
+            yield JSONError("As a dictionary key for cyber observable "
+                            "objects, '%s' should be no longer than 30 "
+                            "characters long." % k, inst_id,
+                            'observable-dictionary-keys')
+
+        if type(v) is dict and k not in enums.OBSERVABLE_DICT_KEY_EXCEPTIONS:
+            for error in test_dict_keys(v, inst_id):
+                yield error
+
+
+@cyber_observable_check
+def observable_dictionary_keys(instance):
+    """Ensure dictionaries in the cyber observable layer have lowercase keys
+    no longer than 30 characters.
+    """
+    for error in test_dict_keys(instance['objects'], instance['id']):
+        yield error
 
 
 @cyber_observable_check
@@ -475,10 +478,11 @@ def custom_observable_object_prefix_strict(instance):
                 obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
                 not re.match("^x\-.+\-.+$", obj['type'])):
             yield JSONError("Custom Observable Object type '%s' should start "
-                    "with 'x-' followed by a source unique identifier (like a "
-                    "domain name with dots replaced by dashes), a dash and "
-                    "then the name."
-                    % obj['type'], instance['id'])
+                            "with 'x-' followed by a source unique identifier "
+                            "(like a domain name with dots replaced by "
+                            "dashes), a dash and then the name."
+                            % obj['type'], instance['id'],
+                            'custom-observable-object-prefix')
 
 
 @cyber_observable_check
@@ -490,13 +494,15 @@ def custom_observable_object_prefix_lax(instance):
                 obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
                 not re.match("^x\-.+$", obj['type'])):
             yield JSONError("Custom Observable Object type '%s' should start "
-                    "with 'x-'."
-                    % obj['type'], instance['id'])
+                            "with 'x-'."
+                            % obj['type'], instance['id'],
+                            'custom-observable-object-prefix')
 
 
 @cyber_observable_check
 def custom_object_extension_prefix_strict(instance):
-    """Ensure custom observable objects follow strict naming style conventions.
+    """Ensure custom observable object extensions follow strict naming style
+    conventions.
     """
     for key, obj in instance['objects'].items():
         if not ('extensions' in obj and 'type' in obj and
@@ -509,12 +515,14 @@ def custom_object_extension_prefix_strict(instance):
                         " '%s' should start with 'x-' followed by a source "
                         "unique identifier (like a domain name with dots "
                         "replaced by dashes), a dash and then the name."
-                        % ext_key, instance['id'])
+                        % ext_key, instance['id'],
+                        'custom-object-extension-prefix')
 
 
 @cyber_observable_check
 def custom_object_extension_prefix_lax(instance):
-    """Ensure custom observable objects follow naming style conventions.
+    """Ensure custom observable object extensions follow naming style
+    conventions.
     """
     for key, obj in instance['objects'].items():
         if not ('extensions' in obj and 'type' in obj and
@@ -525,7 +533,8 @@ def custom_object_extension_prefix_lax(instance):
                     not re.match("^x\-.+$", ext_key)):
                 yield JSONError("Custom Cyber Observable Object extension type"
                                 " '%s' should start with 'x-'."
-                                % ext_key, instance['id'])
+                                % ext_key, instance['id'],
+                                'custom-object-extension-prefix')
 
 
 @cyber_observable_check
@@ -548,7 +557,8 @@ def custom_observable_properties_prefix_strict(instance):
                                 "unique identifier (like a domain name with "
                                 "dots replaced by dashes), a dash and then the"
                                 " name."
-                                % prop, instance['id'])
+                                % prop, instance['id'],
+                                'custom-observable-properties-prefix')
             # Check properties of embedded cyber observable types
             if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
                     prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
@@ -564,7 +574,8 @@ def custom_observable_properties_prefix_strict(instance):
                                                 "identifier (like a domain name with "
                                                 "dots replaced by dashes), a dash and "
                                                 "then the name."
-                                                % (embedded, prop, type_), instance['id'])
+                                                % (embedded, prop, type_), instance['id'],
+                                                'custom-observable-properties-prefix')
                     elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
                             not re.match("^x\-.+\-.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
@@ -574,7 +585,8 @@ def custom_observable_properties_prefix_strict(instance):
                                         "identifier (like a domain name with "
                                         "dots replaced by dashes), a dash and "
                                         "then the name."
-                                        % (embed_prop, prop, type_), instance['id'])
+                                        % (embed_prop, prop, type_), instance['id'],
+                                        'custom-observable-properties-prefix')
 
         # Check object extensions' properties
         if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
@@ -590,7 +602,8 @@ def custom_observable_properties_prefix_strict(instance):
                                             "source unique identifier (like a "
                                             "domain name with dots replaced by "
                                             "dashes), a dash and then the name."
-                                            % (ext_prop, ext_key), instance['id'])
+                                            % (ext_prop, ext_key), instance['id'],
+                                            'custom-observable-properties-prefix')
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
@@ -609,7 +622,8 @@ def custom_observable_properties_prefix_strict(instance):
                                                 "unique identifier (like a domain name"
                                                 " with dots replaced by dashes), a "
                                                 "dash and then the name."
-                                                % (p, ext_prop, ext_key), instance['id'])
+                                                % (p, ext_prop, ext_key), instance['id'],
+                                                'custom-observable-properties-prefix')
 
 
 @cyber_observable_check
@@ -629,7 +643,8 @@ def custom_observable_properties_prefix_lax(instance):
                     not re.match("^x\-.+$", prop)):
                 yield JSONError("Cyber Observable Object custom property '%s' "
                                 "should start with 'x-'."
-                                % prop, instance['id'])
+                                % prop, instance['id'],
+                                'custom-observable-properties-prefix')
             # Check properties of embedded cyber observable types
             if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
                     prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
@@ -641,13 +656,15 @@ def custom_observable_properties_prefix_lax(instance):
                                 yield JSONError("Cyber Observable Object custom "
                                                 "property '%s' in the %s property of a"
                                                 " %s object should start with 'x-'."
-                                                % (embedded, prop, type_), instance['id'])
+                                                % (embedded, prop, type_), instance['id'],
+                                                'custom-observable-properties-prefix')
                     elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
                             not re.match("^x\-.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
                                         "property '%s' in the %s property of a"
                                         " %s object should start with 'x-'."
-                                        % (embed_prop, prop, type_), instance['id'])
+                                        % (embed_prop, prop, type_), instance['id'],
+                                        'custom-observable-properties-prefix')
 
         # Check object extensions' properties
         if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
@@ -660,7 +677,8 @@ def custom_observable_properties_prefix_lax(instance):
                             yield JSONError("Cyber Observable Object custom "
                                             "property '%s' in the %s extension "
                                             "should start with 'x-'."
-                                            % (ext_prop, ext_key), instance['id'])
+                                            % (ext_prop, ext_key), instance['id'],
+                                            'custom-observable-properties-prefix')
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
@@ -676,7 +694,8 @@ def custom_observable_properties_prefix_lax(instance):
                                                 "custom property '%s' in the %s "
                                                 "property of the %s extension should "
                                                 "start with 'x-'."
-                                                % (p, ext_prop, ext_key), instance['id'])
+                                                % (p, ext_prop, ext_key), instance['id'],
+                                                'custom-observable-properties-prefix')
 
 
 @cyber_observable_check
@@ -688,7 +707,7 @@ def network_traffic_ports(instance):
                 ('src_port' not in obj or 'dst_port' not in obj)):
             yield JSONError("The Network Traffic object '%s' should contain "
                             "both the 'src_port' and 'dst_port' properties."
-                            % key, instance['id'])
+                            % key, instance['id'], 'network-traffic-ports')
 
 
 @cyber_observable_check
@@ -703,7 +722,8 @@ def file_mime_type(instance):
                     yield JSONError("The 'mime_type' property of object '%s' "
                                     "('%s') should be an IANA registered MIME "
                                     "Type of the form 'type/subtype'."
-                                    % (key, obj['mime_type']), instance['id'])
+                                    % (key, obj['mime_type']), instance['id'],
+                                    'file-mime-type')
             else:
                 info("Can't reach IANA website; using regex for mime types.")
                 mime_pattern = '^(application|audio|font|image|message|model' \
@@ -712,7 +732,8 @@ def file_mime_type(instance):
                     yield JSONError("The 'mime_type' property of object '%s' "
                                     "('%s') should be an IANA MIME Type of the"
                                     " form 'type/subtype'."
-                                    % (key, obj['mime_type']), instance['id'])
+                                    % (key, obj['mime_type']), instance['id'],
+                                    'file-mime-type')
 
 
 @cyber_observable_check
@@ -727,8 +748,8 @@ def windows_process_priority_format(instance):
                 continue
             if not re.match('.+_CLASS$', priority):
                 yield JSONError("The 'priority' property of object '%s' should"
-                                " end in '_CLASS'."
-                                % key, instance['id'])
+                                " end in '_CLASS'." % key, instance['id'],
+                                'windows-process-priority-format')
 
 
 # Mapping of check names to the functions which perform the checks
@@ -738,6 +759,14 @@ CHECKS = {
         custom_property_prefix_strict,
         open_vocab_values,
         kill_chain_phase_names,
+        observable_object_keys,
+        observable_dictionary_keys,
+        custom_observable_object_prefix_strict,
+        custom_object_extension_prefix_strict,
+        custom_observable_properties_prefix_strict,
+        windows_process_priority_format,
+        vocab_marking_definition,
+        relationships_strict,
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_identity_class,
@@ -749,14 +778,24 @@ CHECKS = {
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
         vocab_tool_label,
-        vocab_marking_definition,
-        relationships_strict
+        vocab_hash_algo,
+        vocab_encryption_algo,
+        vocab_windows_pebinary_type,
+        vocab_account_type,
+        file_mime_type,
+        network_traffic_ports
     ],
     'format-checks': [
         custom_object_prefix_strict,
         custom_property_prefix_strict,
         open_vocab_values,
-        kill_chain_phase_names
+        kill_chain_phase_names,
+        observable_object_keys,
+        observable_dictionary_keys,
+        custom_observable_object_prefix_strict,
+        custom_object_extension_prefix_strict,
+        custom_observable_properties_prefix_strict,
+        windows_process_priority_format,
     ],
     'custom-object-prefix': custom_object_prefix_strict,
     'custom-object-prefix-lax': custom_object_prefix_lax,
@@ -764,7 +803,18 @@ CHECKS = {
     'custom-property-prefix-lax': custom_property_prefix_lax,
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
+    'observable-object-keys': observable_object_keys,
+    'observable-dictionary-keys': observable_dictionary_keys,
+    'custom-observable-object-prefix': custom_observable_object_prefix_strict,
+    'custom-observable-object-prefix-lax': custom_observable_object_prefix_lax,
+    'custom-object-extension-prefix': custom_object_extension_prefix_strict,
+    'custom-object-extension-prefix-lax': custom_object_extension_prefix_lax,
+    'custom-observable-properties-prefix': custom_observable_properties_prefix_strict,
+    'custom-observable-properties-prefix-lax': custom_observable_properties_prefix_lax,
+    'windows-process-priority-format': windows_process_priority_format,
     'approved-values': [
+        vocab_marking_definition,
+        relationships_strict,
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_identity_class,
@@ -776,9 +826,14 @@ CHECKS = {
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
         vocab_tool_label,
-        vocab_marking_definition,
-        relationships_strict
+        vocab_hash_algo,
+        vocab_encryption_algo,
+        vocab_windows_pebinary_type,
+        vocab_account_type,
+        file_mime_type,
     ],
+    'marking-definition-type': vocab_marking_definition,
+    'relationship-types': relationships_strict,
     'all-vocabs': [
         vocab_attack_motivation,
         vocab_attack_resource_level,
@@ -791,7 +846,10 @@ CHECKS = {
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
         vocab_tool_label,
-        vocab_marking_definition
+        vocab_hash_algo,
+        vocab_encryption_algo,
+        vocab_windows_pebinary_type,
+        vocab_account_type,
     ],
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
@@ -804,8 +862,15 @@ CHECKS = {
     'threat-actor-role': vocab_threat_actor_role,
     'threat-actor-sophistication': vocab_threat_actor_sophistication_level,
     'tool-label': vocab_tool_label,
-    'marking-definition-type': vocab_marking_definition,
-    'relationship-types': relationships_strict
+    'hash-algo': vocab_hash_algo,
+    'encryption-algo': vocab_encryption_algo,
+    'windows-pebinary-type': vocab_windows_pebinary_type,
+    'account-type': vocab_account_type,
+    'all-external-sources': [
+        file_mime_type,
+    ],
+    'file-mime-type': file_mime_type,
+    'network-traffic-ports': network_traffic_ports
 }
 
 
@@ -813,24 +878,6 @@ def list_shoulds(options):
     """Construct the list of 'SHOULD' validators to be run by the validator.
     """
     validator_list = []
-
-    # TODO: make these optional, and add check codes to all of them
-    validator_list.extend([
-        observable_dictionary_keys,
-        vocab_hash_algo,
-        vocab_encryption_algo,
-        vocab_windows_pebinary_type,
-        vocab_account_type,
-        observable_object_keys,
-        custom_observable_object_prefix_strict,
-        custom_observable_object_prefix_lax,
-        custom_object_extension_prefix_strict,
-        custom_object_extension_prefix_lax,
-        custom_observable_properties_prefix_strict,
-        windows_process_priority_format,
-        network_traffic_ports,
-        file_mime_type
-    ])
 
     # Default: enable all
     if not options.disabled and not options.enabled:
@@ -860,8 +907,39 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['open-vocab-format'])
                 if 'kill-chain-names' not in options.disabled:
                     validator_list.append(CHECKS['kill-chain-names'])
+                if 'observable-object-keys' not in options.disabled:
+                    validator_list.append(CHECKS['observable-object-keys'])
+                if 'observable-dictionary-keys' not in options.disabled:
+                    validator_list.append(CHECKS['observable-dictionary-keys'])
+                if ('custom-observable-object-prefix' not in options.disabled and
+                        'custom-observable-object-prefix-lax' not in options.disabled):
+                    validator_list.append(CHECKS['custom-observable-object-prefix'])
+                elif 'custom-observable-object-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-observable-object-prefix'])
+                elif 'custom-observable-object-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-observable-object-prefix-lax'])
+                if ('custom-object-extension-prefix' not in options.disabled and
+                        'custom-object-extension-prefix-lax' not in options.disabled):
+                    validator_list.append(CHECKS['custom-object-extension-prefix'])
+                elif 'custom-object-extension-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-object-extension-prefix'])
+                elif 'custom-object-extension-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-object-extension-prefix-lax'])
+                if ('custom-observable-properties-prefix' not in options.disabled and
+                        'custom-observable-properties-prefix' not in options.disabled):
+                    validator_list.append(CHECKS['custom-observable-properties-prefix'])
+                elif 'custom-observable-properties-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-observable-properties-prefix'])
+                elif 'custom-observable-properties-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-observable-properties-prefix-lax'])
+                if 'windows-process-priority-format' not in options.disabled:
+                    validator_list.append(CHECKS['windows-process-priority-format'])
 
             if 'approved-values' not in options.disabled:
+                if 'marking-definition-type' not in options.disabled:
+                    validator_list.append(CHECKS['marking-definition-type'])
+                if 'relationship-types' not in options.disabled:
+                    validator_list.append(CHECKS['relationship-types'])
                 if 'all-vocabs' not in options.disabled:
                     if 'attack-motivation' not in options.disabled:
                         validator_list.append(CHECKS['attack-motivation'])
@@ -885,10 +963,20 @@ def list_shoulds(options):
                         validator_list.append(CHECKS['threat-actor-sophistication'])
                     if 'tool-label' not in options.disabled:
                         validator_list.append(CHECKS['tool-label'])
-                    if 'marking-definition-type' not in options.disabled:
-                        validator_list.append(CHECKS['marking-definition-type'])
-                if 'relationship-types' not in options.disabled:
-                    validator_list.append(CHECKS['relationship-types'])
+                    if 'hash-algo' not in options.disabled:
+                        validator_list.append(CHECKS['hash-algo'])
+                    if 'encryption-algo' not in options.disabled:
+                        validator_list.append(CHECKS['encryption-algo'])
+                    if 'windows-pebinary-type' not in options.disabled:
+                        validator_list.append(CHECKS['windows-pebinary-type'])
+                    if 'account-type' not in options.disabled:
+                        validator_list.append(CHECKS['account-type'])
+                if 'all-external-sources' not in options.disabled:
+                    if 'file-mime-type' not in options.disabled:
+                        validator_list.append(CHECKS['file-mime-type'])
+
+            if 'network-traffic-ports' not in options.disabled:
+                validator_list.append(CHECKS['network-traffic-ports'])
 
     # --enable
     if options.enabled:
