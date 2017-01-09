@@ -1,7 +1,7 @@
 ====================
 `cti-stix-validator`
 ====================
-NOTE: This is an `OASIS Open Repository <https://www.oasis-open.org/resources/open-repositories>`_. See the `Governance`_ section for more information.
+NOTE: This is an `OASIS Open Repository <https://www.oasis-open.org/resources/open-repositories/>`_. See the `Governance`_ section for more information.
 
 The STIX validator checks that STIX JSON content conforms to the requirements specified in the STIX 2.0 specification. In addition to checking conformance with the JSON schemas, the validator checks conformance with requirements that cannot be specified in JSON schema, as well as with established "best practices." This validator is non-normative; in cases of conflict with the STIX 2.0 specification, the specification takes precedence.
 
