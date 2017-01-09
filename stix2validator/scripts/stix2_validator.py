@@ -91,7 +91,7 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | account-type vocabulary                |
 | 270  | all-external-sources        | all of the following external source   |
 |      |                             | checks are run                         |
-| 271  | file-mime-type              | certain property values are valid IANA |
+| 271  | mime-type                   | certain property values are valid IANA |
 |      |                             | MIME types                             |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
@@ -200,6 +200,31 @@ def _get_arg_parser(is_script=True):
         default=False,
         help="Ensure that no custom object types are used, only those detailed"
              " in the STIX specification."
+    )
+
+    parser.add_argument(
+        "--no-cache",
+        dest="no_cache",
+        action="store_true",
+        default=False,
+        help="Disable the caching of external source values."
+    )
+
+    parser.add_argument(
+        "--refresh-cache",
+        dest="refresh_cache",
+        action="store_true",
+        default=False,
+        help="Clears the cache of external source values, then "
+             "during validation downloads them again."
+    )
+
+    parser.add_argument(
+        "--clear-cache",
+        dest="clear_cache",
+        action="store_true",
+        default=False,
+        help="Clear the cache of external source values after validation."
     )
 
     return parser

@@ -711,7 +711,7 @@ def network_traffic_ports(instance):
 
 
 @cyber_observable_check
-def file_mime_type(instance):
+def mime_type(instance):
     """Ensure the 'mime_type' property of file objects comes from the Template
     column in the IANA media type registry.
     """
@@ -723,7 +723,7 @@ def file_mime_type(instance):
                                     "('%s') should be an IANA registered MIME "
                                     "Type of the form 'type/subtype'."
                                     % (key, obj['mime_type']), instance['id'],
-                                    'file-mime-type')
+                                    'mime-type')
             else:
                 info("Can't reach IANA website; using regex for mime types.")
                 mime_pattern = '^(application|audio|font|image|message|model' \
@@ -733,7 +733,7 @@ def file_mime_type(instance):
                                     "('%s') should be an IANA MIME Type of the"
                                     " form 'type/subtype'."
                                     % (key, obj['mime_type']), instance['id'],
-                                    'file-mime-type')
+                                    'mime-type')
 
 
 @cyber_observable_check
@@ -782,7 +782,7 @@ CHECKS = {
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
         vocab_account_type,
-        file_mime_type,
+        mime_type,
         network_traffic_ports
     ],
     'format-checks': [
@@ -830,7 +830,7 @@ CHECKS = {
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
         vocab_account_type,
-        file_mime_type,
+        mime_type,
     ],
     'marking-definition-type': vocab_marking_definition,
     'relationship-types': relationships_strict,
@@ -867,9 +867,9 @@ CHECKS = {
     'windows-pebinary-type': vocab_windows_pebinary_type,
     'account-type': vocab_account_type,
     'all-external-sources': [
-        file_mime_type,
+        mime_type,
     ],
-    'file-mime-type': file_mime_type,
+    'mime-type': mime_type,
     'network-traffic-ports': network_traffic_ports
 }
 
@@ -972,8 +972,8 @@ def list_shoulds(options):
                     if 'account-type' not in options.disabled:
                         validator_list.append(CHECKS['account-type'])
                 if 'all-external-sources' not in options.disabled:
-                    if 'file-mime-type' not in options.disabled:
-                        validator_list.append(CHECKS['file-mime-type'])
+                    if 'mime-type' not in options.disabled:
+                        validator_list.append(CHECKS['mime-type'])
 
             if 'network-traffic-ports' not in options.disabled:
                 validator_list.append(CHECKS['network-traffic-ports'])

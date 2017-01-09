@@ -25,11 +25,19 @@ class ValidationOptions(object):
             instead of mere warnings.
         strict_types: Specifies that no custom object types be used, only
             those detailed in the STIX specification.
+        no_cache: Specifies that caching of values from external sources should
+            be disabled.
+        refresh_cache: Specifies that the cache of values from external sources
+            should be cleared before validation, and then re-downloaded during
+            validation.
+        clear_cache: Specifies that the cache of values from external sources
+            should be cleared after validation.
 
     """
     def __init__(self, cmd_args=None, verbose=False, files=None,
                  recursive=False, schema_dir=None, disabled="",
-                 enabled="", strict=False, strict_types=False):
+                 enabled="", strict=False, strict_types=False,
+                 no_cache=False, refresh_cache=False, clear_cache=False):
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
             self.files = cmd_args.files
@@ -39,6 +47,9 @@ class ValidationOptions(object):
             self.enabled = cmd_args.enabled
             self.strict = cmd_args.strict
             self.strict_types = cmd_args.strict_types
+            self.no_cache = cmd_args.no_cache
+            self.refresh_cache = cmd_args.refresh_cache
+            self.clear_cache = cmd_args.clear_cache
         else:
             # input options
             self.files = files
@@ -51,6 +62,11 @@ class ValidationOptions(object):
             self.strict_types = strict_types
             self.disabled = disabled
             self.enabled = enabled
+
+            # cache options
+            self.no_cache = no_cache
+            self.refresh_cache = refresh_cache
+            self.clear_cache = clear_cache
 
         # If no schema directory given, use default bundled with this package
         if not self.schema_dir:
@@ -107,7 +123,7 @@ CHECK_CODES = {
     '243': 'windows-pebinary-type',
     '244': 'account-type',
     '270': 'all-external-sources',
-    '271': 'file-mime-type',
+    '271': 'mime-type',
     '301': 'network-traffic-ports'
 }
 

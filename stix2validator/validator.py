@@ -3,13 +3,15 @@
 
 import os
 import json
-from itertools import chain
 import fnmatch
+import datetime
+from itertools import chain
 from collections import Iterable
 
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
 from six import text_type
+import requests_cache
 
 from . import output, musts, shoulds
 from .errors import (SchemaError, SchemaInvalidError, pretty_error,
@@ -436,6 +438,13 @@ def schema_validate(instance, options):
     except schema_exceptions.SchemaError as e:
         raise SchemaInvalidError('Invalid JSON schema: ' + str(e))
 
+    # Cache data from external sources; used in some checks
+    if not options.no_cache:
+        requests_cache.install_cache(expire_after=datetime.timedelta(weeks=1))
+    if options.refresh_cache:
+        now = datetime.datetime.utcnow()
+        requests_cache.get_cache().remove_old_entries(now)
+
     validator = load_validator(schema_path, schema, options)
     validator_list = validator.musts_list + validator.shoulds_list
     output.info("Running the following additional checks: %s."
@@ -472,6 +481,11 @@ def schema_validate(instance, options):
         valid = False
     else:
         valid = True
+
+    # Clear requests cache if commandline flag was set
+    if options.clear_cache:
+        now = datetime.datetime.utcnow()
+        requests_cache.get_cache().remove_old_entries(now)
 
     return ValidationResults(is_valid=valid, errors=error_list,
                              warnings=warnings)
