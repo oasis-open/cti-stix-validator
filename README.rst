@@ -121,26 +121,26 @@ Some checks access Internet resources to determine valid values for certain prop
 |  142   | observable-dictionary-keys  | dictionaries in cyber observable       |
 |        |                             | objects follow the correct format      |
 +--------+-----------------------------+----------------------------------------+
-|  143   | custom-observable-object-   | custom observable object names follow  |
-|        |     prefix                  | the correct format                     |
+|  143   | custom-observable-object-\  | custom observable object names follow  |
+|        | prefix                      | the correct format                     |
 +--------+-----------------------------+----------------------------------------+
-|  144   | custom-observable-object-   | same as 144 but more lenient; no       |
-|        |     prefix-lax              | source identifier needed in prefix     |
+|  144   | custom-observable-object-\  | same as 144 but more lenient; no       |
+|        | prefix-lax                  | source identifier needed in prefix     |
 +--------+-----------------------------+----------------------------------------+
-|  145   | custom-object-extension-    | custom observable object extension     |
-|        |     prefix                  | names follow the correct format        |
+|  145   | custom-object-extension-\   | custom observable object extension     |
+|        | prefix                      | names follow the correct format        |
 +--------+-----------------------------+----------------------------------------+
-|  146   | custom-object-extension-    | same as 145 but more lenient; no       |
-|        |     prefix-lax              | source identifier needed in prefix     |
+|  146   | custom-object-extension-\   | same as 145 but more lenient; no       |
+|        | prefix-lax                  | source identifier needed in prefix     |
 +--------+-----------------------------+----------------------------------------+
-|  147   | custom-observable-          | observable object custom property      |
-|        |     properties-prefix       | names follow the correct format        |
+|  147   | custom-observable-\         | observable object custom property      |
+|        | properties-prefix           | names follow the correct format        |
 +--------+-----------------------------+----------------------------------------+
-|  148   | custom-observable-          | same as 148 but more lenient; no       |
-|        |     properties-prefix-lax   | source identifier needed in prefix     |
+|  148   | custom-observable-\         | same as 148 but more lenient; no       |
+|        | properties-prefix-lax       | source identifier needed in prefix     |
 +--------+-----------------------------+----------------------------------------+
-|  149   | windows-process-priority-   | windows-process-ext's 'priority'       |
-|        |     format                  | follows the correct format             |
+|  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
+|        | format                      | follows the correct format             |
 |        |                             |                                        |
 +--------+-----------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run                 |
