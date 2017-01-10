@@ -440,13 +440,25 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.check_ignore(json.dumps(observed_data), 'windows-process-priority-format')
 
-    def test_mime_type(self):
+    def test_file_mime_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['mime_type'] = "bla"
         observed_data = json.dumps(observed_data)
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data, 'mime-type')
+
+    def test_artifact_mime_type(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "artifact",
+            "hashes": {
+                "foo": "B4D33B0C7306351B9ED96578465C5579"
+            },
+            "mime_type": "bla/blabla"
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
 
     def test_network_traffic_ports(self):
         observed_data = copy.deepcopy(self.valid_observed_data)

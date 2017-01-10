@@ -1320,5 +1320,6 @@ def media_types():
                         types.append(line.split(',')[1])
 
             tlist.extend(types)
+        tlist.append('image/jpeg')
         media_types.typelist = tlist
     return media_types.typelist

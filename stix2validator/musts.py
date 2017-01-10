@@ -197,6 +197,22 @@ def observable_object_references(instance):
                                                 % (obj_prop, key, valids), instance['id'])
 
 
+@cyber_observable_check
+def artifact_mime_type(instance):
+    """Ensure the 'mime_type' property of artifact objects comes from the
+    Template column in the IANA media type registry.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'artifact' and 'mime_type' in obj):
+            if enums.media_types():
+                if obj['mime_type'] not in enums.media_types():
+                    yield JSONError("The 'mime_type' property of object '%s' "
+                                    "('%s') should be an IANA registered MIME "
+                                    "Type of the form 'type/subtype'."
+                                    % (key, obj['mime_type']), instance['id'],
+                                    'mime-type')
+
+
 def types_strict(instance):
     """Ensure that no custom object types are used, but only the official ones
     from the specification.
@@ -215,7 +231,8 @@ def list_musts(options):
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,
-        observable_object_references
+        observable_object_references,
+        artifact_mime_type
     ]
 
     # --strict-types
