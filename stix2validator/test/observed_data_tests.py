@@ -479,6 +479,26 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2']['dst_port'] = 80
         self.assertTrueWithOptions(json.dumps(observed_data))
 
+    def test_file_character_set(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['name_enc'] = "blablabla"
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['0']['name_enc'] = "ISO-8859-2"
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+    def test_directory_character_set(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+          "type": "directory",
+          "path": "C:\\Windows\\System32",
+          "path_enc": "blablabla"
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['path_enc'] = "US-ASCII"
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
 
 if __name__ == "__main__":
     unittest.main()
