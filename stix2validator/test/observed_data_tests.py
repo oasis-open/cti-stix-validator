@@ -502,6 +502,39 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2']['path_enc'] = "US-ASCII"
         self.assertTrueWithOptions(json.dumps(observed_data))
 
+    def test_network_traffic_protocols(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "network-traffic",
+            "src_port": 24678,
+            "dst_port": 80,
+            "protocols": [
+                "ipv4",
+                "tcp",
+                "foobar"
+            ]
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        self.check_ignore(json.dumps(observed_data), 'protocols')
+
+        observed_data['objects']['2']['protocols'][2] = 'https'
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+    def test_network_traffic_ipfix(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "network-traffic",
+            "src_port": 24678,
+            "dst_port": 80,
+            "ipfix": {
+                "minimumIpTotalLength": 32,
+                "maximumIpTotalLength": 2556,
+                "foo": "bar"
+            }
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        self.check_ignore(json.dumps(observed_data), 'ipfix')
+
 
 if __name__ == "__main__":
     unittest.main()

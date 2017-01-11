@@ -737,6 +737,65 @@ def mime_type(instance):
 
 
 @cyber_observable_check
+def protocols(instance):
+    """Ensure the 'protocols' property of network-traffic objects contains only
+    values from the IANA Service Name and Transport Protocol Port Number
+    Registry.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'network-traffic' and
+                'protocols' in obj):
+            for prot in obj['protocols']:
+                if enums.protocols():
+                    if prot not in enums.protocols():
+                        yield JSONError("The 'protocols' property of object "
+                                        "'%s' contains a value ('%s') not in "
+                                        "IANA Service Name and Transport "
+                                        "Protocol Port Number Registry."
+                                        % (key, prot), instance['id'],
+                                        'protocols')
+                else:
+                    info("Can't reach IANA website; using regex for protocols.")
+                    prot_pattern = '^[a-zA-Z0-9-]{1,15}'
+                    if not re.match(prot_pattern, prot):
+                        yield JSONError("The 'protocols' property of object "
+                                        "'%s' contains a value ('%s') not in "
+                                        "IANA Service Name and Transport "
+                                        "Protocol Port Number Registry."
+                                        % (key, prot), instance['id'],
+                                        'protocols')
+
+
+@cyber_observable_check
+def ipfix(instance):
+    """Ensure the 'protocols' property of network-traffic objects contains only
+    values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'network-traffic' and
+                'ipfix' in obj):
+            for ipf in obj['ipfix']:
+                if enums.ipfix():
+                    if ipf not in enums.ipfix():
+                        yield JSONError("The 'ipfix' property of object "
+                                        "'%s' contains a key ('%s') not in "
+                                        "IANA IP Flow Information Export "
+                                        "(IPFIX) Entities Registry."
+                                        % (key, ipf), instance['id'],
+                                        'ipfix')
+                else:
+                    info("Can't reach IANA website; using regex for ipfix.")
+                    ipf_pattern = '^[a-Z][a-zA-Z0-9]+'
+                    if not re.match(ipf_pattern, ipf):
+                        yield JSONError("The 'ipfix' property of object "
+                                        "'%s' contains a value ('%s') not in "
+                                        "IANA Service Name and Transport "
+                                        "Protocol Port Number Registry."
+                                        % (key, ipf), instance['id'],
+                                        'ipfix')
+
+
+@cyber_observable_check
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
     """
@@ -783,7 +842,9 @@ CHECKS = {
         vocab_windows_pebinary_type,
         vocab_account_type,
         mime_type,
-        network_traffic_ports
+        protocols,
+        ipfix,
+        network_traffic_ports,
     ],
     'format-checks': [
         custom_object_prefix_strict,
@@ -831,6 +892,8 @@ CHECKS = {
         vocab_windows_pebinary_type,
         vocab_account_type,
         mime_type,
+        protocols,
+        ipfix,
     ],
     'marking-definition-type': vocab_marking_definition,
     'relationship-types': relationships_strict,
@@ -868,8 +931,12 @@ CHECKS = {
     'account-type': vocab_account_type,
     'all-external-sources': [
         mime_type,
+        protocols,
+        ipfix,
     ],
     'mime-type': mime_type,
+    'protocols': protocols,
+    'ipfix': ipfix,
     'network-traffic-ports': network_traffic_ports
 }
 

@@ -93,6 +93,11 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | checks are run                         |
 | 271  | mime-type                   | certain property values are valid IANA |
 |      |                             | MIME types                             |
+| 272  | protocols                   | certain property values are valid IANA |
+|      |                             | Service and Protocol names             |
+| 273  | ipfix                       | certain property values are valid IANA |
+|      |                             | IP Flow Information Export (IPFIX)     |
+|      |                             | Entities                               |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
 +------+-----------------------------+----------------------------------------+

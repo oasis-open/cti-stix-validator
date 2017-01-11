@@ -124,6 +124,8 @@ CHECK_CODES = {
     '244': 'account-type',
     '270': 'all-external-sources',
     '271': 'mime-type',
+    '272': 'protocols',
+    '273': 'ipfix',
     '301': 'network-traffic-ports'
 }
 

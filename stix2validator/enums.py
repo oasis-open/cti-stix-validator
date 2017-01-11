@@ -2,6 +2,7 @@
 """
 
 import requests
+import re
 from six import PY2, text_type
 
 # Enumerations of the default values of STIX open vocabularies
@@ -1347,10 +1348,69 @@ def char_sets():
                     line = line.decode("ascii")
                 if line.count(',') > 0:
                     vals = line.split(',')
-                    if vals[0] != '':
+                    if vals[0]:
                         clist.append(vals[0])
                     else:
                         clist.append(vals[1])
 
         char_sets.setlist = clist
     return char_sets.setlist
+
+
+def protocols():
+    """Return a list of values from the IANA Service Name and Transport
+    Protocol Port Number Registry, or an empty list if the IANA website is
+    unreachable.
+    Store it as a function attribute so that we only build the list once.
+    """
+    if not hasattr(protocols, 'protlist'):
+        plist = []
+        try:
+            data = requests.get('http://www.iana.org/assignments/service-names'
+                                '-port-numbers/service-names-port-numbers.csv')
+        except requests.exceptions.RequestException:
+            return []
+
+        for line in data.iter_lines():
+            if line:
+                line = line.decode("utf-8")
+                if line.count(',') > 0:
+                    vals = line.split(',')
+                    if vals[0]:
+                        plist.append(vals[0])
+                    if len(vals) > 2 and vals[2] and vals[2] not in plist:
+                        plist.append(vals[2])
+
+        plist.append('ipv4')
+        plist.append('ipv6')
+        plist.append('ssl')
+        plist.append('tls')
+        plist.append('dns')
+        protocols.protlist = plist
+    return protocols.protlist
+
+
+def ipfix():
+    """Return a list of values from the list of IANA IP Flow Information Export
+    (IPFIX) Entities, or an empty list if the IANA website is unreachable.
+    Store it as a function attribute so that we only build the list once.
+    """
+    if not hasattr(ipfix, 'ipflist'):
+        ilist = []
+        try:
+            data = requests.get('http://www.iana.org/assignments/ipfix/ipfix-'
+                                'information-elements.csv')
+        except requests.exceptions.RequestException:
+            return []
+
+        for line in data.iter_lines():
+            if line:
+                if not PY2:
+                    line = line.decode("ascii")
+                if re.match('^\d+(,[a-zA-Z0-9]+){2},', line):
+                    vals = line.split(',')
+                    if vals[1]:
+                        ilist.append(vals[1])
+
+        ipfix.ipflist = ilist
+    return ipfix.ipflist
