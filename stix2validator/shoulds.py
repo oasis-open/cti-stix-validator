@@ -785,14 +785,83 @@ def ipfix(instance):
                                         'ipfix')
                 else:
                     info("Can't reach IANA website; using regex for ipfix.")
-                    ipf_pattern = '^[a-Z][a-zA-Z0-9]+'
+                    ipf_pattern = '^[a-z][a-zA-Z0-9]+'
                     if not re.match(ipf_pattern, ipf):
                         yield JSONError("The 'ipfix' property of object "
-                                        "'%s' contains a value ('%s') not in "
-                                        "IANA Service Name and Transport "
-                                        "Protocol Port Number Registry."
+                                        "'%s' contains a key ('%s') not in "
+                                        "IANA IP Flow Information Export "
+                                        "(IPFIX) Entities Registry."
                                         % (key, ipf), instance['id'],
                                         'ipfix')
+
+
+@cyber_observable_check
+def http_request_headers(instance):
+    """Ensure the keys of the 'request_headers' property of the http-request-
+    ext extension of network-traffic objects conform to the format for HTTP
+    request headers. Use a regex because there isn't a definitive source.
+    https://www.iana.org/assignments/message-headers/message-headers.xhtml does
+    not differentiate between request and response headers, and leaves out
+    several common non-standard request fields listed elsewhere.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'network-traffic'):
+            try:
+                headers = obj['extensions']['http-request-ext']['request_header']
+            except KeyError:
+                continue
+
+            for hdr in headers:
+                h_pattern = '^[A-Z][a-zA-Z0-9]*(-[A-Z][a-zA-Z0-9]*)*$'
+                if not re.match(h_pattern, hdr):
+                    yield JSONError("The 'request_header' property of object "
+                                    "'%s' contains an invalid HTTP request"
+                                    "header ('%s')."
+                                    % (key, hdr), instance['id'],
+                                    'http-request-headers')
+
+
+@cyber_observable_check
+def socket_options(instance):
+    """Ensure the keys of the 'options' property of the socket-ext extension of
+    network-traffic objects are only valid socket options (SO_*).
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'network-traffic'):
+            try:
+                options = obj['extensions']['socket-ext']['options']
+            except KeyError:
+                continue
+
+            for opt in options:
+                if opt not in enums.SOCKET_OPTIONS:
+                    yield JSONError("The 'options' property of object '%s' "
+                                    "contains a key ('%s') that is not a valid"
+                                    " socket option (SO_*)."
+                                    % (key, opt), instance['id'], 'socket-options')
+
+
+@cyber_observable_check
+def pdf_doc_info(instance):
+    """Ensure the keys of the 'document_info_dict' property of the pdf-ext
+    extension of file objects are only valid PDF Document Information
+    Dictionary Keys.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'file'):
+            try:
+                did = obj['extensions']['pdf-ext']['document_info_dict']
+            except KeyError:
+                continue
+
+            for elem in did:
+                if elem not in enums.PDF_DID:
+                    yield JSONError("The 'document_info_dict' property of "
+                                    "object '%s' contains a key ('%s') that is"
+                                    " not a valid PDF Document Information "
+                                    "Dictionary key."
+                                    % (key, elem), instance['id'],
+                                    'pdf-doc-info')
 
 
 @cyber_observable_check
@@ -844,6 +913,9 @@ CHECKS = {
         mime_type,
         protocols,
         ipfix,
+        http_request_headers,
+        socket_options,
+        pdf_doc_info,
         network_traffic_ports,
     ],
     'format-checks': [
@@ -894,6 +966,9 @@ CHECKS = {
         mime_type,
         protocols,
         ipfix,
+        http_request_headers,
+        socket_options,
+        pdf_doc_info,
     ],
     'marking-definition-type': vocab_marking_definition,
     'relationship-types': relationships_strict,
@@ -933,10 +1008,16 @@ CHECKS = {
         mime_type,
         protocols,
         ipfix,
+        http_request_headers,
+        socket_options,
+        pdf_doc_info,
     ],
     'mime-type': mime_type,
     'protocols': protocols,
     'ipfix': ipfix,
+    'http-request-headers': http_request_headers,
+    'socket-options': socket_options,
+    'pdf-doc-info': pdf_doc_info,
     'network-traffic-ports': network_traffic_ports
 }
 

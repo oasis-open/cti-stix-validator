@@ -126,6 +126,9 @@ CHECK_CODES = {
     '271': 'mime-type',
     '272': 'protocols',
     '273': 'ipfix',
+    '274': 'http-request-headers',
+    '275': 'socket-options',
+    '276': 'pdf-doc-info',
     '301': 'network-traffic-ports'
 }
 

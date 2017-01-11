@@ -207,7 +207,7 @@ def artifact_mime_type(instance):
             if enums.media_types():
                 if obj['mime_type'] not in enums.media_types():
                     yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA registered MIME "
+                                    "('%s') must be an IANA registered MIME "
                                     "Type of the form 'type/subtype'."
                                     % (key, obj['mime_type']), instance['id'])
 
@@ -222,7 +222,7 @@ def character_set(instance):
             if enums.char_sets():
                 if obj['path_enc'] not in enums.char_sets():
                     yield JSONError("The 'path_enc' property of object '%s' "
-                                    "('%s') should be an IANA registered "
+                                    "('%s') must be an IANA registered "
                                     "character set."
                                     % (key, obj['path_enc']), instance['id'])
 
@@ -230,9 +230,22 @@ def character_set(instance):
             if enums.char_sets():
                 if obj['name_enc'] not in enums.char_sets():
                     yield JSONError("The 'name_enc' property of object '%s' "
-                                    "('%s') should be an IANA registered "
+                                    "('%s') must be an IANA registered "
                                     "character set."
                                     % (key, obj['name_enc']), instance['id'])
+
+
+@cyber_observable_check
+def software_language(instance):
+    """Ensure the 'language' property of software objects is a valid ISO 639-2
+    language code.
+    """
+    for key, obj in instance['objects'].items():
+        if ('type' in obj and obj['type'] == 'software' and
+                'language' in obj and obj['language'] not in enums.LANG_CODES):
+            yield JSONError("The 'language' property of object '%s' "
+                            "('%s') must be a valid ISO 639-2 language code."
+                            % (key, obj['language']), instance['id'])
 
 
 def types_strict(instance):
@@ -262,7 +275,8 @@ def list_musts(options):
         marking_selector_syntax,
         observable_object_references,
         artifact_mime_type,
-        character_set
+        character_set,
+        software_language
     ]
 
     # --strict-types

@@ -535,6 +535,76 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(json.dumps(observed_data))
         self.check_ignore(json.dumps(observed_data), 'ipfix')
 
+    def test_network_traffic_http_request_header(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "network-traffic",
+            "src_port": 24678,
+            "dst_port": 80,
+            "extensions": {
+                "http-request-ext": {
+                    "request_method": "get",
+                    "request_value": "/download.html",
+                    "request_version": "http/1.1",
+                    "request_header": {
+                        "Accept-Encoding": "gzip,deflate",
+                        "Host": "www.example.com",
+                        "x-foobar": "something"
+                    }
+                }
+            }
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        self.check_ignore(json.dumps(observed_data), 'http-request-headers')
+
+    def test_network_traffic_socket_options(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "network-traffic",
+            "src_port": 24678,
+            "dst_port": 80,
+            "extensions": {
+                "socket-ext": {
+                  "address_family": "AF_INET",
+                  "socket_type": "SOCK_STREAM",
+                  "options": {
+                    "foo": "bar"
+                  }
+                }
+            }
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+    def test_pdf_doc_info(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "file",
+            "name": "foo.pdf",
+            "extensions": {
+                "pdf-ext": {
+                    "version": "1.7",
+                    "document_info_dict": {
+                        "Title": "Sample document",
+                        "foo": "bar"
+                    }
+                }
+            }
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        self.check_ignore(json.dumps(observed_data), 'pdf-doc-info')
+
+    def test_software_language(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "software",
+            "name": "word",
+            "language": "bbb"
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['language'] = 'eng'
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
 
 if __name__ == "__main__":
     unittest.main()

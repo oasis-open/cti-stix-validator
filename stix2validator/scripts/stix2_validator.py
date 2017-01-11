@@ -98,6 +98,12 @@ the validator performs, along with the code to use with the --enable or
 | 273  | ipfix                       | certain property values are valid IANA |
 |      |                             | IP Flow Information Export (IPFIX)     |
 |      |                             | Entities                               |
+| 274  | http-request-headers        | certain property values are valid HTTP |
+|      |                             | request header names                   |
+| 275  | socket-options              | certain property values are valid      |
+|      |                             | socket options                         |
+| 276  | pdf-doc-info                | certain property values are valid PDF  |
+|      |                             | Document Information Dictionary keys   |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
 +------+-----------------------------+----------------------------------------+
