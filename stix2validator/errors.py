@@ -147,5 +147,7 @@ def pretty_error(error, verbose=False):
                 msg = ("Relationships cannot link bundles, marking definitions"
                        ", sightings, or other relationships. This field must "
                        "contain the id of an SDO.")
+    elif error.validator == 'anyOf':
+        msg = msg + ':\n' + text_type(error.schema)
 
     return error_loc + msg

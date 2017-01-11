@@ -3,7 +3,7 @@
 
 import re
 from . import enums
-from .util import cyber_observable_check
+from .util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
 
 
@@ -240,8 +240,15 @@ def types_strict(instance):
     from the specification.
     """
     if instance['type'] not in enums.TYPES:
-        return JSONError("Object type '%s' is not one of those detailed in the"
+        yield JSONError("Object type '%s' is not one of those detailed in the"
                          " specification." % instance['type'], instance['id'])
+    elif has_cyber_observable_data(instance):
+        for key, obj in instance['objects'].items():
+            if 'type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES:
+                yield JSONError("Observable object %s is type '%s' which is "
+                                "not one of those detailed in the "
+                                "specification."
+                                % (key, obj['type']), instance['id'])
 
 
 def list_musts(options):

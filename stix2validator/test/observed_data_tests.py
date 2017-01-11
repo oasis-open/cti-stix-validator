@@ -106,7 +106,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_dict_key_uppercase(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['x-s-dicts'] = {
+        observed_data['objects']['0']['x_s_dicts'] = {
             'FOOBAR': {
                 "foo": "bar"
             }
@@ -120,7 +120,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_dict_key_length(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['x-s-dicts'] = {
+        observed_data['objects']['0']['x_s_dicts'] = {
             'foofoobarfoofoobarbarfoofoobarbarbar': {
                 "foo": "bar"
             }
@@ -300,11 +300,14 @@ class ObservedDataTestCases(ValidatorTest):
     def test_observable_object_types(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['type'] = "foo"
-        observed_data = json.dumps(observed_data)
-        self.assertFalseWithOptions(observed_data)
+        self.assertFalseWithOptions(json.dumps(observed_data))
 
-        self.check_ignore(observed_data,
+        self.check_ignore(json.dumps(observed_data),
             'custom-observable-object-prefix,custom-observable-object-prefix-lax')
+
+        observed_data['objects']['0']['type'] = "x-c-foo"
+        self.assertTrueWithOptions(json.dumps(observed_data))
+        self.assertFalseWithOptions(json.dumps(observed_data), strict_types=True)
 
     def test_observable_object_extensions(self):
         observed_data = copy.deepcopy(self.valid_observed_data)

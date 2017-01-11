@@ -269,7 +269,7 @@ OBSERVABLE_TYPES = [
     "autonomous-system",
     "directory",
     "domain-name",
-    "email-address",
+    "email-addr",
     "email-message",
     "file",
     "ipv4-addr",
@@ -593,7 +593,7 @@ OBSERVABLE_PROPERTIES = {
         'value',
         'resolves_to_refs'
     ],
-    'email-address': [
+    'email-addr': [
         'type',
         'description',
         'extensions',
@@ -987,26 +987,26 @@ OBSERVABLE_PROP_REFS = {
             'domain-name'
         ]
     },
-    'email-address': {
+    'email-addr': {
         'belongs_to_ref': [
             'user-account'
         ]
     },
     'email-message': {
         'from_ref': [
-            'email-address'
+            'email-addr'
         ],
         'sender_ref': [
-            'email-address'
+            'email-addr'
         ],
         'to_refs': [
-            'email-address'
+            'email-addr'
         ],
         'cc_refs': [
-            'email-address'
+            'email-addr'
         ],
         'bcc_refs': [
-            'email-address'
+            'email-addr'
         ],
         'raw_email_ref': [
             'artifact'
@@ -1317,10 +1317,13 @@ def media_types():
                     if not PY2:
                         line = text_type(line)
                     if line.count(',') > 0:
-                        types.append(line.split(',')[1])
+                        reg_template = line.split(',')[1]
+                        if reg_template:
+                            types.append(reg_template)
+                        else:
+                            types.append(cat + '/' + line.split(',')[0])
 
             tlist.extend(types)
-        tlist.append('image/jpeg')
         media_types.typelist = tlist
     return media_types.typelist
 
