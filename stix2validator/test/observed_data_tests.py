@@ -157,11 +157,15 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_vocab_encryption_algo(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['encryption_algorithm'] = "MDK"
-        observed_data = json.dumps(observed_data)
-        self.assertFalseWithOptions(observed_data)
+        observed_data['objects']['0']['encryption_algorithm'] = "AES128-ECB"
+        self.assertFalseWithOptions(json.dumps(observed_data))
 
-        self.check_ignore(observed_data, 'encryption-algo')
+        observed_data['objects']['0']['is_encrypted'] = True
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['0']['encryption_algorithm'] = "FOO"
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        self.check_ignore(json.dumps(observed_data), 'encryption-algo')
 
     def test_vocab_file_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -177,6 +181,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "url": "http://www.example.com/file.txt",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
             }
@@ -299,6 +304,12 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_observable_object_types(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['type'] = "x--foo"
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        observed_data['objects']['0']['type'] = "FOO"
+        self.assertFalseWithOptions(json.dumps(observed_data))
+        observed_data['objects']['0']['type'] = "a"
+        self.assertFalseWithOptions(json.dumps(observed_data))
         observed_data['objects']['0']['type'] = "foo"
         self.assertFalseWithOptions(json.dumps(observed_data))
 
@@ -421,6 +432,26 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['0']['extensions']['archive-ext']['contains_refs'][0] = '2'
         self.assertFalseWithOptions(json.dumps(observed_data))
 
+    def test_observable_object_reserved_property(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['0']['type'] = 'action'
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['0']['type'] = 'file'
+        observed_data['objects']['0']['action'] = True
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+    def test_windows_registry_key_truncated(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "windows-registry-key",
+            "key": "HKLM\\system\\bar\\foo"
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['key'] = "hkey_local_machine\\system\\bar\\foo"
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
     def test_vocab_windows_process_priority(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
@@ -455,32 +486,19 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "url": "http://www.example.com/file.txt",
             "hashes": {
-                "foo": "B4D33B0C7306351B9ED96578465C5579"
+                "MD5": "B4D33B0C7306351B9ED96578465C5579"
             },
             "mime_type": "bla/blabla"
         }
-        observed_data = json.dumps(observed_data)
-        self.assertFalseWithOptions(observed_data)
-
-    def test_network_traffic_ports(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "network-traffic",
-            "protocols": [
-                "ipv4",
-                "tcp"
-            ]
-        }
         self.assertFalseWithOptions(json.dumps(observed_data))
 
-        observed_data['objects']['2']['src_port'] = 3372
-        self.assertFalseWithOptions(json.dumps(observed_data))
-
-        self.check_ignore(json.dumps(observed_data), 'network-traffic-ports')
-
-        observed_data['objects']['2']['dst_port'] = 80
+        observed_data['objects']['2']['mime_type'] = "text/plain"
         self.assertTrueWithOptions(json.dumps(observed_data))
+
+        del observed_data['objects']['2']['url']
+        self.assertFalseWithOptions(json.dumps(observed_data))
 
     def test_file_character_set(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -501,79 +519,6 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['2']['path_enc'] = "US-ASCII"
         self.assertTrueWithOptions(json.dumps(observed_data))
-
-    def test_network_traffic_protocols(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "network-traffic",
-            "src_port": 24678,
-            "dst_port": 80,
-            "protocols": [
-                "ipv4",
-                "tcp",
-                "foobar"
-            ]
-        }
-        self.assertFalseWithOptions(json.dumps(observed_data))
-        self.check_ignore(json.dumps(observed_data), 'protocols')
-
-        observed_data['objects']['2']['protocols'][2] = 'https'
-        self.assertTrueWithOptions(json.dumps(observed_data))
-
-    def test_network_traffic_ipfix(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "network-traffic",
-            "src_port": 24678,
-            "dst_port": 80,
-            "ipfix": {
-                "minimumIpTotalLength": 32,
-                "maximumIpTotalLength": 2556,
-                "foo": "bar"
-            }
-        }
-        self.assertFalseWithOptions(json.dumps(observed_data))
-        self.check_ignore(json.dumps(observed_data), 'ipfix')
-
-    def test_network_traffic_http_request_header(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "network-traffic",
-            "src_port": 24678,
-            "dst_port": 80,
-            "extensions": {
-                "http-request-ext": {
-                    "request_method": "get",
-                    "request_value": "/download.html",
-                    "request_version": "http/1.1",
-                    "request_header": {
-                        "Accept-Encoding": "gzip,deflate",
-                        "Host": "www.example.com",
-                        "x-foobar": "something"
-                    }
-                }
-            }
-        }
-        self.assertFalseWithOptions(json.dumps(observed_data))
-        self.check_ignore(json.dumps(observed_data), 'http-request-headers')
-
-    def test_network_traffic_socket_options(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "network-traffic",
-            "src_port": 24678,
-            "dst_port": 80,
-            "extensions": {
-                "socket-ext": {
-                  "address_family": "AF_INET",
-                  "socket_type": "SOCK_STREAM",
-                  "options": {
-                    "foo": "bar"
-                  }
-                }
-            }
-        }
-        self.assertFalseWithOptions(json.dumps(observed_data))
 
     def test_pdf_doc_info(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -603,6 +548,60 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(json.dumps(observed_data))
 
         observed_data['objects']['2']['language'] = 'eng'
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+    def test_email_address_invalid_value(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "email-addr",
+            "value": "John Doe <jdoe@example.com>",
+            "display_name": "John Doe"
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['value'] = 'jdoe@example.com'
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+    def test_email_message_multipart(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+          "type": "email-addr",
+          "value": "jdoe@example.com",
+          "display_name": "John Doe"
+        }
+        observed_data['objects']['3'] = {
+          "type": "email-addr",
+          "value": "mary@example.com",
+          "display_name": "Mary Smith"
+        }
+        observed_data['objects']['4'] = {
+            "type": "email-message",
+            "is_multipart": False,
+            "from_ref": "2",
+            "to_refs": ["3"],
+            "date": "1997-11-21T15:55:06Z",
+            "subject": "Saying Hello",
+            "body_multipart": [
+                {
+                    "content_type": "text/plain; charset=utf-8",
+                    "content_disposition": "inline",
+                    "body": "Cats are funny!"
+                },
+                {
+                    "content_type": "image/png",
+                    "content_disposition": "attachment; filename=\"tabby.png\"",
+                },
+                {
+                    "content_type": "application/zip",
+                    "content_disposition": "attachment; filename=\"tabby_pics.zip\"",
+                }
+            ]
+
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        del observed_data['objects']['4']['body_multipart']
+        observed_data['objects']['4']['body'] = "Hello World"
         self.assertTrueWithOptions(json.dumps(observed_data))
 
 

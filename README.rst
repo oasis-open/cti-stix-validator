@@ -202,8 +202,8 @@ Some checks access Internet resources to determine valid values for certain prop
 |  270   | all-external-sources        | all of the following external source   |
 |        |                             | checks are run                         |
 +--------+-----------------------------+----------------------------------------+
-|  271   | mime-type                   | certain property values are valid IANA |
-|        |                             | MIME types                             |
+|  271   | mime-type                   | file.mime_type is a valid IANA MIME    |
+|        |                             | type                                   |
 +--------+-----------------------------+----------------------------------------+
 |  272   | protocols                   | certain property values are valid IANA |
 |        |                             | Service and Protocol names             |

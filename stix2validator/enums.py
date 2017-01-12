@@ -1315,8 +1315,7 @@ def media_types():
             types = []
             for line in data.iter_lines():
                 if line:
-                    if not PY2:
-                        line = text_type(line)
+                    line = line.decode("utf-8")
                     if line.count(',') > 0:
                         reg_template = line.split(',')[1]
                         if reg_template:
@@ -1344,8 +1343,7 @@ def char_sets():
 
         for line in data.iter_lines():
             if line:
-                if not PY2:
-                    line = line.decode("ascii")
+                line = line.decode("utf-8")
                 if line.count(',') > 0:
                     vals = line.split(',')
                     if vals[0]:
@@ -1405,8 +1403,7 @@ def ipfix():
 
         for line in data.iter_lines():
             if line:
-                if not PY2:
-                    line = line.decode("ascii")
+                line = line.decode("utf-8")
                 if re.match('^\d+(,[a-zA-Z0-9]+){2},', line):
                     vals = line.split(',')
                     if vals[1]:
