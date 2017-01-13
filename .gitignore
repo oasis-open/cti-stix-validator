@@ -27,3 +27,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 *~
+
+# External data cache
+cache.sqlite
