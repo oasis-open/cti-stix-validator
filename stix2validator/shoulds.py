@@ -290,10 +290,10 @@ def vocab_hash_algo(instance):
                 for h in hashes:
                     if not (valid_hash_value(h)):
                         yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                " with a hash of type '%s', which is not a "
-                                "value in the hash-algo-ov vocabulary nor a "
-                                "custom value prepended with 'x_'."
-                                % (key, h), instance['id'], 'hash-algo')
+                                        " with a hash of type '%s', which is not a "
+                                        "value in the hash-algo-ov vocabulary nor a "
+                                        "custom value prepended with 'x_'."
+                                        % (key, h), instance['id'], 'hash-algo')
 
             try:
                 ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
@@ -306,12 +306,12 @@ def vocab_hash_algo(instance):
                     for h in datastream['hashes']:
                         if not (valid_hash_value(h)):
                             yield JSONError("Object '%s' has an NTFS extension"
-                                    " with an alternate data stream that has a"
-                                    " 'hashes' dictionary with a hash of type "
-                                    "'%s', which is not a value in the "
-                                    "hash-algo-ov vocabulary nor a custom "
-                                    "value prepended with 'x_'."
-                                    % (key, h), instance['id'], 'hash-algo')
+                                            " with an alternate data stream that has a"
+                                            " 'hashes' dictionary with a hash of type "
+                                            "'%s', which is not a value in the "
+                                            "hash-algo-ov vocabulary nor a custom "
+                                            "value prepended with 'x_'."
+                                            % (key, h), instance['id'], 'hash-algo')
 
             try:
                 head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
@@ -321,11 +321,11 @@ def vocab_hash_algo(instance):
                 for h in head_hashes:
                     if not (valid_hash_value(h)):
                         yield JSONError("Object '%s' has a Windows PE Binary "
-                                "File extension with a file header hash of "
-                                "'%s', which is not a value in the "
-                                "hash-algo-ov vocabulary nor a custom value "
-                                "prepended with 'x_'."
-                                % (key, h), instance['id'], 'hash-algo')
+                                        "File extension with a file header hash of "
+                                        "'%s', which is not a value in the "
+                                        "hash-algo-ov vocabulary nor a custom value "
+                                        "prepended with 'x_'."
+                                        % (key, h), instance['id'], 'hash-algo')
 
             try:
                 hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
@@ -335,11 +335,11 @@ def vocab_hash_algo(instance):
                 for h in hashes:
                     if not (valid_hash_value(h)):
                         yield JSONError("Object '%s' has a Windows PE Binary "
-                                "File extension with an optional header that "
-                                "has a hash of '%s', which is not a value in "
-                                "the hash-algo-ov vocabulary nor a custom "
-                                "value prepended with 'x_'."
-                                % (key, h), instance['id'], 'hash-algo')
+                                        "File extension with an optional header that "
+                                        "has a hash of '%s', which is not a value in "
+                                        "the hash-algo-ov vocabulary nor a custom "
+                                        "value prepended with 'x_'."
+                                        % (key, h), instance['id'], 'hash-algo')
 
             try:
                 sections = obj['extensions']['windows-pebinary-ext']['sections']
@@ -352,11 +352,11 @@ def vocab_hash_algo(instance):
                     for h in s['hashes']:
                         if not (valid_hash_value(h)):
                             yield JSONError("Object '%s' has a Windows PE "
-                                    "Binary File extension with a section that"
-                                    " has a hash of '%s', which is not a value"
-                                    " in the hash-algo-ov vocabulary nor a "
-                                    "custom value prepended with 'x_'."
-                                    % (key, h), instance['id'], 'hash-algo')
+                                            "Binary File extension with a section that"
+                                            " has a hash of '%s', which is not a value"
+                                            " in the hash-algo-ov vocabulary nor a "
+                                            "custom value prepended with 'x_'."
+                                            % (key, h), instance['id'], 'hash-algo')
 
         elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
             try:
@@ -367,10 +367,10 @@ def vocab_hash_algo(instance):
                 for h in hashes:
                     if not (valid_hash_value(h)):
                         yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                " with a hash of type '%s', which is not a "
-                                "value in the hash-algo-ov vocabulary nor a "
-                                "custom value prepended with 'x_'."
-                                % (key, h), instance['id'], 'hash-algo')
+                                        " with a hash of type '%s', which is not a "
+                                        "value in the hash-algo-ov vocabulary nor a "
+                                        "custom value prepended with 'x_'."
+                                        % (key, h), instance['id'], 'hash-algo')
 
 
 @cyber_observable_check
@@ -405,10 +405,10 @@ def vocab_windows_pebinary_type(instance):
                 continue
             if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
                 yield JSONError("Object '%s' has a Windows PE Binary File "
-                        "extension with a 'pe_type' of '%s', which is not a "
-                        "value in the windows-pebinary-type-ov vocabulary."
-                        % (key, pe_type), instance['id'],
-                        'windows-pebinary-type')
+                                "extension with a 'pe_type' of '%s', which is not a "
+                                "value in the windows-pebinary-type-ov vocabulary."
+                                % (key, pe_type), instance['id'],
+                                'windows-pebinary-type')
 
 
 @cyber_observable_check
@@ -424,9 +424,9 @@ def vocab_account_type(instance):
                 continue
             if acct_type not in enums.ACCOUNT_TYPE_OV:
                 yield JSONError("Object '%s' is a User Account Object "
-                        "with an 'account_type' of '%s', which is not a "
-                        "value in the account-type-ov vocabulary."
-                        % (key, acct_type), instance['id'], 'account-type')
+                                "with an 'account_type' of '%s', which is not a "
+                                "value in the account-type-ov vocabulary."
+                                % (key, acct_type), instance['id'], 'account-type')
 
 
 @cyber_observable_check
@@ -436,8 +436,8 @@ def observable_object_keys(instance):
     for key in instance['objects']:
         if not re.match("^\d+$", key):
             yield JSONError("'%s' is not a good key value. Observable Objects "
-                "should use non-negative integers for their keys."
-                % key, instance['id'], 'observable-object-keys')
+                            "should use non-negative integers for their keys."
+                            % key, instance['id'], 'observable-object-keys')
 
 
 def test_dict_keys(item, inst_id):
@@ -512,11 +512,11 @@ def custom_object_extension_prefix_strict(instance):
             if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
                     not re.match("^x\-.+\-.+$", ext_key)):
                 yield JSONError("Custom Cyber Observable Object extension type"
-                        " '%s' should start with 'x-' followed by a source "
-                        "unique identifier (like a domain name with dots "
-                        "replaced by dashes), a dash and then the name."
-                        % ext_key, instance['id'],
-                        'custom-object-extension-prefix')
+                                " '%s' should start with 'x-' followed by a source "
+                                "unique identifier (like a domain name with dots "
+                                "replaced by dashes), a dash and then the name."
+                                % ext_key, instance['id'],
+                                'custom-object-extension-prefix')
 
 
 @cyber_observable_check
@@ -616,14 +616,14 @@ def custom_observable_properties_prefix_strict(instance):
                                     if (p not in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key][ext_prop] and
                                             not re.match("^x_.+\_.+$", p)):
                                         yield JSONError("Cyber Observable Object "
-                                                "custom property '%s' in the %s "
-                                                "property of the %s extension should "
-                                                "start with 'x_' followed by a source "
-                                                "unique identifier (like a domain name"
-                                                " with dots replaced by dashes), a "
-                                                "dash and then the name."
-                                                % (p, ext_prop, ext_key), instance['id'],
-                                                'custom-observable-properties-prefix')
+                                                        "custom property '%s' in the %s "
+                                                        "property of the %s extension should "
+                                                        "start with 'x_' followed by a source "
+                                                        "unique identifier (like a domain name"
+                                                        " with dots replaced by dashes), a "
+                                                        "dash and then the name."
+                                                        % (p, ext_prop, ext_key), instance['id'],
+                                                        'custom-observable-properties-prefix')
 
 
 @cyber_observable_check
@@ -691,11 +691,11 @@ def custom_observable_properties_prefix_lax(instance):
                                     if (p not in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key][ext_prop] and
                                             not re.match("^x_.+$", p)):
                                         yield JSONError("Cyber Observable Object "
-                                                "custom property '%s' in the %s "
-                                                "property of the %s extension should "
-                                                "start with 'x_'."
-                                                % (p, ext_prop, ext_key), instance['id'],
-                                                'custom-observable-properties-prefix')
+                                                        "custom property '%s' in the %s "
+                                                        "property of the %s extension should "
+                                                        "start with 'x_'."
+                                                        % (p, ext_prop, ext_key), instance['id'],
+                                                        'custom-observable-properties-prefix')
 
 
 @cyber_observable_check

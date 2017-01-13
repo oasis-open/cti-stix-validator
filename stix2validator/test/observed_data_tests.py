@@ -314,7 +314,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(json.dumps(observed_data))
 
         self.check_ignore(json.dumps(observed_data),
-            'custom-observable-object-prefix,custom-observable-object-prefix-lax')
+                          'custom-observable-object-prefix,custom-observable-object-prefix-lax')
 
         observed_data['objects']['0']['type'] = "x-c-foo"
         self.assertTrueWithOptions(json.dumps(observed_data))
@@ -329,7 +329,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
-            'custom-object-extension-prefix,custom-object-extension-prefix-lax')
+                          'custom-object-extension-prefix,custom-object-extension-prefix-lax')
 
     def test_observable_object_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -338,7 +338,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
-            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+                          'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_extension_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -347,7 +347,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
-            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+                          'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -361,7 +361,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
-            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+                          'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_embedded_dict_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -381,7 +381,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
-            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+                          'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_extension_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -398,7 +398,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
-            'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
+                          'custom-observable-properties-prefix,custom-observable-properties-prefix-lax')
 
     def test_observable_object_property_reference(self):
         observed_data = copy.deepcopy(self.valid_observed_data)

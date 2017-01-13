@@ -254,7 +254,7 @@ def types_strict(instance):
     """
     if instance['type'] not in enums.TYPES:
         yield JSONError("Object type '%s' is not one of those detailed in the"
-                         " specification." % instance['type'], instance['id'])
+                        " specification." % instance['type'], instance['id'])
     elif has_cyber_observable_data(instance):
         for key, obj in instance['objects'].items():
             if 'type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES:
