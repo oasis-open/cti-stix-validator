@@ -10,6 +10,8 @@ install_requires = [
     'jsonschema==2.5.1',
     'colorama',
     'six',
+    'requests',
+    'requests_cache'
 ]
 
 setup(

@@ -11,7 +11,6 @@ VALID_INTRUSION_SET = """
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T20:03:48Z",
   "modified": "2016-04-06T20:03:48Z",
-  "version": 1,
   "name": "Bobcat Breakin",
   "description": "Incidents usually feature a shared TTP of a bobcat being released within the building containing network access, scaring users to leave their computers without locking them first. Still determining where the threat actors are getting the bobcats.",
   "aliases": ["Zookeeper"],

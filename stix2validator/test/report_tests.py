@@ -12,7 +12,6 @@ VALID_REPORT = """
   "created": "2015-12-21T19:59:11Z",
   "modified": "2016-05-21T19:59:11Z",
   "published": "2016-05-21T19:59:11Z",
-  "version": 2,
   "name": "The Black Vine Cyberespionage Group",
   "description": "A simple report with an indicator and campaign",
   "labels": ["campaign"],

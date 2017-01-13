@@ -10,7 +10,6 @@ VALID_ATTACK_PATTERN = """
   "id": "attack-pattern--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",
   "created": "2016-05-12T08:17:27.000000Z",
   "modified": "2016-05-12T08:17:27.000000Z",
-  "version": 1,
   "name": "Spear Phishing",
   "description": "...",
   "external_references": [

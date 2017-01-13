@@ -1,7 +1,7 @@
 ====================
 `cti-stix-validator`
 ====================
-NOTE: This is an `OASIS Open Repository <https://www.oasis-open.org/resources/open-repositories>`_. See the `Governance`_ section for more information.
+NOTE: This is an `OASIS Open Repository <https://www.oasis-open.org/resources/open-repositories/>`_. See the `Governance`_ section for more information.
 
 The STIX validator checks that STIX JSON content conforms to the requirements specified in the STIX 2.0 specification. In addition to checking conformance with the JSON schemas, the validator checks conformance with requirements that cannot be specified in JSON schema, as well as with established "best practices." This validator is non-normative; in cases of conflict with the STIX 2.0 specification, the specification takes precedence.
 
@@ -88,6 +88,8 @@ You cannot select which of the "MUST" requirement checks will be performed; all 
 
 Enabling supersedes disabling. Simultaneously enabling and disabling the same check will result in the validator performing that check.
 
+Some checks access Internet resources to determine valid values for certain properties. For instance, the 'mime-type' check accesses the IANA's list of registered MIME types. These web requests are cached to conserve bandwidth, will expire after one week, and are stored in a file called 'cache.sqlite' in the same directory the script is run from. The cache can be refreshed manually with the :code:`--refresh-cache` or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or :code:`clear_cache=True`. This caching can be disabled entirely with :code:`--no-cache` or :code:`no_cache=True`.
+
 **Recommended Best Practice Check Codes**
 
 +--------+-----------------------------+----------------------------------------+
@@ -112,9 +114,42 @@ Enabling supersedes disabling. Simultaneously enabling and disabling the same ch
 +--------+-----------------------------+----------------------------------------+
 |  121   | kill-chain-names            | kill-chain-phase name and phase follow |
 |        |                             | the correct format                     |
++--------+-----------------------------+----------------------------------------+
+|  141   | observable-object-keys      | observable object keys follow the      |
+|        |                             | correct format                         |
++--------+-----------------------------+----------------------------------------+
+|  142   | observable-dictionary-keys  | dictionaries in cyber observable       |
+|        |                             | objects follow the correct format      |
++--------+-----------------------------+----------------------------------------+
+|  143   | custom-observable-object-\  | custom observable object names follow  |
+|        | prefix                      | the correct format                     |
++--------+-----------------------------+----------------------------------------+
+|  144   | custom-observable-object-\  | same as 144 but more lenient; no       |
+|        | prefix-lax                  | source identifier needed in prefix     |
++--------+-----------------------------+----------------------------------------+
+|  145   | custom-object-extension-\   | custom observable object extension     |
+|        | prefix                      | names follow the correct format        |
++--------+-----------------------------+----------------------------------------+
+|  146   | custom-object-extension-\   | same as 145 but more lenient; no       |
+|        | prefix-lax                  | source identifier needed in prefix     |
++--------+-----------------------------+----------------------------------------+
+|  147   | custom-observable-\         | observable object custom property      |
+|        | properties-prefix           | names follow the correct format        |
++--------+-----------------------------+----------------------------------------+
+|  148   | custom-observable-\         | same as 148 but more lenient; no       |
+|        | properties-prefix-lax       | source identifier needed in prefix     |
++--------+-----------------------------+----------------------------------------+
+|  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
+|        | format                      | follows the correct format             |
 |        |                             |                                        |
 +--------+-----------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run                 |
++--------+-----------------------------+----------------------------------------+
+|  201   | marking-definition-type     | marking definitions use a valid        |
+|        |                             | definition_type                        |
++--------+-----------------------------+----------------------------------------+
+|  202   | relationship-types          | relationships are among those defined  |
+|        |                             | in the specification                   |
 +--------+-----------------------------+----------------------------------------+
 |  210   | all-vocabs                  | all of the following open vocabulary   |
 |        |                             | checks are run                         |
@@ -152,11 +187,42 @@ Enabling supersedes disabling. Simultaneously enabling and disabling the same ch
 |  222   | tool-label                  | certain property values are from the   |
 |        |                             | tool_label vocabulary                  |
 +--------+-----------------------------+----------------------------------------+
-|  229   | marking-definition-type     | marking definitions use a valid        |
-|        |                             | definition_type                        |
+|  241   | hash-algo                   | certain property values are from the   |
+|        |                             | hash-algo vocabulary                   |
 +--------+-----------------------------+----------------------------------------+
-|  250   | relationship-types          | relationships are among those defined  |
-|        |                             | in the specification                   |
+|  242   | encryption-algo             | certain property values are from the   |
+|        |                             | encryption-algo vocabulary             |
++--------+-----------------------------+----------------------------------------+
+|  243   | windows-pebinary-type       | certain property values are from the   |
+|        |                             | windows-pebinary-type vocabulary       |
++--------+-----------------------------+----------------------------------------+
+|  244   | account-type                | certain property values are from the   |
+|        |                             | account-type vocabulary                |
++--------+-----------------------------+----------------------------------------+
+|  270   | all-external-sources        | all of the following external source   |
+|        |                             | checks are run                         |
++--------+-----------------------------+----------------------------------------+
+|  271   | mime-type                   | file.mime_type is a valid IANA MIME    |
+|        |                             | type                                   |
++--------+-----------------------------+----------------------------------------+
+|  272   | protocols                   | certain property values are valid IANA |
+|        |                             | Service and Protocol names             |
++--------+-----------------------------+----------------------------------------+
+|  273   | ipfix                       | certain property values are valid IANA |
+|        |                             | IP Flow Information Export (IPFIX)     |
+|        |                             | Entities                               |
++--------+-----------------------------+----------------------------------------+
+|  274   | http-request-headers        | certain property values are valid HTTP |
+|        |                             | request header names                   |
++--------+-----------------------------+----------------------------------------+
+|  275   | socket-options              | certain property values are valid      |
+|        |                             | socket options                         |
++--------+-----------------------------+----------------------------------------+
+|  276   | pdf-doc-info                | certain property values are valid PDF  |
+|        |                             | Document Information Dictionary keys   |
++--------+-----------------------------+----------------------------------------+
+|  301   | network-traffic-ports       | network-traffic objects contain both   |
+|        |                             | src_port and dst_port                  |
 +--------+-----------------------------+----------------------------------------+
 
 Governance
