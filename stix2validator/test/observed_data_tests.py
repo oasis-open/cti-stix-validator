@@ -502,7 +502,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_file_character_set(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['name_enc'] = "blablabla"
+        observed_data['objects']['0']['name_enc'] = "bla.bla.bla"
         self.assertFalseWithOptions(json.dumps(observed_data))
 
         observed_data['objects']['0']['name_enc'] = "ISO-8859-2"
@@ -513,7 +513,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
           "type": "directory",
           "path": "C:\\Windows\\System32",
-          "path_enc": "blablabla"
+          "path_enc": "bla.bla.bla"
         }
         self.assertFalseWithOptions(json.dumps(observed_data))
 

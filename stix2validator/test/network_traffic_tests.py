@@ -78,7 +78,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_network_traffic_protocols(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
-        net_traffic['objects']['1']['protocols'].append('foobar')
+        net_traffic['objects']['1']['protocols'].append('foo_bar')
         self.assertFalseWithOptions(json.dumps(net_traffic))
         self.check_ignore(json.dumps(net_traffic), 'protocols')
 
@@ -90,7 +90,7 @@ class ObservedDataTestCases(ValidatorTest):
         net_traffic['objects']['1']['ipfix'] = {
             "minimumIpTotalLength": 32,
             "maximumIpTotalLength": 2556,
-            "foo": "bar"
+            "Foo": "bar"
         }
         self.assertFalseWithOptions(json.dumps(net_traffic))
         self.check_ignore(json.dumps(net_traffic), 'ipfix')

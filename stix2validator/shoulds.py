@@ -756,7 +756,7 @@ def protocols(instance):
                                         'protocols')
                 else:
                     info("Can't reach IANA website; using regex for protocols.")
-                    prot_pattern = '^[a-zA-Z0-9-]{1,15}'
+                    prot_pattern = '^[a-zA-Z0-9-]{1,15}$'
                     if not re.match(prot_pattern, prot):
                         yield JSONError("The 'protocols' property of object "
                                         "'%s' contains a value ('%s') not in "

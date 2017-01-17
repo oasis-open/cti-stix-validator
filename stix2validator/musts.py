@@ -5,6 +5,7 @@ import re
 from . import enums
 from .util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
+from .output import info
 
 
 def modified_created(instance):
@@ -211,6 +212,16 @@ def artifact_mime_type(instance):
                                     "Type of the form 'type/subtype'."
                                     % (key, obj['mime_type']), instance['id'])
 
+            else:
+                info("Can't reach IANA website; using regex for mime types.")
+                mime_pattern = '^(application|audio|font|image|message|model' \
+                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+'
+                if not re.match(mime_pattern, obj['mime_type']):
+                    yield JSONError("The 'mime_type' property of object '%s' "
+                                    "('%s') should be an IANA MIME Type of the"
+                                    " form 'type/subtype'."
+                                    % (key, obj['mime_type']), instance['id'])
+
 
 @cyber_observable_check
 def character_set(instance):
@@ -225,10 +236,26 @@ def character_set(instance):
                                     "('%s') must be an IANA registered "
                                     "character set."
                                     % (key, obj['path_enc']), instance['id'])
+            else:
+                info("Can't reach IANA website; using regex for character_set.")
+                char_pattern = '^[a-zA-Z0-9_\(\)-]+$'
+                if not re.match(char_pattern, obj['path_enc']):
+                    yield JSONError("The 'path_enc' property of object '%s' "
+                                    "('%s') must be an IANA registered "
+                                    "character set."
+                                    % (key, obj['path_enc']), instance['id'])
 
         if ('type' in obj and obj['type'] == 'file' and 'name_enc' in obj):
             if enums.char_sets():
                 if obj['name_enc'] not in enums.char_sets():
+                    yield JSONError("The 'name_enc' property of object '%s' "
+                                    "('%s') must be an IANA registered "
+                                    "character set."
+                                    % (key, obj['name_enc']), instance['id'])
+            else:
+                info("Can't reach IANA website; using regex for character_set.")
+                char_pattern = '^[a-zA-Z0-9_\(\)-]+$'
+                if not re.match(char_pattern, obj['name_enc']):
                     yield JSONError("The 'name_enc' property of object '%s' "
                                     "('%s') must be an IANA registered "
                                     "character set."
