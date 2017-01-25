@@ -66,6 +66,12 @@ class CustomDraft4Validator(Draft4Validator):
                     for err in self.iter_errors_more(obj, check_musts):
                         yield err
 
+    def get_list(self):
+        """Return a combined list of all musts and shoulds this validator will
+        perform, both MUSTs and SHOULDs.
+        """
+        return self.musts_list + self.shoulds_list
+
 
 class BaseResults(object):
     """Base class for all validation result types.
@@ -350,12 +356,16 @@ def validate_string(string, options=None):
     return results
 
 
-def load_validator(schema_path, schema, options):
+def load_validator(schema_path, schema, options, custom=True):
     """Create a JSON schema validator for the given schema.
 
     Args:
         schema_path: The filename of the JSON schema.
         schema: A Python object representation of the same schema.
+        options: ValidationOptions instance with validation options for this
+            validator.
+        custom: A boolean, True indicating the CustomDraft4Validator should be
+            used, False indicating the default Draft4Validator should be used.
 
     Returns:
         An instance of Draft4Validator.
@@ -368,7 +378,11 @@ def load_validator(schema_path, schema, options):
         file_prefix = 'file:'
 
     resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema)
-    validator = CustomDraft4Validator(schema, resolver=resolver, options=options)
+
+    if custom:
+        validator = CustomDraft4Validator(schema, resolver=resolver, options=options)
+    else:
+        validator = Draft4Validator(schema, resolver=resolver)
 
     return validator
 
@@ -432,6 +446,15 @@ def schema_validate(instance, options):
             raise SchemaInvalidError("Cannot locate a schema for the object's "
                                      "type, nor the base schema (core.json).")
 
+    if instance['type'] == 'bundle':
+        # Validate against schemas for specific object types later
+        schema['properties']['objects'] = {
+            "objects": {
+                "type": "array",
+                "minItems": 1
+            }
+        }
+
     # Validate the schema first
     try:
         CustomDraft4Validator.check_schema(schema)
@@ -446,9 +469,8 @@ def schema_validate(instance, options):
         requests_cache.get_cache().remove_old_entries(now)
 
     validator = load_validator(schema_path, schema, options)
-    validator_list = validator.musts_list + validator.shoulds_list
     output.info("Running the following additional checks: %s."
-                % ", ".join(x.__name__ for x in validator_list))
+                % ", ".join(x.__name__ for x in validator.get_list()))
 
     # Actual validation of JSON document
     try:
@@ -462,12 +484,37 @@ def schema_validate(instance, options):
         else:
             chained_errors = chain(some_errors, more_errors)
             warnings = [pretty_error(x, options.verbose) for x in warnings]
-
-        errors = sorted(chained_errors, key=lambda e: e.path)
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
                                  'failed to resolve')
 
+    if instance['type'] == 'bundle' and 'objects' in instance:
+        for obj in instance['objects']:
+            try:
+                obj_schema_path = find_schema(options.schema_dir, obj['type'])
+                obj_schema = load_schema(obj_schema_path)
+            except (KeyError, TypeError) as e:
+                # Assume a custom object with no schema
+                try:
+                    obj_schema_path = find_schema(options.schema_dir, 'core')
+                    obj_schema = load_schema(obj_schema_path)
+                except (KeyError, TypeError) as e:
+                    raise SchemaInvalidError("Cannot locate a schema for the "
+                                             "object's type, nor the base "
+                                             "schema (core.json).")
+
+            # Don't use custom validator; don't need to perform extra checks
+            # again; already did them on the bundle
+            o_validator = load_validator(obj_schema_path, obj_schema, options,
+                                         custom=False)
+            try:
+                obj_errors = o_validator.iter_errors(obj)
+            except schema_exceptions.RefResolutionError:
+                raise SchemaInvalidError('Invalid JSON schema: a JSON '
+                                         'reference failed to resolve')
+            chained_errors = chain(chained_errors, obj_errors)
+
+    errors = sorted(chained_errors, key=lambda e: e.path)
     if not errors and not warnings:
         return ValidationResults(True)
 
