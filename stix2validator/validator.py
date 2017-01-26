@@ -10,7 +10,7 @@ from collections import Iterable
 
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
-from six import text_type
+from six import text_type, iteritems
 import requests_cache
 
 from . import output, musts, shoulds
@@ -488,51 +488,88 @@ def schema_validate(instance, options):
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
                                  'failed to resolve')
 
+    # List of error generators and message prefixes (to denote which object the
+    # error comes from)
+    error_gens = [(chained_errors, '')]
+
+    # Validate each object in a bundle separately
     if instance['type'] == 'bundle' and 'objects' in instance:
-        for obj in instance['objects']:
+        for sdo in instance['objects']:
             try:
-                obj_schema_path = find_schema(options.schema_dir, obj['type'])
-                obj_schema = load_schema(obj_schema_path)
+                sdo_schema_path = find_schema(options.schema_dir, sdo['type'])
+                sdo_schema = load_schema(sdo_schema_path)
             except (KeyError, TypeError) as e:
                 # Assume a custom object with no schema
                 try:
-                    obj_schema_path = find_schema(options.schema_dir, 'core')
-                    obj_schema = load_schema(obj_schema_path)
+                    sdo_schema_path = find_schema(options.schema_dir, 'core')
+                    sdo_schema = load_schema(sdo_schema_path)
                 except (KeyError, TypeError) as e:
                     raise SchemaInvalidError("Cannot locate a schema for the "
                                              "object's type, nor the base "
                                              "schema (core.json).")
 
+            if sdo['type'] == 'observed-data':
+                # Validate against schemas for specific object types later
+                sdo_schema['allOf'][1]['properties']['objects'] = {
+                    "objects": {
+                        "type": "object",
+                        "minProperties": 1
+                    }
+                }
+
             # Don't use custom validator; don't need to perform extra checks
             # again; already did them on the bundle
-            o_validator = load_validator(obj_schema_path, obj_schema, options,
-                                         custom=False)
+            sdo_validator = load_validator(sdo_schema_path, sdo_schema,
+                                           options, custom=False)
             try:
-                obj_errors = o_validator.iter_errors(obj)
+                sdo_errors = sdo_validator.iter_errors(sdo)
             except schema_exceptions.RefResolutionError:
                 raise SchemaInvalidError('Invalid JSON schema: a JSON '
                                          'reference failed to resolve')
-            chained_errors = chain(chained_errors, obj_errors)
+            error_gens.append((sdo_errors, ''))
 
-    errors = sorted(chained_errors, key=lambda e: e.path)
-    if not errors and not warnings:
-        return ValidationResults(True)
+            # Validate each cyber observable object separately
+            if sdo['type'] == 'observed-data' and 'objects' in sdo:
+                for key, obj in iteritems(sdo['objects']):
+                    try:
+                        obj_schema_path = find_schema(options.schema_dir, obj['type'])
+                        obj_schema = load_schema(obj_schema_path)
+                    except (KeyError, TypeError) as e:
+                        # Assume a custom object with no schema
+                        try:
+                            obj_schema_path = find_schema(options.schema_dir, 'cyber-observable-core')
+                            obj_schema = load_schema(obj_schema_path)
+                        except (KeyError, TypeError) as e:
+                            raise SchemaInvalidError("Cannot locate a schema for the "
+                                                     "object's type, nor the base "
+                                                     "schema (core.json).")
 
-    # Prepare the list of errors
-    error_list = []
-    for error in errors:
-        msg = pretty_error(error, options.verbose)
-        error_list.append(SchemaError(msg))
-
-    if error_list:
-        valid = False
-    else:
-        valid = True
+                    obj_validator = load_validator(obj_schema_path, obj_schema,
+                                                   options, custom=False)
+                    try:
+                        obj_errors = obj_validator.iter_errors(obj)
+                    except schema_exceptions.RefResolutionError:
+                        raise SchemaInvalidError('Invalid JSON schema: a JSON '
+                                                 'reference failed to resolve')
+                    error_prefix = sdo['id'] + ': object \'' + key + '\': '
+                    error_gens.append((obj_errors, error_prefix))
 
     # Clear requests cache if commandline flag was set
     if options.clear_cache:
         now = datetime.datetime.utcnow()
         requests_cache.get_cache().remove_old_entries(now)
+
+    # Prepare the list of errors
+    error_list = []
+    for gen, prefix in error_gens:
+        for error in gen:
+            msg = prefix + pretty_error(error, options.verbose)
+            error_list.append(SchemaError(msg))
+
+    if error_list:
+        valid = False
+    else:
+        valid = True
 
     return ValidationResults(is_valid=valid, errors=error_list,
                              warnings=warnings)
