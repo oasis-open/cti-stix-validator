@@ -604,6 +604,31 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['4']['body'] = "Hello World"
         self.assertTrueWithOptions(json.dumps(observed_data))
 
+    def test_artifact_url_payloadbin(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "artifact",
+            "mime_type": "image/jpeg",
+            "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
+            "hashes": {
+                "MD5": "69D0D97D02A03C43782DD571394E6869"
+            },
+            "url": "www.g.com"
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+    def test_file_invalid_is_encrypted(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "file",
+            "hashes": {
+                "MD5": "8D98A25E9D0662B1F4CA3BF22D6F53E9"
+            },
+            "is_encrypted": False,
+            "encryption_algorithm": "RSA"
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
 
 if __name__ == "__main__":
     unittest.main()

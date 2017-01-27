@@ -568,8 +568,8 @@ def custom_observable_properties_prefix_strict(instance):
                             if (embedded not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
                                     not re.match("^x_.+\_.+$", embedded)):
                                 yield JSONError("Cyber Observable Object custom "
-                                                "property '%s' in the %s property of a"
-                                                " %s object should start with 'x_' "
+                                                "property '%s' in the %s property of "
+                                                "%s object should start with 'x_' "
                                                 "followed by a source unique "
                                                 "identifier (like a domain name with "
                                                 "dots replaced by dashes), a dash and "
@@ -579,8 +579,8 @@ def custom_observable_properties_prefix_strict(instance):
                     elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
                             not re.match("^x_.+\_.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
-                                        "property '%s' in the %s property of a"
-                                        " %s object should start with 'x_' "
+                                        "property '%s' in the %s property of "
+                                        "%s object should start with 'x_' "
                                         "followed by a source unique "
                                         "identifier (like a domain name with "
                                         "dots replaced by dashes), a dash and "
@@ -654,15 +654,15 @@ def custom_observable_properties_prefix_lax(instance):
                             if (embedded not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
                                     not re.match("^x_.+$", embedded)):
                                 yield JSONError("Cyber Observable Object custom "
-                                                "property '%s' in the %s property of a"
-                                                " %s object should start with 'x_'."
+                                                "property '%s' in the %s property of "
+                                                "%s object should start with 'x_'."
                                                 % (embedded, prop, type_), instance['id'],
                                                 'custom-observable-properties-prefix')
                     elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
                             not re.match("^x_.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
-                                        "property '%s' in the %s property of a"
-                                        " %s object should start with 'x_'."
+                                        "property '%s' in the %s property of "
+                                        "%s object should start with 'x_'."
                                         % (embed_prop, prop, type_), instance['id'],
                                         'custom-observable-properties-prefix')
 

@@ -18,32 +18,6 @@ def modified_created(instance):
                          instance['id'])
 
 
-def sighting_refs(instance):
-    """Ensure that properties of Sighting objects that reference other objects
-    refer to the correct type of object.
-    """
-    if instance['type'] != 'sighting':
-        return
-
-    if 'sighting_of_ref' in instance:
-        ref = instance['sighting_of_ref']
-        if ref.split('--')[0] in enums.NON_SDOS:
-            yield JSONError("`sighting_of_ref` must refer to a STIX Domain "
-                            "Object or Custom Object.", instance['id'])
-
-    if 'observed_data_refs' in instance:
-        for ref in instance['observed_data_refs']:
-            if ref.split('--')[0] != 'observed-data':
-                yield JSONError("`observed_data_refs` must refer to an "
-                                "Observed Data Object.", instance['id'])
-
-    if 'where_sighted_refs' in instance:
-        for ref in instance['where_sighted_refs']:
-            if ref.split('--')[0] != 'identity':
-                yield JSONError("`where_sighted_refs` must refer to an "
-                                "Identity Object.", instance['id'])
-
-
 def object_marking_circular_refs(instance):
     """Ensure that marking definitions do not contain circular references (ie.
     they do not reference themselves in the `object_marking_refs` property).
@@ -296,7 +270,6 @@ def list_musts(options):
     """
     validator_list = [
         modified_created,
-        sighting_refs,
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,

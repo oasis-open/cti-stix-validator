@@ -126,6 +126,14 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(json.dumps(net_traffic))
         self.check_ignore(json.dumps(net_traffic), 'socket-options')
 
+    def test_network_traffic_end_is_active(self):
+        net_traffic = copy.deepcopy(self.valid_net_traffic)
+        net_traffic['objects']['1']['is_active'] = True
+        net_traffic['objects']['1']['end'] = "2016-12-21T19:00:00Z"
+        self.assertFalseWithOptions(json.dumps(net_traffic))
+
+        del net_traffic['objects']['1']['end']
+        self.assertTrueWithOptions(json.dumps(net_traffic))
 
 if __name__ == "__main__":
     unittest.main()

@@ -1126,7 +1126,8 @@ OBSERVABLE_DICT_KEY_EXCEPTIONS = [
     'ipfix',
     'options',
     'environment_variables',
-    'key'
+    'key',
+    'startup_info'
 ]
 
 # Reserved properties and objects

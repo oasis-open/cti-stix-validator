@@ -310,6 +310,8 @@ def validate_file(fn, options=None):
                "will be performed.")
         output.info(msg.format(fn=fn))
     except Exception as ex:
+        import traceback
+        print(traceback.format_exc())
         results.fatal = ValidationErrorResults(ex)
         msg = ("Unexpected error occurred with file '{fn}'. No further "
                "validation will be performed: {error}")
@@ -526,7 +528,8 @@ def schema_validate(instance, options):
             except schema_exceptions.RefResolutionError:
                 raise SchemaInvalidError('Invalid JSON schema: a JSON '
                                          'reference failed to resolve')
-            error_gens.append((sdo_errors, ''))
+            error_gens.append((sdo_errors, sdo['id'] + ": "))
+            # error_gens.append((sdo_errors, ''))
 
             # Validate each cyber observable object separately
             if sdo['type'] == 'observed-data' and 'objects' in sdo:

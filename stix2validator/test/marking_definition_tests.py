@@ -63,6 +63,11 @@ class MarkingDefinitionTestCases(ValidatorTest):
         }]
         self.assertFalseWithOptions(json.dumps(marking_definition))
 
+    def test_marking_definition_invalid_definition(self):
+        marking_definition = copy.deepcopy(self.valid_marking_definition)
+        marking_definition['definition']['tlp'] = 21
+        self.assertFalseWithOptions(json.dumps(marking_definition))
+
 
 if __name__ == "__main__":
     unittest.main()
