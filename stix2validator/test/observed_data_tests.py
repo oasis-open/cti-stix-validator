@@ -207,6 +207,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_pebinary_sections_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "exe",
             "sections": [
                 {
                     "name": "CODE",
@@ -225,6 +226,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_pebinary_optional_header_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "exe",
             "optional_header": {
                 "hashes": {
                     "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
@@ -243,6 +245,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_pebinary_file_header_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "exe",
             "file_header_hashes": {
                 "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
             }
@@ -255,6 +258,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_pebinary_multiple_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "exe",
             "file_header_hashes": {
                 "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
             },
@@ -543,11 +547,11 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
             "type": "software",
             "name": "word",
-            "language": "bbb"
+            "languages": ["bbb"]
         }
         self.assertFalseWithOptions(json.dumps(observed_data))
 
-        observed_data['objects']['2']['language'] = 'eng'
+        observed_data['objects']['2']['languages'][0] = 'eng'
         self.assertTrueWithOptions(json.dumps(observed_data))
 
     def test_email_address_invalid_value(self):

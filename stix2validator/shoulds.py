@@ -812,10 +812,9 @@ def http_request_headers(instance):
                 continue
 
             for hdr in headers:
-                h_pattern = '^[A-Z][a-zA-Z0-9]*(-[A-Z][a-zA-Z0-9]*)*$'
-                if not re.match(h_pattern, hdr):
+                if hdr not in enums.HTTP_REQUEST_HEADERS:
                     yield JSONError("The 'request_header' property of object "
-                                    "'%s' contains an invalid HTTP request"
+                                    "'%s' contains an invalid HTTP request "
                                     "header ('%s')."
                                     % (key, hdr), instance['id'],
                                     'http-request-headers')
