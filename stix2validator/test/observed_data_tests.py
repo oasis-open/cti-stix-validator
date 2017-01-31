@@ -608,6 +608,27 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['4']['body'] = "Hello World"
         self.assertTrueWithOptions(json.dumps(observed_data))
 
+    def test_email_message_multipart_body_raw_refs(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "email-message",
+            "is_multipart": True,
+            "body_multipart": [
+                {
+                    "content_type": "text/plain; charset=utf-8",
+                    "body": "Cats are cute!"
+                },
+                {
+                    "body_raw_ref": "999"
+                }
+            ]
+
+        }
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['body_multipart'][1]['body_raw_ref'] = "0"
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
     def test_artifact_url_payloadbin(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {

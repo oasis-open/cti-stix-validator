@@ -93,6 +93,37 @@ def marking_selector_syntax(instance):
                 prev_segmt = segmt
 
 
+def check_observable_refs(refs, obj_prop, enum_prop, embed_obj_prop, enum_vals,
+                          key, instance):
+    if embed_obj_prop != '':
+        embed_obj_prop = "'" + embed_obj_prop + "' "
+
+    if not isinstance(refs, list):
+        refs = [refs]
+    for ref in refs:
+        try:
+            refed_obj = instance['objects'][ref]
+        except KeyError:
+            yield JSONError("%s in observable object '%s' can't "
+                            "resolve %sreference '%s'."
+                            % (obj_prop, key, embed_obj_prop, ref),
+                            instance['id'])
+            continue
+        try:
+            refed_type = refed_obj['type']
+        except KeyError:
+            continue
+        if refed_type not in enum_vals:
+            if len(enum_vals) == 1:
+                valids = "'" + enum_vals[0] + "'"
+            else:
+                valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
+                                          enum_vals[-1])
+            yield JSONError("'%s' in observable object '%s' must "
+                            "refer to an object of type %s."
+                            % (obj_prop, key, valids), instance['id'])
+
+
 @cyber_observable_check
 def observable_object_references(instance):
     """Ensure certain observable object properties reference the correct type
@@ -111,65 +142,39 @@ def observable_object_references(instance):
             enum_prop = enums.OBSERVABLE_PROP_REFS[obj_type][obj_prop]
             if isinstance(enum_prop, list):
                 refs = obj[obj_prop]
-                if not isinstance(refs, list):
-                    refs = [refs]
-                for ref in refs:
-                    try:
-                        refed_obj = instance['objects'][ref]
-                    except KeyError:
-                        yield JSONError("%s in observable object '%s' can't "
-                                        "resolve reference '%s'."
-                                        % (obj_prop, key, ref), instance['id'])
-                        continue
-                    try:
-                        refed_type = refed_obj['type']
-                    except KeyError:
-                        continue
-                    enum_vals = enum_prop
-                    if refed_type not in enum_vals:
-                        if len(enum_vals) == 1:
-                            valids = "'" + enum_vals[0] + "'"
-                        else:
-                            valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
-                                                      enum_vals[-1])
-                        yield JSONError("'%s' in observable object '%s' must "
-                                        "refer to an object of type %s."
-                                        % (obj_prop, key, valids), instance['id'])
+                enum_vals = enum_prop
+                for x in check_observable_refs(refs, obj_prop, enum_prop, '',
+                                               enum_vals, key, instance):
+                    yield x
+
             elif isinstance(enum_prop, dict):
                 for embedded_prop in enum_prop:
-                    if embedded_prop not in obj[obj_prop]:
-                        continue
-                    embedded_obj = obj[obj_prop][embedded_prop]
-                    for embed_obj_prop in embedded_obj:
-                        if embed_obj_prop not in enum_prop[embedded_prop]:
+                    if isinstance(obj[obj_prop], dict):
+                        if embedded_prop not in obj[obj_prop]:
                             continue
-                        refs = embedded_obj[embed_obj_prop]
-                        if not isinstance(refs, list):
-                            refs = [refs]
-                        for ref in refs:
-                            try:
-                                refed_obj = instance['objects'][ref]
-                            except KeyError:
-                                yield JSONError("%s in observable object '%s' "
-                                                "can't resolve '%s' reference "
-                                                "'%s'."
-                                                % (obj_prop, key, embed_obj_prop, ref),
-                                                instance['id'])
+                        embedded_obj = obj[obj_prop][embedded_prop]
+                        for embed_obj_prop in embedded_obj:
+                            if embed_obj_prop not in enum_prop[embedded_prop]:
                                 continue
-                            try:
-                                refed_type = refed_obj['type']
-                            except KeyError:
-                                continue
+                            refs = embedded_obj[embed_obj_prop]
                             enum_vals = enum_prop[embedded_prop][embed_obj_prop]
-                            if refed_type not in enum_vals:
-                                if len(enum_vals) == 1:
-                                    valids = "'" + enum_vals[0] + "'"
-                                else:
-                                    valids = "'%s or '%s'" % ("', '".join(enum_vals[:-1]),
-                                                              enum_vals[-1])
-                                yield JSONError("'%s' in observable object '%s' must "
-                                                "refer to an object of type %s."
-                                                % (obj_prop, key, valids), instance['id'])
+                            for x in check_observable_refs(refs, obj_prop, enum_prop,
+                                                           embed_obj_prop, enum_vals,
+                                                           key, instance):
+                                yield x
+
+                    elif isinstance(obj[obj_prop], list):
+                        for embedded_list_obj in obj[obj_prop]:
+
+                            if embedded_prop not in embedded_list_obj:
+                                continue
+                            embedded_obj = embedded_list_obj[embedded_prop]
+                            refs = embedded_obj
+                            enum_vals = enum_prop[embedded_prop]
+                            for x in check_observable_refs(refs, obj_prop, enum_prop,
+                                                           embedded_prop, enum_vals,
+                                                           key, instance):
+                                yield x
 
 
 @cyber_observable_check
