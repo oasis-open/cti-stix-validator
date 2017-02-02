@@ -151,8 +151,8 @@ def pretty_error(error, verbose=False):
     elif error.validator == 'additionalProperties':
         if 'extensions' in error.schema_path:
             msg = re.sub(r"Additional .+$", 'Custom extension keys may only '
-                        'contain alphanumeric characters, dashes, and '
-                        'underscores; 3-256 characters', msg)
+                         'contain alphanumeric characters, dashes, and '
+                         'underscores; 3-256 characters', msg)
 
     # Reword 'is valid under each of' errors
     elif error.validator == 'oneOf':

@@ -135,5 +135,6 @@ class ObservedDataTestCases(ValidatorTest):
         del net_traffic['objects']['1']['end']
         self.assertTrueWithOptions(json.dumps(net_traffic))
 
+
 if __name__ == "__main__":
     unittest.main()
