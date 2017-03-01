@@ -14,7 +14,7 @@ VALID_INDICATOR = """
     "labels": ["malicious-activity"],
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
-    "pattern": "file-object.hashes.md5 = '3773a88f65a5e780c8dff9cdc3a056f3'",
+    "pattern": "[file-object:hashes.md5 = '3773a88f65a5e780c8dff9cdc3a056f3']",
     "valid_from": "2016-04-06T20:03:48Z"
 }
 """
@@ -134,6 +134,11 @@ class IndicatorTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(indicator, 'indicator-label')
+
+    def test_invalid_pattern(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = "[file-object:hashes.md5 = '3773a88f65a5e780c8dff9cdc3a056f3'"
+        self.assertFalseWithOptions(json.dumps(indicator))
 
 
 if __name__ == "__main__":

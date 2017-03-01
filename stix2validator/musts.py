@@ -2,6 +2,7 @@
 """
 
 import re
+from stix2patterns.validator import run_validator as pattern_validator
 from . import enums
 from .util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
@@ -273,6 +274,20 @@ def types_strict(instance):
                                 % (key, obj['type']), instance['id'])
 
 
+def patterns(instance):
+    """Ensure that the syntax of the pattern of an indicator is valid.
+    """
+    if instance['type'] != 'indicator' or 'pattern' not in instance:
+        return
+
+    pattern = instance['pattern']
+    errors = pattern_validator(pattern)
+
+    for e in errors:
+        yield JSONError("Pattern failed to validate: %s."
+                        % e, instance['id'])
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -284,7 +299,8 @@ def list_musts(options):
         observable_object_references,
         artifact_mime_type,
         character_set,
-        software_language
+        software_language,
+        patterns
     ]
 
     # --strict-types

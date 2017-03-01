@@ -11,7 +11,8 @@ install_requires = [
     'colorama',
     'six',
     'requests',
-    'requests_cache'
+    'requests_cache',
+    'stix2-patterns'
 ]
 
 setup(
