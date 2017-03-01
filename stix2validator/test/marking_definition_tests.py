@@ -46,6 +46,12 @@ class MarkingDefinitionTestCases(ValidatorTest):
         marking_definition = json.dumps(marking_definition)
         self.assertFalseWithOptions(marking_definition)
 
+    def test_object_marking_ref_invalid_type(self):
+        marking_definition = copy.deepcopy(self.valid_marking_definition)
+        marking_definition['object_marking_refs'] = ["indicator--44098fce-860f-48ae-8e50-ebd3cc5e41da"]
+        marking_definition = json.dumps(marking_definition)
+        self.assertFalseWithOptions(marking_definition)
+
     def test_granular_marking_circular_ref(self):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         marking_definition['granular_markings'] = [{
@@ -60,6 +66,14 @@ class MarkingDefinitionTestCases(ValidatorTest):
         marking_definition['granular_markings'] = [{
             "marking_ref": "marking-definition--4478bf48-9af2-4afa-9fc5-7075f6af04af",
             "selectors": ["[0]"]
+        }]
+        self.assertFalseWithOptions(json.dumps(marking_definition))
+
+    def test_granular_marking_invalid_marking_ref_type(self):
+        marking_definition = copy.deepcopy(self.valid_marking_definition)
+        marking_definition['granular_markings'] = [{
+            "marking_ref": "indicator--3478bf48-9af2-4afa-9fc5-7075f6af04af",
+            "selectors": ["created"]
         }]
         self.assertFalseWithOptions(json.dumps(marking_definition))
 
