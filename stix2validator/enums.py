@@ -1137,7 +1137,11 @@ RESERVED_PROPERTIES = [
     'action',
     'usernames',
     'phone_numbers',
-    'addresses'
+    'addresses',
+    'first_seen_precision',
+    'last_seen_precision',
+    'valid_from_precision',
+    'valid_until_precision'
 ]
 RESERVED_OBJECTS = [
     'incident',
