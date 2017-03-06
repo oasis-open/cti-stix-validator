@@ -1276,7 +1276,6 @@ VOCAB_PROPERTIES = {
     "threat-actor": [
         'labels',
         'roles',
-        'goals',
         'sophistication',
         'resource_level',
         'primary_motivation',
