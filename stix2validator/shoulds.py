@@ -1073,7 +1073,7 @@ def list_shoulds(options):
                 elif 'custom-object-extension-prefix-lax' not in options.disabled:
                     validator_list.append(CHECKS['custom-object-extension-prefix-lax'])
                 if ('custom-observable-properties-prefix' not in options.disabled and
-                        'custom-observable-properties-prefix' not in options.disabled):
+                        'custom-observable-properties-prefix-lax' not in options.disabled):
                     validator_list.append(CHECKS['custom-observable-properties-prefix'])
                 elif 'custom-observable-properties-prefix' not in options.disabled:
                     validator_list.append(CHECKS['custom-observable-properties-prefix'])

@@ -64,6 +64,9 @@ class CustomObjectTestCases(ValidatorTest):
         results = validate_string(custom_obj_string, self.options)
         self.assertEqual(results.is_valid, False)
 
+        self.assertFalseWithOptions(custom_obj_string, enabled='custom-object-prefix-lax')
+        self.assertFalseWithOptions(custom_obj_string, disabled='custom-object-prefix-lax')
+
     def test_invalid_type_name_lax(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         custom_obj['type'] = "x-corporation"
@@ -73,7 +76,6 @@ class CustomObjectTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.assertTrueWithOptions(custom_obj_string, enabled='custom-object-prefix-lax')
-
         self.check_ignore(custom_obj_string, 'custom-object-prefix')
 
     def test_valid_type_name(self):

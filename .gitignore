@@ -20,6 +20,8 @@ lib
 lib64
 __pycache__
 .cache
+.coverage
+htmlcov
 
 # Operating System
 .DS_Store

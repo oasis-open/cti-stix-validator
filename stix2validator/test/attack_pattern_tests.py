@@ -52,6 +52,8 @@ class AttackPatternTestCases(ValidatorTest):
         results = validate_string(attack_pattern_string, self.options)
         self.assertEqual(results.is_valid, False)
 
+        self.assertFalseWithOptions(attack_pattern_string, enabled='custom-property-prefix-lax')
+
     def test_invalid_property_prefix_lax(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x_something'] = "some value"
@@ -60,7 +62,7 @@ class AttackPatternTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.assertTrueWithOptions(attack_pattern_string, enabled='custom-property-prefix-lax')
-
+        self.assertFalseWithOptions(attack_pattern_string, disabled='custom-property-prefix-lax')
         self.check_ignore(attack_pattern_string, 'custom-property-prefix')
 
     def test_valid_property_prefix(self):

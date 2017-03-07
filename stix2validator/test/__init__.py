@@ -1,9 +1,9 @@
 import unittest
 import os
-from .. import validate_string
-from ..util import ValidationOptions
+from .. import validate_string, ValidationOptions, print_results
 
-SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
+# SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
+SCHEMA_DIR = "/home/lu/Projects/cti-stix2-json-schemas/schemas"
 
 
 class ValidatorTest(unittest.TestCase):
@@ -33,6 +33,7 @@ class ValidatorTest(unittest.TestCase):
             options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
                                         **kwargs)
         results = validate_string(instance, options)
+        print_results(results)
         self.assertTrue(results.is_valid)
 
     def assertFalseWithOptions(self, instance, **kwargs):
