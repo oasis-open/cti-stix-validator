@@ -152,7 +152,7 @@ def _get_arg_parser(is_script=True):
         "--recursive",
         dest="recursive",
         action="store_true",
-        default=False,
+        default=True,
         help="Recursively descend into input directories."
     )
     parser.add_argument(
