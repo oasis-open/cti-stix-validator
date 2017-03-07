@@ -2,8 +2,7 @@ import unittest
 import os
 from .. import validate_string, ValidationOptions, print_results
 
-# SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
-SCHEMA_DIR = "/home/lu/Projects/cti-stix2-json-schemas/schemas"
+SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 
 
 class ValidatorTest(unittest.TestCase):
