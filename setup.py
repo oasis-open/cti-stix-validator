@@ -19,7 +19,7 @@ setup(
     name='stix2-validator',
     description='APIs and scripts for validating STIX 2.0 documents.',
     url='http://stixproject.github.io/',
-    version='0.2.0',
+    version='0.3.0',
     packages=find_packages(),
     entry_points={
         'console_scripts': [
