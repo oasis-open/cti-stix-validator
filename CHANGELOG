@@ -1,0 +1,30 @@
+CHANGELOG
+=========
+
+0.3.0 - 2017-03-07
+
+* Integrate stix2-patterns validator.
+* Add more reserved properties.
+* Process input directories recursively by default.
+* Add explicit support for Python 3.6
+* Minor Bug fixes and enhancements.
+
+0.2.0 - 2017-03-06
+
+* Update to Working Draft 01 Revision 2 schemas
+
+0.1.0 - 2017-02-03
+
+* Improve error messages
+* Update to version Working Draft 01 schemas
+* Validate objects other than bundles
+
+0.0.2 - 2017-01-24
+
+* Update to latest JSON Schemas
+* Add validation for Cyber Observables
+* Use a data cache for data from IANA registries
+
+0.0.1 - 2017-01-05
+
+* First released version
