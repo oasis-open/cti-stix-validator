@@ -763,6 +763,12 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(json.dumps(observed_data))
 
+        del observed_data['objects']['2']['url']
+        self.assertTrueWithOptions(json.dumps(observed_data))
+
+        observed_data['objects']['2']['payload_bin'] = "failing test"
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
     def test_file_invalid_is_encrypted(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {

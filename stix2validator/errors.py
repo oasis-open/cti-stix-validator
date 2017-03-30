@@ -123,6 +123,8 @@ def pretty_error(error, verbose=False):
         elif error.schema['title'] == 'url':
             msg = re.sub(r"match '.+'$", 'match the format '
                          'of a URL', msg)
+        elif error.schema['title'] == 'binary':
+            msg = re.sub(r"does not.+'$", 'must be a base64-encoded string', msg)
     elif error.validator == 'pattern' and 'observed_data_refs' in error.schema_path:
         msg = "'observed_data_refs' must refer to Observed Data Objects"
     elif error.validator == 'pattern' and 'where_sighted_refs' in error.schema_path:
