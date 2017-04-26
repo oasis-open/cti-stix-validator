@@ -226,6 +226,9 @@ Some checks access Internet resources to determine valid values for certain prop
 |  301   | network-traffic-ports       | network-traffic objects contain both   |
 |        |                             | src_port and dst_port                  |
 +--------+-----------------------------+----------------------------------------+
+|  302   | extref-hashes               | external references SHOULD have hashes |
+|        |                             | if they have a url                     |
++--------+-----------------------------+----------------------------------------+
 
 Governance
 ==========

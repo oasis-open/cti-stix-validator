@@ -781,9 +781,14 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(json.dumps(observed_data))
 
-    def test_hash_too_long(self):
+    def test_hash_length(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         hash_name = "abcdefghijklmnopqrstuvwxyz0123456789"
+        observed_data['objects']['0']['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
+        self.assertFalseWithOptions(json.dumps(observed_data))
+
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        hash_name = "MD"
         observed_data['objects']['0']['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
         self.assertFalseWithOptions(json.dumps(observed_data))
 

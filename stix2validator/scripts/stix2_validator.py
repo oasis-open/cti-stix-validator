@@ -108,6 +108,8 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | Document Information Dictionary keys   |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
+| 302  | extref-hashes               | external references SHOULD have hashes |
+|      |                             | if they have a url                     |
 +------+-----------------------------+----------------------------------------+
 """
 

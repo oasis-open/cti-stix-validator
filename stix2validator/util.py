@@ -103,6 +103,7 @@ CHECK_CODES = {
     '147': 'custom-observable-properties-prefix',
     '148': 'custom-observable-properties-prefix-lax',
     '149': 'windows-process-priority-format',
+    '150': 'hash-length',
     '2': 'approved-values',
     '201': 'marking-definition-type',
     '202': 'relationship-types',
@@ -129,7 +130,8 @@ CHECK_CODES = {
     '274': 'http-request-headers',
     '275': 'socket-options',
     '276': 'pdf-doc-info',
-    '301': 'network-traffic-ports'
+    '301': 'network-traffic-ports',
+    '302': 'extref-hashes',
 }
 
 

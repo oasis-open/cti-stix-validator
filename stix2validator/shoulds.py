@@ -1,4 +1,16 @@
 """Recommended (SHOULD) requirement checking functions
+
+To add a new check:
+- in this module:
+    - define a new function
+    - add the function to CHECKS
+    - add the function to list_shoulds()
+- in utils.py:
+    - add the check code and name to CHECK_CODES
+- in scripts/stix2_validator:
+    - add the check code and name to table
+- in README.rst:
+    - add the check code and name to table
 """
 
 import re
@@ -973,6 +985,15 @@ def hash_length(instance):
                                         % (key, h), instance['id'], 'hash-algo')
 
 
+def extref_hashes(instance):
+    if 'external_references' in instance:
+        for extref in instance['external_references']:
+            if 'url' in extref and 'hashes' not in extref:
+                src = extref['source_name'] if 'source_name' in extref else ''
+                return JSONError("External reference '%s' has a URL but no hash."
+                                 % (src), instance['id'], 'extref-hashes')
+
+
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
@@ -1011,6 +1032,7 @@ CHECKS = {
         socket_options,
         pdf_doc_info,
         network_traffic_ports,
+        extref_hashes,
     ],
     'format-checks': [
         custom_object_prefix_strict,
@@ -1114,7 +1136,8 @@ CHECKS = {
     'http-request-headers': http_request_headers,
     'socket-options': socket_options,
     'pdf-doc-info': pdf_doc_info,
-    'network-traffic-ports': network_traffic_ports
+    'network-traffic-ports': network_traffic_ports,
+    'extref-hashes': extref_hashes,
 }
 
 
@@ -1223,6 +1246,8 @@ def list_shoulds(options):
 
             if 'network-traffic-ports' not in options.disabled:
                 validator_list.append(CHECKS['network-traffic-ports'])
+            if 'extref-hashes' not in options.disabled:
+                validator_list.append(CHECKS['extref-hashes'])
 
     # --enable
     if options.enabled:
