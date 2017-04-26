@@ -561,7 +561,6 @@ PROPERTIES = {
 OBSERVABLE_PROPERTIES = {
     'artifact': [
         'type',
-        'description',
         'extensions',
         'mime_type',
         'payload_bin',
@@ -570,7 +569,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'autonomous-system': [
         'type',
-        'description',
         'extensions',
         'number',
         'name',
@@ -578,7 +576,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'directory': [
         'type',
-        'description',
         'extensions',
         'path',
         'path_enc',
@@ -589,14 +586,12 @@ OBSERVABLE_PROPERTIES = {
     ],
     'domain-name': [
         'type',
-        'description',
         'extensions',
         'value',
         'resolves_to_refs'
     ],
     'email-addr': [
         'type',
-        'description',
         'extensions',
         'value',
         'display_name',
@@ -604,7 +599,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'email-message': [
         'type',
-        'description',
         'extensions',
         'is_multipart',
         'date',
@@ -623,7 +617,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'file': [
         'type',
-        'description',
         'extensions',
         'hashes',
         'size',
@@ -643,7 +636,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'ipv4-addr': [
         'type',
-        'description',
         'extensions',
         'value',
         'resolves_to_refs',
@@ -651,7 +643,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'ipv6-addr': [
         'type',
-        'description',
         'extensions',
         'value',
         'resolves_to_refs',
@@ -659,19 +650,16 @@ OBSERVABLE_PROPERTIES = {
     ],
     'mac-addr': [
         'type',
-        'description',
         'extensions',
         'value'
     ],
     'mutex': [
         'type',
-        'description',
         'extensions',
         'name'
     ],
     'network-traffic': [
         'type',
-        'description',
         'extensions',
         'start',
         'end',
@@ -693,7 +681,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'process': [
         'type',
-        'description',
         'extensions',
         'is_hidden',
         'pid',
@@ -711,7 +698,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'software': [
         'type',
-        'description',
         'extensions',
         'name',
         'cpe',
@@ -721,13 +707,11 @@ OBSERVABLE_PROPERTIES = {
     ],
     'url': [
         'type',
-        'description',
         'extensions',
         'value'
     ],
     'user-account': [
         'type',
-        'description',
         'extensions',
         'user_id',
         'account_login',
@@ -745,7 +729,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'windows-registry-key': [
         'type',
-        'description',
         'extensions',
         'key',
         'values',
@@ -755,7 +738,6 @@ OBSERVABLE_PROPERTIES = {
     ],
     'x509-certificate': [
         'type',
-        'description',
         'extensions',
         'is_self_signed',
         'hashes',
