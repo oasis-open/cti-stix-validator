@@ -51,6 +51,8 @@ the validator performs, along with the code to use with the --enable or
 |      |     properties-prefix-lax   | source identifier needed in prefix     |
 | 149  | windows-process-priority-   | windows-process-ext's 'priority'       |
 |      |     format                  | follows the correct format             |
+| 150  | hash-length                 | keys in 'hashes'-type properties are   |
+|      |                             | not too long                           |
 |      |                             |                                        |
 |  2   | approved-values             | all 2xx checks are run                 |
 | 201  | marking-definition-type     | marking definitions use a valid        |

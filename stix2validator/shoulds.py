@@ -879,6 +879,100 @@ def windows_process_priority_format(instance):
                                 'windows-process-priority-format')
 
 
+@cyber_observable_check
+def hash_length(instance):
+    """Ensure keys in 'hashes'-type properties are no more than 30 characters long.
+    """
+    for key, obj in instance['objects'].items():
+        if 'type' not in obj:
+            continue
+
+        if obj['type'] == 'file':
+            try:
+                hashes = obj['hashes']
+            except KeyError:
+                pass
+            else:
+                for h in hashes:
+                    if (len(h) > 30):
+                        yield JSONError("Object '%s' has a 'hashes' dictionary"
+                                        " with a hash of type '%s', which is "
+                                        "longer than 30 characters."
+                                        % (key, h), instance['id'], 'hash-algo')
+
+            try:
+                ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
+            except KeyError:
+                pass
+            else:
+                for datastream in ads:
+                    if 'hashes' not in datastream:
+                        continue
+                    for h in datastream['hashes']:
+                        if (len(h) > 30):
+                            yield JSONError("Object '%s' has an NTFS extension"
+                                            " with an alternate data stream that has a"
+                                            " 'hashes' dictionary with a hash of type "
+                                            "'%s', which is longer than 30 "
+                                            "characters."
+                                            % (key, h), instance['id'], 'hash-algo')
+
+            try:
+                head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
+            except KeyError:
+                pass
+            else:
+                for h in head_hashes:
+                    if (len(h) > 30):
+                        yield JSONError("Object '%s' has a Windows PE Binary "
+                                        "File extension with a file header hash of "
+                                        "'%s', which is longer than 30 "
+                                        "characters."
+                                        % (key, h), instance['id'], 'hash-algo')
+
+            try:
+                hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
+            except KeyError:
+                pass
+            else:
+                for h in hashes:
+                    if (len(h) > 30):
+                        yield JSONError("Object '%s' has a Windows PE Binary "
+                                        "File extension with an optional header that "
+                                        "has a hash of '%s', which is longer "
+                                        "than 30 characters."
+                                        % (key, h), instance['id'], 'hash-algo')
+
+            try:
+                sections = obj['extensions']['windows-pebinary-ext']['sections']
+            except KeyError:
+                pass
+            else:
+                for s in sections:
+                    if 'hashes' not in s:
+                        continue
+                    for h in s['hashes']:
+                        if (len(h) > 30):
+                            yield JSONError("Object '%s' has a Windows PE "
+                                            "Binary File extension with a section that"
+                                            " has a hash of '%s', which is "
+                                            "longer than 30 characters."
+                                            % (key, h), instance['id'], 'hash-algo')
+
+        elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
+            try:
+                hashes = obj['hashes']
+            except KeyError:
+                pass
+            else:
+                for h in hashes:
+                    if (len(h) > 30):
+                        yield JSONError("Object '%s' has a 'hashes' dictionary"
+                                        " with a hash of type '%s', which is "
+                                        "longer than 30 characters."
+                                        % (key, h), instance['id'], 'hash-algo')
+
+
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
@@ -892,6 +986,7 @@ CHECKS = {
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
         windows_process_priority_format,
+        hash_length,
         vocab_marking_definition,
         relationships_strict,
         vocab_attack_motivation,
@@ -928,6 +1023,7 @@ CHECKS = {
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
         windows_process_priority_format,
+        hash_length,
     ],
     'custom-object-prefix': custom_object_prefix_strict,
     'custom-object-prefix-lax': custom_object_prefix_lax,
@@ -944,6 +1040,7 @@ CHECKS = {
     'custom-observable-properties-prefix': custom_observable_properties_prefix_strict,
     'custom-observable-properties-prefix-lax': custom_observable_properties_prefix_lax,
     'windows-process-priority-format': windows_process_priority_format,
+    'hash-length': hash_length,
     'approved-values': [
         vocab_marking_definition,
         relationships_strict,
@@ -1081,6 +1178,8 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['custom-observable-properties-prefix-lax'])
                 if 'windows-process-priority-format' not in options.disabled:
                     validator_list.append(CHECKS['windows-process-priority-format'])
+                if 'hash-length' not in options.disabled:
+                    validator_list.append(CHECKS['hash-length'])
 
             if 'approved-values' not in options.disabled:
                 if 'marking-definition-type' not in options.disabled:

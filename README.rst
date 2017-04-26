@@ -141,7 +141,9 @@ Some checks access Internet resources to determine valid values for certain prop
 +--------+-----------------------------+----------------------------------------+
 |  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
 |        | format                      | follows the correct format             |
-|        |                             |                                        |
++--------+-----------------------------+----------------------------------------+
+|  150   | hash-length                 | keys in 'hashes'-type properties are   |
+|        |                             | not too long                           |
 +--------+-----------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run                 |
 +--------+-----------------------------+----------------------------------------+

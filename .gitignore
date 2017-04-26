@@ -32,3 +32,6 @@ Desktop.ini
 
 # External data cache
 cache.sqlite
+
+# Editors
+*.swp
