@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+0.4.0 - 2017-05-05
+
+* Update to STIX 2.0 Working Draft 2
+  * Check length of keys in 'hashes'-type properties.
+  * Remove 'description' for Cyber Observable objects.
+  * External references should have hashes if they have a URL
+  * Update to cti-pattern-validator 0.3.0.
+* Improve error message for invalid binary data.
+
 0.3.0 - 2017-03-07
 
 * Integrate stix2-patterns validator.
