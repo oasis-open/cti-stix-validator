@@ -12,7 +12,7 @@ install_requires = [
     'six',
     'requests',
     'requests_cache',
-    'stix2-patterns'
+    'stix2-patterns>=0.3.0',
 ]
 
 setup(
