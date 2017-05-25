@@ -72,6 +72,30 @@ class AttackPatternTestCases(ValidatorTest):
         results = validate_string(attack_pattern_string, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        attack_pattern = copy.deepcopy(self.valid_attack_pattern)
+        attack_pattern['created'] = "2016-13-12T08:17:27.000000Z"
+        print(attack_pattern['created'])
+        print(json.dumps(attack_pattern))
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['created'] = "2016-03-42T08:17:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['created'] = "2016-03-00T08:17:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['created'] = "2016-03-12T99:17:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['created'] = "2016-03-12T08:99:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
 
 if __name__ == "__main__":
     unittest.main()
