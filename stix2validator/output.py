@@ -8,6 +8,7 @@ _GREEN = Fore.GREEN
 _YELLOW = Fore.YELLOW
 _RED = Fore.RED + Style.BRIGHT
 _VERBOSE = False
+_SILENT = False
 
 
 def set_level(verbose_output=False):
@@ -18,6 +19,14 @@ def set_level(verbose_output=False):
     """
     global _VERBOSE
     _VERBOSE = verbose_output
+
+def set_silent(silence_output=False):
+    """Set the silent flag for the application.
+    If ``silence_output`` is True then the application does not print
+    any messages to stdout.
+    """
+    global _SILENT
+    _SILENT = silence_output
 
 
 def error(msg, status=codes.EXIT_FAILURE):
@@ -55,6 +64,11 @@ def print_level(fmt, level, *args):
     """Prints a formatted message to stdout prepended by spaces. Useful for
     printing hierarchical information, like bullet lists.
 
+    Note:
+        If the application is running in "Silent Mode"
+        (i.e., ``_SILENT == True``), this function will return
+        immediately and no message will be printed.
+
     Args:
         fmt (str): A Python formatted string.
         level (int): Used to determing how many spaces to print. The formula
@@ -71,6 +85,9 @@ def print_level(fmt, level, *args):
                 TEST 2
 
     """
+    if _SILENT:
+        return
+
     msg = fmt % args
     spaces = '    ' * level
     print("%s%s" % (spaces, msg))
@@ -102,6 +119,19 @@ def print_warning_results(results, level=0):
     for warning in results.warnings:
         print_level(marker + "Warning: %s", level + 1, warning)
 
+def print_horizontal_rule():
+    """Prints a horizontal rule.
+
+    Note:
+        If the application is running in "Silent Mode"
+        (i.e., ``_SILENT == True``), this function will return
+        immediately and nothing will be printed.
+    """
+
+    if _SILENT:
+      return
+
+    print("=" * 80)
 
 def print_results(results):
     """Prints `results` (the results of validation) to stdout.
@@ -117,7 +147,7 @@ def print_results(results):
 
     level = 0
     for fn, result in sorted(iteritems(results)):
-        print("=" * 80)
+        print_horizontal_rule()
         print_level("[-] Results for: %s", level, fn)
 
         if result.is_valid:
