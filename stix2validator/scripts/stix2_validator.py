@@ -178,6 +178,15 @@ def _get_arg_parser(is_script=True):
     )
 
     parser.add_argument(
+        "-q",
+        "--silent",
+        dest="silent",
+        action="store_true",
+        default=False,
+        help="Silence all output to stdout."
+    )
+
+    parser.add_argument(
         "-d",
         "--disable",
         "--ignore",
