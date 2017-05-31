@@ -229,11 +229,16 @@ def pretty_error(error, verbose=False):
     # Reword 'is not valid under any of the given schemas' errors
     elif error.validator == 'anyOf':
         try:
-            if 'type' in error.instance and error.instance['type'] == 'network-traffic':
+            if error.instance == {}:
+                msg = "must contain at least one property from this type."
+            elif 'type' in error.instance and error.instance['type'] == 'network-traffic':
                 if ('src_ref' not in error.instance and
                         'dst_ref' not in error.instance):
                     msg = "'network-traffic' objects must contain at least "\
                           "one of 'src_ref' or 'dst_ref'"
+            elif 'type' in error.instance and error.instance['type'] in ['process', 'x509-certificate']:
+                if error.instance.keys() == ['type']:
+                    msg = "must contain at least one property (other than `type`) from this object."
             else:
                 raise TypeError
         except TypeError:
