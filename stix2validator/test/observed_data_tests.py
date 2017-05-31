@@ -416,6 +416,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
             "x509_v3_extensions": {
+              "issuer_alternative_name": "Example Corp",
               "foo": "bar"
             }
         }
@@ -430,6 +431,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
             "x509_v3_extensions": {
+              "issuer_alternative_name": "Example Corp",
               "foo": "bar"
             }
         }
