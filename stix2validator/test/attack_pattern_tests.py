@@ -8,8 +8,8 @@ VALID_ATTACK_PATTERN = """
 {
   "type": "attack-pattern",
   "id": "attack-pattern--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",
-  "created": "2016-05-12T08:17:27.000000Z",
-  "modified": "2016-05-12T08:17:27.000000Z",
+  "created": "2016-02-12T08:17:27.000000Z",
+  "modified": "2016-02-12T08:17:27.000000Z",
   "name": "Spear Phishing",
   "description": "...",
   "external_references": [
@@ -74,27 +74,37 @@ class AttackPatternTestCases(ValidatorTest):
 
     def test_invalid_timestamp(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
-        attack_pattern['created'] = "2016-13-12T08:17:27.000000Z"
-        print(attack_pattern['created'])
-        print(json.dumps(attack_pattern))
+        attack_pattern['modified'] = "2016-13-12T08:17:27.000000Z"
         attack_pattern_string = json.dumps(attack_pattern)
         self.assertFalseWithOptions(attack_pattern_string)
 
-        attack_pattern['created'] = "2016-03-42T08:17:27.000000Z"
+        attack_pattern['modified'] = "2016-03-42T08:17:27.000000Z"
         attack_pattern_string = json.dumps(attack_pattern)
         self.assertFalseWithOptions(attack_pattern_string)
 
-        attack_pattern['created'] = "2016-03-00T08:17:27.000000Z"
+        attack_pattern['modified'] = "2016-03-00T08:17:27.000000Z"
         attack_pattern_string = json.dumps(attack_pattern)
         self.assertFalseWithOptions(attack_pattern_string)
 
-        attack_pattern['created'] = "2016-03-12T99:17:27.000000Z"
+        attack_pattern['modified'] = "2016-03-12T99:17:27.000000Z"
         attack_pattern_string = json.dumps(attack_pattern)
         self.assertFalseWithOptions(attack_pattern_string)
 
-        attack_pattern['created'] = "2016-03-12T08:99:27.000000Z"
+        attack_pattern['modified'] = "2016-03-12T08:99:27.000000Z"
         attack_pattern_string = json.dumps(attack_pattern)
         self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['modified'] = "2016-11-31T08:17:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['modified'] = "2017-02-29T08:17:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertFalseWithOptions(attack_pattern_string)
+
+        attack_pattern['modified'] = "2016-02-29T08:17:27.000000Z"
+        attack_pattern_string = json.dumps(attack_pattern)
+        self.assertTrueWithOptions(attack_pattern_string)
 
 
 if __name__ == "__main__":

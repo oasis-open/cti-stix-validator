@@ -40,6 +40,12 @@ class IdentityTestCases(ValidatorTest):
 
         self.check_ignore(report, 'report-label')
 
+    def test_invalid_timestamp(self):
+        report = copy.deepcopy(self.valid_report)
+        report['published'] = "2016-11-31T08:17:27.000000Z"
+        report_string = json.dumps(report)
+        self.assertFalseWithOptions(report_string)
+
 
 if __name__ == "__main__":
     unittest.main()

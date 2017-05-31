@@ -13,6 +13,7 @@ install_requires = [
     'requests',
     'requests_cache',
     'stix2-patterns>=0.4.1',
+    'python-dateutil',
 ]
 
 setup(
