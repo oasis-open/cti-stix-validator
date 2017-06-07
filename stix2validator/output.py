@@ -20,6 +20,7 @@ def set_level(verbose_output=False):
     global _VERBOSE
     _VERBOSE = verbose_output
 
+
 def set_silent(silence_output=False):
     """Set the silent flag for the application.
     If ``silence_output`` is True then the application does not print
@@ -119,6 +120,7 @@ def print_warning_results(results, level=0):
     for warning in results.warnings:
         print_level(marker + "Warning: %s", level + 1, warning)
 
+
 def print_horizontal_rule():
     """Prints a horizontal rule.
 
@@ -129,9 +131,10 @@ def print_horizontal_rule():
     """
 
     if _SILENT:
-      return
+        return
 
     print("=" * 80)
+
 
 def print_results(results):
     """Prints `results` (the results of validation) to stdout.

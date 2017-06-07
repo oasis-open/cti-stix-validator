@@ -35,7 +35,7 @@ class ValidationOptions(object):
             should be cleared after validation.
 
     """
-    def __init__(self, cmd_args=None, verbose=False,silent=False,
+    def __init__(self, cmd_args=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, no_cache=False,
