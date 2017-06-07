@@ -1235,6 +1235,87 @@ RELATIONSHIPS = {
 }
 
 
+# Mapping of official STIX objects to their timestamp properties
+TIMESTAMP_PROPERTIES = {
+    'campaign': [
+        'first_seen',
+        'last_seen',
+    ],
+    'indicator': [
+        'valid_from',
+        'valid_until',
+    ],
+    'intrusion-set': [
+        'first_seen',
+        'last_seen',
+    ],
+    'observed-data': [
+        'first_observed',
+        'last_observed',
+    ],
+    'report': [
+        'published',
+    ],
+    'sighting': [
+        'first_seen',
+        'last_seen',
+    ],
+}
+
+
+# Mapping of official STIX Cyber Observable objects to their timestamp properties
+TIMESTAMP_OBSERVABLE_PROPERTIES = {
+    'directory': [
+        'created',
+        'modified',
+        'accessed',
+    ],
+    'email-message': [
+        'date',
+    ],
+    'file': [
+        'created',
+        'modified',
+        'accessed',
+    ],
+    'network-traffic': [
+        'start',
+        'end',
+    ],
+    'process': [
+        'created',
+    ],
+    'user-account': [
+        'account_created',
+        'account_expires',
+        'password_last_changed',
+        'account_first_login',
+        'account_last_login',
+    ],
+    'windows-registry-key': [
+        'modified',
+    ],
+    'x509-certificate': [
+        'validity_not_before',
+        'validity_not_after',
+    ],
+}
+
+# Mapping of STIX Cyber Observable object to their timestamp-typed embedded properties
+TIMESTAMP_EMBEDDED_PROPERTIES = {
+    'file': {
+        'extensions': [
+            'time_date_stamp',
+        ],
+    },
+    'x509-certificate': {
+        'x509_v3_extensions': [
+            'private_key_usage_period_not_before',
+            'private_key_usage_period_not_after',
+        ],
+    },
+}
+
 # Mapping of official STIX objects to their open-vocab properties
 VOCAB_PROPERTIES = {
     "identity": [

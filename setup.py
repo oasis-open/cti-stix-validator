@@ -12,13 +12,14 @@ install_requires = [
     'six',
     'requests',
     'requests_cache',
-    'stix2-patterns>=0.3.0',
+    'stix2-patterns>=0.4.1',
+    'python-dateutil',
 ]
 
 setup(
     name='stix2-validator',
     description='APIs and scripts for validating STIX 2.0 documents.',
-    url='http://stixproject.github.io/',
+    url='http://cti-tc.github.io/',
     version='0.4.0',
     packages=find_packages(),
     entry_points={

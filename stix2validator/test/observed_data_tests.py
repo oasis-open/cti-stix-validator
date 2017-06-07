@@ -416,6 +416,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
             "x509_v3_extensions": {
+              "issuer_alternative_name": "Example Corp",
               "foo": "bar"
             }
         }
@@ -430,6 +431,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
             "x509_v3_extensions": {
+              "issuer_alternative_name": "Example Corp",
               "foo": "bar"
             }
         }
@@ -791,6 +793,32 @@ class ObservedDataTestCases(ValidatorTest):
         hash_name = "MD"
         observed_data['objects']['0']['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
         self.assertFalseWithOptions(json.dumps(observed_data))
+
+    def test_invalid_accessed_timestamp(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1']['created'] = "2016-11-31T08:17:27.000000Z"
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_invalid_extension_timestamp(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1']['extensions'] = {'windows-pebinary-ext': {
+            "pe_type": "dll",
+            "time_date_stamp": "2016-11-31T08:17:27Z",
+        }}
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
+
+    def test_invalid_observable_embedded_timestamp(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "x509-certificate",
+            "x509_v3_extensions": {
+              "private_key_usage_period_not_before": "2016-11-31T08:17:27.000000Z"
+            }
+        }
+        observed_data = json.dumps(observed_data)
+        self.assertFalseWithOptions(observed_data)
 
 
 if __name__ == "__main__":
