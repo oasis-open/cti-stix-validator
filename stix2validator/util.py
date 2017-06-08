@@ -15,6 +15,7 @@ class ValidationOptions(object):
             supplied on the command line.
         verbose: True if informational notes and more verbose error messages
             should be printed to stdout/stderr.
+        silent: True if all output to stdout should be silenced.
         files: A list of input files and directories of files to be
             validated.
         recursive: Recursively descend into input directories.
@@ -34,12 +35,15 @@ class ValidationOptions(object):
             should be cleared after validation.
 
     """
-    def __init__(self, cmd_args=None, verbose=False, files=None,
-                 recursive=False, schema_dir=None, disabled="",
-                 enabled="", strict=False, strict_types=False,
-                 no_cache=False, refresh_cache=False, clear_cache=False):
+    def __init__(self, cmd_args=None, verbose=False, silent=False,
+                 files=None, recursive=False, schema_dir=None,
+                 disabled="", enabled="", strict=False,
+                 strict_types=False, no_cache=False,
+                 refresh_cache=False, clear_cache=False):
+
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
+            self.silent = cmd_args.silent
             self.files = cmd_args.files
             self.recursive = cmd_args.recursive
             self.schema_dir = cmd_args.schema_dir
@@ -58,6 +62,7 @@ class ValidationOptions(object):
 
             # output options
             self.verbose = verbose
+            self.silent = silent
             self.strict = strict
             self.strict_types = strict_types
             self.disabled = disabled
