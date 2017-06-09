@@ -572,12 +572,12 @@ def custom_observable_properties_prefix_strict(instance):
                                 % prop, instance['id'],
                                 'custom-observable-properties-prefix')
             # Check properties of embedded cyber observable types
-            if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
-                    prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
+            if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                    prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
                 for embed_prop in obj[prop]:
                     if isinstance(embed_prop, dict):
                         for embedded in embed_prop:
-                            if (embedded not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                            if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
                                     not re.match("^x_.+\_.+$", embedded)):
                                 yield JSONError("Cyber Observable Object custom "
                                                 "property '%s' in the %s property of "
@@ -588,7 +588,7 @@ def custom_observable_properties_prefix_strict(instance):
                                                 "then the name."
                                                 % (embedded, prop, type_), instance['id'],
                                                 'custom-observable-properties-prefix')
-                    elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                    elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
                             not re.match("^x_.+\_.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
                                         "property '%s' in the %s property of "
@@ -619,13 +619,13 @@ def custom_observable_properties_prefix_strict(instance):
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
-                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES and
-                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]):
+                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
                             for embed_prop in obj['extensions'][ext_key][ext_prop]:
                                 if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
                                     embed_prop = [embed_prop]
                                 for p in embed_prop:
-                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key][ext_prop] and
+                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
                                             not re.match("^x_.+\_.+$", p)):
                                         yield JSONError("Cyber Observable Object "
                                                         "custom property '%s' in the %s "
@@ -658,19 +658,19 @@ def custom_observable_properties_prefix_lax(instance):
                                 % prop, instance['id'],
                                 'custom-observable-properties-prefix')
             # Check properties of embedded cyber observable types
-            if (type_ in enums.OBSERVABLE_EMBEDED_PROPERTIES and
-                    prop in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_]):
+            if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                    prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
                 for embed_prop in obj[prop]:
                     if isinstance(embed_prop, dict):
                         for embedded in embed_prop:
-                            if (embedded not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                            if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
                                     not re.match("^x_.+$", embedded)):
                                 yield JSONError("Cyber Observable Object custom "
                                                 "property '%s' in the %s property of "
                                                 "%s object should start with 'x_'."
                                                 % (embedded, prop, type_), instance['id'],
                                                 'custom-observable-properties-prefix')
-                    elif (embed_prop not in enums.OBSERVABLE_EMBEDED_PROPERTIES[type_][prop] and
+                    elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
                             not re.match("^x_.+$", embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
                                         "property '%s' in the %s property of "
@@ -694,13 +694,13 @@ def custom_observable_properties_prefix_lax(instance):
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
-                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES and
-                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key]):
+                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
                             for embed_prop in obj['extensions'][ext_key][ext_prop]:
                                 if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
                                     embed_prop = [embed_prop]
                                 for p in embed_prop:
-                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES[ext_key][ext_prop] and
+                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
                                             not re.match("^x_.+$", p)):
                                         yield JSONError("Cyber Observable Object "
                                                         "custom property '%s' in the %s "
