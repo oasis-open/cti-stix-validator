@@ -18,6 +18,14 @@ class JSONError(schema_exceptions.ValidationError):
         super(JSONError, self).__init__(msg, path=deque([instance_id]))
 
 
+class PatternError(JSONError):
+    """Represent a problem with a STIX Pattern.
+    """
+    def __init__(self, msg=None, instance_id=None, check_code=None):
+        msg = 'Pattern failed to validate: %s.' % msg
+        super(PatternError, self).__init__(msg, instance_id, check_code)
+
+
 class NoJSONFileFoundError(OSError):
     """Represent a problem finding the input JSON file(s).
 

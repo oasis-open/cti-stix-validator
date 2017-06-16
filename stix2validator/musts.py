@@ -5,9 +5,10 @@ from dateutil import parser
 import re
 
 from stix2patterns.validator import run_validator as pattern_validator
+from stix2patterns.pattern import Pattern
 
 from . import enums
-from .errors import JSONError
+from .errors import JSONError, PatternError
 from .output import info
 from .util import cyber_observable_check, has_cyber_observable_data
 
@@ -328,7 +329,8 @@ def types_strict(instance):
 
 
 def patterns(instance):
-    """Ensure that the syntax of the pattern of an indicator is valid.
+    """Ensure that the syntax of the pattern of an indicator is valid, and that
+    objects and properties referenced by the pattern are valid.
     """
     if instance['type'] != 'indicator' or 'pattern' not in instance:
         return
@@ -337,8 +339,22 @@ def patterns(instance):
     errors = pattern_validator(pattern)
 
     for e in errors:
-        yield JSONError("Pattern failed to validate: %s."
-                        % e, instance['id'])
+        yield PatternError(str(e), instance['id'])
+
+    p = Pattern(pattern)
+    inspection = p.inspect().comparisons
+    for objtype in inspection:
+        if objtype not in enums.OBSERVABLE_TYPES:
+            yield PatternError("'%s' is not a valid observable type."
+                               % objtype, instance['id'])
+        expression_list = inpection[objtype]
+        for exp in expression_list:
+            path = exp[0]
+            prop = path.split('.',1)[0]
+            if prop not in enums.OBSERVABLE_PROPERTIES[objtype]:
+                yield PatternError("'%s' is not a valid property for '%s' objects."
+                                   % (prop, objtype), instance['id'])
+
 
 
 def list_musts(options):
