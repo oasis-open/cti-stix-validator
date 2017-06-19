@@ -338,8 +338,10 @@ def patterns(instance):
     pattern = instance['pattern']
     errors = pattern_validator(pattern)
 
-    for e in errors:
-        yield PatternError(str(e), instance['id'])
+    if errors:
+        for e in errors:
+            yield PatternError(str(e), instance['id'])
+        return
 
     p = Pattern(pattern)
     inspection = p.inspect().comparisons
@@ -347,14 +349,13 @@ def patterns(instance):
         if objtype not in enums.OBSERVABLE_TYPES:
             yield PatternError("'%s' is not a valid observable type."
                                % objtype, instance['id'])
-        expression_list = inpection[objtype]
+        expression_list = inspection[objtype]
         for exp in expression_list:
             path = exp[0]
-            prop = path.split('.',1)[0]
+            prop = path.split('.', 1)[0]
             if prop not in enums.OBSERVABLE_PROPERTIES[objtype]:
                 yield PatternError("'%s' is not a valid property for '%s' objects."
                                    % (prop, objtype), instance['id'])
-
 
 
 def list_musts(options):

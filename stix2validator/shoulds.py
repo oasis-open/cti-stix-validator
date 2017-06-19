@@ -22,6 +22,37 @@ from .errors import JSONError
 from .output import info
 
 
+def custom_prefix_strict(instance):
+    """Ensure custom content follows strict naming style conventions.
+    """
+    for error in custom_object_prefix_strict(instance):
+        yield error
+    for error in custom_property_prefix_strict(instance):
+        yield error
+    for error in custom_observable_object_prefix_strict(instance):
+        yield error
+    for error in custom_object_extension_prefix_strict(instance):
+        yield error
+    for error in custom_observable_properties_prefix_strict(instance):
+        yield error
+
+
+def custom_prefix_lax(instance):
+    """Ensure custom content follows lenient naming style conventions
+    for forward-compatibility.
+    """
+    for error in custom_object_prefix_lax(instance):
+        yield error
+    for error in custom_property_prefix_lax(instance):
+        yield error
+    for error in custom_observable_object_prefix_lax(instance):
+        yield error
+    for error in custom_object_extension_prefix_lax(instance):
+        yield error
+    for error in custom_observable_properties_prefix_lax(instance):
+        yield error
+
+
 def custom_object_prefix_strict(instance):
     """Ensure custom objects follow strict naming style conventions.
     """
@@ -1047,20 +1078,12 @@ CHECKS = {
         windows_process_priority_format,
         hash_length,
     ],
-    'custom-object-prefix': custom_object_prefix_strict,
-    'custom-object-prefix-lax': custom_object_prefix_lax,
-    'custom-property-prefix': custom_property_prefix_strict,
-    'custom-property-prefix-lax': custom_property_prefix_lax,
+    'custom-prefix': custom_prefix_strict,
+    'custom-prefix-lax': custom_prefix_lax,
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
     'observable-object-keys': observable_object_keys,
     'observable-dictionary-keys': observable_dictionary_keys,
-    'custom-observable-object-prefix': custom_observable_object_prefix_strict,
-    'custom-observable-object-prefix-lax': custom_observable_object_prefix_lax,
-    'custom-object-extension-prefix': custom_object_extension_prefix_strict,
-    'custom-object-extension-prefix-lax': custom_object_extension_prefix_lax,
-    'custom-observable-properties-prefix': custom_observable_properties_prefix_strict,
-    'custom-observable-properties-prefix-lax': custom_observable_properties_prefix_lax,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
     'approved-values': [
@@ -1156,20 +1179,13 @@ def list_shoulds(options):
     if options.disabled:
         if 'all' not in options.disabled:
             if 'format-checks' not in options.disabled:
-                if ('custom-object-prefix' not in options.disabled and
-                        'custom-object-prefix-lax' not in options.disabled):
-                    validator_list.append(CHECKS['custom-object-prefix'])
-                elif 'custom-object-prefix' not in options.disabled:
-                    validator_list.append(CHECKS['custom-object-prefix'])
-                elif 'custom-object-prefix-lax' not in options.disabled:
-                    validator_list.append(CHECKS['custom-object-prefix-lax'])
-                if ('custom-property-prefix' not in options.disabled and
-                        'custom-property-prefix-lax' not in options.disabled):
-                    validator_list.append(CHECKS['custom-property-prefix'])
-                elif 'custom-property-prefix' not in options.disabled:
-                    validator_list.append(CHECKS['custom-property-prefix'])
-                elif 'custom-property-prefix-lax' not in options.disabled:
-                    validator_list.append(CHECKS['custom-property-prefix-lax'])
+                if ('custom-prefix' not in options.disabled and
+                        'custom-prefix-lax' not in options.disabled):
+                    validator_list.append(CHECKS['custom-prefix'])
+                elif 'custom-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-prefix'])
+                elif 'custom-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-prefix-lax'])
                 if 'open-vocab-format' not in options.disabled:
                     validator_list.append(CHECKS['open-vocab-format'])
                 if 'kill-chain-names' not in options.disabled:
@@ -1178,27 +1194,6 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['observable-object-keys'])
                 if 'observable-dictionary-keys' not in options.disabled:
                     validator_list.append(CHECKS['observable-dictionary-keys'])
-                if ('custom-observable-object-prefix' not in options.disabled and
-                        'custom-observable-object-prefix-lax' not in options.disabled):
-                    validator_list.append(CHECKS['custom-observable-object-prefix'])
-                elif 'custom-observable-object-prefix' not in options.disabled:
-                    validator_list.append(CHECKS['custom-observable-object-prefix'])
-                elif 'custom-observable-object-prefix-lax' not in options.disabled:
-                    validator_list.append(CHECKS['custom-observable-object-prefix-lax'])
-                if ('custom-object-extension-prefix' not in options.disabled and
-                        'custom-object-extension-prefix-lax' not in options.disabled):
-                    validator_list.append(CHECKS['custom-object-extension-prefix'])
-                elif 'custom-object-extension-prefix' not in options.disabled:
-                    validator_list.append(CHECKS['custom-object-extension-prefix'])
-                elif 'custom-object-extension-prefix-lax' not in options.disabled:
-                    validator_list.append(CHECKS['custom-object-extension-prefix-lax'])
-                if ('custom-observable-properties-prefix' not in options.disabled and
-                        'custom-observable-properties-prefix-lax' not in options.disabled):
-                    validator_list.append(CHECKS['custom-observable-properties-prefix'])
-                elif 'custom-observable-properties-prefix' not in options.disabled:
-                    validator_list.append(CHECKS['custom-observable-properties-prefix'])
-                elif 'custom-observable-properties-prefix-lax' not in options.disabled:
-                    validator_list.append(CHECKS['custom-observable-properties-prefix-lax'])
                 if 'windows-process-priority-format' not in options.disabled:
                     validator_list.append(CHECKS['windows-process-priority-format'])
                 if 'hash-length' not in options.disabled:
