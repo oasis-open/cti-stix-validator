@@ -140,6 +140,31 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = """[file:hashes."SHA-256" = 'aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f']"""
         self.assertFalseWithOptions(json.dumps(indicator))
 
+    def test_pattern_custom_invalid_format(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[ab:yz = 'something']"""
+        self.assertFalseWithOptions(json.dumps(indicator))
+
+    def test_pattern_custom_object_noprefix(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[foo:name = 'something']"""
+        self.assertFalseWithOptions(json.dumps(indicator))
+
+        self.check_ignore(json.dumps(indicator), 'custom-prefix,custom-prefix-lax')
+        self.assertFalseWithOptions(json.dumps(indicator), disabled='custom-prefix')
+
+    def test_pattern_custom_object_prefix_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[x-x-foo:x_x_name = 'something']"""
+        self.assertTrueWithOptions(json.dumps(indicator))
+
+        self.assertFalseWithOptions(json.dumps(indicator), strict_types=True)
+
+    def test_pattern_custom_object_prefix_lax(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[x-foo":x_name = 'something']"""
+        self.check_ignore(json.dumps(indicator), 'custom-prefix')
+
 
 if __name__ == "__main__":
     unittest.main()

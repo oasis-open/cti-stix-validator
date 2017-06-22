@@ -1179,10 +1179,7 @@ def list_shoulds(options):
     if options.disabled:
         if 'all' not in options.disabled:
             if 'format-checks' not in options.disabled:
-                if ('custom-prefix' not in options.disabled and
-                        'custom-prefix-lax' not in options.disabled):
-                    validator_list.append(CHECKS['custom-prefix'])
-                elif 'custom-prefix' not in options.disabled:
+                if 'custom-prefix' not in options.disabled:
                     validator_list.append(CHECKS['custom-prefix'])
                 elif 'custom-prefix-lax' not in options.disabled:
                     validator_list.append(CHECKS['custom-prefix-lax'])

@@ -5,7 +5,7 @@ from dateutil import parser
 import re
 
 from stix2patterns.validator import run_validator as pattern_validator
-from stix2patterns.pattern import Pattern
+from stix2patterns.pattern import ParseException, Pattern
 
 from . import enums
 from .errors import JSONError, PatternError
@@ -328,7 +328,7 @@ def types_strict(instance):
                                 % (key, obj['type']), instance['id'])
 
 
-def patterns(instance):
+def patterns(instance, options):
     """Ensure that the syntax of the pattern of an indicator is valid, and that
     objects and properties referenced by the pattern are valid.
     """
@@ -338,6 +338,7 @@ def patterns(instance):
     pattern = instance['pattern']
     errors = pattern_validator(pattern)
 
+    # Check pattern syntax
     if errors:
         for e in errors:
             yield PatternError(str(e), instance['id'])
@@ -346,16 +347,52 @@ def patterns(instance):
     p = Pattern(pattern)
     inspection = p.inspect().comparisons
     for objtype in inspection:
-        if objtype not in enums.OBSERVABLE_TYPES:
-            yield PatternError("'%s' is not a valid observable type."
+        # Check observable object types
+        if objtype in enums.OBSERVABLE_TYPES:
+            pass
+        elif options.strict_types:
+            yield PatternError("'%s' is not a valid STIX observable type"
                                % objtype, instance['id'])
+        elif (not re.match('^\\-?[a-z0-9]+(-[a-z0-9]+)*\\-?$', objtype) or
+              len(objtype) < 3 or len(objtype) > 250):
+            yield PatternError("'%s' is not a valid observable type name"
+                               % objtype, instance['id'])
+        elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
+              not re.match("^x\-.+\-.+$", objtype)):
+            yield PatternError("Custom Observable Object type '%s' should start "
+                               "with 'x-' followed by a source unique identifier "
+                               "(like a domain name with dots replaced by "
+                               "dashes), a dash and then the name"
+                               % objtype, instance['id'])
+        elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix-lax']) and
+              not re.match("^x\-.+$", objtype)):
+            yield PatternError("Custom Observable Object type '%s' should start "
+                               "with 'x-'" % objtype, instance['id'])
+
+        # Check observable object properties
         expression_list = inspection[objtype]
         for exp in expression_list:
             path = exp[0]
             prop = path.split('.', 1)[0]
-            if prop not in enums.OBSERVABLE_PROPERTIES[objtype]:
-                yield PatternError("'%s' is not a valid property for '%s' objects."
+            if objtype in enums.OBSERVABLE_PROPERTIES and prop in enums.OBSERVABLE_PROPERTIES[objtype]:
+                continue
+            elif options.strict_types:
+                yield PatternError("'%s' is not a valid property for '%s' objects"
                                    % (prop, objtype), instance['id'])
+            elif not re.match('^[a-z0-9_]{3,250}$', prop):
+                yield PatternError("'%s' is not a valid observable property name"
+                                   % prop, instance['id'])
+            elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
+                  not re.match("^x_.+_.+$", prop)):
+                yield PatternError("Cyber Observable Object custom property '%s' "
+                                   "should start with 'x_' followed by a source "
+                                   "unique identifier (like a domain name with "
+                                   "dots replaced by dashes), a dash and then the"
+                                   " name" % prop, instance['id'])
+            elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix-lax']) and
+                  not re.match("^x_.+$", prop)):
+                yield PatternError("Cyber Observable Object custom property '%s' "
+                                   "should start with 'x_'" % prop, instance['id'])
 
 
 def list_musts(options):

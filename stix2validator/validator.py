@@ -29,6 +29,7 @@ class CustomDraft4Validator(Draft4Validator):
                                                     format_checker)
         self.musts_list = musts.list_musts(options)
         self.shoulds_list = shoulds.list_shoulds(options)
+        self.options = options
 
     def iter_errors_more(self, instance, check_musts=True):
         """Perform additional validation not possible merely with JSON schemas.
@@ -52,7 +53,10 @@ class CustomDraft4Validator(Draft4Validator):
 
         # Perform validation
         for v_function in validators:
-            result = v_function(instance)
+            try:
+                result = v_function(instance)
+            except TypeError:
+                result = v_function(instance, self.options)
             if isinstance(result, Iterable):
                 for x in result:
                     yield x
