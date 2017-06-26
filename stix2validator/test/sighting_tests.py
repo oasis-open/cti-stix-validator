@@ -8,8 +8,8 @@ VALID_SIGHTING = """
 {
   "type": "sighting",
   "id": "sighting--6b0e3956-95f3-4c04-a882-116832996da0",
-  "created": "2016-08-22T14:09:00.123456Z",
-  "modified": "2016-08-22T14:09:00.123456Z",
+  "created": "2016-08-22T14:09:00.123Z",
+  "modified": "2016-08-22T14:09:00.123Z",
   "first_seen": "2016-08-22T14:09:00.123456Z",
   "sighting_of_ref": "malware--36ffb872-1dd9-446e-b6f5-d58527e5b5d2",
   "observed_data_refs": ["observed-data--b67d30ff-02ac-498a-92f9-32f845f448cf"],
