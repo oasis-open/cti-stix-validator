@@ -843,7 +843,7 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
     ]
 }
 # Mappings of properties of embedded cyber observable types
-OBSERVABLE_EMBEDED_PROPERTIES = {
+OBSERVABLE_EMBEDDED_PROPERTIES = {
     'email-message': {
         'body_multipart': [
             'body',
@@ -880,7 +880,7 @@ OBSERVABLE_EMBEDED_PROPERTIES = {
         ]
     }
 }
-OBSERVABLE_EXTENSION_EMBEDED_PROPERTIES = {
+OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES = {
     'ntfs-ext': {
         'alternate_data_streams': [
             'name',

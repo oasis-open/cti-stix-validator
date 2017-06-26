@@ -97,16 +97,13 @@ Some checks access Internet resources to determine valid values for certain prop
 +--------+-----------------------------+----------------------------------------+
 |   1    | format-checks               | all 1xx checks are run                 |
 +--------+-----------------------------+----------------------------------------+
-|  101   | custom-object-prefix        | custom object type names follow the    |
-|        |                             | correct format                         |
-+--------+-----------------------------+----------------------------------------+
-|  102   | custom-object-prefix-lax    | same as 101 but more lenient; no       |
-|        |                             | source identifier needed in prefix     |
-+--------+-----------------------------+----------------------------------------+
-|  103   | custom-property-prefix      | custom object property names follow    |
+|  101   | custom-prefix               | names of custom object types,          |
+|        |                             | properties, observable objects,        |
+|        |                             | observable object properties, and      |
+|        |                             | observable object extensions follow    |
 |        |                             | the correct format                     |
 +--------+-----------------------------+----------------------------------------+
-|  104   | custom-property-prefix-lax  | same as 103 but more lenient; no       |
+|  102   | custom-prefix-lax           | same as 101 but more lenient; no       |
 |        |                             | source identifier needed in prefix     |
 +--------+-----------------------------+----------------------------------------+
 |  111   | open-vocab-format           | values of open vocabularies follow the |
@@ -120,24 +117,6 @@ Some checks access Internet resources to determine valid values for certain prop
 +--------+-----------------------------+----------------------------------------+
 |  142   | observable-dictionary-keys  | dictionaries in cyber observable       |
 |        |                             | objects follow the correct format      |
-+--------+-----------------------------+----------------------------------------+
-|  143   | custom-observable-object-\  | custom observable object names follow  |
-|        | prefix                      | the correct format                     |
-+--------+-----------------------------+----------------------------------------+
-|  144   | custom-observable-object-\  | same as 144 but more lenient; no       |
-|        | prefix-lax                  | source identifier needed in prefix     |
-+--------+-----------------------------+----------------------------------------+
-|  145   | custom-object-extension-\   | custom observable object extension     |
-|        | prefix                      | names follow the correct format        |
-+--------+-----------------------------+----------------------------------------+
-|  146   | custom-object-extension-\   | same as 145 but more lenient; no       |
-|        | prefix-lax                  | source identifier needed in prefix     |
-+--------+-----------------------------+----------------------------------------+
-|  147   | custom-observable-\         | observable object custom property      |
-|        | properties-prefix           | names follow the correct format        |
-+--------+-----------------------------+----------------------------------------+
-|  148   | custom-observable-\         | same as 148 but more lenient; no       |
-|        | properties-prefix-lax       | source identifier needed in prefix     |
 +--------+-----------------------------+----------------------------------------+
 |  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
 |        | format                      | follows the correct format             |
