@@ -5,7 +5,7 @@ from dateutil import parser
 import re
 
 from stix2patterns.validator import run_validator as pattern_validator
-from stix2patterns.pattern import ParseException, Pattern
+from stix2patterns.pattern import Pattern
 
 from . import enums
 from .errors import JSONError, PatternError
@@ -13,16 +13,22 @@ from .output import info
 from .util import cyber_observable_check, has_cyber_observable_data
 
 
+CUSTOM_TYPE_PREFIX_RE = re.compile("^x\-.+\-.+$")
+CUSTOM_TYPE_LAX_PREFIX_RE = re.compile("^x\-.+$")
+CUSTOM_PROPERTY_PREFIX_RE = re.compile("^x_.+_.+$")
+CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile("^x_.+$")
+
+
 def timestamp(instance):
     """Ensure timestamps contain sane months, days, hours, minutes, seconds.
     """
-    ts_regex = r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$"
+    ts_regex = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
     timestamp_props = ['created', 'modified']
     if instance['type'] in enums.TIMESTAMP_PROPERTIES:
         timestamp_props += enums.TIMESTAMP_PROPERTIES[instance['type']]
 
     for tprop in timestamp_props:
-        if tprop in instance and re.match(ts_regex, instance[tprop]):
+        if tprop in instance and ts_regex.match(instance[tprop]):
             # Don't raise an error if schemas will catch it
             try:
                 parser.parse(instance[tprop])
@@ -36,7 +42,7 @@ def timestamp(instance):
                 continue
             if obj['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
                 for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[obj['type']]:
-                    if tprop in obj and re.match(ts_regex, obj[tprop]):
+                    if tprop in obj and ts_regex.match(obj[tprop]):
                         # Don't raise an error if schemas will catch it
                         try:
                             parser.parse(obj[tprop])
@@ -49,13 +55,13 @@ def timestamp(instance):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                             if embed == 'extensions':
                                 for ext in obj[embed]:
-                                    if tprop in obj[embed][ext] and re.match(ts_regex, obj[embed][ext][tprop]):
+                                    if tprop in obj[embed][ext] and ts_regex.match(obj[embed][ext][tprop]):
                                         try:
                                             parser.parse(obj[embed][ext][tprop])
                                         except ValueError as e:
                                             yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
                                                             % (obj['type'], ext, tprop, obj[embed][ext][tprop], str(e)), instance['id'])
-                            elif tprop in obj[embed] and re.match(ts_regex, obj[embed][tprop]):
+                            elif tprop in obj[embed] and ts_regex.match(obj[embed][tprop]):
                                 try:
                                     parser.parse(obj[embed][tprop])
                                 except ValueError as e:
@@ -110,6 +116,7 @@ def marking_selector_syntax(instance):
     if 'granular_markings' not in instance:
         return
 
+    list_index_re = re.compile(r"\[(\d+)\]")
     for marking in instance['granular_markings']:
         if 'selectors' not in marking:
             continue
@@ -121,7 +128,7 @@ def marking_selector_syntax(instance):
             obj = instance
             prev_segmt = None
             for segmt in segments:
-                index_match = re.match(r"\[(\d+)\]", segmt)
+                index_match = list_index_re.match(segmt)
                 if index_match:
                     try:
                         idx = int(index_match.group(1))
@@ -248,9 +255,9 @@ def artifact_mime_type(instance):
 
             else:
                 info("Can't reach IANA website; using regex for mime types.")
-                mime_pattern = '^(application|audio|font|image|message|model' \
-                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+'
-                if not re.match(mime_pattern, obj['mime_type']):
+                mime_pattern = re.compile('^(application|audio|font|image|message|model'
+                                          '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
+                if not mime_pattern.match(obj['mime_type']):
                     yield JSONError("The 'mime_type' property of object '%s' "
                                     "('%s') should be an IANA MIME Type of the"
                                     " form 'type/subtype'."
@@ -262,6 +269,7 @@ def character_set(instance):
     """Ensure certain properties of cyber observable objects come from the IANA
     Character Set list.
     """
+    char_pattern = re.compile('^[a-zA-Z0-9_\(\)-]+$')
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] == 'directory' and 'path_enc' in obj):
             if enums.char_sets():
@@ -272,8 +280,7 @@ def character_set(instance):
                                     % (key, obj['path_enc']), instance['id'])
             else:
                 info("Can't reach IANA website; using regex for character_set.")
-                char_pattern = '^[a-zA-Z0-9_\(\)-]+$'
-                if not re.match(char_pattern, obj['path_enc']):
+                if not char_pattern.match(obj['path_enc']):
                     yield JSONError("The 'path_enc' property of object '%s' "
                                     "('%s') must be an IANA registered "
                                     "character set."
@@ -288,8 +295,7 @@ def character_set(instance):
                                     % (key, obj['name_enc']), instance['id'])
             else:
                 info("Can't reach IANA website; using regex for character_set.")
-                char_pattern = '^[a-zA-Z0-9_\(\)-]+$'
-                if not re.match(char_pattern, obj['name_enc']):
+                if not char_pattern.match(obj['name_enc']):
                     yield JSONError("The 'name_enc' property of object '%s' "
                                     "('%s') must be an IANA registered "
                                     "character set."
@@ -344,6 +350,9 @@ def patterns(instance, options):
             yield PatternError(str(e), instance['id'])
         return
 
+    type_format_re = re.compile('^\\-?[a-z0-9]+(-[a-z0-9]+)*\\-?$')
+    property_format_re = re.compile('^[a-z0-9_]{3,250}$')
+
     p = Pattern(pattern)
     inspection = p.inspect().comparisons
     for objtype in inspection:
@@ -353,19 +362,19 @@ def patterns(instance, options):
         elif options.strict_types:
             yield PatternError("'%s' is not a valid STIX observable type"
                                % objtype, instance['id'])
-        elif (not re.match('^\\-?[a-z0-9]+(-[a-z0-9]+)*\\-?$', objtype) or
+        elif (not type_format_re.match(objtype) or
               len(objtype) < 3 or len(objtype) > 250):
             yield PatternError("'%s' is not a valid observable type name"
                                % objtype, instance['id'])
         elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
-              not re.match("^x\-.+\-.+$", objtype)):
+              not CUSTOM_TYPE_PREFIX_RE.match(objtype)):
             yield PatternError("Custom Observable Object type '%s' should start "
                                "with 'x-' followed by a source unique identifier "
                                "(like a domain name with dots replaced by "
-                               "dashes), a dash and then the name"
+                               "hyphens), a hyphen and then the name"
                                % objtype, instance['id'])
         elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix-lax']) and
-              not re.match("^x\-.+$", objtype)):
+              not CUSTOM_TYPE_LAX_PREFIX_RE.match(objtype)):
             yield PatternError("Custom Observable Object type '%s' should start "
                                "with 'x-'" % objtype, instance['id'])
 
@@ -379,18 +388,19 @@ def patterns(instance, options):
             elif options.strict_types:
                 yield PatternError("'%s' is not a valid property for '%s' objects"
                                    % (prop, objtype), instance['id'])
-            elif not re.match('^[a-z0-9_]{3,250}$', prop):
+            elif not property_format_re.match(prop):
                 yield PatternError("'%s' is not a valid observable property name"
                                    % prop, instance['id'])
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
-                  not re.match("^x_.+_.+$", prop)):
+                  not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
                 yield PatternError("Cyber Observable Object custom property '%s' "
                                    "should start with 'x_' followed by a source "
                                    "unique identifier (like a domain name with "
-                                   "dots replaced by dashes), a dash and then the"
-                                   " name" % prop, instance['id'])
+                                   "dots replaced by underscores), an "
+                                   "underscore and then the name"
+                                   % prop, instance['id'])
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix-lax']) and
-                  not re.match("^x_.+$", prop)):
+                  not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop)):
                 yield PatternError("Cyber Observable Object custom property '%s' "
                                    "should start with 'x_'" % prop, instance['id'])
 
