@@ -22,13 +22,13 @@ CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile("^x_.+$")
 def timestamp(instance):
     """Ensure timestamps contain sane months, days, hours, minutes, seconds.
     """
-    ts_regex = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
+    ts_re = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
     timestamp_props = ['created', 'modified']
     if instance['type'] in enums.TIMESTAMP_PROPERTIES:
         timestamp_props += enums.TIMESTAMP_PROPERTIES[instance['type']]
 
     for tprop in timestamp_props:
-        if tprop in instance and ts_regex.match(instance[tprop]):
+        if tprop in instance and ts_re.match(instance[tprop]):
             # Don't raise an error if schemas will catch it
             try:
                 parser.parse(instance[tprop])
@@ -42,7 +42,7 @@ def timestamp(instance):
                 continue
             if obj['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
                 for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[obj['type']]:
-                    if tprop in obj and ts_regex.match(obj[tprop]):
+                    if tprop in obj and ts_re.match(obj[tprop]):
                         # Don't raise an error if schemas will catch it
                         try:
                             parser.parse(obj[tprop])
@@ -55,13 +55,13 @@ def timestamp(instance):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                             if embed == 'extensions':
                                 for ext in obj[embed]:
-                                    if tprop in obj[embed][ext] and ts_regex.match(obj[embed][ext][tprop]):
+                                    if tprop in obj[embed][ext] and ts_re.match(obj[embed][ext][tprop]):
                                         try:
                                             parser.parse(obj[embed][ext][tprop])
                                         except ValueError as e:
                                             yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
                                                             % (obj['type'], ext, tprop, obj[embed][ext][tprop], str(e)), instance['id'])
-                            elif tprop in obj[embed] and ts_regex.match(obj[embed][tprop]):
+                            elif tprop in obj[embed] and ts_re.match(obj[embed][tprop]):
                                 try:
                                     parser.parse(obj[embed][tprop])
                                 except ValueError as e:
@@ -255,9 +255,9 @@ def artifact_mime_type(instance):
 
             else:
                 info("Can't reach IANA website; using regex for mime types.")
-                mime_pattern = re.compile('^(application|audio|font|image|message|model'
+                mime_re = re.compile('^(application|audio|font|image|message|model'
                                           '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-                if not mime_pattern.match(obj['mime_type']):
+                if not mime_re.match(obj['mime_type']):
                     yield JSONError("The 'mime_type' property of object '%s' "
                                     "('%s') should be an IANA MIME Type of the"
                                     " form 'type/subtype'."
@@ -269,7 +269,7 @@ def character_set(instance):
     """Ensure certain properties of cyber observable objects come from the IANA
     Character Set list.
     """
-    char_pattern = re.compile('^[a-zA-Z0-9_\(\)-]+$')
+    char_re = re.compile('^[a-zA-Z0-9_\(\)-]+$')
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] == 'directory' and 'path_enc' in obj):
             if enums.char_sets():
@@ -280,7 +280,7 @@ def character_set(instance):
                                     % (key, obj['path_enc']), instance['id'])
             else:
                 info("Can't reach IANA website; using regex for character_set.")
-                if not char_pattern.match(obj['path_enc']):
+                if not char_re.match(obj['path_enc']):
                     yield JSONError("The 'path_enc' property of object '%s' "
                                     "('%s') must be an IANA registered "
                                     "character set."
@@ -295,7 +295,7 @@ def character_set(instance):
                                     % (key, obj['name_enc']), instance['id'])
             else:
                 info("Can't reach IANA website; using regex for character_set.")
-                if not char_pattern.match(obj['name_enc']):
+                if not char_re.match(obj['name_enc']):
                     yield JSONError("The 'name_enc' property of object '%s' "
                                     "('%s') must be an IANA registered "
                                     "character set."
