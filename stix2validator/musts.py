@@ -256,7 +256,7 @@ def artifact_mime_type(instance):
             else:
                 info("Can't reach IANA website; using regex for mime types.")
                 mime_re = re.compile('^(application|audio|font|image|message|model'
-                                          '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
+                                     '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
                 if not mime_re.match(obj['mime_type']):
                     yield JSONError("The 'mime_type' property of object '%s' "
                                     "('%s') should be an IANA MIME Type of the"
