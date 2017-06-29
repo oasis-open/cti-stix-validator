@@ -20,7 +20,7 @@ The easiest way to install the STIX validator is with pip:
 
 ::
 
-  $ pip install git+https://github.com/oasis-open/cti-stix-validator.git
+  $ pip install stix2
 
 Note that if you instead install it by cloning or downloading the repository, you will need to set up the submodules before you install it:
 

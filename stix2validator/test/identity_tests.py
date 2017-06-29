@@ -9,8 +9,8 @@ VALID_IDENTITY = """
 {
   "type": "identity",
   "id": "identity--2d1c6ab3-5e4e-48ac-a32b-f0c01c2836a8",
-  "created": "2014-08-08T15:50:10.983464Z",
-  "modified": "2014-08-08T15:50:10.983464Z",
+  "created": "2014-08-08T15:50:10.983Z",
+  "modified": "2014-08-08T15:50:10.983Z",
   "name": "ACME Widget, Inc.",
   "identity_class": "organization"
 }

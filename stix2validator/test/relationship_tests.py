@@ -9,8 +9,8 @@ VALID_RELATIONSHIP = """
     "type": "relationship",
     "id": "relationship--44298a74-ba52-4f0c-87a3-1824e67d7fad",
     "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
-    "created": "2016-04-06T20:06:37Z",
-    "modified": "2016-04-06T20:06:37Z",
+    "created": "2016-04-06T20:06:37.000Z",
+    "modified": "2016-04-06T20:06:37.000Z",
     "source_ref": "indicator--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f",
     "target_ref": "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b",
     "relationship_type": "indicates"

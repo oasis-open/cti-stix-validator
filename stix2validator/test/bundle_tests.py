@@ -12,8 +12,8 @@ VALID_BUNDLE = """
     {
       "type": "identity",
       "id": "identity--8ae20dde-83d4-4218-88fd-41ef0dabf9d1",
-      "created": "2016-08-22T14:09:00.123456Z",
-      "modified": "2016-08-22T14:09:00.123456Z",
+      "created": "2016-08-22T14:09:00.123Z",
+      "modified": "2016-08-22T14:09:00.123Z",
       "name": "mitre.org",
       "identity_class": "organization"
     }

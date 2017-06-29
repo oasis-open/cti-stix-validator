@@ -8,8 +8,8 @@ VALID_CUSTOM_OBJECT = """
 {
   "type": "x-example-com-customobject",
   "id": "x-example-com-customobject--4527e5de-8572-446a-a57a-706f15467461",
-  "created": "2016-08-01T00:00:00Z",
-  "modified": "2016-08-01T00:00:00Z",
+  "created": "2016-08-01T00:00:00.000Z",
+  "modified": "2016-08-01T00:00:00.000Z",
   "some_custom_stuff": 14,
   "other_custom_stuff": "hello"
 }

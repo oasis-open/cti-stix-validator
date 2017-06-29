@@ -124,7 +124,11 @@ def pretty_error(error, verbose=False):
                          error.validator_value[1:-2] + '--\'', msg)
         elif error.schema['title'] == 'timestamp':
             msg = re.sub(r"match '.+'$", 'match the timestamp format '
-                         '(YYYY-MM-DDTHH:mm:ss[.s+]Z)', msg)
+                         'YYYY-MM-DDTHH:mm:ss[.s+]Z', msg)
+        elif error.schema['title'] == 'timestamp_millis':
+            msg = re.sub(r"match '.+'$", 'match the timestamp format '
+                         'YYYY-MM-DDTHH:mm:ss.sssZ (must be precise to the '
+                         'millisecond)', msg)
         elif error.schema['title'] == 'relationship_type':
             msg = re.sub(r"does not match '.+'$", 'contains invalid '
                          'characters', msg)
