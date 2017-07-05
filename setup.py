@@ -6,6 +6,16 @@ from setuptools import setup, find_packages
 with open('README.rst') as f:
     readme = f.read()
 
+
+def get_version():
+    with open('stix2validator/version.py') as f:
+        for line in f.readlines():
+            if line.startswith("__version__"):
+                version = line.split()[-1].strip('"')
+                return version
+        raise AttributeError("Package does not have a __version__")
+
+
 install_requires = [
     'jsonschema==2.5.1',
     'colorama',
@@ -20,7 +30,7 @@ setup(
     name='stix2-validator',
     description='APIs and scripts for validating STIX 2.0 documents.',
     url='http://cti-tc.github.io/',
-    version='0.4.0',
+    version=get_version(),
     packages=find_packages(),
     entry_points={
         'console_scripts': [
