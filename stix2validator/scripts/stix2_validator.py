@@ -46,6 +46,8 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | definition_type                        |
 | 202  | relationship-types          | relationships are among those defined  |
 |      |                             | in the specification                   |
+| 203  | duplicate-ids               | objects in a bundle with duplicate IDs |
+|      |                             | have different `modified` timestamps   |
 | 210  | all-vocabs                  | all of the following open vocabulary   |
 |      |                             | checks are run                         |
 | 211  | attack-motivation           | certain property values are from the   |
