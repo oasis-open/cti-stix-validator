@@ -132,6 +132,9 @@ Some checks access Internet resources to determine valid values for certain prop
 |  202   | relationship-types          | relationships are among those defined  |
 |        |                             | in the specification                   |
 +--------+-----------------------------+----------------------------------------+
+|  203   | duplicate-ids               | objects in a bundle with duplicate IDs |
+|        |                             | have different `modified` timestamps   |
++--------+-----------------------------+----------------------------------------+
 |  210   | all-vocabs                  | all of the following open vocabulary   |
 |        |                             | checks are run                         |
 +--------+-----------------------------+----------------------------------------+

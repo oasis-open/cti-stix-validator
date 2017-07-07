@@ -47,6 +47,14 @@ class BundleTestCases(ValidatorTest):
         bundle = json.dumps(bundle)
         self.assertFalseWithOptions(bundle)
 
+    def test_bundle_duplicate_ids(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        bundle['objects'].append(bundle['objects'][0].copy())
+        self.assertFalseWithOptions(json.dumps(bundle))
+
+        bundle['objects'][1]['modified'] = "2017-06-22T14:09:00.123Z"
+        self.assertTrueWithOptions(json.dumps(bundle))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -58,7 +58,7 @@ def custom_object_prefix_strict(instance):
                         "followed by a source unique identifier (like a "
                         "domain name with dots replaced by hyphens), a hyphen "
                         "and then the name." % instance['type'],
-                        instance['id'], 'custom-object-prefix')
+                        instance['id'], 'custom-prefix')
 
 
 def custom_object_prefix_lax(instance):
@@ -71,7 +71,7 @@ def custom_object_prefix_lax(instance):
         yield JSONError("Custom object type '%s' should start with 'x-' in "
                         "order to be compatible with future versions of the "
                         "STIX 2 specification." % instance['type'],
-                        instance['id'], 'custom-object-prefix')
+                        instance['id'], 'custom-prefix-lax')
 
 
 def custom_property_prefix_strict(instance):
@@ -90,7 +90,7 @@ def custom_property_prefix_strict(instance):
                             "identifier (like a domain name with dots "
                             "replaced by hyphen), a hyphen and then the name."
                             % prop_name, instance['id'],
-                            'custom-property-prefix')
+                            'custom-prefix')
 
 
 def custom_property_prefix_lax(instance):
@@ -109,7 +109,7 @@ def custom_property_prefix_lax(instance):
                             "starts with 'x_' in order to be compatible with "
                             "future versions of the STIX 2 specification." %
                             prop_name, instance['id'],
-                            'custom-property-prefix')
+                            'custom-prefix-lax')
 
 
 def open_vocab_values(instance):
@@ -523,7 +523,7 @@ def custom_observable_object_prefix_strict(instance):
                             "(like a domain name with dots replaced by "
                             "hyphens), a hyphen and then the name."
                             % obj['type'], instance['id'],
-                            'custom-observable-object-prefix')
+                            'custom-prefix')
 
 
 @cyber_observable_check
@@ -537,7 +537,7 @@ def custom_observable_object_prefix_lax(instance):
             yield JSONError("Custom Observable Object type '%s' should start "
                             "with 'x-'."
                             % obj['type'], instance['id'],
-                            'custom-observable-object-prefix')
+                            'custom-prefix-lax')
 
 
 @cyber_observable_check
@@ -557,7 +557,7 @@ def custom_object_extension_prefix_strict(instance):
                                 "unique identifier (like a domain name with dots "
                                 "replaced by hyphens), a hyphen and then the name."
                                 % ext_key, instance['id'],
-                                'custom-object-extension-prefix')
+                                'custom-prefix')
 
 
 @cyber_observable_check
@@ -575,7 +575,7 @@ def custom_object_extension_prefix_lax(instance):
                 yield JSONError("Custom Cyber Observable Object extension type"
                                 " '%s' should start with 'x-'."
                                 % ext_key, instance['id'],
-                                'custom-object-extension-prefix')
+                                'custom-prefix-lax')
 
 
 @cyber_observable_check
@@ -599,7 +599,7 @@ def custom_observable_properties_prefix_strict(instance):
                                 "dots replaced by hyphens), a hyphen and then the"
                                 " name."
                                 % prop, instance['id'],
-                                'custom-observable-properties-prefix')
+                                'custom-prefix')
             # Check properties of embedded cyber observable types
             if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
                     prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
@@ -616,7 +616,7 @@ def custom_observable_properties_prefix_strict(instance):
                                                 "dots replaced by hyphens), a hyphen and "
                                                 "then the name."
                                                 % (embedded, prop, type_), instance['id'],
-                                                'custom-observable-properties-prefix')
+                                                'custom-prefix')
                     elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
                             not CUSTOM_PROPERTY_PREFIX_RE.match(embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
@@ -627,7 +627,7 @@ def custom_observable_properties_prefix_strict(instance):
                                         "dots replaced by hyphens), a hyphen and "
                                         "then the name."
                                         % (embed_prop, prop, type_), instance['id'],
-                                        'custom-observable-properties-prefix')
+                                        'custom-prefix')
 
         # Check object extensions' properties
         if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
@@ -644,7 +644,7 @@ def custom_observable_properties_prefix_strict(instance):
                                             "domain name with dots replaced by "
                                             "hyphens), a hyphen and then the name."
                                             % (ext_prop, ext_key), instance['id'],
-                                            'custom-observable-properties-prefix')
+                                            'custom-prefix')
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
@@ -664,7 +664,7 @@ def custom_observable_properties_prefix_strict(instance):
                                                         " with dots replaced by hyphens), a "
                                                         "hyphen and then the name."
                                                         % (p, ext_prop, ext_key), instance['id'],
-                                                        'custom-observable-properties-prefix')
+                                                        'custom-prefix')
 
 
 @cyber_observable_check
@@ -685,7 +685,7 @@ def custom_observable_properties_prefix_lax(instance):
                 yield JSONError("Cyber Observable Object custom property '%s' "
                                 "should start with 'x_'."
                                 % prop, instance['id'],
-                                'custom-observable-properties-prefix')
+                                'custom-prefix-lax')
             # Check properties of embedded cyber observable types
             if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
                     prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
@@ -698,14 +698,14 @@ def custom_observable_properties_prefix_lax(instance):
                                                 "property '%s' in the %s property of "
                                                 "%s object should start with 'x_'."
                                                 % (embedded, prop, type_), instance['id'],
-                                                'custom-observable-properties-prefix')
+                                                'custom-prefix-lax')
                     elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
                             not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embed_prop)):
                         yield JSONError("Cyber Observable Object custom "
                                         "property '%s' in the %s property of "
                                         "%s object should start with 'x_'."
                                         % (embed_prop, prop, type_), instance['id'],
-                                        'custom-observable-properties-prefix')
+                                        'custom-prefix-lax')
 
         # Check object extensions' properties
         if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
@@ -719,7 +719,7 @@ def custom_observable_properties_prefix_lax(instance):
                                             "property '%s' in the %s extension "
                                             "should start with 'x_'."
                                             % (ext_prop, ext_key), instance['id'],
-                                            'custom-observable-properties-prefix')
+                                            'custom-prefix-lax')
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
                     for ext_prop in obj['extensions'][ext_key]:
@@ -736,7 +736,7 @@ def custom_observable_properties_prefix_lax(instance):
                                                         "property of the %s extension should "
                                                         "start with 'x_'."
                                                         % (p, ext_prop, ext_key), instance['id'],
-                                                        'custom-observable-properties-prefix')
+                                                        'custom-prefix-lax')
 
 
 @cyber_observable_check
@@ -1024,6 +1024,25 @@ def extref_hashes(instance):
                                  % (src), instance['id'], 'extref-hashes')
 
 
+def duplicate_ids(instance):
+    """Ensure objects with duplicate IDs have different `modified` timestamps.
+    """
+    if instance['type'] != 'bundle' or 'objects' not in instance:
+        return
+
+    unique_ids = {}
+    for obj in instance['objects']:
+        if 'id' not in obj or 'modified' not in obj:
+            continue
+        elif obj['id'] not in unique_ids:
+            unique_ids[obj['id']] = obj['modified']
+        elif obj['modified'] == unique_ids[obj['id']]:
+            yield JSONError("Duplicate ID '%s' has identical `modified` timestamp."
+                            " If they are different versions of the same object, "
+                            "they should have different `modified` properties."
+                            % obj['id'], instance['id'], 'duplicate-ids')
+
+
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
@@ -1063,6 +1082,7 @@ CHECKS = {
         pdf_doc_info,
         network_traffic_ports,
         extref_hashes,
+        duplicate_ids,
     ],
     'format-checks': [
         custom_object_prefix_strict,
@@ -1088,6 +1108,7 @@ CHECKS = {
     'approved-values': [
         vocab_marking_definition,
         relationships_strict,
+        duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_identity_class,
@@ -1112,6 +1133,7 @@ CHECKS = {
     ],
     'marking-definition-type': vocab_marking_definition,
     'relationship-types': relationships_strict,
+    'duplicate-ids': duplicate_ids,
     'all-vocabs': [
         vocab_attack_motivation,
         vocab_attack_resource_level,
@@ -1200,6 +1222,8 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['marking-definition-type'])
                 if 'relationship-types' not in options.disabled:
                     validator_list.append(CHECKS['relationship-types'])
+                if 'duplicate-ids' not in options.disabled:
+                    validator_list.append(CHECKS['duplicate-ids'])
                 if 'all-vocabs' not in options.disabled:
                     if 'attack-motivation' not in options.disabled:
                         validator_list.append(CHECKS['attack-motivation'])

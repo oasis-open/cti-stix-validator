@@ -382,7 +382,9 @@ def patterns(instance, options):
         expression_list = inspection[objtype]
         for exp in expression_list:
             path = exp[0]
-            prop = path.split('.', 1)[0]
+            # Get the property name without list index, dictionary key, or referenced object property
+            prop_matches = re.match('([^\.\[]+)(\[\.+\])?(\..+)?', path)
+            prop = prop_matches.group(1)
             if objtype in enums.OBSERVABLE_PROPERTIES and prop in enums.OBSERVABLE_PROPERTIES[objtype]:
                 continue
             elif options.strict_types:

@@ -165,6 +165,11 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = """[x-foo":x_name = 'something']"""
         self.check_ignore(json.dumps(indicator), 'custom-prefix')
 
+    def test_pattern_list_object_property(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[windows-registry-key:values[*].data='badstuff']"""
+        self.assertTrueWithOptions(json.dumps(indicator))
+
 
 if __name__ == "__main__":
     unittest.main()
