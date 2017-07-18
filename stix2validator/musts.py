@@ -341,7 +341,7 @@ def patterns(instance, options):
     if instance['type'] != 'indicator' or 'pattern' not in instance:
         return
 
-    pattern = instance['pattern'].replace('\\', r"\\")
+    pattern = instance['pattern']
     errors = pattern_validator(pattern)
 
     # Check pattern syntax
