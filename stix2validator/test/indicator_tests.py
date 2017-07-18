@@ -170,6 +170,11 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = """[windows-registry-key:values[*].data='badstuff']"""
         self.assertTrueWithOptions(json.dumps(indicator))
 
+    def test_pattern_with_escaped_slashes(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = "[windows-registry-key:key LIKE 'HKEY_LOCAL_MACHINE\\Foo\\Bar%']"
+        self.assertTrueWithOptions(json.dumps(indicator))
+
 
 if __name__ == "__main__":
     unittest.main()
