@@ -306,7 +306,7 @@ def validate_file(fn, options=None):
             instance = json.load(instance_file)
 
         if options.files:
-            results = schema_validate(instance, options)
+            results = validate_instance(instance, options)
 
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
@@ -314,8 +314,6 @@ def validate_file(fn, options=None):
                "will be performed.")
         output.info(msg.format(fn=fn))
     except Exception as ex:
-        import traceback
-        print(traceback.format_exc())
         results.fatal = ValidationErrorResults(ex)
         msg = ("Unexpected error occurred with file '{fn}'. No further "
                "validation will be performed: {error}")
@@ -349,7 +347,7 @@ def validate_string(string, options=None):
         options = ValidationOptions()
 
     try:
-        results = schema_validate(instance, options)
+        results = validate_instance(instance, options)
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
         msg = ("String was schema-invalid. No further validation "
@@ -492,7 +490,7 @@ def object_validate(sdo, options, error_gens):
     return error_gens
 
 
-def schema_validate(instance, options=None):
+def validate_instance(instance, options=None):
     """Perform STIX JSON Schema validation against STIX input.
 
     Find the correct schema by looking at the 'type' property of the
