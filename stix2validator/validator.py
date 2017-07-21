@@ -2,7 +2,6 @@
 """
 
 import os
-import json
 import fnmatch
 import datetime
 from itertools import chain
@@ -10,6 +9,7 @@ from collections import Iterable
 
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
+import simplejson
 from six import text_type, iteritems
 import requests_cache
 
@@ -107,7 +107,7 @@ class BaseResults(object):
     def as_json(self):
         """Returns a JSON representation of this class instance.
         """
-        return json.dumps(self.as_dict())
+        return simplejson.dumps(self.as_dict())
 
 
 class ValidationResults(BaseResults):
@@ -303,7 +303,7 @@ def validate_file(fn, options=None):
 
     try:
         with open(fn) as instance_file:
-            instance = json.load(instance_file)
+            instance = simplejson.load(instance_file)
 
         if options.files:
             results = validate_instance(instance, options)
@@ -341,7 +341,7 @@ def validate_string(string, options=None):
     """
     results = ValidationResults(fn="input string")
     output.info("Performing JSON schema validation on input string: " + string)
-    instance = json.loads(string)
+    instance = simplejson.loads(string)
 
     if not options:
         options = ValidationOptions()
@@ -412,7 +412,7 @@ def load_schema(schema_path):
     """
     try:
         with open(schema_path) as schema_file:
-            schema = json.load(schema_file)
+            schema = simplejson.load(schema_file)
     except ValueError as e:
         raise SchemaInvalidError('Invalid JSON in schema or included schema: '
                                  '%s\n%s' % (schema_file.name, str(e)))
