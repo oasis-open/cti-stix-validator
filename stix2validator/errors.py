@@ -243,6 +243,8 @@ def pretty_error(error, verbose=False):
         try:
             if error.instance == {}:
                 msg = "must contain at least one property from this type."
+            elif error.instance is None:
+                msg = "null properties are not allowed in STIX."
             elif 'type' in error.instance and error.instance['type'] == 'network-traffic':
                 if ('src_ref' not in error.instance and
                         'dst_ref' not in error.instance):

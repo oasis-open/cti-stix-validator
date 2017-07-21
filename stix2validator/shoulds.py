@@ -274,14 +274,16 @@ def relationships_strict(instance):
         return
 
     r_type = instance['relationship_type']
-    r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
-    r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
+    try:
+        r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
+        r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
+    except TypeError:
+        return  # Schemas already catch this
 
     if (r_type in enums.COMMON_RELATIONSHIPS or
             r_source in enums.NON_SDOS or
             r_target in enums.NON_SDOS):
-        # Schemas will already catch relationships not allowed by spec
-        return
+        return  # Schemas already catch invalid relationships
 
     if r_source not in enums.RELATIONSHIPS:
         return JSONError("'%s' is not a suggested relationship source object "

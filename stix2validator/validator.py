@@ -455,7 +455,10 @@ def object_validate(sdo, options, error_gens):
                                  'reference failed to resolve')
 
     if 'id' in sdo:
-        error_prefix = sdo['id'] + ": "
+        try:
+            error_prefix = sdo['id'] + ": "
+        except TypeError:
+            error_prefix = 'unidentifiable object: '
     else:
         error_prefix = ''
     error_gens.append((sdo_errors, error_prefix))
