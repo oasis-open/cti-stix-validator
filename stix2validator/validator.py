@@ -492,13 +492,15 @@ def object_validate(sdo, options, error_gens):
     return error_gens
 
 
-def schema_validate(instance, options):
-    """Perform STIX JSON Schema validation against the input JSON.
+def schema_validate(instance, options=None):
+    """Perform STIX JSON Schema validation against STIX input.
+
     Find the correct schema by looking at the 'type' property of the
     `instance` JSON object.
 
     Args:
-        instance: A STIX JSON string.
+        instance: A Python dictionary representing a STIX object with a
+            'type' property.
         options: ValidationOptions instance with validation options for this
             validation run.
 
@@ -508,6 +510,9 @@ def schema_validate(instance, options):
     """
     if 'type' not in instance:
         raise ValidationError("Input must be an object with a 'type' property.")
+
+    if not options:
+        options = ValidationOptions()
 
     # Find and load the schema
     try:
