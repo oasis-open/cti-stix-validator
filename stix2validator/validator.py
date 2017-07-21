@@ -314,7 +314,12 @@ def validate_file(fn, options=None):
                "will be performed.")
         output.info(msg.format(fn=fn))
     except Exception as ex:
-        results.fatal = ValidationErrorResults(ex)
+        if 'Expecting value' in str(ex):
+            line_no = str(ex).split()[3]
+            results.fatal = ValidationErrorResults('Invalid JSON input on line'
+                                                   ' %s' % line_no)
+        else:
+            results.fatal = ValidationErrorResults(ex)
         msg = ("Unexpected error occurred with file '{fn}'. No further "
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))

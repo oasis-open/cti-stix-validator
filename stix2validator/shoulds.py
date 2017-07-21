@@ -277,8 +277,8 @@ def relationships_strict(instance):
     try:
         r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
         r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
-    except TypeError:
-        return  # Schemas already catch this
+    except (AttributeError, TypeError):
+        return  # Schemas already catch these
 
     if (r_type in enums.COMMON_RELATIONSHIPS or
             r_source in enums.NON_SDOS or
