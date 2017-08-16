@@ -2,7 +2,6 @@
 """
 
 import os
-import json
 import fnmatch
 import datetime
 from itertools import chain
@@ -10,6 +9,7 @@ from collections import Iterable
 
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
+import simplejson as json
 from six import text_type, iteritems
 import requests_cache
 
@@ -31,7 +31,7 @@ class CustomDraft4Validator(Draft4Validator):
         self.shoulds_list = shoulds.list_shoulds(options)
         self.options = options
 
-    def iter_errors_more(self, instance, check_musts=True):
+    def iter_errors_custom(self, instance, check_musts=True):
         """Perform additional validation not possible merely with JSON schemas.
 
         Args:
@@ -67,7 +67,7 @@ class CustomDraft4Validator(Draft4Validator):
         for field in instance:
             if type(instance[field]) is list:
                 for obj in instance[field]:
-                    for err in self.iter_errors_more(obj, check_musts):
+                    for err in self.iter_errors_custom(obj, check_musts):
                         yield err
 
     def get_list(self):
@@ -306,7 +306,7 @@ def validate_file(fn, options=None):
             instance = json.load(instance_file)
 
         if options.files:
-            results = schema_validate(instance, options)
+            results = validate_instance(instance, options)
 
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
@@ -314,9 +314,12 @@ def validate_file(fn, options=None):
                "will be performed.")
         output.info(msg.format(fn=fn))
     except Exception as ex:
-        import traceback
-        print(traceback.format_exc())
-        results.fatal = ValidationErrorResults(ex)
+        if 'Expecting value' in str(ex):
+            line_no = str(ex).split()[3]
+            results.fatal = ValidationErrorResults('Invalid JSON input on line'
+                                                   ' %s' % line_no)
+        else:
+            results.fatal = ValidationErrorResults(ex)
         msg = ("Unexpected error occurred with file '{fn}'. No further "
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
@@ -349,7 +352,7 @@ def validate_string(string, options=None):
         options = ValidationOptions()
 
     try:
-        results = schema_validate(instance, options)
+        results = validate_instance(instance, options)
     except SchemaInvalidError as ex:
         results.fatal = ValidationErrorResults(ex)
         msg = ("String was schema-invalid. No further validation "
@@ -424,6 +427,9 @@ def load_schema(schema_path):
 
 def object_validate(sdo, options, error_gens):
     """Validate a single STIX object against its type's schema.
+
+    Do not call this function directly; use validate_instance() instead, as it
+    calls this one. This function does not perform any custom checks.
     """
     try:
         sdo_schema_path = find_schema(options.schema_dir, sdo['type'])
@@ -457,7 +463,10 @@ def object_validate(sdo, options, error_gens):
                                  'reference failed to resolve')
 
     if 'id' in sdo:
-        error_prefix = sdo['id'] + ": "
+        try:
+            error_prefix = sdo['id'] + ": "
+        except TypeError:
+            error_prefix = 'unidentifiable object: '
     else:
         error_prefix = ''
     error_gens.append((sdo_errors, error_prefix))
@@ -492,13 +501,15 @@ def object_validate(sdo, options, error_gens):
     return error_gens
 
 
-def schema_validate(instance, options):
-    """Perform STIX JSON Schema validation against the input JSON.
+def validate_instance(instance, options=None):
+    """Perform STIX JSON Schema validation against STIX input.
+
     Find the correct schema by looking at the 'type' property of the
     `instance` JSON object.
 
     Args:
-        instance: A STIX JSON string.
+        instance: A Python dictionary representing a STIX object with a
+            'type' property.
         options: ValidationOptions instance with validation options for this
             validation run.
 
@@ -508,6 +519,9 @@ def schema_validate(instance, options):
     """
     if 'type' not in instance:
         raise ValidationError("Input must be an object with a 'type' property.")
+
+    if not options:
+        options = ValidationOptions()
 
     # Find and load the schema
     try:
@@ -557,15 +571,14 @@ def schema_validate(instance, options):
 
     # Actual validation of JSON document
     try:
-        some_errors = validator.iter_errors(instance)
-        more_errors = validator.iter_errors_more(instance)
-        warnings = validator.iter_errors_more(instance, False)
+        errors = validator.iter_errors_custom(instance)
+        warnings = validator.iter_errors_custom(instance, False)
 
         if options.strict:
-            chained_errors = chain(some_errors, more_errors, warnings)
+            chained_errors = chain(errors, warnings)
             warnings = []
         else:
-            chained_errors = chain(some_errors, more_errors)
+            chained_errors = errors
             warnings = [pretty_error(x, options.verbose) for x in warnings]
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '

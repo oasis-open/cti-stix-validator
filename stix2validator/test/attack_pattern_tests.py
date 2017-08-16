@@ -2,7 +2,7 @@ import unittest
 import copy
 import json
 from . import ValidatorTest
-from .. import validate_string
+from .. import validate_string, validate_instance
 
 VALID_ATTACK_PATTERN = """
 {
@@ -33,78 +33,65 @@ class AttackPatternTestCases(ValidatorTest):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         ext_refs = attack_pattern['external_references']
         ext_refs[0]['external_id'] = "CAPEC-abc"
-        attack_pattern = json.dumps(attack_pattern)
-        results = validate_string(attack_pattern, self.options)
+        results = validate_instance(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_external_reference_no_external_id(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         ext_refs = attack_pattern['external_references']
         del ext_refs[0]['external_id']
-        attack_pattern = json.dumps(attack_pattern)
-        results = validate_string(attack_pattern, self.options)
+        results = validate_instance(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_invalid_property_prefix(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x-something'] = "some value"
-        attack_pattern_string = json.dumps(attack_pattern)
-        results = validate_string(attack_pattern_string, self.options)
+        results = validate_instance(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.assertFalseWithOptions(attack_pattern_string, enabled='custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, enabled='custom-prefix-lax')
 
     def test_invalid_property_prefix_lax(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x_something'] = "some value"
-        attack_pattern_string = json.dumps(attack_pattern)
-        results = validate_string(attack_pattern_string, self.options)
+        results = validate_instance(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.assertTrueWithOptions(attack_pattern_string, enabled='custom-prefix-lax')
-        self.assertFalseWithOptions(attack_pattern_string, disabled='custom-prefix-lax')
-        self.check_ignore(attack_pattern_string, 'custom-prefix')
+        self.assertTrueWithOptions(attack_pattern, enabled='custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, disabled='custom-prefix-lax')
+        self.check_ignore(attack_pattern, 'custom-prefix')
 
     def test_valid_property_prefix(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x_source_something'] = "some value"
-        attack_pattern_string = json.dumps(attack_pattern)
-        results = validate_string(attack_pattern_string, self.options)
+        results = validate_instance(attack_pattern, self.options)
         self.assertTrue(results.is_valid)
 
     def test_invalid_timestamp(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['modified'] = "2016-13-12T08:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2016-03-42T08:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2016-03-00T08:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2016-03-12T99:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2016-03-12T08:99:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2016-11-31T08:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2017-02-29T08:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertFalseWithOptions(attack_pattern_string)
+        self.assertFalseWithOptions(attack_pattern)
 
         attack_pattern['modified'] = "2016-02-29T08:17:27.000Z"
-        attack_pattern_string = json.dumps(attack_pattern)
-        self.assertTrueWithOptions(attack_pattern_string)
+        self.assertTrueWithOptions(attack_pattern)
 
 
 if __name__ == "__main__":

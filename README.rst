@@ -70,7 +70,20 @@ You can also validate a JSON string, and check if the input passed validation:
   if results.is_valid:
       print_results(results)
 
-You can pass in a ValidationOptions object if you want behavior other than the default:
+If your STIX is already in a Python dictionary (for example if you have already run `json.loads()`), use `validate_instance()` instead:
+
+.. code:: python
+
+  import json
+  from stix2validator import validate_instance, print_results
+
+  stix_json_string = "..."
+  stix_obj = json.loads(stix_json_string)
+  results = validate_instance(stix_obj)
+  if results.is_valid:
+      print_results(results)
+
+You can pass a ValidationOptions object into `validate_file()`, `validate_string()`, or `validate_instance()` if you want behavior other than the default:
 
 .. code:: python
 

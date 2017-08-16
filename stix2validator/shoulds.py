@@ -274,13 +274,19 @@ def relationships_strict(instance):
         return
 
     r_type = instance['relationship_type']
-    r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
-    r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
+    try:
+        r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
+        r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
+    except (AttributeError, TypeError):
+        # Schemas already catch errors of these properties not being strings or
+        # not containing the string '--'.
+        return
 
     if (r_type in enums.COMMON_RELATIONSHIPS or
             r_source in enums.NON_SDOS or
             r_target in enums.NON_SDOS):
-        # Schemas will already catch relationships not allowed by spec
+        # If all objects can have this relationship type, no more checks needed
+        # Schemas already catch if source/target type cannot have relationship
         return
 
     if r_source not in enums.RELATIONSHIPS:

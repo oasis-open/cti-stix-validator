@@ -1,6 +1,6 @@
 import unittest
 import os
-from .. import validate_string, ValidationOptions, print_results
+from .. import validate_instance, ValidationOptions, print_results
 
 SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 
@@ -31,7 +31,7 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
                                         **kwargs)
-        results = validate_string(instance, options)
+        results = validate_instance(instance, options)
         print_results(results)
         self.assertTrue(results.is_valid)
 
@@ -49,5 +49,5 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
                                         **kwargs)
-        results = validate_string(instance, options)
+        results = validate_instance(instance, options)
         self.assertEqual(results.is_valid, False)

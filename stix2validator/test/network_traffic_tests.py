@@ -53,37 +53,37 @@ class ObservedDataTestCases(ValidatorTest):
     def test_network_traffic_required_fields(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         del net_traffic['objects']['1']['src_ref']
-        self.assertFalseWithOptions(json.dumps(net_traffic))
+        self.assertFalseWithOptions(net_traffic)
 
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         del net_traffic['objects']['1']['protocols']
-        self.assertFalseWithOptions(json.dumps(net_traffic))
+        self.assertFalseWithOptions(net_traffic)
 
     def test_network_traffic_ports(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         del net_traffic['objects']['1']['src_port']
         del net_traffic['objects']['1']['dst_port']
-        self.assertFalseWithOptions(json.dumps(net_traffic))
+        self.assertFalseWithOptions(net_traffic)
 
         net_traffic['objects']['1']['src_port'] = 3372
-        self.assertFalseWithOptions(json.dumps(net_traffic))
+        self.assertFalseWithOptions(net_traffic)
 
-        self.check_ignore(json.dumps(net_traffic), 'network-traffic-ports')
+        self.check_ignore(net_traffic, 'network-traffic-ports')
 
         net_traffic['objects']['1']['dst_port'] = 80
-        self.assertTrueWithOptions(json.dumps(net_traffic))
+        self.assertTrueWithOptions(net_traffic)
 
         net_traffic['objects']['1']['src_port'] = 9999999
-        self.assertFalseWithOptions(json.dumps(net_traffic))
+        self.assertFalseWithOptions(net_traffic)
 
     def test_network_traffic_protocols(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         net_traffic['objects']['1']['protocols'].append('foo_bar')
-        self.assertFalseWithOptions(json.dumps(net_traffic))
-        self.check_ignore(json.dumps(net_traffic), 'protocols')
+        self.assertFalseWithOptions(net_traffic)
+        self.check_ignore(net_traffic, 'protocols')
 
         net_traffic['objects']['1']['protocols'][2] = 'https'
-        self.assertTrueWithOptions(json.dumps(net_traffic))
+        self.assertTrueWithOptions(net_traffic)
 
     def test_network_traffic_ipfix(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
@@ -92,8 +92,8 @@ class ObservedDataTestCases(ValidatorTest):
             "maximumIpTotalLength": 2556,
             "Foo": "bar"
         }
-        self.assertFalseWithOptions(json.dumps(net_traffic))
-        self.check_ignore(json.dumps(net_traffic), 'ipfix')
+        self.assertFalseWithOptions(net_traffic)
+        self.check_ignore(net_traffic, 'ipfix')
 
     def test_network_traffic_http_request_header(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
@@ -109,8 +109,8 @@ class ObservedDataTestCases(ValidatorTest):
                 }
             }
         }
-        self.assertFalseWithOptions(json.dumps(net_traffic))
-        self.check_ignore(json.dumps(net_traffic), 'http-request-headers')
+        self.assertFalseWithOptions(net_traffic)
+        self.check_ignore(net_traffic, 'http-request-headers')
 
     def test_network_traffic_socket_options(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
@@ -123,17 +123,17 @@ class ObservedDataTestCases(ValidatorTest):
                 }
             }
         }
-        self.assertFalseWithOptions(json.dumps(net_traffic))
-        self.check_ignore(json.dumps(net_traffic), 'socket-options')
+        self.assertFalseWithOptions(net_traffic)
+        self.check_ignore(net_traffic, 'socket-options')
 
     def test_network_traffic_end_is_active(self):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         net_traffic['objects']['1']['is_active'] = True
         net_traffic['objects']['1']['end'] = "2016-12-21T19:00:00Z"
-        self.assertFalseWithOptions(json.dumps(net_traffic))
+        self.assertFalseWithOptions(net_traffic)
 
         del net_traffic['objects']['1']['end']
-        self.assertTrueWithOptions(json.dumps(net_traffic))
+        self.assertTrueWithOptions(net_traffic)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@
 """
 
 from dateutil import parser
+from six import string_types
 import re
 
 from stix2patterns.validator import run_validator as pattern_validator
@@ -342,6 +343,8 @@ def patterns(instance, options):
         return
 
     pattern = instance['pattern']
+    if not isinstance(pattern, string_types):
+        return  # This error already caught by schemas
     errors = pattern_validator(pattern)
 
     # Check pattern syntax

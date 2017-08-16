@@ -2,7 +2,7 @@ import unittest
 import copy
 import json
 from . import ValidatorTest
-from .. import validate_string
+from .. import validate_string, validate_instance
 
 VALID_REPORT = """
 {
@@ -34,8 +34,7 @@ class IdentityTestCases(ValidatorTest):
     def test_vocab_report_label(self):
         report = copy.deepcopy(self.valid_report)
         report['labels'] = ["something"]
-        report = json.dumps(report)
-        results = validate_string(report, self.options)
+        results = validate_instance(report, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(report, 'report-label')
@@ -43,8 +42,7 @@ class IdentityTestCases(ValidatorTest):
     def test_invalid_timestamp(self):
         report = copy.deepcopy(self.valid_report)
         report['published'] = "2016-11-31T08:17:27.000000Z"
-        report_string = json.dumps(report)
-        self.assertFalseWithOptions(report_string)
+        self.assertFalseWithOptions(report)
 
 
 if __name__ == "__main__":

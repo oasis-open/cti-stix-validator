@@ -2,7 +2,7 @@ import unittest
 import copy
 import json
 from . import ValidatorTest
-from .. import validate_string
+from .. import validate_string, validate_instance
 
 VALID_INDICATOR = """
 {
@@ -30,107 +30,92 @@ class IndicatorTestCases(ValidatorTest):
     def test_modified_before_created(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['modified'] = "2001-04-06T20:03:48Z"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_custom_property_name_invalid_character(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['my_new_property!'] = "abc123"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_custom_property_name_short(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['mp'] = "abc123"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_custom_property_name_long(self):
         indicator = copy.deepcopy(self.valid_indicator)
         long_property_name = 'my_new_property_' * 16
         indicator[long_property_name] = "abc123"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_empty_list(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['my_new_property'] = []
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_id_type(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['id'] = "something--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_property_confidence(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['confidence'] = "Something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_property_severity(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['severity'] = "Something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_property_action(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['action'] = "Something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_property_usernames(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['usernames'] = "Something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_property_phone_numbers(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['phone_numbers'] = "Something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_property_addresses(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['addresses'] = "Something"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_object_type_incident(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['type'] = "incident"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_reserved_object_type_infrastructure(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['type'] = "infrastructure"
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_vocab_indicator_label(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['labels'] = ["suspicious"]
-        indicator = json.dumps(indicator)
-        results = validate_string(indicator, self.options)
+        results = validate_instance(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(indicator, 'indicator-label')
@@ -138,42 +123,42 @@ class IndicatorTestCases(ValidatorTest):
     def test_invalid_pattern(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[file:hashes."SHA-256" = 'aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f']"""
-        self.assertFalseWithOptions(json.dumps(indicator))
+        self.assertFalseWithOptions(indicator)
 
     def test_pattern_custom_invalid_format(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[ab:yz = 'something']"""
-        self.assertFalseWithOptions(json.dumps(indicator))
+        self.assertFalseWithOptions(indicator)
 
     def test_pattern_custom_object_noprefix(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[foo:name = 'something']"""
-        self.assertFalseWithOptions(json.dumps(indicator))
+        self.assertFalseWithOptions(indicator)
 
-        self.check_ignore(json.dumps(indicator), 'custom-prefix,custom-prefix-lax')
-        self.assertFalseWithOptions(json.dumps(indicator), disabled='custom-prefix')
+        self.check_ignore(indicator, 'custom-prefix,custom-prefix-lax')
+        self.assertFalseWithOptions(indicator, disabled='custom-prefix')
 
     def test_pattern_custom_object_prefix_strict(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[x-x-foo:x_x_name = 'something']"""
-        self.assertTrueWithOptions(json.dumps(indicator))
+        self.assertTrueWithOptions(indicator)
 
-        self.assertFalseWithOptions(json.dumps(indicator), strict_types=True)
+        self.assertFalseWithOptions(indicator, strict_types=True)
 
     def test_pattern_custom_object_prefix_lax(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[x-foo":x_name = 'something']"""
-        self.check_ignore(json.dumps(indicator), 'custom-prefix')
+        self.check_ignore(indicator, 'custom-prefix')
 
     def test_pattern_list_object_property(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[windows-registry-key:values[*].data='badstuff']"""
-        self.assertTrueWithOptions(json.dumps(indicator))
+        self.assertTrueWithOptions(indicator)
 
     def test_pattern_with_escaped_slashes(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = "[windows-registry-key:key LIKE 'HKEY_LOCAL_MACHINE\\\\Foo\\\\Bar%']"
-        self.assertTrueWithOptions(json.dumps(indicator))
+        self.assertTrueWithOptions(indicator)
 
 
 if __name__ == "__main__":
