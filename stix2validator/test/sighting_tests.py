@@ -28,17 +28,17 @@ class IdentityTestCases(ValidatorTest):
     def test_sighting_of_ref(self):
         sighting = copy.deepcopy(self.valid_sighting)
         sighting['sighting_of_ref'] = "bundle--36ffb872-1dd9-446e-b6f5-d58527e5b5d2"
-        self.assertFalseWithOptions(json.dumps(sighting))
+        self.assertFalseWithOptions(sighting)
 
     def test_observed_data_refs(self):
         sighting = copy.deepcopy(self.valid_sighting)
         sighting['observed_data_refs'].append("tool--36ffb872-1dd9-446e-b6f5-d58527e5b5d2")
-        self.assertFalseWithOptions(json.dumps(sighting))
+        self.assertFalseWithOptions(sighting)
 
     def test_where_sighted_refs(self):
         sighting = copy.deepcopy(self.valid_sighting)
         sighting['where_sighted_refs'].append("tool--36ffb872-1dd9-446e-b6f5-d58527e5b5d2")
-        self.assertFalseWithOptions(json.dumps(sighting))
+        self.assertFalseWithOptions(sighting)
 
 
 if __name__ == "__main__":

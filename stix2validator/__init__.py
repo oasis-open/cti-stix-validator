@@ -2,5 +2,6 @@
 from .output import print_results
 from .util import ValidationOptions
 from .errors import ValidationError
-from .validator import validate_file, validate_string, run_validation
+from .validator import (validate_file, validate_instance, validate_string,
+                        run_validation)
 from .version import __version__

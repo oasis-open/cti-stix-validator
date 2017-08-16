@@ -2,7 +2,7 @@ import unittest
 import copy
 import json
 from . import ValidatorTest
-from .. import validate_string
+from .. import validate_string, validate_instance
 
 VALID_TOOL = """
 {
@@ -33,8 +33,7 @@ class ToolTestCases(ValidatorTest):
     def test_vocab_tool_label(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['labels'] += ["multi-purpose"]
-        tool = json.dumps(tool)
-        results = validate_string(tool, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool, 'tool-label')
@@ -42,50 +41,43 @@ class ToolTestCases(ValidatorTest):
     def test_kill_chain_name(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['kill_chain_name'] = "Something"
-        tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['kill_chain_name'] = "some thing"
-        tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['kill_chain_name'] = "some_thing"
-        tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.check_ignore(tool_string, 'kill-chain-names')
+        self.check_ignore(tool, 'kill-chain-names')
 
     def test_kill_chain_phase_name(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['phase_name'] = "Something"
-        tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['phase_name'] = "some thing"
-        tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['phase_name'] = "some_thing"
-        tool_string = json.dumps(tool)
-        results = validate_string(tool_string, self.options)
+        results = validate_instance(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.check_ignore(tool_string, 'kill-chain-names')
+        self.check_ignore(tool, 'kill-chain-names')
 
     def test_format_and_value_checks(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['phase_name'] = "Something_invalid"
         tool['labels'] += ["something-not-in-vocab"]
-        tool_string = json.dumps(tool)
 
-        self.assertFalseWithOptions(tool_string, disabled='1')
-        self.assertFalseWithOptions(tool_string, disabled='2')
-        self.assertTrueWithOptions(tool_string, disabled='1,2')
+        self.assertFalseWithOptions(tool, disabled='1')
+        self.assertFalseWithOptions(tool, disabled='2')
+        self.assertTrueWithOptions(tool, disabled='1,2')
 
 
 if __name__ == "__main__":

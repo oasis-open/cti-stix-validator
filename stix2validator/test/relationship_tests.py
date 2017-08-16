@@ -2,7 +2,7 @@ import unittest
 import copy
 import json
 from . import ValidatorTest
-from .. import validate_string
+from .. import validate_string, validate_instance
 
 VALID_RELATIONSHIP = """
 {
@@ -28,36 +28,37 @@ class RelationshipTestCases(ValidatorTest):
     def test_relationship_type(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['relationship_type'] = "SOMETHING"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_source_relationship(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "relationship--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
+        # import stix2validator
+        # stix2validator.print_results(results)
+        # assert False
 
     def test_source_sighting(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "sighting--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_target_bundle(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['target_ref'] = "bundle--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
+        # import stix2validator
+        # stix2validator.print_results(results)
+        # assert False
 
     def test_target_marking_definition(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['target_ref'] = "marking-definition--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_relationship_types_invalid_type(self):
@@ -65,8 +66,7 @@ class RelationshipTestCases(ValidatorTest):
         relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
         relationship['relationship_type'] = "mitigates"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(relationship, 'relationship-types')
@@ -74,20 +74,19 @@ class RelationshipTestCases(ValidatorTest):
     def test_relationship_types_invalid_source(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "identity--b5437038-eb96-4652-88bc-5f94993b7326"
-        self.assertFalseWithOptions(json.dumps(relationship))
+        self.assertFalseWithOptions(relationship)
 
     def test_relationship_types_invalid_target(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['target_ref'] = "report--af0976b2-e8f3-4646-8026-1cf4d0ce4d8a"
-        self.assertFalseWithOptions(json.dumps(relationship))
+        self.assertFalseWithOptions(relationship)
 
     def test_relationship_types_valid(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "tool--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         relationship['target_ref'] = "vulnerability--9c1f891b-459a-6f7f-80ea-31b17b5940d4"
         relationship['relationship_type'] = "targets"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertTrue(results.is_valid)
 
     def test_relationship_types_common(self):
@@ -95,14 +94,13 @@ class RelationshipTestCases(ValidatorTest):
         relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
         relationship['relationship_type'] = "related-to"
-        relationship = json.dumps(relationship)
-        results = validate_string(relationship, self.options)
+        results = validate_instance(relationship, self.options)
         self.assertTrue(results.is_valid)
 
     def test_missing_required(self):
         relationship = copy.deepcopy(self.valid_relationship)
         del relationship['relationship_type']
-        self.assertFalseWithOptions(json.dumps(relationship))
+        self.assertFalseWithOptions(relationship)
 
 
 if __name__ == "__main__":

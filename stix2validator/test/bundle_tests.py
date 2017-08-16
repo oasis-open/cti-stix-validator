@@ -26,34 +26,31 @@ class BundleTestCases(ValidatorTest):
     valid_bundle = json.loads(VALID_BUNDLE)
 
     def test_wellformed_bundle(self):
-        self.assertTrueWithOptions(VALID_BUNDLE)
+        self.assertTrueWithOptions(self.valid_bundle)
 
     def test_bundle_object_categories(self):
         bundle = copy.deepcopy(self.valid_bundle)
         bundle['identities'] = bundle['objects']
         del bundle['objects']
-        bundle = json.dumps(bundle)
         self.assertFalseWithOptions(bundle)
 
     def test_bundle_created(self):
         bundle = copy.deepcopy(self.valid_bundle)
         bundle['created'] = "2016-08-22T14:09:00.123456Z"
-        bundle = json.dumps(bundle)
         self.assertFalseWithOptions(bundle)
 
     def test_bundle_version(self):
         bundle = copy.deepcopy(self.valid_bundle)
         bundle['version'] = 1
-        bundle = json.dumps(bundle)
         self.assertFalseWithOptions(bundle)
 
     def test_bundle_duplicate_ids(self):
         bundle = copy.deepcopy(self.valid_bundle)
         bundle['objects'].append(bundle['objects'][0].copy())
-        self.assertFalseWithOptions(json.dumps(bundle))
+        self.assertFalseWithOptions(bundle)
 
         bundle['objects'][1]['modified'] = "2017-06-22T14:09:00.123Z"
-        self.assertTrueWithOptions(json.dumps(bundle))
+        self.assertTrueWithOptions(bundle)
 
 
 if __name__ == "__main__":
