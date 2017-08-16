@@ -36,9 +36,7 @@ class RelationshipTestCases(ValidatorTest):
         relationship['source_ref'] = "relationship--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
-        # import stix2validator
-        # stix2validator.print_results(results)
-        # assert False
+        self.assertEqual(len(results.errors), 1)
 
     def test_source_sighting(self):
         relationship = copy.deepcopy(self.valid_relationship)
@@ -51,9 +49,7 @@ class RelationshipTestCases(ValidatorTest):
         relationship['target_ref'] = "bundle--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         results = validate_instance(relationship, self.options)
         self.assertEqual(results.is_valid, False)
-        # import stix2validator
-        # stix2validator.print_results(results)
-        # assert False
+        self.assertEqual(len(results.errors), 1)
 
     def test_target_marking_definition(self):
         relationship = copy.deepcopy(self.valid_relationship)

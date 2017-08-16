@@ -31,7 +31,7 @@ class CustomDraft4Validator(Draft4Validator):
         self.shoulds_list = shoulds.list_shoulds(options)
         self.options = options
 
-    def iter_errors_more(self, instance, check_musts=True):
+    def iter_errors_custom(self, instance, check_musts=True):
         """Perform additional validation not possible merely with JSON schemas.
 
         Args:
@@ -67,7 +67,7 @@ class CustomDraft4Validator(Draft4Validator):
         for field in instance:
             if type(instance[field]) is list:
                 for obj in instance[field]:
-                    for err in self.iter_errors_more(obj, check_musts):
+                    for err in self.iter_errors_custom(obj, check_musts):
                         yield err
 
     def get_list(self):
@@ -427,6 +427,9 @@ def load_schema(schema_path):
 
 def object_validate(sdo, options, error_gens):
     """Validate a single STIX object against its type's schema.
+
+    Do not call this function directly; use validate_instance() instead, as it
+    calls this one. This function does not perform any custom checks.
     """
     try:
         sdo_schema_path = find_schema(options.schema_dir, sdo['type'])
@@ -568,15 +571,14 @@ def validate_instance(instance, options=None):
 
     # Actual validation of JSON document
     try:
-        some_errors = validator.iter_errors(instance)
-        more_errors = validator.iter_errors_more(instance)
-        warnings = validator.iter_errors_more(instance, False)
+        errors = validator.iter_errors_custom(instance)
+        warnings = validator.iter_errors_custom(instance, False)
 
         if options.strict:
-            chained_errors = chain(some_errors, more_errors, warnings)
+            chained_errors = chain(errors, warnings)
             warnings = []
         else:
-            chained_errors = chain(some_errors, more_errors)
+            chained_errors = errors
             warnings = [pretty_error(x, options.verbose) for x in warnings]
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '

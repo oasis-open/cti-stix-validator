@@ -278,12 +278,16 @@ def relationships_strict(instance):
         r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
         r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
     except (AttributeError, TypeError):
-        return  # Schemas already catch these
+        # Schemas already catch errors of these properties not being strings or
+        # not containing the string '--'.
+        return
 
     if (r_type in enums.COMMON_RELATIONSHIPS or
             r_source in enums.NON_SDOS or
             r_target in enums.NON_SDOS):
-        return  # Schemas already catch invalid relationships
+        # If all objects can have this relationship type, no more checks needed
+        # Schemas already catch if source/target type cannot have relationship
+        return
 
     if r_source not in enums.RELATIONSHIPS:
         return JSONError("'%s' is not a suggested relationship source object "
