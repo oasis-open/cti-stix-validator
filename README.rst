@@ -1,3 +1,5 @@
+|Build Status|  |Version|
+
 ====================
 `cti-stix-validator`
 ====================
@@ -254,6 +256,7 @@ Initially, the associated TC members have designated one or more persons to serv
 
 *  `Greg Back <mailto:gback@mitre.org>`_; GitHub ID: `https://github.com/gtback <https://github.com/gtback>`_; WWW: `MITRE <https://www.mitre.org>`__
 *  `Ivan Kirillov <mailto:ikirillov@mitre.org>`_; GitHub ID: `https://github.com/ikiril01 <https://github.com/ikiril01>`_; WWW: `MITRE <https://www.mitre.org>`__
+*  `Chris Lenk <mailto:clenk@mitre.org>`_; GitHub ID: `https://github.com/clenk <https://github.com/clenk>`_; WWW: `MITRE <https://www.mitre.org>`__
 
 .. _aboutOpenRepos:
 
@@ -270,3 +273,10 @@ Initially, the associated TC members have designated one or more persons to serv
 `Feedback`
 ==========
 Questions or comments about this Open Repository's activities should be composed as GitHub issues or comments. If use of an issue/comment is not possible or appropriate, questions may be directed by email to the Maintainer(s) `listed above <#currentmaintainers>`_. Please send general questions about Open Repository participation to OASIS Staff at `repository-admin@oasis-open.org <mailto:repository-admin@oasis-open.org>`_ and any specific CLA-related questions to `repository-cla@oasis-open.org <mailto:repository-cla@oasis-open.org>`_.
+
+
+
+.. |Build Status| image:: https://travis-ci.org/oasis-open/cti-stix-validator.svg?branch=master
+   :target: https://travis-ci.org/oasis-open/cti-stix-validator
+.. |Version| image:: https://img.shields.io/pypi/v/stix2-validator.svg?maxAge=3600
+   :target: https://pypi.python.org/pypi/stix2-validator/
