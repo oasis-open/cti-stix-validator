@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+0.5.0 - 2017-08-17
+
+* Check for invalid timestamps
+* Add option to silence all output
+* Check that indicator patterns use valid observable types and property names
+* Warn on multiple objects with identical `id` and `modified` properties
+* Consolidate custom content prefix checks
+* Improve error messages
+
 0.4.0 - 2017-05-05
 
 * Update to STIX 2.0 Working Draft 2
