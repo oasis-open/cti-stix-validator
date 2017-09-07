@@ -26,7 +26,7 @@ class IndicatorTestCases(ValidatorTest):
     valid_indicator = json.loads(VALID_INDICATOR)
 
     def test_wellformed_indicator(self):
-        results = validate_string(VALID_INDICATOR, self.options)
+        results, = validate_string(VALID_INDICATOR, self.options)
         self.assertTrue(results.is_valid)
 
     def test_modified_before_created(self):

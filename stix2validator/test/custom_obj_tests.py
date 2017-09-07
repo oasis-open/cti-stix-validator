@@ -22,7 +22,7 @@ class CustomObjectTestCases(ValidatorTest):
     valid_custom_object = json.loads(VALID_CUSTOM_OBJECT)
 
     def test_wellformed_custom_object(self):
-        results = validate_string(VALID_CUSTOM_OBJECT, self.options)
+        results, = validate_string(VALID_CUSTOM_OBJECT, self.options)
         self.assertTrue(results.is_valid)
 
     def test_no_type(self):

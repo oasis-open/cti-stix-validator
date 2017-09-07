@@ -28,7 +28,7 @@ class AttackPatternTestCases(ValidatorTest):
     valid_attack_pattern = json.loads(VALID_ATTACK_PATTERN)
 
     def test_wellformed_attack_pattern(self):
-        results = validate_string(VALID_ATTACK_PATTERN, self.options)
+        results, = validate_string(VALID_ATTACK_PATTERN, self.options)
         self.assertTrue(results.is_valid)
 
     def test_valid_capec_id(self):

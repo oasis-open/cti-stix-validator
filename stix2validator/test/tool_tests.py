@@ -29,7 +29,7 @@ class ToolTestCases(ValidatorTest):
     valid_tool = json.loads(VALID_TOOL)
 
     def test_wellformed_tool(self):
-        results = validate_string(VALID_TOOL, self.options)
+        results, = validate_string(VALID_TOOL, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_tool_label(self):

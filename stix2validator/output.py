@@ -106,7 +106,7 @@ def print_schema_results(results, level=0):
     """Prints JSON Schema validation errors to stdout.
 
     Args:
-        results: An instance of ValidationResults.
+        results: An instance of ObjectValidationResults.
         level: The level at which to print the results.
 
     """
@@ -142,30 +142,26 @@ def print_results(results):
     """Prints `results` (the results of validation) to stdout.
 
     Args:
-        results: A dictionary of ValidationResults instances. The key is the
-            file path to the validated document.
+        results: A list of FileValidationResults instances.
 
     """
-    if not hasattr(results, 'items'):
-        results_arr = {'': results}
-        results = results_arr
-
-    level = 0
-    for fn, result in sorted(iteritems(results)):
+    for file_result in results:
         print_horizontal_rule()
-        print_level("[-] Results for: %s", level, fn)
+        print_level("[-] Results for: %s", 0, file_result.filepath)
 
-        if result.is_valid:
+        if file_result.is_valid:
             marker = _GREEN + "[+]"
             verdict = "Valid"
         else:
             marker = _RED + "[X]"
             verdict = "Invalid"
-        print_level("%s STIX JSON: %s", level, marker, verdict)
+        print_level("%s STIX JSON: %s", 0, marker, verdict)
 
-        if result.warnings:
-            print_warning_results(result, level)
-        if result.errors:
-            print_schema_results(result, level)
-        if result.fatal:
-            print_fatal_results(result.fatal, level)
+        for object_result in file_result.object_results:
+            if object_result.warnings:
+                print_warning_results(object_result, 1)
+            if object_result.errors:
+                print_schema_results(object_result, 1)
+
+        if file_result.fatal:
+            print_fatal_results(file_result.fatal, 1)

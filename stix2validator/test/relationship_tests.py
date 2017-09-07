@@ -24,7 +24,7 @@ class RelationshipTestCases(ValidatorTest):
     valid_relationship = json.loads(VALID_RELATIONSHIP)
 
     def test_wellformed_relationship(self):
-        results = validate_string(VALID_RELATIONSHIP, self.options)
+        results, = validate_string(VALID_RELATIONSHIP, self.options)
         self.assertTrue(results.is_valid)
 
     def test_relationship_type(self):

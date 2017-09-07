@@ -23,7 +23,7 @@ class MarkingDefinitionTestCases(ValidatorTest):
     valid_marking_definition = json.loads(VALID_MARKING_DEFINITION)
 
     def test_wellformed_marking_definition(self):
-        results = validate_string(VALID_MARKING_DEFINITION, self.options)
+        results, = validate_string(VALID_MARKING_DEFINITION, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_marking_definition_label(self):

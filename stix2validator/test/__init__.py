@@ -33,7 +33,6 @@ class ValidatorTest(unittest.TestCase):
             options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
                                         **kwargs)
         results = validate_instance(instance, options)
-        print_results(results)
         self.assertTrue(results.is_valid)
 
     def assertFalseWithOptions(self, instance, **kwargs):

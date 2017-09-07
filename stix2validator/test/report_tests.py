@@ -30,7 +30,7 @@ class IdentityTestCases(ValidatorTest):
     valid_report = json.loads(VALID_REPORT)
 
     def test_wellformed_report(self):
-        results = validate_string(VALID_REPORT, self.options)
+        results, = validate_string(VALID_REPORT, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_report_label(self):

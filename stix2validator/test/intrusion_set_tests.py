@@ -25,7 +25,7 @@ class IntrusionSetTestCases(ValidatorTest):
     valid_intrusion_set = json.loads(VALID_INTRUSION_SET)
 
     def test_wellformed_intrusion_set(self):
-        results = validate_string(VALID_INTRUSION_SET, self.options)
+        results, = validate_string(VALID_INTRUSION_SET, self.options)
         self.assertTrue(results.is_valid)
 
     def test_country(self):

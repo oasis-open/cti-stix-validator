@@ -30,9 +30,9 @@ def get_code(results):
     """
     status = EXIT_SUCCESS
 
-    for result in itervalues(results):
-        error = result.errors
-        fatal = result.fatal
+    for file_result in results:
+        error = any(object_result.errors for object_result in file_result.object_results)
+        fatal = file_result.fatal
 
         if error:
             status |= EXIT_SCHEMA_INVALID

@@ -2,6 +2,7 @@
 """
 
 from collections import Iterable
+import io
 import datetime
 import errno
 import fnmatch
@@ -113,8 +114,38 @@ class BaseResults(object):
         return json.dumps(self.as_dict())
 
 
-class ValidationResults(BaseResults):
-    """Results of JSON schema validation.
+class FileValidationResults(BaseResults):
+    """
+    Represents validation results for a file.  This entails potentially
+    several STIX object results, since a file may contain a list of STIX
+    objects.
+    """
+    def __init__(self, is_valid=False, filepath=None, object_results=None, fatal=None):
+        """
+        Initialize this instance.
+        :param is_valid: Whether the overall result is valid
+        :param filepath: Which file was validated
+        :param object_results: Individual object validation results
+        :param fatal: A non-validation-related fatal error
+        """
+        super(FileValidationResults, self).__init__(is_valid)
+        self.filepath = filepath
+        self.object_results = object_results or []
+        self.fatal = fatal
+
+    def as_dict(self):
+        d = super(FileValidationResults, self).as_dict()
+        d.update(
+            filepath=self.filepath,
+            object_results=[object_result.as_dict() for object_result in self.object_results],
+            fatal=self.fatal.as_dict()
+        )
+
+        return d
+
+
+class ObjectValidationResults(BaseResults):
+    """Results of JSON schema validation for a single STIX object.
 
     Args:
         is_valid: The validation result.
@@ -130,13 +161,10 @@ class ValidationResults(BaseResults):
             otherwise.
 
     """
-    def __init__(self, is_valid=False, errors=None, fatal=None, warnings=None,
-                 fn=None):
-        super(ValidationResults, self).__init__(is_valid)
+    def __init__(self, is_valid=False, errors=None, warnings=None):
+        super(ObjectValidationResults, self).__init__(is_valid)
         self.errors = errors
-        self.fatal = fatal
         self.warnings = warnings
-        self.fn = fn
 
     @property
     def errors(self):
@@ -154,7 +182,7 @@ class ValidationResults(BaseResults):
             self._errors = [SchemaError(value)]
 
     def as_dict(self):
-        """A dictionary representation of the :class:`.ValidationResults`
+        """A dictionary representation of the :class:`.ObjectValidationResults`
         instance.
 
         Keys:
@@ -165,7 +193,7 @@ class ValidationResults(BaseResults):
             A dictionary representation of an instance of this class.
 
         """
-        d = super(ValidationResults, self).as_dict()
+        d = super(ObjectValidationResults, self).as_dict()
 
         if self.errors:
             d['errors'] = [x.as_dict() for x in self.errors]
@@ -277,9 +305,39 @@ def run_validation(options):
     except NoJSONFileFoundError as e:
         output.error(e.message)
 
-    results = {}
-    for fn in files:
-        results[fn] = validate_file(fn, options)
+    results = [validate_file(fn, options) for fn in files]
+
+    return results
+
+
+def validate(in_, options=None):
+    """
+    Validate objects from JSON data.  This can be an object or a list of
+    objects.
+
+    :param in_: A textual stream of JSON data.
+    :param options: Validation options
+    :return: A list of ObjectValidationResults.
+    """
+    if not options:
+        options = ValidationOptions()
+
+    obj_json = json.load(in_)
+
+    results = []
+    try:
+        if isinstance(obj_json, list):
+            for obj in obj_json:
+                results.append(validate_instance(obj, options))
+        else:
+            results.append(validate_instance(obj_json, options))
+
+    except SchemaInvalidError as ex:
+        error_result = ObjectValidationResults(is_valid=False,
+                                               fatal=ValidationErrorResults(ex))
+        results.append(error_result)
+        output.info("Data was schema-invalid. No further validation "
+                    "will be performed.")
 
     return results
 
@@ -295,10 +353,10 @@ def validate_file(fn, options=None):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of ValidationResults.
+        An instance of FileValidationResults.
 
     """
-    results = ValidationResults(fn=fn)
+    file_results = FileValidationResults(filepath=fn)
     output.info("Performing JSON schema validation on %s" % fn)
 
     if not options:
@@ -306,31 +364,25 @@ def validate_file(fn, options=None):
 
     try:
         with open(fn) as instance_file:
-            instance = json.load(instance_file)
+            file_results.object_results = validate(instance_file, options)
 
-        if options.files:
-            results = validate_instance(instance, options)
-
-    except SchemaInvalidError as ex:
-        results.fatal = ValidationErrorResults(ex)
-        msg = ("File '{fn}' was schema-invalid. No further validation "
-               "will be performed.")
-        output.info(msg.format(fn=fn))
     except Exception as ex:
         if 'Expecting value' in str(ex):
             line_no = str(ex).split()[3]
-            results.fatal = ValidationErrorResults('Invalid JSON input on line'
-                                                   ' %s' % line_no)
+            file_results.fatal = ValidationErrorResults(
+                'Invalid JSON input on line %s' % line_no
+            )
         else:
-            results.fatal = ValidationErrorResults(ex)
+            file_results.fatal = ValidationErrorResults(ex)
+
         msg = ("Unexpected error occurred with file '{fn}'. No further "
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
 
-    if results.errors or results.fatal:
-        results.is_valid = False
+    file_results.is_valid = all(object_result.is_valid
+                                for object_result in file_results.object_results)
 
-    return results
+    return file_results
 
 
 def validate_string(string, options=None):
@@ -344,28 +396,12 @@ def validate_string(string, options=None):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of ValidationResults.
+        An instance of ObjectValidationResults.
 
     """
-    results = ValidationResults(fn="input string")
     output.info("Performing JSON schema validation on input string: " + string)
-    instance = json.loads(string)
-
-    if not options:
-        options = ValidationOptions()
-
-    try:
-        results = validate_instance(instance, options)
-    except SchemaInvalidError as ex:
-        results.fatal = ValidationErrorResults(ex)
-        msg = ("String was schema-invalid. No further validation "
-               "will be performed.")
-        output.info(msg.format(string=string))
-
-    if results.errors or results.fatal:
-        results.is_valid = False
-
-    return results
+    stream = io.StringIO(string)
+    return validate(stream, options)
 
 
 def load_validator(schema_path, schema, options, custom=True):
@@ -623,5 +659,5 @@ def validate_instance(instance, options=None):
     else:
         valid = True
 
-    return ValidationResults(is_valid=valid, errors=error_list,
-                             warnings=warnings)
+    return ObjectValidationResults(is_valid=valid, errors=error_list,
+                                   warnings=warnings)

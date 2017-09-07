@@ -55,7 +55,7 @@ class ObservedDataTestCases(ValidatorTest):
     valid_observed_data = json.loads(VALID_OBSERVED_DATA_DEFINITION)
 
     def test_wellformed_observed_data(self):
-        results = validate_string(VALID_OBSERVED_DATA_DEFINITION, self.options)
+        results, = validate_string(VALID_OBSERVED_DATA_DEFINITION, self.options)
         self.assertTrue(results.is_valid)
 
     def test_number_observed(self):

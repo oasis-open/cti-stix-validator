@@ -48,7 +48,7 @@ class ObservedDataTestCases(ValidatorTest):
     valid_net_traffic = json.loads(VALID_NETWORK_TRAFFIC_DEFINITION)
 
     def test_wellformed_network_traffic(self):
-        results = validate_string(VALID_NETWORK_TRAFFIC_DEFINITION,
+        results, = validate_string(VALID_NETWORK_TRAFFIC_DEFINITION,
                                   self.options)
         self.assertTrue(results.is_valid)
 
