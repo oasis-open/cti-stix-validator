@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import ValidationError, validate_instance, validate_string
 
 
-VALID_CUSTOM_OBJECT = """
+VALID_CUSTOM_OBJECT = u"""
 {
   "type": "x-example-com-customobject",
   "id": "x-example-com-customobject--4527e5de-8572-446a-a57a-706f15467461",

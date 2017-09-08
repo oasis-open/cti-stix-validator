@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_ATTACK_PATTERN = """
+VALID_ATTACK_PATTERN = u"""
 {
   "type": "attack-pattern",
   "id": "attack-pattern--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",

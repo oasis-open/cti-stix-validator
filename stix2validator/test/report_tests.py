@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_REPORT = """
+VALID_REPORT = u"""
 {
   "type": "report",
   "id": "report--84e4d88f-44ea-4bcd-bbf3-b2c1c320bcb3",

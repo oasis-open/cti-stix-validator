@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_OBSERVED_DATA_DEFINITION = """
+VALID_OBSERVED_DATA_DEFINITION = u"""
 {
   "type": "observed-data",
   "id": "observed-data--b67d30ff-02ac-498a-92f9-32f845f448cf",

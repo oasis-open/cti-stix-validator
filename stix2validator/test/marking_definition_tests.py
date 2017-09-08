@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_MARKING_DEFINITION = """
+VALID_MARKING_DEFINITION = u"""
 {
   "type": "marking-definition",
   "id": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",

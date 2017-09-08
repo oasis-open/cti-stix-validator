@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_TOOL = """
+VALID_TOOL = u"""
 {
   "type": "tool",
   "id": "tool--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f",

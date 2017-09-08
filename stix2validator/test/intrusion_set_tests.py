@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_INTRUSION_SET = """
+VALID_INTRUSION_SET = u"""
 {
   "type": "intrusion-set",
   "id": "intrusion-set--4e78f46f-a023-4e5f-bc24-71b3ca22ec29",

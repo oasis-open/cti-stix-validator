@@ -4,7 +4,7 @@ from . import ValidatorTest
 from .. import validate_string
 
 
-MULTI_OBJ_JSON = """
+MULTI_OBJ_JSON = u"""
 [
     {
       "type": "attack-pattern",

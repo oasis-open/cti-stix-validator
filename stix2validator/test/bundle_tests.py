@@ -5,7 +5,7 @@ import unittest
 from . import ValidatorTest
 
 
-VALID_BUNDLE = """
+VALID_BUNDLE = u"""
 {
   "type": "bundle",
   "id": "bundle--44af6c39-c09b-49c5-9de2-394224b04982",

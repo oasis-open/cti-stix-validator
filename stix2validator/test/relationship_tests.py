@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_instance, validate_string
 
 
-VALID_RELATIONSHIP = """
+VALID_RELATIONSHIP = u"""
 {
     "type": "relationship",
     "id": "relationship--44298a74-ba52-4f0c-87a3-1824e67d7fad",
