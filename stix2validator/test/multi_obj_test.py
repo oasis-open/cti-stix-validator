@@ -32,6 +32,7 @@ MULTI_OBJ_JSON = u"""
 ]
 """
 
+
 class MultiObjTestCases(ValidatorTest):
     valid_objs = json.loads(MULTI_OBJ_JSON)
 
