@@ -111,7 +111,7 @@ def print_schema_results(results, level=0):
 
     """
     for error in results.errors:
-        print_level(_RED + "[X] %s", level + 1, error)
+        print_level(_RED + "[X] %s", level, error)
 
 
 def print_warning_results(results, level=0):
@@ -120,7 +120,7 @@ def print_warning_results(results, level=0):
     marker = _YELLOW + "[!] "
 
     for warning in results.warnings:
-        print_level(marker + "Warning: %s", level + 1, warning)
+        print_level(marker + "Warning: %s", level, warning)
 
 
 def print_horizontal_rule():
