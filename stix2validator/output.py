@@ -1,3 +1,4 @@
+import operator
 import sys
 
 from colorama import Fore, Style, init
@@ -145,7 +146,7 @@ def print_results(results):
         results: A list of FileValidationResults instances.
 
     """
-    for file_result in results:
+    for file_result in sorted(results, key=operator.attrgetter("filepath")):
         print_horizontal_rule()
         print_level("[-] Results for: %s", 0, file_result.filepath)
 
