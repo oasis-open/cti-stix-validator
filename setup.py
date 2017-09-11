@@ -17,6 +17,7 @@ def get_version():
 
 
 install_requires = [
+    'appdirs',
     'jsonschema==2.5.1',
     'colorama',
     'six',

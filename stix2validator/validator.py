@@ -1,12 +1,14 @@
 """Custom jsonschema.IValidator class and validator functions.
 """
 
+import errno
 import os
 import fnmatch
 import datetime
 from itertools import chain
 from collections import Iterable
 
+from appdirs import AppDirs
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
 import simplejson as json
@@ -560,7 +562,15 @@ def validate_instance(instance, options=None):
 
     # Cache data from external sources; used in some checks
     if not options.no_cache:
-        requests_cache.install_cache(expire_after=datetime.timedelta(weeks=1))
+        dirs = AppDirs("stix2-validator", "OASIS")
+        # Create cache dir if doesn't exist
+        try:
+            os.makedirs(dirs.user_cache_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+        requests_cache.install_cache(cache_name=os.path.join(dirs.user_cache_dir, 'cache'),
+                                     expire_after=datetime.timedelta(weeks=1))
     if options.refresh_cache:
         now = datetime.datetime.utcnow()
         requests_cache.get_cache().remove_old_entries(now)
