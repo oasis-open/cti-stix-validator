@@ -7,6 +7,7 @@ import fnmatch
 import datetime
 from itertools import chain
 from collections import Iterable
+import sys
 
 from appdirs import AppDirs
 from jsonschema import Draft4Validator, RefResolver
@@ -569,7 +570,7 @@ def validate_instance(instance, options=None):
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
-        requests_cache.install_cache(cache_name=os.path.join(dirs.user_cache_dir, 'cache'),
+        requests_cache.install_cache(cache_name=os.path.join(dirs.user_cache_dir, 'py{}cache'.format(sys.version_info[0])),
                                      expire_after=datetime.timedelta(weeks=1))
     if options.refresh_cache:
         now = datetime.datetime.utcnow()
