@@ -1,6 +1,8 @@
 import sys
-from colorama import init, Fore, Style
+
+from colorama import Fore, Style, init
 from six import iteritems
+
 from . import codes
 
 init(autoreset=True)

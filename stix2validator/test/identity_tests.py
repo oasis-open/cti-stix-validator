@@ -1,9 +1,11 @@
-import unittest
 import copy
 import json
+import unittest
+
 from . import ValidatorTest
-from .. import validate_string, validate_instance
+from .. import validate_instance, validate_string
 from ..errors import JSONError
+
 
 VALID_IDENTITY = """
 {
