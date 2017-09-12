@@ -3,14 +3,15 @@
 """Validate STIX 2.0 documents against the specification.
 """
 
-
-import logging
 import argparse
+from argparse import RawDescriptionHelpFormatter
+import logging
 import sys
 import textwrap
-from argparse import RawDescriptionHelpFormatter
-from stix2validator import (codes, output, ValidationOptions, run_validation,
-                            print_results, ValidationError)
+
+from stix2validator import (ValidationError, ValidationOptions, codes, output,
+                            print_results, run_validation)
+
 
 CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which

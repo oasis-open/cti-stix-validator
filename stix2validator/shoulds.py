@@ -13,16 +13,18 @@ To add a new check:
     - add the check code and name to table
 """
 
-import re
 from collections import Iterable
 from itertools import chain
+import re
+
 from six import string_types
+
 from . import enums
-from .util import cyber_observable_check
 from .errors import JSONError
-from .musts import (CUSTOM_TYPE_PREFIX_RE, CUSTOM_TYPE_LAX_PREFIX_RE,
-                    CUSTOM_PROPERTY_PREFIX_RE, CUSTOM_PROPERTY_LAX_PREFIX_RE)
+from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
+                    CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
 from .output import info
+from .util import cyber_observable_check
 
 
 def custom_prefix_strict(instance):

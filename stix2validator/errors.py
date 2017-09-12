@@ -1,7 +1,9 @@
-import re
 from collections import deque
-from six import python_2_unicode_compatible, text_type
+import re
+
 from jsonschema import exceptions as schema_exceptions
+from six import python_2_unicode_compatible, text_type
+
 from . import enums
 from .util import CHECK_CODES
 

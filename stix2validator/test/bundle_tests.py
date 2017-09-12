@@ -1,7 +1,9 @@
-import unittest
 import copy
 import json
+import unittest
+
 from . import ValidatorTest
+
 
 VALID_BUNDLE = """
 {

@@ -17,14 +17,14 @@ def get_version():
 
 
 install_requires = [
-    'jsonschema==2.5.1',
     'colorama',
-    'six',
+    'jsonschema==2.5.1',
+    'python-dateutil',
     'requests',
     'requests_cache',
-    'stix2-patterns>=0.4.1',
-    'python-dateutil',
     'simplejson',
+    'six',
+    'stix2-patterns>=0.4.1',
 ]
 
 setup(
