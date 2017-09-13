@@ -1,8 +1,10 @@
-import unittest
 import copy
 import json
+import unittest
+
 from . import ValidatorTest
-from .. import validate_string, validate_instance
+from .. import validate_instance, validate_string
+
 
 VALID_RELATIONSHIP = """
 {

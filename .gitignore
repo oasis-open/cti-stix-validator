@@ -19,8 +19,6 @@ develop-eggs
 lib
 lib64
 __pycache__
-.cache
-.coverage
 htmlcov
 
 # Operating System
@@ -35,3 +33,16 @@ cache.sqlite
 
 # Editors
 *.swp
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+
+# PyCharm
+.idea/

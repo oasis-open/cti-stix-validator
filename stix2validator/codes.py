@@ -3,7 +3,6 @@
 
 from six import itervalues
 
-
 #: Execution finished successfully. All STIX documents were valid for all user-
 #: specified validation scenarios.
 EXIT_SUCCESS = 0x0

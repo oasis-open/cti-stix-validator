@@ -1,6 +1,7 @@
-import unittest
 import os
-from .. import validate_instance, ValidationOptions, print_results
+import unittest
+
+from .. import ValidationOptions, print_results, validate_instance
 
 SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 
