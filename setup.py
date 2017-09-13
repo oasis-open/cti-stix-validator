@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open('README.rst') as f:
     readme = f.read()
@@ -18,14 +18,14 @@ def get_version():
 
 install_requires = [
     'appdirs',
-    'jsonschema==2.5.1',
     'colorama',
-    'six',
+    'jsonschema==2.5.1',
+    'python-dateutil',
     'requests',
     'requests_cache',
-    'stix2-patterns>=0.4.1',
-    'python-dateutil',
     'simplejson',
+    'six',
+    'stix2-patterns>=0.4.1',
 ]
 
 setup(

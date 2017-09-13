@@ -24,7 +24,7 @@ The easiest way to install the STIX validator is with pip:
 
 ::
 
-  $ pip install stix2
+  $ pip install stix2-validator
 
 Note that if you instead install it by cloning or downloading the repository, you will need to set up the submodules before you install it:
 

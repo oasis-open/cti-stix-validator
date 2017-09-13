@@ -1,9 +1,9 @@
 """STIX 2.0 open vocabularies and other lists
 """
 
-import requests
 import re
-from six import PY2, text_type
+
+import requests
 
 # Enumerations of the default values of STIX open vocabularies
 ATTACK_MOTIVATION_OV = [

@@ -1,24 +1,24 @@
 """Custom jsonschema.IValidator class and validator functions.
 """
 
-import errno
-import os
-import fnmatch
-import datetime
-from itertools import chain
 from collections import Iterable
+import datetime
+import errno
+import fnmatch
+from itertools import chain
+import os
 import sys
 
 from appdirs import AppDirs
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
-import simplejson as json
-from six import text_type, iteritems
 import requests_cache
+import simplejson as json
+from six import iteritems, text_type
 
-from . import output, musts, shoulds
-from .errors import (SchemaError, SchemaInvalidError, pretty_error,
-                     ValidationError, NoJSONFileFoundError)
+from . import musts, output, shoulds
+from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
+                     ValidationError, pretty_error)
 from .util import ValidationOptions
 
 
