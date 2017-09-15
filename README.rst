@@ -1,4 +1,4 @@
-|Build Status|  |Version|
+|Build Status|  |Coverage|  |Version|
 
 ====================
 `cti-stix-validator`
@@ -278,5 +278,8 @@ Questions or comments about this Open Repository's activities should be composed
 
 .. |Build Status| image:: https://travis-ci.org/oasis-open/cti-stix-validator.svg?branch=master
    :target: https://travis-ci.org/oasis-open/cti-stix-validator
+.. |Coverage| image:: https://codecov.io/gh/oasis-open/cti-stix-validator/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/oasis-open/cti-stix-validator
 .. |Version| image:: https://img.shields.io/pypi/v/stix2-validator.svg?maxAge=3600
    :target: https://pypi.python.org/pypi/stix2-validator/
+
