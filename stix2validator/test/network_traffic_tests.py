@@ -49,7 +49,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_wellformed_network_traffic(self):
         results = validate_string(VALID_NETWORK_TRAFFIC_DEFINITION,
-                                   self.options)
+                                  self.options)
         self.assertTrue(results.is_valid)
 
     def test_network_traffic_required_fields(self):

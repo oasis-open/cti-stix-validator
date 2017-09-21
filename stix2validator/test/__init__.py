@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from .. import ValidationOptions, print_results, validate_parsed_json
+from .. import ValidationOptions, validate_parsed_json
 
 SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 

@@ -25,6 +25,7 @@ from .util import ValidationOptions
 def _is_stix_obj(obj):
     return isinstance(obj, dict) and 'id' in obj and 'type' in obj
 
+
 def _iter_errors_custom(instance, checks, options):
     """Perform additional validation not possible merely with JSON schemas.
 

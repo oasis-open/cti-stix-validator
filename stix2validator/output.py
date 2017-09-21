@@ -2,7 +2,6 @@ import operator
 import sys
 
 from colorama import Fore, Style, init
-from six import iteritems
 
 from . import codes
 
