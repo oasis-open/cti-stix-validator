@@ -3,7 +3,7 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_string, validate_parsed_json
+from .. import validate_parsed_json, validate_string
 
 
 VALID_THREAT_ACTOR = u"""

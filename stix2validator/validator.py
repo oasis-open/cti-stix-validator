@@ -2,9 +2,9 @@
 """
 
 from collections import Iterable
-import io
 import datetime
 import errno
+import io
 from itertools import chain
 import os
 import sys
