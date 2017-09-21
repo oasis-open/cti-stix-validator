@@ -3,7 +3,7 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 from ..errors import JSONError
 
 
@@ -27,19 +27,19 @@ class IdentityTestCases(ValidatorTest):
                           self.valid_identity, enabled='abc')
 
     def test_wellformed_identity(self):
-        results, = validate_string(VALID_IDENTITY, self.options)
+        results = validate_string(VALID_IDENTITY, self.options)
         self.assertTrue(results.is_valid)
 
     def test_vocab_identity_class(self):
         identity = copy.deepcopy(self.valid_identity)
         identity['identity_class'] = "corporation"
-        results = validate_instance(identity, self.options)
+        results = validate_parsed_json(identity, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_vocab_industry_sector(self):
         identity = copy.deepcopy(self.valid_identity)
         identity['sectors'] = ["something"]
-        results = validate_instance(identity, self.options)
+        results = validate_parsed_json(identity, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(identity, 'industry-sector')

@@ -1,7 +1,7 @@
 import copy
 import json
 from . import ValidatorTest
-from .. import validate_string
+from .. import validate_string, validate_parsed_json
 
 
 MULTI_OBJ_JSON = u"""
@@ -44,7 +44,7 @@ class MultiObjTestCases(ValidatorTest):
     def test_one_valid_one_invalid(self):
         objs = copy.deepcopy(self.valid_objs)
         objs[1]["id"] = objs[1]["id"].replace("identity", "abc")
-        obj_results = validate_string(json.dumps(objs))
+        obj_results = validate_parsed_json(objs)
 
         self.assertEqual(len(obj_results), 2)
         self.assertTrue(obj_results[0].is_valid)

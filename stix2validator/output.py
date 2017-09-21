@@ -158,11 +158,17 @@ def print_results(results):
             verdict = "Invalid"
         print_level("%s STIX JSON: %s", 0, marker, verdict)
 
-        for object_result in file_result.object_results:
-            if object_result.warnings:
-                print_warning_results(object_result, 1)
-            if object_result.errors:
-                print_schema_results(object_result, 1)
+        if isinstance(file_result.object_results, list):
+            for object_result in file_result.object_results:
+                if object_result.warnings:
+                    print_warning_results(object_result, 1)
+                if object_result.errors:
+                    print_schema_results(object_result, 1)
+        else:
+            if file_result.object_results.warnings:
+                print_warning_results(file_result.object_results, 1)
+            if file_result.object_results.errors:
+                print_schema_results(file_result.object_results, 1)
 
         if file_result.fatal:
             print_fatal_results(file_result.fatal, 1)

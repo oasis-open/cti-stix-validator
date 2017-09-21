@@ -3,7 +3,7 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
 VALID_ATTACK_PATTERN = u"""
@@ -28,27 +28,27 @@ class AttackPatternTestCases(ValidatorTest):
     valid_attack_pattern = json.loads(VALID_ATTACK_PATTERN)
 
     def test_wellformed_attack_pattern(self):
-        results, = validate_string(VALID_ATTACK_PATTERN, self.options)
+        results = validate_string(VALID_ATTACK_PATTERN, self.options)
         self.assertTrue(results.is_valid)
 
     def test_valid_capec_id(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         ext_refs = attack_pattern['external_references']
         ext_refs[0]['external_id'] = "CAPEC-abc"
-        results = validate_instance(attack_pattern, self.options)
+        results = validate_parsed_json(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_external_reference_no_external_id(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         ext_refs = attack_pattern['external_references']
         del ext_refs[0]['external_id']
-        results = validate_instance(attack_pattern, self.options)
+        results = validate_parsed_json(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_invalid_property_prefix(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x-something'] = "some value"
-        results = validate_instance(attack_pattern, self.options)
+        results = validate_parsed_json(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.assertFalseWithOptions(attack_pattern, enabled='custom-prefix-lax')
@@ -56,7 +56,7 @@ class AttackPatternTestCases(ValidatorTest):
     def test_invalid_property_prefix_lax(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x_something'] = "some value"
-        results = validate_instance(attack_pattern, self.options)
+        results = validate_parsed_json(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.assertTrueWithOptions(attack_pattern, enabled='custom-prefix-lax')
@@ -66,7 +66,7 @@ class AttackPatternTestCases(ValidatorTest):
     def test_valid_property_prefix(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['x_source_something'] = "some value"
-        results = validate_instance(attack_pattern, self.options)
+        results = validate_parsed_json(attack_pattern, self.options)
         self.assertTrue(results.is_valid)
 
     def test_invalid_timestamp(self):

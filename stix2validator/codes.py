@@ -31,7 +31,11 @@ def get_code(results):
     status = EXIT_SUCCESS
 
     for file_result in results:
-        error = any(object_result.errors for object_result in file_result.object_results)
+        if isinstance(file_result.object_results, list):
+            error = any(object_result.errors for object_result in file_result.object_results)
+        else:
+            error = file_result.object_results.errors
+
         fatal = file_result.fatal
 
         if error:

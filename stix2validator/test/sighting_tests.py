@@ -24,7 +24,7 @@ class IdentityTestCases(ValidatorTest):
     valid_sighting = json.loads(VALID_SIGHTING)
 
     def test_wellformed_report(self):
-        results, = validate_string(VALID_SIGHTING, self.options)
+        results = validate_string(VALID_SIGHTING, self.options)
         self.assertTrue(results.is_valid)
 
     def test_sighting_of_ref(self):
