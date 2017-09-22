@@ -9,12 +9,16 @@ import os
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
 import simplejson as json
-from six import iteritems, text_type
+from six import iteritems, string_types, text_type
 
 from . import musts, output, shoulds
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
 from .util import ValidationOptions
+
+
+def _is_iterable_non_string(val):
+    return hasattr(val, "__iter__") and not isinstance(val, string_types)
 
 
 def _is_stix_obj(obj):
@@ -102,7 +106,7 @@ class FileValidationResults(BaseResults):
         """
         super(FileValidationResults, self).__init__(is_valid)
         self.filepath = filepath
-        self.object_results = object_results or []
+        self.object_results = object_results
         self.fatal = fatal
 
     def as_dict(self):
@@ -114,6 +118,59 @@ class FileValidationResults(BaseResults):
         )
 
         return d
+
+    @property
+    def object_result(self):
+        """
+        Get the object result object, assuming there is only one.  Raises
+        an error if there is more than one.
+        :return: The result object
+        :raises ValueError: If there is more than one result
+        """
+        num_obj_results = len(self._object_results)
+
+        if num_obj_results < 1:
+            return None
+        elif num_obj_results < 2:
+            return self._object_results[0]
+        else:
+            raise ValueError("There is more than one result; use 'object_results'")
+
+    @object_result.setter
+    def object_result(self, object_result):
+        """
+        Set the object result to a single value.  If ``object_result`` is not a
+        single value, an error will be raised.
+        :param object_result: The result to set
+        :raises ValueError: if ``object_result`` is not a single value.
+        """
+        if _is_iterable_non_string(object_result):
+            raise ValueError("Can't set \"object_result\" to more than one"
+                             " result; try setting \"object_results\" instead")
+        self._object_results = [object_result]
+
+    @property
+    def object_results(self):
+        """
+        Get all object results.
+        :return: the results
+        """
+        return self._object_results
+
+    @object_results.setter
+    def object_results(self, object_results):
+        """
+        Set the results to an iterable of values.  The values will be collected
+        into a list.  A single value is allowed; it will be converted to a
+        length 1 list.
+        :param object_results: The results to set
+        """
+        if _is_iterable_non_string(object_results):
+            self._object_results = list(object_results)
+        elif object_results is None:
+            self._object_results = []
+        else:
+            self._object_results = [object_results]
 
 
 class ObjectValidationResults(BaseResults):
@@ -330,7 +387,7 @@ def validate(in_, options=None):
 
     :param in_: A textual stream of JSON data.
     :param options: Validation options
-    :return: A list of ObjectValidationResults.
+    :return: An ObjectValidationResults instance, or a list of such.
     """
     obj_json = json.load(in_)
 
@@ -376,11 +433,8 @@ def validate_file(fn, options=None):
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
 
-    if isinstance(file_results.object_results, list):
-        file_results.is_valid = all(object_result.is_valid
-                                    for object_result in file_results.object_results)
-    else:
-        file_results.is_valid = file_results.object_results.is_valid
+    file_results.is_valid = all(object_result.is_valid
+                                for object_result in file_results.object_results)
 
     return file_results
 
@@ -396,7 +450,7 @@ def validate_string(string, options=None):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of ObjectValidationResults.
+        An ObjectValidationResults instance, or a list of such.
 
     """
     output.info("Performing JSON schema validation on input string: " + string)
