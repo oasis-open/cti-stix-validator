@@ -3,10 +3,10 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
-VALID_TOOL = """
+VALID_TOOL = u"""
 {
   "type": "tool",
   "id": "tool--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f",
@@ -35,7 +35,7 @@ class ToolTestCases(ValidatorTest):
     def test_vocab_tool_label(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['labels'] += ["multi-purpose"]
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool, 'tool-label')
@@ -43,15 +43,15 @@ class ToolTestCases(ValidatorTest):
     def test_kill_chain_name(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['kill_chain_name'] = "Something"
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['kill_chain_name'] = "some thing"
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['kill_chain_name'] = "some_thing"
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool, 'kill-chain-names')
@@ -59,15 +59,15 @@ class ToolTestCases(ValidatorTest):
     def test_kill_chain_phase_name(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['phase_name'] = "Something"
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['phase_name'] = "some thing"
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         tool['kill_chain_phases'][0]['phase_name'] = "some_thing"
-        results = validate_instance(tool, self.options)
+        results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(tool, 'kill-chain-names')

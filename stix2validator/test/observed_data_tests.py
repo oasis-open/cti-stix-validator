@@ -3,10 +3,10 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
-VALID_OBSERVED_DATA_DEFINITION = """
+VALID_OBSERVED_DATA_DEFINITION = u"""
 {
   "type": "observed-data",
   "id": "observed-data--b67d30ff-02ac-498a-92f9-32f845f448cf",
@@ -96,7 +96,7 @@ class ObservedDataTestCases(ValidatorTest):
           "objects.0.addons",
           "objects.9"
         ]
-        results = validate_instance(observed_data, self.options)
+        results = validate_parsed_json(observed_data, self.options)
         self.assertTrue(len(results.errors) == 3)
         self.assertFalse(results.is_valid)
 
@@ -107,7 +107,7 @@ class ObservedDataTestCases(ValidatorTest):
                 "foo": "bar"
             }
         }
-        results = validate_instance(observed_data, self.options)
+        results = validate_parsed_json(observed_data, self.options)
         self.assertTrue(len(results.errors) == 1)
         self.assertFalse(results.is_valid)
 
@@ -120,7 +120,7 @@ class ObservedDataTestCases(ValidatorTest):
                 "foo": "bar"
             }
         }
-        results = validate_instance(observed_data, self.options)
+        results = validate_parsed_json(observed_data, self.options)
         self.assertTrue(len(results.errors) == 1)
         self.assertFalse(results.is_valid)
 
@@ -255,7 +255,7 @@ class ObservedDataTestCases(ValidatorTest):
                 }
             }
         }
-        results = validate_instance(observed_data, self.options)
+        results = validate_parsed_json(observed_data, self.options)
         self.assertTrue(len(results.errors) == 2)
         self.assertFalse(results.is_valid)
 

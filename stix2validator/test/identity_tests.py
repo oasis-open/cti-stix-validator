@@ -3,11 +3,11 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 from ..errors import JSONError
 
 
-VALID_IDENTITY = """
+VALID_IDENTITY = u"""
 {
   "type": "identity",
   "id": "identity--2d1c6ab3-5e4e-48ac-a32b-f0c01c2836a8",
@@ -33,13 +33,13 @@ class IdentityTestCases(ValidatorTest):
     def test_vocab_identity_class(self):
         identity = copy.deepcopy(self.valid_identity)
         identity['identity_class'] = "corporation"
-        results = validate_instance(identity, self.options)
+        results = validate_parsed_json(identity, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_vocab_industry_sector(self):
         identity = copy.deepcopy(self.valid_identity)
         identity['sectors'] = ["something"]
-        results = validate_instance(identity, self.options)
+        results = validate_parsed_json(identity, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(identity, 'industry-sector')

@@ -6,7 +6,7 @@ from . import ValidatorTest
 from .. import validate_string
 
 
-VALID_SIGHTING = """
+VALID_SIGHTING = u"""
 {
   "type": "sighting",
   "id": "sighting--6b0e3956-95f3-4c04-a882-116832996da0",

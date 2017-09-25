@@ -3,10 +3,10 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
-VALID_MARKING_DEFINITION = """
+VALID_MARKING_DEFINITION = u"""
 {
   "type": "marking-definition",
   "id": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
@@ -29,7 +29,7 @@ class MarkingDefinitionTestCases(ValidatorTest):
     def test_vocab_marking_definition_label(self):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         marking_definition['definition_type'] = "something"
-        results = validate_instance(marking_definition, self.options)
+        results = validate_parsed_json(marking_definition, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(marking_definition, 'marking-definition-type')

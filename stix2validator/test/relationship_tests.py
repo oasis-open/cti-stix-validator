@@ -3,10 +3,10 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
-VALID_RELATIONSHIP = """
+VALID_RELATIONSHIP = u"""
 {
     "type": "relationship",
     "id": "relationship--44298a74-ba52-4f0c-87a3-1824e67d7fad",
@@ -30,33 +30,33 @@ class RelationshipTestCases(ValidatorTest):
     def test_relationship_type(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['relationship_type'] = "SOMETHING"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_source_relationship(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "relationship--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
         self.assertEqual(len(results.errors), 1)
 
     def test_source_sighting(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "sighting--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_target_bundle(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['target_ref'] = "bundle--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
         self.assertEqual(len(results.errors), 1)
 
     def test_target_marking_definition(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['target_ref'] = "marking-definition--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_relationship_types_invalid_type(self):
@@ -64,7 +64,7 @@ class RelationshipTestCases(ValidatorTest):
         relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
         relationship['relationship_type'] = "mitigates"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(relationship, 'relationship-types')
@@ -84,7 +84,7 @@ class RelationshipTestCases(ValidatorTest):
         relationship['source_ref'] = "tool--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         relationship['target_ref'] = "vulnerability--9c1f891b-459a-6f7f-80ea-31b17b5940d4"
         relationship['relationship_type'] = "targets"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertTrue(results.is_valid)
 
     def test_relationship_types_common(self):
@@ -92,7 +92,7 @@ class RelationshipTestCases(ValidatorTest):
         relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
         relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
         relationship['relationship_type'] = "related-to"
-        results = validate_instance(relationship, self.options)
+        results = validate_parsed_json(relationship, self.options)
         self.assertTrue(results.is_valid)
 
     def test_missing_required(self):

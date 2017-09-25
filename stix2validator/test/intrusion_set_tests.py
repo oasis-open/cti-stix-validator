@@ -3,10 +3,10 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
-VALID_INTRUSION_SET = """
+VALID_INTRUSION_SET = u"""
 {
   "type": "intrusion-set",
   "id": "intrusion-set--4e78f46f-a023-4e5f-bc24-71b3ca22ec29",
@@ -31,13 +31,13 @@ class IntrusionSetTestCases(ValidatorTest):
     def test_country(self):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['country'] = "USA"
-        results = validate_instance(intrusion_set, self.options)
+        results = validate_parsed_json(intrusion_set, self.options)
         self.assertEqual(results.is_valid, False)
 
     def test_vocab_attack_motivation(self):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['primary_motivation'] = "selfishness"
-        results = validate_instance(intrusion_set, self.options)
+        results = validate_parsed_json(intrusion_set, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(intrusion_set, 'attack-motivation')
@@ -45,7 +45,7 @@ class IntrusionSetTestCases(ValidatorTest):
     def test_vocab_attack_resource_level(self):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['resource_level'] = "high"
-        results = validate_instance(intrusion_set, self.options)
+        results = validate_parsed_json(intrusion_set, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(intrusion_set, 'attack-resource-level')

@@ -3,10 +3,10 @@ import json
 import unittest
 
 from . import ValidatorTest
-from .. import validate_instance, validate_string
+from .. import validate_parsed_json, validate_string
 
 
-VALID_REPORT = """
+VALID_REPORT = u"""
 {
   "type": "report",
   "id": "report--84e4d88f-44ea-4bcd-bbf3-b2c1c320bcb3",
@@ -36,7 +36,7 @@ class IdentityTestCases(ValidatorTest):
     def test_vocab_report_label(self):
         report = copy.deepcopy(self.valid_report)
         report['labels'] = ["something"]
-        results = validate_instance(report, self.options)
+        results = validate_parsed_json(report, self.options)
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(report, 'report-label')

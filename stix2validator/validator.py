@@ -2,19 +2,14 @@
 """
 
 from collections import Iterable
-import datetime
-import errno
-import fnmatch
+import io
 from itertools import chain
 import os
-import sys
 
-from appdirs import AppDirs
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
-import requests_cache
 import simplejson as json
-from six import iteritems, text_type
+from six import iteritems, string_types, text_type
 
 from . import musts, output, shoulds
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
@@ -22,62 +17,44 @@ from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
 from .util import ValidationOptions
 
 
-class CustomDraft4Validator(Draft4Validator):
-    """Custom validator class for JSON Schema Draft 4.
+def _is_iterable_non_string(val):
+    return hasattr(val, "__iter__") and not isinstance(val, string_types)
 
+
+def _is_stix_obj(obj):
+    return isinstance(obj, dict) and 'id' in obj and 'type' in obj
+
+
+def _iter_errors_custom(instance, checks, options):
+    """Perform additional validation not possible merely with JSON schemas.
+
+    Args:
+        instance: The STIX object to be validated.
+        checks: A sequence of callables which do the checks.  Each callable
+            may be written to accept 1 arg, which is the object to check,
+            or 2 args, which are the object and a ValidationOptions instance.
+        options: ValidationOptions instance with settings affecting how
+            validation should be done.
     """
-    def __init__(self, schema, types=(), resolver=None, format_checker=None,
-                 options=ValidationOptions()):
-        super(CustomDraft4Validator, self).__init__(schema, types, resolver,
-                                                    format_checker)
-        self.musts_list = musts.list_musts(options)
-        self.shoulds_list = shoulds.list_shoulds(options)
-        self.options = options
+    # Perform validation
+    for v_function in checks:
+        try:
+            result = v_function(instance)
+        except TypeError:
+            result = v_function(instance, options)
+        if isinstance(result, Iterable):
+            for x in result:
+                yield x
+        elif result is not None:
+            yield result
 
-    def iter_errors_custom(self, instance, check_musts=True):
-        """Perform additional validation not possible merely with JSON schemas.
-
-        Args:
-            instance: The STIX object to be validated.
-            check_musts: If True, this function will check against the
-                additional mandatory "MUST" requirements which cannot be
-                enforced by schemas. If False, this function will check against
-                recommended "SHOULD" best practices instead. This function will
-                never check both; to do so call it twice.
-        """
-        # Ensure `instance` is a whole STIX object, not just a property of one
-        if not (type(instance) is dict and 'id' in instance and 'type' in instance):
-            return
-
-        if check_musts:
-            validators = self.musts_list
-        else:
-            validators = self.shoulds_list
-
-        # Perform validation
-        for v_function in validators:
-            try:
-                result = v_function(instance)
-            except TypeError:
-                result = v_function(instance, self.options)
-            if isinstance(result, Iterable):
-                for x in result:
-                    yield x
-            elif result is not None:
-                yield result
-
-        # Validate any child STIX objects
-        for field in instance:
-            if type(instance[field]) is list:
-                for obj in instance[field]:
-                    for err in self.iter_errors_custom(obj, check_musts):
+    # Validate any child STIX objects
+    for field in instance:
+        if type(instance[field]) is list:
+            for obj in instance[field]:
+                if _is_stix_obj(obj):
+                    for err in _iter_errors_custom(obj, checks, options):
                         yield err
-
-    def get_list(self):
-        """Return a combined list of all musts and shoulds this validator will
-        perform, both MUSTs and SHOULDs.
-        """
-        return self.musts_list + self.shoulds_list
 
 
 class BaseResults(object):
@@ -113,8 +90,91 @@ class BaseResults(object):
         return json.dumps(self.as_dict())
 
 
-class ValidationResults(BaseResults):
-    """Results of JSON schema validation.
+class FileValidationResults(BaseResults):
+    """
+    Represents validation results for a file.  This entails potentially
+    several STIX object results, since a file may contain a list of STIX
+    objects.
+    """
+    def __init__(self, is_valid=False, filepath=None, object_results=None, fatal=None):
+        """
+        Initialize this instance.
+        :param is_valid: Whether the overall result is valid
+        :param filepath: Which file was validated
+        :param object_results: Individual object validation results
+        :param fatal: A non-validation-related fatal error
+        """
+        super(FileValidationResults, self).__init__(is_valid)
+        self.filepath = filepath
+        self.object_results = object_results
+        self.fatal = fatal
+
+    def as_dict(self):
+        d = super(FileValidationResults, self).as_dict()
+        d.update(
+            filepath=self.filepath,
+            object_results=[object_result.as_dict() for object_result in self.object_results],
+            fatal=self.fatal.as_dict()
+        )
+
+        return d
+
+    @property
+    def object_result(self):
+        """
+        Get the object result object, assuming there is only one.  Raises
+        an error if there is more than one.
+        :return: The result object
+        :raises ValueError: If there is more than one result
+        """
+        num_obj_results = len(self._object_results)
+
+        if num_obj_results < 1:
+            return None
+        elif num_obj_results < 2:
+            return self._object_results[0]
+        else:
+            raise ValueError("There is more than one result; use 'object_results'")
+
+    @object_result.setter
+    def object_result(self, object_result):
+        """
+        Set the object result to a single value.  If ``object_result`` is not a
+        single value, an error will be raised.
+        :param object_result: The result to set
+        :raises ValueError: if ``object_result`` is not a single value.
+        """
+        if _is_iterable_non_string(object_result):
+            raise ValueError("Can't set \"object_result\" to more than one"
+                             " result; try setting \"object_results\" instead")
+        self._object_results = [object_result]
+
+    @property
+    def object_results(self):
+        """
+        Get all object results.
+        :return: the results
+        """
+        return self._object_results
+
+    @object_results.setter
+    def object_results(self, object_results):
+        """
+        Set the results to an iterable of values.  The values will be collected
+        into a list.  A single value is allowed; it will be converted to a
+        length 1 list.
+        :param object_results: The results to set
+        """
+        if _is_iterable_non_string(object_results):
+            self._object_results = list(object_results)
+        elif object_results is None:
+            self._object_results = []
+        else:
+            self._object_results = [object_results]
+
+
+class ObjectValidationResults(BaseResults):
+    """Results of JSON schema validation for a single STIX object.
 
     Args:
         is_valid: The validation result.
@@ -130,13 +190,10 @@ class ValidationResults(BaseResults):
             otherwise.
 
     """
-    def __init__(self, is_valid=False, errors=None, fatal=None, warnings=None,
-                 fn=None):
-        super(ValidationResults, self).__init__(is_valid)
+    def __init__(self, is_valid=False, errors=None, warnings=None):
+        super(ObjectValidationResults, self).__init__(is_valid)
         self.errors = errors
-        self.fatal = fatal
         self.warnings = warnings
-        self.fn = fn
 
     @property
     def errors(self):
@@ -154,7 +211,7 @@ class ValidationResults(BaseResults):
             self._errors = [SchemaError(value)]
 
     def as_dict(self):
-        """A dictionary representation of the :class:`.ValidationResults`
+        """A dictionary representation of the :class:`.ObjectValidationResults`
         instance.
 
         Keys:
@@ -165,7 +222,7 @@ class ValidationResults(BaseResults):
             A dictionary representation of an instance of this class.
 
         """
-        d = super(ValidationResults, self).as_dict()
+        d = super(ObjectValidationResults, self).as_dict()
 
         if self.errors:
             d['errors'] = [x.as_dict() for x in self.errors]
@@ -277,9 +334,64 @@ def run_validation(options):
     except NoJSONFileFoundError as e:
         output.error(e.message)
 
-    results = {}
-    for fn in files:
-        results[fn] = validate_file(fn, options)
+    results = [validate_file(fn, options) for fn in files]
+
+    return results
+
+
+def validate_parsed_json(obj_json, options=None):
+    """
+    Validate objects from parsed JSON.  This supports a single object, or a
+    list of objects.  If a single object is given, a single result is
+    returned.  Otherwise, a list of results is returned.
+
+    If an error occurs, a ValidationErrorResults instance or list which
+    includes one of these instances, is returned.
+
+    :param obj_json: The parsed json
+    :param options: Validation options
+    :return: An ObjectValidationResults instance, or a list of such.
+    """
+
+    validating_list = isinstance(obj_json, list)
+
+    if not options:
+        options = ValidationOptions()
+
+    results = None
+    try:
+        if validating_list:
+            # Doing it this way instead of using a comprehension means that
+            # initial validation results will be retained, even if a later
+            # exception aborts the sequence.
+            results = []
+            for obj in obj_json:
+                results.append(validate_instance(obj, options))
+        else:
+            results = validate_instance(obj_json, options)
+
+    except SchemaInvalidError as ex:
+        error_result = ObjectValidationResults(is_valid=False,
+                                               errors=[str(ex)])
+        if validating_list:
+            results.append(error_result)
+        else:
+            results = error_result
+
+    return results
+
+
+def validate(in_, options=None):
+    """
+    Validate objects from JSON data in a textual stream.
+
+    :param in_: A textual stream of JSON data.
+    :param options: Validation options
+    :return: An ObjectValidationResults instance, or a list of such.
+    """
+    obj_json = json.load(in_)
+
+    results = validate_parsed_json(obj_json, options)
 
     return results
 
@@ -295,10 +407,10 @@ def validate_file(fn, options=None):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of ValidationResults.
+        An instance of FileValidationResults.
 
     """
-    results = ValidationResults(fn=fn)
+    file_results = FileValidationResults(filepath=fn)
     output.info("Performing JSON schema validation on %s" % fn)
 
     if not options:
@@ -306,31 +418,25 @@ def validate_file(fn, options=None):
 
     try:
         with open(fn) as instance_file:
-            instance = json.load(instance_file)
+            file_results.object_results = validate(instance_file, options)
 
-        if options.files:
-            results = validate_instance(instance, options)
-
-    except SchemaInvalidError as ex:
-        results.fatal = ValidationErrorResults(ex)
-        msg = ("File '{fn}' was schema-invalid. No further validation "
-               "will be performed.")
-        output.info(msg.format(fn=fn))
     except Exception as ex:
         if 'Expecting value' in str(ex):
             line_no = str(ex).split()[3]
-            results.fatal = ValidationErrorResults('Invalid JSON input on line'
-                                                   ' %s' % line_no)
+            file_results.fatal = ValidationErrorResults(
+                'Invalid JSON input on line %s' % line_no
+            )
         else:
-            results.fatal = ValidationErrorResults(ex)
+            file_results.fatal = ValidationErrorResults(ex)
+
         msg = ("Unexpected error occurred with file '{fn}'. No further "
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
 
-    if results.errors or results.fatal:
-        results.is_valid = False
+    file_results.is_valid = all(object_result.is_valid
+                                for object_result in file_results.object_results)
 
-    return results
+    return file_results
 
 
 def validate_string(string, options=None):
@@ -344,40 +450,20 @@ def validate_string(string, options=None):
         options: An instance of ``ValidationOptions``.
 
     Returns:
-        An instance of ValidationResults.
+        An ObjectValidationResults instance, or a list of such.
 
     """
-    results = ValidationResults(fn="input string")
     output.info("Performing JSON schema validation on input string: " + string)
-    instance = json.loads(string)
-
-    if not options:
-        options = ValidationOptions()
-
-    try:
-        results = validate_instance(instance, options)
-    except SchemaInvalidError as ex:
-        results.fatal = ValidationErrorResults(ex)
-        msg = ("String was schema-invalid. No further validation "
-               "will be performed.")
-        output.info(msg.format(string=string))
-
-    if results.errors or results.fatal:
-        results.is_valid = False
-
-    return results
+    stream = io.StringIO(string)
+    return validate(stream, options)
 
 
-def load_validator(schema_path, schema, options, custom=True):
+def load_validator(schema_path, schema):
     """Create a JSON schema validator for the given schema.
 
     Args:
         schema_path: The filename of the JSON schema.
         schema: A Python object representation of the same schema.
-        options: ValidationOptions instance with validation options for this
-            validator.
-        custom: A boolean, True indicating the CustomDraft4Validator should be
-            used, False indicating the default Draft4Validator should be used.
 
     Returns:
         An instance of Draft4Validator.
@@ -390,11 +476,7 @@ def load_validator(schema_path, schema, options, custom=True):
         file_prefix = 'file:'
 
     resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema)
-
-    if custom:
-        validator = CustomDraft4Validator(schema, resolver=resolver, options=options)
-    else:
-        validator = Draft4Validator(schema, resolver=resolver)
+    validator = Draft4Validator(schema, resolver=resolver)
 
     return validator
 
@@ -403,9 +485,10 @@ def find_schema(schema_dir, obj_type):
     """Search the `schema_dir` directory for a schema called `obj_type`.json.
     Return the file path of the first match it finds.
     """
+    schema_filename = obj_type + '.json'
     for root, dirnames, filenames in os.walk(schema_dir):
-        for filename in fnmatch.filter(filenames, obj_type + '.json'):
-            return os.path.join(root, filename)
+        if schema_filename in filenames:
+            return os.path.join(root, schema_filename)
 
 
 def load_schema(schema_path):
@@ -428,8 +511,10 @@ def load_schema(schema_path):
     return schema
 
 
-def object_validate(sdo, options, error_gens):
-    """Validate a single STIX object against its type's schema.
+def _schema_validate(sdo, options):
+    """Set up validation of a single STIX object against its type's schema.
+    This does no actual validation; it just returns generators which must be
+    iterated to trigger the actual generation.
 
     Do not call this function directly; use validate_instance() instead, as it
     calls this one. This function does not perform any custom checks.
@@ -457,8 +542,7 @@ def object_validate(sdo, options, error_gens):
         }
 
     # Don't use custom validator; only check schemas, no additional checks
-    sdo_validator = load_validator(sdo_schema_path, sdo_schema,
-                                   options, custom=False)
+    sdo_validator = load_validator(sdo_schema_path, sdo_schema)
     try:
         sdo_errors = sdo_validator.iter_errors(sdo)
     except schema_exceptions.RefResolutionError:
@@ -472,7 +556,7 @@ def object_validate(sdo, options, error_gens):
             error_prefix = 'unidentifiable object: '
     else:
         error_prefix = ''
-    error_gens.append((sdo_errors, error_prefix))
+    error_gens = [(sdo_errors, error_prefix)]
 
     # Validate each cyber observable object separately
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
@@ -491,8 +575,7 @@ def object_validate(sdo, options, error_gens):
                                              "object's type, nor the base "
                                              "schema (core.json).")
 
-            obj_validator = load_validator(obj_schema_path, obj_schema,
-                                           options, custom=False)
+            obj_validator = load_validator(obj_schema_path, obj_schema)
             try:
                 obj_errors = obj_validator.iter_errors(obj)
             except schema_exceptions.RefResolutionError:
@@ -526,64 +609,24 @@ def validate_instance(instance, options=None):
     if not options:
         options = ValidationOptions()
 
-    # Find and load the schema
-    try:
-        schema_path = find_schema(options.schema_dir, instance['type'])
-        schema = load_schema(schema_path)
-    except (KeyError, TypeError):
-        # Assume a custom object with no schema
-        try:
-            schema_path = find_schema(options.schema_dir, 'core')
-            schema = load_schema(schema_path)
-        except (KeyError, TypeError):
-            raise SchemaInvalidError("Cannot locate a schema for the object's "
-                                     "type, nor the base schema (core.json).")
+    error_gens = []
 
-    # Validate against schemas for specific object types later
-    if instance['type'] == 'bundle':
-        schema['properties']['objects'] = {
-            "objects": {
-                "type": "array",
-                "minItems": 1
-            }
-        }
-    elif instance['type'] == 'observed-data':
-        schema['allOf'][1]['properties']['objects'] = {
-            "objects": {
-                "type": "object",
-                "minProperties": 1
-            }
-        }
+    # Schema validation
+    if instance['type'] == 'bundle' and 'objects' in instance:
+        # Validate each object in a bundle separately
+        for sdo in instance['objects']:
+            error_gens += _schema_validate(sdo, options)
+    else:
+        error_gens += _schema_validate(instance, options)
 
-    # Validate the schema first
-    try:
-        CustomDraft4Validator.check_schema(schema)
-    except schema_exceptions.SchemaError as e:
-        raise SchemaInvalidError('Invalid JSON schema: ' + str(e))
-
-    # Cache data from external sources; used in some checks
-    if not options.no_cache:
-        dirs = AppDirs("stix2-validator", "OASIS")
-        # Create cache dir if doesn't exist
-        try:
-            os.makedirs(dirs.user_cache_dir)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
-        requests_cache.install_cache(cache_name=os.path.join(dirs.user_cache_dir, 'py{}cache'.format(sys.version_info[0])),
-                                     expire_after=datetime.timedelta(weeks=1))
-    if options.refresh_cache:
-        now = datetime.datetime.utcnow()
-        requests_cache.get_cache().remove_old_entries(now)
-
-    validator = load_validator(schema_path, schema, options)
+    # Custom validation
+    must_checks = musts.list_musts(options)
+    should_checks = shoulds.list_shoulds(options)
     output.info("Running the following additional checks: %s."
-                % ", ".join(x.__name__ for x in validator.get_list()))
-
-    # Actual validation of JSON document
+                % ", ".join(x.__name__ for x in chain(must_checks, should_checks)))
     try:
-        errors = validator.iter_errors_custom(instance)
-        warnings = validator.iter_errors_custom(instance, False)
+        errors = _iter_errors_custom(instance, must_checks, options)
+        warnings = _iter_errors_custom(instance, should_checks, options)
 
         if options.strict:
             chained_errors = chain(errors, warnings)
@@ -597,21 +640,10 @@ def validate_instance(instance, options=None):
 
     # List of error generators and message prefixes (to denote which object the
     # error comes from)
-    error_gens = [(chained_errors, '')]
+    error_gens += [(chained_errors, '')]
 
-    # Validate each object in a bundle separately
-    if instance['type'] == 'bundle' and 'objects' in instance:
-        for sdo in instance['objects']:
-            object_validate(sdo, options, error_gens)
-    else:
-        object_validate(instance, options, error_gens)
-
-    # Clear requests cache if commandline flag was set
-    if options.clear_cache:
-        now = datetime.datetime.utcnow()
-        requests_cache.get_cache().remove_old_entries(now)
-
-    # Prepare the list of errors
+    # Prepare the list of errors (this actually triggers the custom validation
+    # functions).
     error_list = []
     for gen, prefix in error_gens:
         for error in gen:
@@ -623,5 +655,5 @@ def validate_instance(instance, options=None):
     else:
         valid = True
 
-    return ValidationResults(is_valid=valid, errors=error_list,
-                             warnings=warnings)
+    return ObjectValidationResults(is_valid=valid, errors=error_list,
+                                   warnings=warnings)

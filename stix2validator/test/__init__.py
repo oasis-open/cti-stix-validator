@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from .. import ValidationOptions, print_results, validate_instance
+from .. import ValidationOptions, validate_parsed_json
 
 SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
 
@@ -32,8 +32,7 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
                                         **kwargs)
-        results = validate_instance(instance, options)
-        print_results(results)
+        results = validate_parsed_json(instance, options)
         self.assertTrue(results.is_valid)
 
     def assertFalseWithOptions(self, instance, **kwargs):
@@ -50,5 +49,5 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
                                         **kwargs)
-        results = validate_instance(instance, options)
+        results = validate_parsed_json(instance, options)
         self.assertEqual(results.is_valid, False)
