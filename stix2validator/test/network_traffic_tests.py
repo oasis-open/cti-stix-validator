@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_string
@@ -136,7 +135,3 @@ class ObservedDataTestCases(ValidatorTest):
 
         del net_traffic['objects']['1']['end']
         self.assertTrueWithOptions(net_traffic)
-
-
-if __name__ == "__main__":
-    unittest.main()

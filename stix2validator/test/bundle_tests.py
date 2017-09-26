@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 
@@ -53,7 +52,3 @@ class BundleTestCases(ValidatorTest):
 
         bundle['objects'][1]['modified'] = "2017-06-22T14:09:00.123Z"
         self.assertTrueWithOptions(bundle)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -43,7 +42,3 @@ class IdentityTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(identity, 'industry-sector')
-
-
-if __name__ == "__main__":
-    unittest.main()

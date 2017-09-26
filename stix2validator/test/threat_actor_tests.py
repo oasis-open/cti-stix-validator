@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -67,7 +66,3 @@ class ThreatActorTestCases(ValidatorTest):
 
         self.check_ignore(threat_actor,
                           'threat-actor-sophistication')
-
-
-if __name__ == "__main__":
-    unittest.main()

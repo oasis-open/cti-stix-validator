@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_string
@@ -41,7 +40,3 @@ class IdentityTestCases(ValidatorTest):
         sighting = copy.deepcopy(self.valid_sighting)
         sighting['where_sighted_refs'].append("tool--36ffb872-1dd9-446e-b6f5-d58527e5b5d2")
         self.assertFalseWithOptions(sighting)
-
-
-if __name__ == "__main__":
-    unittest.main()

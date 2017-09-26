@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import ValidationError, validate_parsed_json, validate_string
@@ -82,7 +81,3 @@ class CustomObjectTestCases(ValidatorTest):
 
     def test_strict_types(self):
         self.assertFalseWithOptions(self.valid_custom_object, strict_types=True)
-
-
-if __name__ == "__main__":
-    unittest.main()

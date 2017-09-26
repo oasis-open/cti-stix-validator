@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -45,7 +44,3 @@ class IdentityTestCases(ValidatorTest):
         report = copy.deepcopy(self.valid_report)
         report['published'] = "2016-11-31T08:17:27.000000Z"
         self.assertFalseWithOptions(report)
-
-
-if __name__ == "__main__":
-    unittest.main()

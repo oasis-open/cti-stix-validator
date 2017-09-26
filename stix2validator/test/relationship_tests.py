@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -99,7 +98,3 @@ class RelationshipTestCases(ValidatorTest):
         relationship = copy.deepcopy(self.valid_relationship)
         del relationship['relationship_type']
         self.assertFalseWithOptions(relationship)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -80,7 +79,3 @@ class ToolTestCases(ValidatorTest):
         self.assertFalseWithOptions(tool, disabled='1')
         self.assertFalseWithOptions(tool, disabled='2')
         self.assertTrueWithOptions(tool, disabled='1,2')
-
-
-if __name__ == "__main__":
-    unittest.main()

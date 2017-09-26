@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -49,7 +48,3 @@ class IntrusionSetTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(intrusion_set, 'attack-resource-level')
-
-
-if __name__ == "__main__":
-    unittest.main()

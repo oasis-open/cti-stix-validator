@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -78,7 +77,3 @@ class MarkingDefinitionTestCases(ValidatorTest):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         marking_definition['definition']['tlp'] = 21
         self.assertFalseWithOptions(marking_definition)
-
-
-if __name__ == "__main__":
-    unittest.main()

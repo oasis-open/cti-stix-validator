@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -161,7 +160,3 @@ class IndicatorTestCases(ValidatorTest):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = "[windows-registry-key:key LIKE 'HKEY_LOCAL_MACHINE\\\\Foo\\\\Bar%']"
         self.assertTrueWithOptions(indicator)
-
-
-if __name__ == "__main__":
-    unittest.main()

@@ -1,6 +1,5 @@
 import copy
 import json
-import unittest
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -94,7 +93,3 @@ class AttackPatternTestCases(ValidatorTest):
 
         attack_pattern['modified'] = "2016-02-29T08:17:27.000Z"
         self.assertTrueWithOptions(attack_pattern)
-
-
-if __name__ == "__main__":
-    unittest.main()
