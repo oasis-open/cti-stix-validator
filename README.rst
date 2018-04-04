@@ -516,14 +516,11 @@ CLA-related questions to `repository-cla@oasis-open.org
 
 
 
-.. |Build Status| image:: https://travis-ci.org/oasis-open/cti-stix-
-validator.svg?branch=master
+.. |Build Status| image:: https://travis-ci.org/oasis-open/cti-stix-validator.svg?branch=master
    :target: https://travis-ci.org/oasis-open/cti-stix-validator
-.. |Coverage| image:: https://codecov.io/gh/oasis-open/cti-stix-
-validator/branch/master/graph/badge.svg
+.. |Coverage| image:: https://codecov.io/gh/oasis-open/cti-stix-validator/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/oasis-open/cti-stix-validator
-.. |Version| image:: https://img.shields.io/pypi/v/stix2-
-validator.svg?maxAge=3600
+.. |Version| image:: https://img.shields.io/pypi/v/stix2-validator.svg?maxAge=3600
    :target: https://pypi.python.org/pypi/stix2-validator/
 
 
