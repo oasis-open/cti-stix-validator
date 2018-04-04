@@ -356,30 +356,19 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 
 .. Initial Maintainers: Greg Back & Ivan Kirillov
 
-*  `Greg Back <mailto:gback@mitre.org>`_; GitHub ID:
-`https://github.com/gtback <https://github.com/gtback>`_; WWW: `MITRE
-<https://www.mitre.org>`__
-*  `Ivan Kirillov <mailto:ikirillov@mitre.org>`_; GitHub ID:
-`https://github.com/ikiril01 <https://github.com/ikiril01>`_; WWW:
-`MITRE <https://www.mitre.org>`__
-*  `Chris Lenk <mailto:clenk@mitre.org>`_; GitHub ID:
-`https://github.com/clenk <https://github.com/clenk>`_; WWW: `MITRE
-<https://www.mitre.org>`__
+*  `Greg Back <mailto:gback@mitre.org>`_; GitHub ID: `https://github.com/gtback <https://github.com/gtback>`_; WWW: `MITRE <https://www.mitre.org>`__
+*  `Ivan Kirillov <mailto:ikirillov@mitre.org>`_; GitHub ID: `https://github.com/ikiril01 <https://github.com/ikiril01>`_; WWW: `MITRE <https://www.mitre.org>`__
+*  `Chris Lenk <mailto:clenk@mitre.org>`_; GitHub ID: `https://github.com/clenk <https://github.com/clenk>`_; WWW: `MITRE <https://www.mitre.org>`__
 
 .. _aboutOpenRepos:
 
 `About OASIS TC Open Repositories`
 ===============================
-*  `TC Open Repositories: Overview and Resources <https://www.oasis-
-open.org/resources/open-repositories/>`_
-*  `Frequently Asked Questions <https://www.oasis-
-open.org/resources/open-repositories/faq>`_
-*  `Open Source Licenses <https://www.oasis-open.org/resources/open-
-repositories/licenses>`_
-*  `Contributor License Agreements (CLAs) <https://www.oasis-
-open.org/resources/open-repositories/cla>`_
-*  `Maintainers' Guidelines and Agreement <https://www.oasis-
-open.org/resources/open-repositories/maintainers-guide>`__
+*  `TC Open Repositories: Overview and Resources <https://www.oasis-open.org/resources/open-repositories/>`_
+*  `Frequently Asked Questions <https://www.oasis-open.org/resources/open-repositories/faq>`_
+*  `Open Source Licenses <https://www.oasis-open.org/resources/open-repositories/licenses>`_
+*  `Contributor License Agreements (CLAs) <https://www.oasis-open.org/resources/open-repositories/cla>`_
+*  `Maintainers' Guidelines and Agreement <https://www.oasis-open.org/resources/open-repositories/maintainers-guide>`__
 
 .. _feedback:
 
