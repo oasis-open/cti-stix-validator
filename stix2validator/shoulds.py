@@ -26,6 +26,8 @@ from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
 from .output import info
 from .util import cyber_observable_check
 
+PROTOCOL_RE = re.compile(r'^[a-zA-Z0-9-]{1,15}$')
+
 
 def custom_prefix_strict(instance):
     """Ensure custom content follows strict naming style conventions.
@@ -794,7 +796,6 @@ def protocols(instance):
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] == 'network-traffic' and
                 'protocols' in obj):
-            prot_pattern = '^[a-zA-Z0-9-]{1,15}$'
             for prot in obj['protocols']:
                 if enums.protocols():
                     if prot not in enums.protocols():
@@ -806,7 +807,7 @@ def protocols(instance):
                                         'protocols')
                 else:
                     info("Can't reach IANA website; using regex for protocols.")
-                    if not prot_pattern.match(prot):
+                    if not PROTOCOL_RE.match(prot):
                         yield JSONError("The 'protocols' property of object "
                                         "'%s' contains a value ('%s') not in "
                                         "IANA Service Name and Transport "
