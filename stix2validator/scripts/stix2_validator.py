@@ -158,8 +158,9 @@ def _get_arg_parser(is_script=True):
         "-s",
         "--schemas",
         dest="schema_dir",
-        help="Schema directory. If not provided, the STIX schemas bundled "
-             "with this script will be used."
+        help="Custom schema directory. If provided, input will be validated "
+             "against these schemas in addition to the STIX schemas bundled "
+             "with this script."
     )
 
     # Output options
