@@ -363,7 +363,7 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 .. _aboutOpenRepos:
 
 `About OASIS TC Open Repositories`
-===============================
+==================================
 *  `TC Open Repositories: Overview and Resources <https://www.oasis-open.org/resources/open-repositories/>`_
 *  `Frequently Asked Questions <https://www.oasis-open.org/resources/open-repositories/faq>`_
 *  `Open Source Licenses <https://www.oasis-open.org/resources/open-repositories/licenses>`_
@@ -392,5 +392,3 @@ CLA-related questions to `repository-cla@oasis-open.org
    :target: https://codecov.io/gh/oasis-open/cti-stix-validator
 .. |Version| image:: https://img.shields.io/pypi/v/stix2-validator.svg?maxAge=3600
    :target: https://pypi.python.org/pypi/stix2-validator/
-
-
