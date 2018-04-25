@@ -4,7 +4,6 @@ import json
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
 
-
 VALID_MARKING_DEFINITION = u"""
 {
   "type": "marking-definition",

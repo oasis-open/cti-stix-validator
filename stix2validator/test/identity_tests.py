@@ -5,7 +5,6 @@ from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
 from ..errors import JSONError
 
-
 VALID_IDENTITY = u"""
 {
   "type": "identity",

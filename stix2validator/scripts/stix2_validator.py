@@ -18,7 +18,6 @@ import requests_cache
 from stix2validator import (ValidationError, ValidationOptions, codes, output,
                             print_results, run_validation)
 
-
 CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
 the validator performs, along with the code to use with the --enable or

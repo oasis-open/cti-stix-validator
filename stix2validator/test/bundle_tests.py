@@ -3,7 +3,6 @@ import json
 
 from . import ValidatorTest
 
-
 VALID_BUNDLE = u"""
 {
   "type": "bundle",

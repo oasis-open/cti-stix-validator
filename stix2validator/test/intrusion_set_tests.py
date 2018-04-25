@@ -4,7 +4,6 @@ import json
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
 
-
 VALID_INTRUSION_SET = u"""
 {
   "type": "intrusion-set",

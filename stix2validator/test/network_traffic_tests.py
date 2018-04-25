@@ -4,7 +4,6 @@ import json
 from . import ValidatorTest
 from .. import validate_string
 
-
 VALID_NETWORK_TRAFFIC_DEFINITION = u"""
 {
   "type": "observed-data",

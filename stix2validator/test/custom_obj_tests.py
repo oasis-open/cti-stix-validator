@@ -4,7 +4,6 @@ import json
 from . import ValidatorTest
 from .. import ValidationError, validate_parsed_json, validate_string
 
-
 VALID_CUSTOM_OBJECT = u"""
 {
   "type": "x-example-com-customobject",
