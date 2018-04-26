@@ -1,4 +1,3 @@
-import os
 import unittest
 
 from .. import ValidationOptions, validate_parsed_json

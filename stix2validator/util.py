@@ -1,5 +1,4 @@
 from collections import Iterable
-import os
 
 
 class ValidationOptions(object):

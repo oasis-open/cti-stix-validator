@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -159,3 +160,35 @@ class IndicatorTestCases(ValidatorTest):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = "[windows-registry-key:key LIKE 'HKEY_LOCAL_MACHINE\\\\Foo\\\\Bar%']"
         self.assertTrueWithOptions(indicator)
+
+    def test_additional_schemas(self):
+        folder = os.path.abspath(os.path.dirname(__file__) + "/test_schemas")
+        indicator = copy.deepcopy(self.valid_indicator)
+        self.assertFalseWithOptions(indicator, schema_dir=folder)
+
+        indicator['name'] = "Foobar"
+        self.assertTrueWithOptions(indicator, schema_dir=folder)
+
+    def test_additional_schemas_custom_type(self):
+        folder = os.path.abspath(os.path.dirname(__file__) + "/test_schemas")
+
+        # no schema exists for this type
+        new_obj = {
+            "type": "x-type",
+            "id": "x-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f",
+            "created": "2016-04-06T20:03:48.000Z",
+            "modified": "2016-04-06T20:03:48.000Z",
+            "property1": 10,
+            "property2": "fizzbuzz"
+        }
+        self.assertFalseWithOptions(new_obj, schema_dir=folder)
+
+        # properties are wrong types (str vs int)
+        new_obj['type'] = 'x-new-type'
+        new_obj['id'] = 'x-new-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f'
+        self.assertFalseWithOptions(new_obj, schema_dir=folder)
+
+        # now it's valid
+        new_obj['property1'] = 'fizzbuzz'
+        new_obj['property2'] = 10
+        self.assertTrueWithOptions(new_obj, schema_dir=folder)
