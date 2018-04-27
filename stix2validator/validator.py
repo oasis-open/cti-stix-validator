@@ -542,8 +542,9 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
             raise SchemaInvalidError("Cannot locate a schema for the object's "
                                      "type, nor the base schema ({}.json).".format(default))
 
-    if type == 'observed-data':
-        # Validate against schemas for specific object types later
+    if type == 'observed-data' and schema_dir is None:
+        # Validate against schemas for specific observed data object types later.
+        # If schema_dir is None the schema is custom and won't need to be modified.
         schema['allOf'][1]['properties']['objects'] = {
             "objects": {
                 "type": "object",

@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from .. import ValidationOptions, validate_parsed_json
@@ -5,6 +6,7 @@ from .. import ValidationOptions, validate_parsed_json
 
 class ValidatorTest(unittest.TestCase):
     options = ValidationOptions(strict=True)
+    custom_schemas = os.path.abspath(os.path.dirname(__file__) + "/test_schemas")
 
     def check_ignore(self, instance, code):
         """Test that the given instance is valid if the given check is ignored.

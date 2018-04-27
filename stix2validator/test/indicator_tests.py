@@ -1,6 +1,5 @@
 import copy
 import json
-import os
 
 from . import ValidatorTest
 from .. import validate_parsed_json, validate_string
@@ -162,16 +161,13 @@ class IndicatorTestCases(ValidatorTest):
         self.assertTrueWithOptions(indicator)
 
     def test_additional_schemas(self):
-        folder = os.path.abspath(os.path.dirname(__file__) + "/test_schemas")
         indicator = copy.deepcopy(self.valid_indicator)
-        self.assertFalseWithOptions(indicator, schema_dir=folder)
+        self.assertFalseWithOptions(indicator, schema_dir=self.custom_schemas)
 
         indicator['name'] = "Foobar"
-        self.assertTrueWithOptions(indicator, schema_dir=folder)
+        self.assertTrueWithOptions(indicator, schema_dir=self.custom_schemas)
 
     def test_additional_schemas_custom_type(self):
-        folder = os.path.abspath(os.path.dirname(__file__) + "/test_schemas")
-
         # no schema exists for this type
         new_obj = {
             "type": "x-type",
@@ -181,14 +177,14 @@ class IndicatorTestCases(ValidatorTest):
             "property1": 10,
             "property2": "fizzbuzz"
         }
-        self.assertFalseWithOptions(new_obj, schema_dir=folder)
+        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
 
         # properties are wrong types (str vs int)
         new_obj['type'] = 'x-new-type'
         new_obj['id'] = 'x-new-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f'
-        self.assertFalseWithOptions(new_obj, schema_dir=folder)
+        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
 
         # now it's valid
         new_obj['property1'] = 'fizzbuzz'
         new_obj['property2'] = 10
-        self.assertTrueWithOptions(new_obj, schema_dir=folder)
+        self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
