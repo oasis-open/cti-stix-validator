@@ -16,7 +16,7 @@ from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
 from .util import ValidationOptions
 
-DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas/')
+DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas-2.0/')
 
 
 def _is_iterable_non_string(val):
