@@ -1,0 +1,20 @@
+{
+    "properties": {
+        "extensions": {
+            "patternProperties": {
+                "^x-example-com-foobar-ext$": {
+                    "type": "object",
+                    "properties": {
+                        "foo_value": {
+                            "type": "string"
+                        },
+                        "bar_value": {
+                            "type": "string"
+                        }
+                    },
+                    "required": ["foo_value"]
+                }
+            }
+        }
+    }
+}

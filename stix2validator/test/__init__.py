@@ -3,11 +3,10 @@ import unittest
 
 from .. import ValidationOptions, validate_parsed_json
 
-SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + "../../schemas")
-
 
 class ValidatorTest(unittest.TestCase):
-    options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True)
+    options = ValidationOptions(strict=True)
+    custom_schemas = os.path.abspath(os.path.dirname(__file__) + "/test_schemas")
 
     def check_ignore(self, instance, code):
         """Test that the given instance is valid if the given check is ignored.
@@ -28,10 +27,9 @@ class ValidatorTest(unittest.TestCase):
                     ValidationOptions constructor.
         """
         if 'strict' in kwargs:
-            options = ValidationOptions(schema_dir=SCHEMA_DIR, **kwargs)
+            options = ValidationOptions(**kwargs)
         else:
-            options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
-                                        **kwargs)
+            options = ValidationOptions(strict=True, **kwargs)
         results = validate_parsed_json(instance, options)
         self.assertTrue(results.is_valid)
 
@@ -45,9 +43,8 @@ class ValidatorTest(unittest.TestCase):
                     ValidationOptions constructor.
         """
         if 'strict' in kwargs:
-            options = ValidationOptions(schema_dir=SCHEMA_DIR, **kwargs)
+            options = ValidationOptions(**kwargs)
         else:
-            options = ValidationOptions(schema_dir=SCHEMA_DIR, strict=True,
-                                        **kwargs)
+            options = ValidationOptions(strict=True, **kwargs)
         results = validate_parsed_json(instance, options)
         self.assertEqual(results.is_valid, False)

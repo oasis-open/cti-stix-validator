@@ -16,6 +16,8 @@ from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
 from .util import ValidationOptions
 
+DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas/')
+
 
 def _is_iterable_non_string(val):
     return hasattr(val, "__iter__") and not isinstance(val, string_types)
@@ -486,7 +488,9 @@ def find_schema(schema_dir, obj_type):
     Return the file path of the first match it finds.
     """
     schema_filename = obj_type + '.json'
-    for root, dirnames, filenames in os.walk(schema_dir):
+
+    # If no schema directory given, use default bundled with this package
+    for root, dirnames, filenames in os.walk(schema_dir or DEFAULT_SCHEMA_DIR):
         if schema_filename in filenames:
             return os.path.join(root, schema_filename)
 
@@ -511,30 +515,36 @@ def load_schema(schema_path):
     return schema
 
 
-def _schema_validate(sdo, options):
-    """Set up validation of a single STIX object against its type's schema.
-    This does no actual validation; it just returns generators which must be
-    iterated to trigger the actual generation.
+def _get_error_generator(type, obj, schema_dir=None, default='core'):
+    """Get a generator for validating against the schema for the given object type.
 
-    Do not call this function directly; use validate_instance() instead, as it
-    calls this one. This function does not perform any custom checks.
+    Args:
+        type (str): The object type to find the schema for.
+        obj: The object to be validated.
+        schema_dir (str): The path in which to search for schemas.
+        default (str): If the schema for the given type cannot be found, use
+            the one with this name instead.
+
+    Returns:
+        A generator for errors found when validating the object against the
+        appropriate schema.
     """
     try:
-        sdo_schema_path = find_schema(options.schema_dir, sdo['type'])
-        sdo_schema = load_schema(sdo_schema_path)
+        schema_path = find_schema(schema_dir, type)
+        schema = load_schema(schema_path)
     except (KeyError, TypeError):
         # Assume a custom object with no schema
         try:
-            sdo_schema_path = find_schema(options.schema_dir, 'core')
-            sdo_schema = load_schema(sdo_schema_path)
+            schema_path = find_schema(schema_dir, default)
+            schema = load_schema(schema_path)
         except (KeyError, TypeError):
-            raise SchemaInvalidError("Cannot locate a schema for the "
-                                     "object's type, nor the base "
-                                     "schema (core.json).")
+            raise SchemaInvalidError("Cannot locate a schema for the object's "
+                                     "type, nor the base schema ({}.json).".format(default))
 
-    if sdo['type'] == 'observed-data':
-        # Validate against schemas for specific object types later
-        sdo_schema['allOf'][1]['properties']['objects'] = {
+    if type == 'observed-data' and schema_dir is None:
+        # Validate against schemas for specific observed data object types later.
+        # If schema_dir is None the schema is custom and won't need to be modified.
+        schema['allOf'][1]['properties']['objects'] = {
             "objects": {
                 "type": "object",
                 "minProperties": 1
@@ -542,12 +552,28 @@ def _schema_validate(sdo, options):
         }
 
     # Don't use custom validator; only check schemas, no additional checks
-    sdo_validator = load_validator(sdo_schema_path, sdo_schema)
+    validator = load_validator(schema_path, schema)
     try:
-        sdo_errors = sdo_validator.iter_errors(sdo)
+        error_gen = validator.iter_errors(obj)
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON '
                                  'reference failed to resolve')
+
+    return error_gen
+
+
+def _schema_validate(sdo, options):
+    """Set up validation of a single STIX object against its type's schema.
+    This does no actual validation; it just returns generators which must be
+    iterated to trigger the actual generation.
+
+    This function first creates generators for the built-in schemas, then adds
+    generators for additional schemas from the options, if specified.
+
+    Do not call this function directly; use validate_instance() instead, as it
+    calls this one. This function does not perform any custom checks.
+    """
+    error_gens = []
 
     if 'id' in sdo:
         try:
@@ -556,32 +582,33 @@ def _schema_validate(sdo, options):
             error_prefix = 'unidentifiable object: '
     else:
         error_prefix = ''
-    error_gens = [(sdo_errors, error_prefix)]
+
+    # Get validator for built-in schema
+    base_sdo_errors = _get_error_generator(sdo['type'], sdo)
+    error_gens.append((base_sdo_errors, error_prefix))
+
+    # Get validator for any user-supplied schema
+    if options.schema_dir:
+        custom_sdo_errors = _get_error_generator(sdo['type'], sdo, options.schema_dir)
+        error_gens.append((custom_sdo_errors, error_prefix))
 
     # Validate each cyber observable object separately
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
         for key, obj in iteritems(sdo['objects']):
-            try:
-                obj_schema_path = find_schema(options.schema_dir, obj['type'])
-                obj_schema = load_schema(obj_schema_path)
-            except (KeyError, TypeError):
-                # Assume a custom object with no schema
-                try:
-                    obj_schema_path = find_schema(options.schema_dir,
-                                                  'cyber-observable-core')
-                    obj_schema = load_schema(obj_schema_path)
-                except (KeyError, TypeError):
-                    raise SchemaInvalidError("Cannot locate a schema for the "
-                                             "object's type, nor the base "
-                                             "schema (core.json).")
+            # Get validator for built-in schemas
+            base_obs_errors = _get_error_generator(obj['type'],
+                                                   obj,
+                                                   None,
+                                                   'cyber-observable-core')
+            error_gens.append((base_obs_errors,
+                               error_prefix + 'object \'' + key + '\': '))
 
-            obj_validator = load_validator(obj_schema_path, obj_schema)
-            try:
-                obj_errors = obj_validator.iter_errors(obj)
-            except schema_exceptions.RefResolutionError:
-                raise SchemaInvalidError('Invalid JSON schema: a JSON '
-                                         'reference failed to resolve')
-            error_gens.append((obj_errors,
+            # Get validator for any user-supplied schema
+            custom_obs_errors = _get_error_generator(obj['type'],
+                                                     obj,
+                                                     options.schema_dir,
+                                                     'cyber-observable-core')
+            error_gens.append((custom_obs_errors,
                                error_prefix + 'object \'' + key + '\': '))
 
     return error_gens

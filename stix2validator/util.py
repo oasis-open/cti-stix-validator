@@ -1,5 +1,4 @@
 from collections import Iterable
-import os
 
 
 class ValidationOptions(object):
@@ -72,11 +71,6 @@ class ValidationOptions(object):
             self.no_cache = no_cache
             self.refresh_cache = refresh_cache
             self.clear_cache = clear_cache
-
-        # If no schema directory given, use default bundled with this package
-        if not self.schema_dir:
-            self.schema_dir = os.path.abspath(os.path.dirname(__file__) +
-                                              '/schemas/')
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names

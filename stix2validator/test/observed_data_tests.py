@@ -785,3 +785,24 @@ class ObservedDataTestCases(ValidatorTest):
             }
         }
         self.assertFalseWithOptions(observed_data)
+
+    def test_additional_schemas_custom_observable(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "x-new-observable",
+            "foo": 100
+        }
+        self.assertFalseWithOptions(observed_data, schema_dir=self.custom_schemas)
+
+        observed_data['objects']['2']['foo'] = 'something'
+        self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
+
+    def test_additional_schemas_custom_extension(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['1']['extensions'] = {'x-example-com-foobar-ext': {
+            "bar_value": "something",
+        }}
+        self.assertFalseWithOptions(observed_data, schema_dir=self.custom_schemas)
+
+        observed_data['objects']['1']['extensions']['x-example-com-foobar-ext']['foo_value'] = 'something else'
+        self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
