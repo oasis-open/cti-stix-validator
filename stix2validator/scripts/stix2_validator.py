@@ -108,6 +108,8 @@ the validator performs, along with the code to use with the --enable or
 +------+-----------------------------+----------------------------------------+
 """
 
+logger = logging.getLogger(__name__)
+
 
 class NewlinesHelpFormatter(RawDescriptionHelpFormatter):
     """Custom help formatter to insert newlines between argument help texts.
@@ -315,7 +317,7 @@ def main():
             codes.EXIT_VALIDATION_ERROR
         )
     except Exception:
-        logging.exception("Fatal error occurred")
+        logger.exception("Fatal error occurred")
         sys.exit(codes.EXIT_FAILURE)
 
 
