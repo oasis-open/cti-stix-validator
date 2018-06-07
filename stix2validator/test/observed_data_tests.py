@@ -810,6 +810,17 @@ class ObservedDataTestCases(ValidatorTest):
     def test_url(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
+            "type": "url",
+            "value": "foo",
+        }
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['objects']['2']['value'] = "http://www.example.com/file.txt"
+        self.assertTrueWithOptions(observed_data)
+
+    def test_url_in_artifact(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
             "type": "artifact",
             "url": "foo",
             "hashes": {
