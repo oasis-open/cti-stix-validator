@@ -1,6 +1,6 @@
 from collections import Iterable
 
-from .output import error
+from .output import error, set_level, set_silent
 
 
 class ValidationOptions(object):
@@ -42,9 +42,6 @@ class ValidationOptions(object):
                  strict_types=False, no_cache=False,
                  refresh_cache=False, clear_cache=False):
 
-        if silent and verbose:
-            error('Error: Output can either be silent or verbose, but not both.')
-
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
             self.silent = cmd_args.silent
@@ -76,6 +73,12 @@ class ValidationOptions(object):
             self.no_cache = no_cache
             self.refresh_cache = refresh_cache
             self.clear_cache = clear_cache
+
+        # Set the output level (e.g., quiet vs. verbose)
+        if self.silent and self.verbose:
+            error('Error: Output can either be silent or verbose, but not both.')
+        set_level(self.verbose)
+        set_silent(self.silent)
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names
