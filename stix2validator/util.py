@@ -1,5 +1,7 @@
 from collections import Iterable
 
+from .output import error
+
 
 class ValidationOptions(object):
     """Collection of validation options which can be set via command line or
@@ -39,6 +41,9 @@ class ValidationOptions(object):
                  disabled="", enabled="", strict=False,
                  strict_types=False, no_cache=False,
                  refresh_cache=False, clear_cache=False):
+
+        if silent and verbose:
+            error('Error: Output can either be silent or verbose, but not both.')
 
         if cmd_args is not None:
             self.verbose = cmd_args.verbose

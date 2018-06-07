@@ -1,6 +1,8 @@
 import copy
 import json
 
+import pytest
+
 from . import ValidatorTest
 
 VALID_BUNDLE = u"""
@@ -51,3 +53,8 @@ class BundleTestCases(ValidatorTest):
 
         bundle['objects'][1]['modified'] = "2017-06-22T14:09:00.123Z"
         self.assertTrueWithOptions(bundle)
+
+    def test_silent_and_verbose(self):
+        bundle = json.loads(VALID_BUNDLE)
+        with pytest.raises(SystemExit):
+            self.assertFalseWithOptions(bundle, silent=True, verbose=True)
