@@ -1,3 +1,4 @@
+import logging
 import operator
 import sys
 
@@ -11,6 +12,8 @@ _YELLOW = Fore.YELLOW
 _RED = Fore.RED + Style.BRIGHT
 _VERBOSE = False
 _SILENT = False
+
+logger = logging.getLogger(__name__)
 
 
 def set_level(verbose_output=False):
@@ -41,7 +44,7 @@ def error(msg, status=codes.EXIT_FAILURE):
         status: The exit status code. Defaults to ``EXIT_FAILURE`` (1).
 
     """
-    sys.stderr.write(_RED + "[X] %s\n" % str(msg))
+    logger.error(_RED + "[X] %s\n" % str(msg))
     sys.exit(status)
 
 
@@ -49,9 +52,8 @@ def info(msg):
     """Prints a message to stdout, prepended by '[-]'.
 
     Note:
-        If the application is running in "Quiet Mode"
-        (i.e., ``_VERBOSE == False``), this function will return
-        immediately and no message will be printed.
+        If the application is not running in verbose mode, this function will
+        return immediately and no message will be printed.
 
     Args:
         msg: The message to print.
@@ -60,10 +62,10 @@ def info(msg):
     if not _VERBOSE:
         return
 
-    print("[-] %s" % msg)
+    logger.debug("[-] %s" % msg)
 
 
-def print_level(fmt, level, *args):
+def print_level(log_function, fmt, level, *args):
     """Prints a formatted message to stdout prepended by spaces. Useful for
     printing hierarchical information, like bullet lists.
 
@@ -73,6 +75,8 @@ def print_level(fmt, level, *args):
         immediately and no message will be printed.
 
     Args:
+        log_function: The function that will be called to output the formatted
+            message.
         fmt (str): A Python formatted string.
         level (int): Used to determing how many spaces to print. The formula
             is ``'    ' * level ``.
@@ -93,13 +97,13 @@ def print_level(fmt, level, *args):
 
     msg = fmt % args
     spaces = '    ' * level
-    print("%s%s" % (spaces, msg))
+    log_function("%s%s" % (spaces, msg))
 
 
 def print_fatal_results(results, level=0):
     """Prints fatal errors that occurred during validation runs.
     """
-    print_level(_RED + "[X] Fatal Error: %s", level, results.error)
+    print_level(logger.critical, _RED + "[X] Fatal Error: %s", level, results.error)
 
 
 def print_schema_results(results, level=0):
@@ -111,7 +115,7 @@ def print_schema_results(results, level=0):
 
     """
     for error in results.errors:
-        print_level(_RED + "[X] %s", level, error)
+        print_level(logger.error, _RED + "[X] %s", level, error)
 
 
 def print_warning_results(results, level=0):
@@ -120,7 +124,7 @@ def print_warning_results(results, level=0):
     marker = _YELLOW + "[!] "
 
     for warning in results.warnings:
-        print_level(marker + "Warning: %s", level, warning)
+        print_level(logger.warning, marker + "Warning: %s", level, warning)
 
 
 def print_horizontal_rule():
@@ -135,7 +139,7 @@ def print_horizontal_rule():
     if _SILENT:
         return
 
-    print("=" * 80)
+    logger.info("=" * 80)
 
 
 def print_results(results):
@@ -147,15 +151,17 @@ def print_results(results):
     """
     for file_result in sorted(results, key=operator.attrgetter("filepath")):
         print_horizontal_rule()
-        print_level("[-] Results for: %s", 0, file_result.filepath)
+        print_level(logger.info, "[-] Results for: %s", 0, file_result.filepath)
 
         if file_result.is_valid:
             marker = _GREEN + "[+]"
             verdict = "Valid"
+            log_func = logger.info
         else:
             marker = _RED + "[X]"
             verdict = "Invalid"
-        print_level("%s STIX JSON: %s", 0, marker, verdict)
+            log_func = logger.error
+        print_level(log_func, "%s STIX JSON: %s", 0, marker, verdict)
 
         for object_result in file_result.object_results:
             if object_result.warnings:
