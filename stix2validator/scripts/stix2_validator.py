@@ -292,9 +292,6 @@ def main():
     options = ValidationOptions(args)
 
     try:
-        # Set the output level (e.g., quiet vs. verbose)
-        output.set_level(options.verbose)
-
         if not options.no_cache:
             init_requests_cache(options.refresh_cache)
 

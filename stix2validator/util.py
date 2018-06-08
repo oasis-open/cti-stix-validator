@@ -1,5 +1,7 @@
 from collections import Iterable
 
+from .output import error, set_level, set_silent
+
 
 class ValidationOptions(object):
     """Collection of validation options which can be set via command line or
@@ -71,6 +73,12 @@ class ValidationOptions(object):
             self.no_cache = no_cache
             self.refresh_cache = refresh_cache
             self.clear_cache = clear_cache
+
+        # Set the output level (e.g., quiet vs. verbose)
+        if self.silent and self.verbose:
+            error('Error: Output can either be silent or verbose, but not both.')
+        set_level(self.verbose)
+        set_silent(self.silent)
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names
