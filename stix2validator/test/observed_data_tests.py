@@ -806,3 +806,29 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['1']['extensions']['x-example-com-foobar-ext']['foo_value'] = 'something else'
         self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
+
+    def test_url(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "url",
+            "value": "foo",
+        }
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['objects']['2']['value'] = "http://www.example.com/file.txt"
+        self.assertTrueWithOptions(observed_data)
+
+    def test_url_in_artifact(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects']['2'] = {
+            "type": "artifact",
+            "url": "foo",
+            "hashes": {
+                "MD5": "B4D33B0C7306351B9ED96578465C5579"
+            },
+            "mime_type": "text/plain"
+        }
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['objects']['2']['url'] = "http://www.example.com/file.txt"
+        self.assertTrueWithOptions(observed_data)
