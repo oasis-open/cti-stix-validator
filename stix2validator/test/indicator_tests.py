@@ -52,6 +52,11 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
+    def test_custom_property_name_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['foobar'] = "abc123"
+        self.assertFalseWithOptions(indicator, strict_properties=True)
+
     def test_empty_list(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['my_new_property'] = []
@@ -149,6 +154,13 @@ class IndicatorTestCases(ValidatorTest):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[x-foo":x_name = 'something']"""
         self.check_ignore(indicator, 'custom-prefix')
+
+    def test_pattern_custom_property_prefix_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[file:x_x_name = 'something']"""
+        self.assertTrueWithOptions(indicator)
+
+        self.assertFalseWithOptions(indicator, strict_properties=True)
 
     def test_pattern_list_object_property(self):
         indicator = copy.deepcopy(self.valid_indicator)
