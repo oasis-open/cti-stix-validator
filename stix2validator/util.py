@@ -184,7 +184,7 @@ def parse_args(cmd_args, is_script=False):
         default="",
         help="A comma-separated list of recommended best practice checks to "
              "skip. By default, no checks are disabled. \n\n"
-             "Example: --disable 212,220"
+             "Example: --disable 202,210"
     )
 
     parser.add_argument(
@@ -196,7 +196,7 @@ def parse_args(cmd_args, is_script=False):
         help="A comma-separated list of recommended best practice checks to "
              "enable. If the --disable option is not used, no other checks "
              "will be run. By default, all checks are enabled.\n\n"
-             "Example: --enable 250"
+             "Example: --enable 218"
     )
 
     parser.add_argument(
