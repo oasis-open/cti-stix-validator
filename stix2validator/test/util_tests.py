@@ -1,5 +1,6 @@
 from .. import parse_args
 
+
 def test_parse_args():
     args = [
         '-r',
@@ -20,16 +21,16 @@ def test_parse_args():
     ]
     options = parse_args(args, True)
 
-    assert options.verbose == False
-    assert options.silent == True
+    assert options.verbose is False
+    assert options.silent is True
     assert options.files == ['/tmp/mystix.json']
-    assert options.recursive == True
+    assert options.recursive is True
     assert options.schema_dir == '/tmp/schemas/'
     assert options.disabled == ['format-checks']
     assert options.enabled == ['custom-prefix']
-    assert options.strict == True
-    assert options.strict_types == True
-    assert options.strict_properties == True
-    assert options.no_cache == True
-    assert options.refresh_cache == True
-    assert options.clear_cache == True
+    assert options.strict is True
+    assert options.strict_types is True
+    assert options.strict_properties is True
+    assert options.no_cache is True
+    assert options.refresh_cache is True
+    assert options.clear_cache is True
