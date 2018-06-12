@@ -220,7 +220,16 @@ def _get_arg_parser(is_script=True):
         dest="strict_types",
         action="store_true",
         default=False,
-        help="Ensure that no custom object types are used, only those detailed"
+        help="Ensure that no custom object types are used, only those defined"
+             " in the STIX specification."
+    )
+
+    parser.add_argument(
+        "--strict-properties",
+        dest="strict_properties",
+        action="store_true",
+        default=False,
+        help="Ensure that no custom properties are used, only those defined"
              " in the STIX specification."
     )
 
