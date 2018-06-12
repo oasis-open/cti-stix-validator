@@ -212,7 +212,16 @@ def parse_args(cmd_args, is_script=False):
         dest="strict_types",
         action="store_true",
         default=False,
-        help="Ensure that no custom object types are used, only those detailed"
+        help="Ensure that no custom object types are used, only those defined"
+             " in the STIX specification."
+    )
+
+    parser.add_argument(
+        "--strict-properties",
+        dest="strict_properties",
+        action="store_true",
+        default=False,
+        help="Ensure that no custom properties are used, only those defined"
              " in the STIX specification."
     )
 
@@ -268,7 +277,9 @@ class ValidationOptions(object):
         strict: Specifies that recommended requirements should produce errors
             instead of mere warnings.
         strict_types: Specifies that no custom object types be used, only
-            those detailed in the STIX specification.
+            those defined in the STIX specification.
+        strict_properties: Specifies that no custom properties be used, only
+            those defined in the STIX specification.
         no_cache: Specifies that caching of values from external sources should
             be disabled.
         refresh_cache: Specifies that the cache of values from external sources
@@ -281,7 +292,7 @@ class ValidationOptions(object):
     def __init__(self, cmd_args=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
-                 strict_types=False, no_cache=False,
+                 strict_types=False, strict_properties=False, no_cache=False,
                  refresh_cache=False, clear_cache=False):
 
         if cmd_args is not None:
@@ -294,6 +305,7 @@ class ValidationOptions(object):
             self.enabled = cmd_args.enabled
             self.strict = cmd_args.strict
             self.strict_types = cmd_args.strict_types
+            self.strict_properties = cmd_args.strict_properties
             self.no_cache = cmd_args.no_cache
             self.refresh_cache = cmd_args.refresh_cache
             self.clear_cache = cmd_args.clear_cache
@@ -308,6 +320,7 @@ class ValidationOptions(object):
             self.silent = silent
             self.strict = strict
             self.strict_types = strict_types
+            self.strict_properties = strict_properties
             self.disabled = disabled
             self.enabled = enabled
 

@@ -75,8 +75,7 @@ class CustomObjectTestCases(ValidatorTest):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         custom_obj['type'] = "x-corp-oration"
         custom_obj['id'] = "x-corp-oration--4527e5de-8572-446a-a57a-706f15467461"
-        results = validate_parsed_json(custom_obj, self.options)
-        self.assertTrue(results.is_valid)
+        self.assertTrueWithOptions(custom_obj, strict=True, strict_properties=True)
 
     def test_strict_types(self):
         self.assertFalseWithOptions(self.valid_custom_object, strict_types=True)
