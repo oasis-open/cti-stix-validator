@@ -5,15 +5,9 @@
 
 import argparse
 from argparse import RawDescriptionHelpFormatter
-import datetime
-import errno
 import logging
-import os
 import sys
 import textwrap
-
-from appdirs import AppDirs
-import requests_cache
 
 from stix2validator import (ValidationError, ValidationOptions, codes, output,
                             print_results, run_validation)
@@ -252,38 +246,6 @@ def _get_arg_parser(is_script=True):
     return parser
 
 
-def init_requests_cache(refresh_cache=False):
-    """
-    Initializes a cache which the ``requests`` library will consult for
-    responses, before making network requests.
-
-    :param refresh_cache: Whether the cache should be cleared out
-    """
-    # Cache data from external sources; used in some checks
-    dirs = AppDirs("stix2-validator", "OASIS")
-    # Create cache dir if doesn't exist
-    try:
-        os.makedirs(dirs.user_cache_dir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-    requests_cache.install_cache(
-        cache_name=os.path.join(dirs.user_cache_dir, 'py{}cache'.format(
-            sys.version_info[0])),
-        expire_after=datetime.timedelta(weeks=1))
-
-    if refresh_cache:
-        clear_requests_cache()
-
-
-def clear_requests_cache():
-    """
-    Clears all cached responses.
-    """
-    now = datetime.datetime.utcnow()
-    requests_cache.get_cache().remove_old_entries(now)
-
-
 def main():
     # Parse command line arguments
     parser = _get_arg_parser()
@@ -292,17 +254,11 @@ def main():
     options = ValidationOptions(args)
 
     try:
-        if not options.no_cache:
-            init_requests_cache(options.refresh_cache)
-
         # Validate input documents
         results = run_validation(options)
 
         # Print validation results
         print_results(results)
-
-        if not options.no_cache and options.clear_cache:
-            clear_requests_cache()
 
         # Determine exit status code and exit.
         code = codes.get_code(results)

@@ -14,7 +14,7 @@ from six import iteritems, string_types, text_type
 from . import musts, output, shoulds
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
-from .util import ValidationOptions
+from .util import ValidationOptions, clear_requests_cache, init_requests_cache
 
 DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas/')
 
@@ -360,6 +360,9 @@ def validate_parsed_json(obj_json, options=None):
     if not options:
         options = ValidationOptions()
 
+    if not options.no_cache:
+        init_requests_cache(options.refresh_cache)
+
     results = None
     try:
         if validating_list:
@@ -379,6 +382,9 @@ def validate_parsed_json(obj_json, options=None):
             results.append(error_result)
         else:
             results = error_result
+
+    if not options.no_cache and options.clear_cache:
+        clear_requests_cache()
 
     return results
 

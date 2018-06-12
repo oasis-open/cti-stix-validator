@@ -1,4 +1,11 @@
 from collections import Iterable
+import datetime
+import errno
+import os
+import sys
+
+from appdirs import AppDirs
+import requests_cache
 
 from .output import error, set_level, set_silent
 
@@ -158,3 +165,35 @@ def cyber_observable_check(original_function):
                 yield x
     new_function.__name__ = original_function.__name__
     return new_function
+
+
+def init_requests_cache(refresh_cache=False):
+    """
+    Initializes a cache which the ``requests`` library will consult for
+    responses, before making network requests.
+
+    :param refresh_cache: Whether the cache should be cleared out
+    """
+    # Cache data from external sources; used in some checks
+    dirs = AppDirs("stix2-validator", "OASIS")
+    # Create cache dir if doesn't exist
+    try:
+        os.makedirs(dirs.user_cache_dir)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    requests_cache.install_cache(
+        cache_name=os.path.join(dirs.user_cache_dir, 'py{}cache'.format(
+            sys.version_info[0])),
+        expire_after=datetime.timedelta(weeks=1))
+
+    if refresh_cache:
+        clear_requests_cache()
+
+
+def clear_requests_cache():
+    """
+    Clears all cached responses.
+    """
+    now = datetime.datetime.utcnow()
+    requests_cache.get_cache().remove_old_entries(now)
