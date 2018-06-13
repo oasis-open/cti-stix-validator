@@ -4,6 +4,7 @@ import json
 import pytest
 
 from . import ValidatorTest
+from .. import ValidationError
 
 VALID_BUNDLE = u"""
 {
@@ -58,3 +59,9 @@ class BundleTestCases(ValidatorTest):
         bundle = json.loads(VALID_BUNDLE)
         with pytest.raises(SystemExit):
             self.assertFalseWithOptions(bundle, silent=True, verbose=True)
+
+    def test_bundle_sdo_missing_type(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        del bundle['objects'][0]['type']
+        with pytest.raises(ValidationError):
+            self.assertFalseWithOptions(bundle)
