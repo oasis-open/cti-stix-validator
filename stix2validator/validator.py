@@ -12,8 +12,8 @@ import simplejson as json
 from six import iteritems, string_types, text_type
 
 from . import musts, output, shoulds
-from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
-                     ValidationError, pretty_error)
+from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
+                     SchemaInvalidError, ValidationError, pretty_error)
 from .util import ValidationOptions
 
 DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas/')
@@ -595,6 +595,10 @@ def _schema_validate(sdo, options):
     # Validate each cyber observable object separately
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
         for key, obj in iteritems(sdo['objects']):
+            if 'type' not in obj:
+                error_gens.append(([JSONError("Observable object must contain a 'type' property.", error_prefix)],
+                                   error_prefix + 'object \'' + key + '\': '))
+                continue
             # Get validator for built-in schemas
             base_obs_errors = _get_error_generator(obj['type'],
                                                    obj,
@@ -642,6 +646,8 @@ def validate_instance(instance, options=None):
     if instance['type'] == 'bundle' and 'objects' in instance:
         # Validate each object in a bundle separately
         for sdo in instance['objects']:
+            if 'type' not in sdo:
+                raise ValidationError("Each object in bundle must have a 'type' property.")
             error_gens += _schema_validate(sdo, options)
     else:
         error_gens += _schema_validate(instance, options)

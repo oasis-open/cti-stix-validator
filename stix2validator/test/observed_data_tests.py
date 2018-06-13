@@ -288,6 +288,11 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.check_ignore(observed_data, 'observable-object-keys')
 
+    def test_observable_object_no_type(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        del observed_data['objects']['0']['type']
+        self.assertFalseWithOptions(observed_data)
+
     def test_observable_object_types(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['type'] = "x--foo"
