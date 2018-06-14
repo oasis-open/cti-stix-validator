@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+1.0.1 - 2018-06-14
+
+* Fix bug when using the validator as a library and no 'files' option is set on
+  ValidationOptions.
+
 1.0.0 - 2018-06-14
 
 * Enable validation of files with lists of objects
