@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+1.0.0 - 2018-06-13
+
+* Enable validation of files with lists of objects
+* Enable validating with additional schemas, e.g for custom objects/properties
+* Add '--strict-properties' option to prohibit custom properties if desired
+* Add a 'parse_args' function to make the validator easier to use as a library
+* Incorporate latest schema fixes for URLs
+* Improve error messages
+
 0.5.0 - 2017-08-17
 
 * Check for invalid timestamps
