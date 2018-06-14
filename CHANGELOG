@@ -1,7 +1,7 @@
 CHANGELOG
 =========
 
-1.0.0 - 2018-06-13
+1.0.0 - 2018-06-14
 
 * Enable validation of files with lists of objects
 * Enable validating with additional schemas, e.g for custom objects/properties

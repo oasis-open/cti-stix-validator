@@ -4,7 +4,7 @@
 `cti-stix-validator`
 ====================
 NOTE: This is an `OASIS TC Open Repository <https://www.oasis-
-open.org/resources/open-repositories/>`_. See the `Governance`_
+open.org/resources/open-repositories/>`__. See the `Governance`_
 section for more information.
 
 The STIX Validator checks that STIX JSON content conforms to the
@@ -33,8 +33,6 @@ optional.
 The validator also color-codes its output to make it easier to tell at
 a glance whether validation passed.
 
-.. _install:
-
 `Installation`
 ==============
 
@@ -43,8 +41,6 @@ The easiest way to install the STIX validator is with pip:
 ::
 
   $ pip install stix2-validator
-
-.. _usage:
 
 `Usage`
 =======
@@ -88,7 +84,7 @@ open.org/archives/cti/201609/msg00001.html>`_ and `approved
 <https://issues.oasis-open.org/browse/TCADMIN-2434>`_] by the `OASIS
 Cyber Threat Intelligence (CTI) TC <https://www.oasis-
 open.org/committees/cti/>`_ as an `OASIS TC Open Repository
-<https://www.oasis-open.org/resources/open-repositories/>`_ to support
+<https://www.oasis-open.org/resources/open-repositories/>`__ to support
 development of open source resources related to Technical Committee
 work.
 
@@ -120,8 +116,6 @@ validator/blob/master/LICENSE>`_ designated for this particular
 repository, and the requirement for an `Individual Contributor License
 Agreement <https://www.oasis-open.org/resources/open-
 repositories/cla/individual-cla>`_ that governs intellectual property.
-
-.. _maintainers:
 
 `Maintainers`
 =============
@@ -162,8 +156,6 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 *  `Open Source Licenses <https://www.oasis-open.org/resources/open-repositories/licenses>`_
 *  `Contributor License Agreements (CLAs) <https://www.oasis-open.org/resources/open-repositories/cla>`_
 *  `Maintainers' Guidelines and Agreement <https://www.oasis-open.org/resources/open-repositories/maintainers-guide>`__
-
-.. _feedback:
 
 `Feedback`
 ==========
