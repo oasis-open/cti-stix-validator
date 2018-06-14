@@ -251,6 +251,10 @@ def parse_args(cmd_args, is_script=False):
     )
 
     args = parser.parse_args(cmd_args)
+
+    if not is_script:
+        args.files = ""
+
     return ValidationOptions(args)
 
 

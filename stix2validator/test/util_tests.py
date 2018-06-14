@@ -1,4 +1,5 @@
-from .. import parse_args
+from .. import parse_args, validate_string
+from .indicator_tests import VALID_INDICATOR
 
 
 def test_parse_args():
@@ -34,3 +35,12 @@ def test_parse_args():
     assert options.no_cache is True
     assert options.refresh_cache is True
     assert options.clear_cache is True
+
+
+def test_parse_args_no_files():
+    args = []
+    options = parse_args(args)
+    assert options.files == ""
+
+    results = validate_string(VALID_INDICATOR, options)
+    assert results.is_valid
