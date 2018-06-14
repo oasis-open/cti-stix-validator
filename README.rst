@@ -72,8 +72,8 @@ own tools. You can validate a JSON file:
   results = validate_file("stix_file.json")
   print_results(results)
 
-You can also validate a JSON string using `validate_string()`, or a Python
-dictionary representing a STIX object using `validate_instance()`. For more
+You can also validate a JSON string using ``validate_string()``, or a Python
+dictionary representing a STIX object using ``validate_instance()``. For more
 information, see the full documentation
 `here <https://stix2-validator.readthedocs.io/en/latest/usage.html>`_.
 
