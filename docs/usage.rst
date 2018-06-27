@@ -37,7 +37,7 @@ validation:
       print_results(results)
 
 If your STIX is already in a Python dictionary (for example if you
-have already run `json.loads()`), use `validate_instance()` instead:
+have already run ``json.loads()``), use ``validate_instance()`` instead:
 
 .. code:: python
 
@@ -50,8 +50,8 @@ have already run `json.loads()`), use `validate_instance()` instead:
   if results.is_valid:
       print_results(results)
 
-You can pass a ValidationOptions object into `validate_file()`,
-`validate_string()`, or `validate_instance()` if you want behavior
+You can pass a ValidationOptions object into ``validate_file()``,
+``validate_string()``, or ``validate_instance()`` if you want behavior
 other than the default:
 
 .. code:: python
@@ -60,3 +60,23 @@ other than the default:
 
   options = ValidationOptions(strict=True)
   results = validate_string(stix_json_string, options)
+
+Additional Schemas
+------------------
+
+The validator uses the `STIX 2 JSON schemas <https://github.com/oasis-open/cti-stix2-
+json-schemas>`_ as the basis for its validation, but you can also validate with
+your own additional schemas. This can help if you want to validate STIX content
+using custom objects, properties, or observables.
+
+To do this use the ``--schema-dir`` argument:
+
+::
+
+  $ stix2_validator --schema-dir /path/to/my/schemas <stix_file.json>
+
+.. note::
+
+   To use a schema for a custom observable object type or custom observable
+   extension, you need to have a schema for observed-data, but it can be an
+   empty object.

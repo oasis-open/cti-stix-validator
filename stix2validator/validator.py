@@ -533,7 +533,8 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
 
     Returns:
         A generator for errors found when validating the object against the
-        appropriate schema.
+        appropriate schema, or None if schema_dir is None and the schema
+        cannot be found.
     """
     try:
         schema_path = find_schema(schema_dir, type)
@@ -544,12 +545,15 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
             schema_path = find_schema(schema_dir, default)
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
+            # Only raise an error when checking against default schemas, not custom
+            if schema_dir is not None:
+                return None
             raise SchemaInvalidError("Cannot locate a schema for the object's "
                                      "type, nor the base schema ({}.json).".format(default))
 
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
-        # If schema_dir is None the schema is custom and won't need to be modified.
+        # If schema_dir is not None the schema is custom and won't need to be modified.
         schema['allOf'][1]['properties']['objects'] = {
             "objects": {
                 "type": "object",
@@ -591,12 +595,14 @@ def _schema_validate(sdo, options):
 
     # Get validator for built-in schema
     base_sdo_errors = _get_error_generator(sdo['type'], sdo)
-    error_gens.append((base_sdo_errors, error_prefix))
+    if base_sdo_errors:
+        error_gens.append((base_sdo_errors, error_prefix))
 
     # Get validator for any user-supplied schema
     if options.schema_dir:
         custom_sdo_errors = _get_error_generator(sdo['type'], sdo, options.schema_dir)
-        error_gens.append((custom_sdo_errors, error_prefix))
+        if custom_sdo_errors:
+            error_gens.append((custom_sdo_errors, error_prefix))
 
     # Validate each cyber observable object separately
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
@@ -610,16 +616,18 @@ def _schema_validate(sdo, options):
                                                    obj,
                                                    None,
                                                    'cyber-observable-core')
-            error_gens.append((base_obs_errors,
-                               error_prefix + 'object \'' + key + '\': '))
+            if base_obs_errors:
+                error_gens.append((base_obs_errors,
+                                   error_prefix + 'object \'' + key + '\': '))
 
             # Get validator for any user-supplied schema
             custom_obs_errors = _get_error_generator(obj['type'],
                                                      obj,
                                                      options.schema_dir,
                                                      'cyber-observable-core')
-            error_gens.append((custom_obs_errors,
-                               error_prefix + 'object \'' + key + '\': '))
+            if custom_obs_errors:
+                error_gens.append((custom_obs_errors,
+                                   error_prefix + 'object \'' + key + '\': '))
 
     return error_gens
 

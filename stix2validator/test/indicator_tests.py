@@ -196,7 +196,16 @@ class IndicatorTestCases(ValidatorTest):
         new_obj['id'] = 'x-new-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f'
         self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
 
-        # now it's valid
+        # now they're valid
         new_obj['property1'] = 'fizzbuzz'
         new_obj['property2'] = 10
         self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
+
+    def test_additional_schemas_custom_type_invalid_schema(self):
+        new_obj = {
+            "type": "x-foo-bar",
+            "id": "x-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f",
+            "created": "2016-04-06T20:03:48.000Z",
+            "modified": "2016-04-06T20:03:48.000Z",
+        }
+        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
