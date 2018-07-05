@@ -35,9 +35,3 @@ latex_documents = [
 man_pages = [
     (master_doc, project, 'stix2-validator Documentation', [author], 1),
 ]
-
-latex_documents = [
-    (master_doc, project, 'stix2-validator Documentation', author, project,
-     'Validator for STIX 2 normative requirements and best practices',
-     'Miscellaneous'),
-]
