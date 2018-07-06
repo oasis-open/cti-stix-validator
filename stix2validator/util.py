@@ -136,9 +136,10 @@ def parse_args(cmd_args, is_script=False):
         parser.add_argument(
             "files",
             metavar="FILES",
-            nargs="+",
+            nargs="*",
+            default=sys.stdin,
             help="A whitespace separated list of STIX files or directories of "
-                 "STIX files to validate."
+                 "STIX files to validate. If none given, stdin will be used."
         )
     parser.add_argument(
         "-r",

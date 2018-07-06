@@ -5,6 +5,7 @@ from collections import Iterable
 import io
 from itertools import chain
 import os
+import sys
 
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
@@ -330,11 +331,16 @@ def run_validation(options):
             this validation run.
 
     """
-    # The JSON files to validate
+    if options.files == sys.stdin:
+        results = validate(options.files, options)
+        return [FileValidationResults(is_valid=results.is_valid,
+                                      filepath='stdin',
+                                      object_results=results)]
+
     try:
         files = get_json_files(options.files, options.recursive)
     except NoJSONFileFoundError as e:
-        output.error(e.message)
+        output.error(e)
 
     results = [validate_file(fn, options) for fn in files]
 

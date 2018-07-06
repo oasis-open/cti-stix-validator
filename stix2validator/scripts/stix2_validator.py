@@ -4,6 +4,7 @@
 """
 
 import logging
+import os
 import sys
 
 from stix2validator import (ValidationError, codes, output, parse_args,
@@ -15,6 +16,10 @@ logger = logging.getLogger(__name__)
 def main():
     # Parse command line arguments
     options = parse_args(sys.argv[1:], is_script=True)
+
+    # Only print prompt if script is run on cmdline and no input is piped in
+    if options.files == sys.stdin and os.isatty(0):
+        print('Input STIX content, then press Ctrl+D: ')
 
     try:
         # Validate input documents
