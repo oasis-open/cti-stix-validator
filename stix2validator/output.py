@@ -149,25 +149,43 @@ def print_results(results):
         results: A list of FileValidationResults instances.
 
     """
-    for file_result in sorted(results, key=operator.attrgetter("filepath")):
-        print_horizontal_rule()
-        print_level(logger.info, "[-] Results for: %s", 0, file_result.filepath)
+    if not isinstance(results, list):
+        results = [results]
 
-        if file_result.is_valid:
-            marker = _GREEN + "[+]"
-            verdict = "Valid"
-            log_func = logger.info
-        else:
-            marker = _RED + "[X]"
-            verdict = "Invalid"
-            log_func = logger.error
-        print_level(log_func, "%s STIX JSON: %s", 0, marker, verdict)
+    if results[0].__class__.__name__ is 'FileValidationResults':
+        for file_result in sorted(results, key=operator.attrgetter("filepath")):
+            print_horizontal_rule()
+            print_level(logger.info, "[-] Results for: %s", 0, file_result.filepath)
 
-        for object_result in file_result.object_results:
-            if object_result.warnings:
-                print_warning_results(object_result, 1)
-            if object_result.errors:
-                print_schema_results(object_result, 1)
+            if file_result.is_valid:
+                marker = _GREEN + "[+]"
+                verdict = "Valid"
+                log_func = logger.info
+            else:
+                marker = _RED + "[X]"
+                verdict = "Invalid"
+                log_func = logger.error
+            print_level(log_func, "%s STIX JSON: %s", 0, marker, verdict)
 
-        if file_result.fatal:
-            print_fatal_results(file_result.fatal, 1)
+            for object_result in file_result.object_results:
+                if object_result.warnings:
+                    print_warning_results(object_result, 1)
+                if object_result.errors:
+                    print_schema_results(object_result, 1)
+
+            if file_result.fatal:
+                print_fatal_results(file_result.fatal, 1)
+    elif results[0].__class__.__name__ is 'ObjectValidationResults':
+        valid = True
+        for obj_result in results:
+            if obj_result.warnings:
+                print_warning_results(obj_result)
+                valid = False
+            if obj_result.errors:
+                print_schema_results(obj_result)
+                valid = False
+        if valid:
+            print_level(logger.info, "STIX JSON: Valid", 0)
+    else:
+        raise ValueError('Argument to print_results() must be a list of '
+                         'FileValidationResults or a list of ObjectValidationResults.')

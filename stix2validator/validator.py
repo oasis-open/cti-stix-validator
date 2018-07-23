@@ -447,8 +447,9 @@ def validate_file(fn, options=None):
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
 
-    file_results.is_valid = all(object_result.is_valid
-                                for object_result in file_results.object_results)
+    file_results.is_valid = (all(object_result.is_valid
+                                 for object_result in file_results.object_results)
+                             and not file_results.fatal)
 
     return file_results
 
