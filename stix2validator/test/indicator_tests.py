@@ -152,7 +152,7 @@ class IndicatorTestCases(ValidatorTest):
 
     def test_pattern_custom_object_prefix_lax(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern'] = """[x-foo":x_name = 'something']"""
+        indicator['pattern'] = """[x-foo:x_name = 'something']"""
         self.check_ignore(indicator, 'custom-prefix')
 
     def test_pattern_custom_property_prefix_strict(self):
