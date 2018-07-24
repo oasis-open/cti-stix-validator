@@ -1,4 +1,5 @@
 from io import open
+import logging
 import os
 import re
 import sys
@@ -8,6 +9,9 @@ import pytest
 from .. import (ValidationOptions, print_results, run_validation,
                 validate_file, validate_string)
 from .tool_tests import VALID_TOOL
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 
 def test_run_validation(caplog):
