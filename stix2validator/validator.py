@@ -175,6 +175,11 @@ class FileValidationResults(BaseResults):
         else:
             self._object_results = [object_results]
 
+    def log(self):
+        """Print (log) these file validation results.
+        """
+        output.print_file_results(self)
+
 
 class ObjectValidationResults(BaseResults):
     """Results of JSON schema validation for a single STIX object.
@@ -191,10 +196,12 @@ class ObjectValidationResults(BaseResults):
     Attributes:
         is_valid: ``True`` if the validation was successful and ``False``
             otherwise.
+        object_id: ID of the STIX object.
 
     """
-    def __init__(self, is_valid=False, errors=None, warnings=None):
+    def __init__(self, is_valid=False, object_id=None, errors=None, warnings=None):
         super(ObjectValidationResults, self).__init__(is_valid)
+        self.object_id = object_id
         self.errors = errors
         self.warnings = warnings
 
@@ -231,6 +238,11 @@ class ObjectValidationResults(BaseResults):
             d['errors'] = [x.as_dict() for x in self.errors]
 
         return d
+
+    def log(self):
+        """Print (log) these file validation results.
+        """
+        output.print_object_results(self)
 
 
 class ValidationErrorResults(BaseResults):
@@ -370,23 +382,23 @@ def validate_parsed_json(obj_json, options=None):
         init_requests_cache(options.refresh_cache)
 
     results = None
-    try:
-        if validating_list:
-            # Doing it this way instead of using a comprehension means that
-            # initial validation results will be retained, even if a later
-            # exception aborts the sequence.
-            results = []
-            for obj in obj_json:
+    if validating_list:
+        results = []
+        for obj in obj_json:
+            try:
                 results.append(validate_instance(obj, options))
-        else:
+            except SchemaInvalidError as ex:
+                error_result = ObjectValidationResults(is_valid=False,
+                                                       object_id=obj.get('id', ''),
+                                                       errors=[str(ex)])
+                results.append(error_result)
+    else:
+        try:
             results = validate_instance(obj_json, options)
-
-    except SchemaInvalidError as ex:
-        error_result = ObjectValidationResults(is_valid=False,
-                                               errors=[str(ex)])
-        if validating_list:
-            results.append(error_result)
-        else:
+        except SchemaInvalidError as ex:
+            error_result = ObjectValidationResults(is_valid=False,
+                                                   object_id=obj_json.get('id', ''),
+                                                   errors=[str(ex)])
             results = error_result
 
     if not options.no_cache and options.clear_cache:
@@ -709,5 +721,5 @@ def validate_instance(instance, options=None):
     else:
         valid = True
 
-    return ObjectValidationResults(is_valid=valid, errors=error_list,
-                                   warnings=warnings)
+    return ObjectValidationResults(is_valid=valid, object_id=instance.get('id', ''),
+                                   errors=error_list, warnings=warnings)
