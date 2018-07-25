@@ -2,7 +2,7 @@ import copy
 import json
 
 from . import ValidatorTest
-from .. import validate_parsed_json, validate_string
+from .. import ValidationOptions, validate_parsed_json, validate_string
 
 VALID_INDICATOR = u"""
 {
@@ -18,6 +18,13 @@ VALID_INDICATOR = u"""
     "valid_from": "2016-04-06T20:03:48Z"
 }
 """
+
+ADDTNL_INVALID_SCHEMA = {
+    "type": "x-foo-bar",
+    "id": "x-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f",
+    "created": "2016-04-06T20:03:48.000Z",
+    "modified": "2016-04-06T20:03:48.000Z",
+}
 
 
 class IndicatorTestCases(ValidatorTest):
@@ -202,10 +209,14 @@ class IndicatorTestCases(ValidatorTest):
         self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
 
     def test_additional_schemas_custom_type_invalid_schema(self):
-        new_obj = {
-            "type": "x-foo-bar",
-            "id": "x-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f",
-            "created": "2016-04-06T20:03:48.000Z",
-            "modified": "2016-04-06T20:03:48.000Z",
-        }
-        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
+        self.assertFalseWithOptions(ADDTNL_INVALID_SCHEMA, schema_dir=self.custom_schemas)
+
+    def test_validate_parsed_json_list_additional_invalid_schema(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['name'] = 'Foobar'
+        objects = [indicator, ADDTNL_INVALID_SCHEMA]
+
+        options = ValidationOptions(schema_dir=self.custom_schemas)
+        results = validate_parsed_json(objects, options)
+        assert results[0].is_valid
+        assert not results[1].is_valid

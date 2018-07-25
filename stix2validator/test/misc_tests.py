@@ -13,12 +13,25 @@ from .tool_tests import VALID_TOOL
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
+EXAMPLE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                       '..', 'schemas', 'examples',
+                       'indicator-to-campaign-relationship.json')
+IDENTITY = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        'test_examples', 'identity.json')
+IDENTITY_CUSTOM = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               'test_examples', 'identity_custom.json')
+INVALID_BRACES = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                              'test_examples', 'invalid_braces.json')
+INVALID_COMMA = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                             'test_examples', 'invalid_comma.json')
+INVALID_IDENTITY = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                'test_examples', 'invalid_identity.json')
+INVALID_TIMESTAMP = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                 'test_examples', 'invalid_timestamp.json')
+
 
 def test_run_validation(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             '..', 'schemas', 'examples',
-                             'indicator-to-campaign-relationship.json')
-    options = ValidationOptions(files=[inputfile])
+    options = ValidationOptions(files=[EXAMPLE])
     results = run_validation(options)
     assert results[0].is_valid
 
@@ -33,20 +46,14 @@ def test_run_validation_nonexistent_file():
 
 
 def test_run_validation_silent(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             '..', 'schemas', 'examples',
-                             'indicator-to-campaign-relationship.json')
-    options = ValidationOptions(files=[inputfile], silent=True)
+    options = ValidationOptions(files=[EXAMPLE], silent=True)
     results = run_validation(options)
     print_results(results)
     assert caplog.text == ''
 
 
 def test_validate_file(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             '..', 'schemas', 'examples',
-                             'indicator-to-campaign-relationship.json')
-    results = validate_file(inputfile)
+    results = validate_file(EXAMPLE)
     assert results.is_valid
 
     print_results(results)
@@ -54,9 +61,7 @@ def test_validate_file(caplog):
 
 
 def test_validate_file_warning(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'identity_custom.json')
-    results = validate_file(inputfile)
+    results = validate_file(IDENTITY_CUSTOM)
     assert results.is_valid
 
     print_results(results)
@@ -64,9 +69,7 @@ def test_validate_file_warning(caplog):
 
 
 def test_validate_file_invalid_brace(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'invalid_braces.json')
-    results = validate_file(inputfile)
+    results = validate_file(INVALID_BRACES)
     assert not results.is_valid
 
     print_results(results)
@@ -74,9 +77,7 @@ def test_validate_file_invalid_brace(caplog):
 
 
 def test_validate_file_invalid_comma(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'invalid_comma.json')
-    results = validate_file(inputfile)
+    results = validate_file(INVALID_COMMA)
     assert not results.is_valid
 
     print_results(results)
@@ -84,9 +85,7 @@ def test_validate_file_invalid_comma(caplog):
 
 
 def test_validate_file_invalid_missing_modified(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'invalid_identity.json')
-    results = validate_file(inputfile)
+    results = validate_file(INVALID_IDENTITY)
     assert not results.is_valid
 
     print_results(results)
@@ -94,9 +93,7 @@ def test_validate_file_invalid_missing_modified(caplog):
 
 
 def test_validate_string(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'identity.json')
-    with open(inputfile, encoding='utf-8') as f:
+    with open(IDENTITY, encoding='utf-8') as f:
         results = validate_string(f.read())
     assert results.is_valid
 
@@ -105,9 +102,7 @@ def test_validate_string(caplog):
 
 
 def test_validate_string_warning(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'identity_custom.json')
-    with open(inputfile, encoding='utf-8') as f:
+    with open(IDENTITY_CUSTOM, encoding='utf-8') as f:
         results = validate_string(f.read())
     assert results.is_valid
 
@@ -116,9 +111,7 @@ def test_validate_string_warning(caplog):
 
 
 def test_validate_string_invalid_timestamp(caplog):
-    inputfile = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                             'test_examples', 'invalid_timestamp.json')
-    with open(inputfile, encoding='utf-8') as f:
+    with open(INVALID_TIMESTAMP, encoding='utf-8') as f:
         results = validate_string(f.read())
     assert not results.is_valid
 
