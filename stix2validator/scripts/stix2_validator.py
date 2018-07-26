@@ -10,6 +10,7 @@ import sys
 from stix2validator import (ValidationError, codes, output, parse_args,
                             print_results, run_validation)
 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
 

@@ -1,5 +1,4 @@
 import logging
-import operator
 import sys
 
 from colorama import Fore, Style, init
@@ -36,7 +35,7 @@ def set_silent(silence_output=False):
 
 
 def error(msg, status=codes.EXIT_FAILURE):
-    """Prints a message to the stderr prepended by '[X]' and calls
+    """Print a message to the stderr prepended by '[X]' and calls
     ```sys.exit(status)``.
 
     Args:
@@ -49,7 +48,7 @@ def error(msg, status=codes.EXIT_FAILURE):
 
 
 def info(msg):
-    """Prints a message to stdout, prepended by '[-]'.
+    """Print a message to stdout, prepended by '[-]'.
 
     Note:
         If the application is not running in verbose mode, this function will
@@ -66,7 +65,7 @@ def info(msg):
 
 
 def print_level(log_function, fmt, level, *args):
-    """Prints a formatted message to stdout prepended by spaces. Useful for
+    """Print a formatted message to stdout prepended by spaces. Useful for
     printing hierarchical information, like bullet lists.
 
     Note:
@@ -101,13 +100,13 @@ def print_level(log_function, fmt, level, *args):
 
 
 def print_fatal_results(results, level=0):
-    """Prints fatal errors that occurred during validation runs.
+    """Print fatal errors that occurred during validation runs.
     """
     print_level(logger.critical, _RED + "[X] Fatal Error: %s", level, results.error)
 
 
 def print_schema_results(results, level=0):
-    """Prints JSON Schema validation errors to stdout.
+    """Print JSON Schema validation errors to stdout.
 
     Args:
         results: An instance of ObjectValidationResults.
@@ -119,7 +118,7 @@ def print_schema_results(results, level=0):
 
 
 def print_warning_results(results, level=0):
-    """Prints warning messages found during validation.
+    """Print warning messages found during validation.
     """
     marker = _YELLOW + "[!] "
 
@@ -128,7 +127,7 @@ def print_warning_results(results, level=0):
 
 
 def print_horizontal_rule():
-    """Prints a horizontal rule.
+    """Print a horizontal rule.
 
     Note:
         If the application is running in "Silent Mode"
@@ -142,32 +141,72 @@ def print_horizontal_rule():
     logger.info("=" * 80)
 
 
-def print_results(results):
-    """Prints `results` (the results of validation) to stdout.
-
-    Args:
-        results: A list of FileValidationResults instances.
+def print_results_header(identifier, is_valid):
+    """Print a header for the results of either a file or an object.
 
     """
-    for file_result in sorted(results, key=operator.attrgetter("filepath")):
-        print_horizontal_rule()
-        print_level(logger.info, "[-] Results for: %s", 0, file_result.filepath)
+    print_horizontal_rule()
+    print_level(logger.info, "[-] Results for: %s", 0, identifier)
 
-        if file_result.is_valid:
-            marker = _GREEN + "[+]"
-            verdict = "Valid"
-            log_func = logger.info
-        else:
-            marker = _RED + "[X]"
-            verdict = "Invalid"
-            log_func = logger.error
-        print_level(log_func, "%s STIX JSON: %s", 0, marker, verdict)
+    if is_valid:
+        marker = _GREEN + "[+]"
+        verdict = "Valid"
+        log_func = logger.info
+    else:
+        marker = _RED + "[X]"
+        verdict = "Invalid"
+        log_func = logger.error
+    print_level(log_func, "%s STIX JSON: %s", 0, marker, verdict)
 
-        for object_result in file_result.object_results:
-            if object_result.warnings:
-                print_warning_results(object_result, 1)
-            if object_result.errors:
-                print_schema_results(object_result, 1)
 
-        if file_result.fatal:
-            print_fatal_results(file_result.fatal, 1)
+def print_object_results(obj_result):
+    """Print the results of validating an object.
+
+    Args:
+        obj_result: An ObjectValidationResults instance.
+
+    """
+    print_results_header(obj_result.object_id, obj_result.is_valid)
+
+    if obj_result.warnings:
+        print_warning_results(obj_result, 1)
+    if obj_result.errors:
+        print_schema_results(obj_result, 1)
+
+
+def print_file_results(file_result):
+    """Print the results of validating a file.
+
+    Args:
+        file_result: A FileValidationResults instance.
+
+    """
+    print_results_header(file_result.filepath, file_result.is_valid)
+
+    for object_result in file_result.object_results:
+        if object_result.warnings:
+            print_warning_results(object_result, 1)
+        if object_result.errors:
+            print_schema_results(object_result, 1)
+
+    if file_result.fatal:
+        print_fatal_results(file_result.fatal, 1)
+
+
+def print_results(results):
+    """Print `results` (the results of validation) to stdout.
+
+    Args:
+        results: A list of FileValidationResults or ObjectValidationResults
+                 instances.
+
+    """
+    if not isinstance(results, list):
+        results = [results]
+
+    for r in results:
+        try:
+            r.log()
+        except AttributeError:
+            raise ValueError('Argument to print_results() must be a list of '
+                             'FileValidationResults or ObjectValidationResults.')
