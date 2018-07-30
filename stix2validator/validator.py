@@ -291,7 +291,7 @@ def list_json_files(directory, recursive=False):
 
     for top, _, files in os.walk(directory):
         # Get paths to each file in `files`
-        paths = (os.path.join(top, f) for f in files)
+        paths = (os.path.join(top, f) for f in sorted(files))
 
         # Add all the .json files to our return collection
         json_files.extend(x for x in paths if is_json(x))
