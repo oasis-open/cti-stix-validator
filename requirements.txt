@@ -1,9 +1,9 @@
-bumpversion>=0.5.3
-pre-commit>=1.10.4
+bumpversion
+pre-commit
 pytest>=3.7.0
 pytest-cov>=2.5.1
-sphinx>=1.7.6
-sphinx-prompt>=1.0.0
+sphinx
+sphinx-prompt
 tox>=3.1.2
 
 -e .
