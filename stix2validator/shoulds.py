@@ -279,8 +279,8 @@ def relationships_strict(instance):
 
     r_type = instance['relationship_type']
     try:
-        r_source = re.search("(.+)\-\-", instance['source_ref']).group(1)
-        r_target = re.search("(.+)\-\-", instance['target_ref']).group(1)
+        r_source = re.search(r"(.+)\-\-", instance['source_ref']).group(1)
+        r_target = re.search(r"(.+)\-\-", instance['target_ref']).group(1)
     except (AttributeError, TypeError):
         # Schemas already catch errors of these properties not being strings or
         # not containing the string '--'.
@@ -314,7 +314,7 @@ def valid_hash_value(hashname):
     """Return true if given value is a valid, recommended hash name according
     to the STIX 2 specification.
     """
-    custom_hash_prefix_re = re.compile("^x_")
+    custom_hash_prefix_re = re.compile(r"^x_")
     if hashname in enums.HASH_ALGO_OV or custom_hash_prefix_re.match(hashname):
         return True
     else:
@@ -482,7 +482,7 @@ def vocab_account_type(instance):
 def observable_object_keys(instance):
     """Ensure observable-objects keys are non-negative integers.
     """
-    digits_re = re.compile("^\d+$")
+    digits_re = re.compile(r"^\d+$")
     for key in instance['objects']:
         if not digits_re.match(key):
             yield JSONError("'%s' is not a good key value. Observable Objects "
@@ -494,7 +494,7 @@ def test_dict_keys(item, inst_id):
     """Recursively generate errors for incorrectly formatted cyber observable
     dictionary keys.
     """
-    not_caps_re = re.compile("^[^A-Z]+$")
+    not_caps_re = re.compile(r"^[^A-Z]+$")
     for k, v in item.items():
         if not not_caps_re.match(k):
             yield JSONError("As a dictionary key for cyber observable "
@@ -766,7 +766,7 @@ def mime_type(instance):
     """Ensure the 'mime_type' property of file objects comes from the Template
     column in the IANA media type registry.
     """
-    mime_pattern = re.compile('^(application|audio|font|image|message|model'
+    mime_pattern = re.compile(r'^(application|audio|font|image|message|model'
                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] == 'file' and 'mime_type' in obj):
@@ -821,7 +821,7 @@ def ipfix(instance):
     """Ensure the 'protocols' property of network-traffic objects contains only
     values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
     """
-    ipf_pattern = re.compile('^[a-z][a-zA-Z0-9]+')
+    ipf_pattern = re.compile(r'^[a-z][a-zA-Z0-9]+')
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] == 'network-traffic' and
                 'ipfix' in obj):
@@ -917,7 +917,7 @@ def pdf_doc_info(instance):
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
     """
-    class_suffix_re = re.compile('.+_CLASS$')
+    class_suffix_re = re.compile(r'.+_CLASS$')
     for key, obj in instance['objects'].items():
         if 'type' in obj and obj['type'] == 'process':
             try:
