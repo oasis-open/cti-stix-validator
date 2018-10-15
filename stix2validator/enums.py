@@ -1067,7 +1067,7 @@ OBSERVABLE_PROP_REFS = {
     },
     'process': {
         'opened_connection_refs': [
-            'ntwork-traffic'
+            'network-traffic'
         ],
         'creator_user_ref': [
             'user-account'
