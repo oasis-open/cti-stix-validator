@@ -349,10 +349,7 @@ def run_validation(options):
                                       filepath='stdin',
                                       object_results=results)]
 
-    try:
-        files = get_json_files(options.files, options.recursive)
-    except NoJSONFileFoundError as e:
-        output.error(e)
+    files = get_json_files(options.files, options.recursive)
 
     results = [validate_file(fn, options) for fn in files]
 

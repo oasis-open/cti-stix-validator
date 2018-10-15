@@ -20,7 +20,7 @@ def main():
 
     # Only print prompt if script is run on cmdline and no input is piped in
     if options.files == sys.stdin and os.isatty(0):
-        print('Input STIX content, then press Ctrl+D: ')
+        logging.info('Input STIX content, then press Ctrl+D: ')
 
     try:
         # Validate input documents
@@ -31,16 +31,15 @@ def main():
 
         # Determine exit status code and exit.
         code = codes.get_code(results)
-        sys.exit(code)
 
     except (ValidationError, IOError) as ex:
-        output.error(
-            "Validation error occurred: '%s'" % str(ex),
-            codes.EXIT_VALIDATION_ERROR
-        )
-    except Exception:
-        logger.exception("Fatal error occurred")
-        sys.exit(codes.EXIT_FAILURE)
+        output.error("Validation error occurred: %s" % str(ex))
+        code = codes.EXIT_VALIDATION_ERROR
+    except Exception as ex:
+        output.error("Fatal error occurred: %s" % str(ex))
+        code = codes.EXIT_FAILURE
+
+    sys.exit(code)
 
 
 if __name__ == '__main__':

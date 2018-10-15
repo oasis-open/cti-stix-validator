@@ -10,7 +10,7 @@ import textwrap
 from appdirs import AppDirs
 import requests_cache
 
-from .output import error, set_level, set_silent
+from .output import set_level, set_silent
 
 CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
@@ -336,7 +336,7 @@ class ValidationOptions(object):
 
         # Set the output level (e.g., quiet vs. verbose)
         if self.silent and self.verbose:
-            error('Error: Output can either be silent or verbose, but not both.')
+            raise ValueError('Error: Output can either be silent or verbose, but not both.')
         set_level(self.verbose)
         set_silent(self.silent)
 
