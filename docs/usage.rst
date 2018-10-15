@@ -74,9 +74,3 @@ To do this use the ``--schema-dir`` argument:
 ::
 
   $ stix2_validator --schema-dir /path/to/my/schemas <stix_file.json>
-
-.. note::
-
-   To use a schema for a custom observable object type or custom observable
-   extension, you need to have a schema for observed-data, but it can be an
-   empty object.
