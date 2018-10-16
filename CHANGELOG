@@ -1,6 +1,32 @@
 CHANGELOG
 =========
 
+1.1.0 - 2018-10-16
+
+* Add ability to use stdin as input
+* Add support for Python 3.7
+* Sort validator output by filename when given a directory as input
+* Fix bug when importing `validate_instance`
+* Fix a bug causing the same error to be raised twice when additional schemas
+  were in use
+* Fix a bug with printing ObjectValidationResults
+* Fix a bug involving duplicate error messages getting logged
+* Fix a mispelling of 'network-traffic'
+
+1.0.1 - 2018-06-14
+
+* Fix bug when using the validator as a library and no 'files' option is set on
+  ValidationOptions.
+
+1.0.0 - 2018-06-14
+
+* Enable validation of files with lists of objects
+* Enable validating with additional schemas, e.g for custom objects/properties
+* Add '--strict-properties' option to prohibit custom properties if desired
+* Add a 'parse_args' function to make the validator easier to use as a library
+* Incorporate latest schema fixes for URLs
+* Improve error messages
+
 0.5.0 - 2017-08-17
 
 * Check for invalid timestamps

@@ -134,8 +134,8 @@ def pretty_error(error, verbose=False):
         elif error.schema['title'] == 'relationship_type':
             msg = re.sub(r"does not match '.+'$", 'contains invalid '
                          'characters', msg)
-        elif error.schema['title'] == 'url':
-            msg = re.sub(r"match '.+'$", 'match the format '
+        elif error.schema['title'] == 'url-regex':
+            msg = re.sub(r'match ".+"$', 'match the format '
                          'of a URL', msg)
         elif error.schema['title'] == 'binary':
             msg = re.sub(r"does not.+'$", 'must be a base64-encoded string', msg)

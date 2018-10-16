@@ -48,6 +48,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
     keywords="stix stix2 json validation validator stix-validator stix2-validator",
     packages=find_packages(),

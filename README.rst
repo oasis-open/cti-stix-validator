@@ -4,7 +4,7 @@
 `cti-stix-validator`
 ====================
 NOTE: This is an `OASIS TC Open Repository <https://www.oasis-
-open.org/resources/open-repositories/>`_. See the `Governance`_
+open.org/resources/open-repositories/>`__. See the `Governance`_
 section for more information.
 
 The STIX Validator checks that STIX JSON content conforms to the
@@ -30,15 +30,8 @@ object's 'type' be one of those defined by a STIX Object in the
 specification. This rules out custom objects, so this check was made
 optional.
 
-The STIX Validator uses the `stix2-patterns validator
-<https://github.com/oasis-open/cti-pattern-validator>`_ to check that
-Indicator patterns conform to the STIX Patterning language and only
-reference properties valid for the objects in the pattern.
-
 The validator also color-codes its output to make it easier to tell at
 a glance whether validation passed.
-
-.. _install:
 
 `Installation`
 ==============
@@ -48,19 +41,6 @@ The easiest way to install the STIX validator is with pip:
 ::
 
   $ pip install stix2-validator
-
-Note that if you instead install it by cloning or downloading the
-repository, you will need to set up the submodules before you install
-it:
-
-::
-
-  $ git clone https://github.com/oasis-open/cti-stix-validator.git
-  $ cd cti-stix-validator/
-  $ git submodule update --init --recursive
-  $ python setup.py install
-
-.. _usage:
 
 `Usage`
 =======
@@ -88,201 +68,10 @@ own tools. You can validate a JSON file:
   results = validate_file("stix_file.json")
   print_results(results)
 
-You can also validate a JSON string, and check if the input passed
-validation:
-
-.. code:: python
-
-  from stix2validator import validate_string, print_results
-
-  stix_json_string = "..."
-  results = validate_string(stix_json_string)
-  if results.is_valid:
-      print_results(results)
-
-If your STIX is already in a Python dictionary (for example if you
-have already run `json.loads()`), use `validate_instance()` instead:
-
-.. code:: python
-
-  import json
-  from stix2validator import validate_instance, print_results
-
-  stix_json_string = "..."
-  stix_obj = json.loads(stix_json_string)
-  results = validate_instance(stix_obj)
-  if results.is_valid:
-      print_results(results)
-
-You can pass a ValidationOptions object into `validate_file()`,
-`validate_string()`, or `validate_instance()` if you want behavior
-other than the default:
-
-.. code:: python
-
-  from stix2validator import ValidationOptions
-
-  options = ValidationOptions(strict=True)
-  results = validate_string(stix_json_string, options)
-
-.. _options:
-
-Checking Best Practices
------------------------
-
-The validator will always validate input against all of the mandatory
-"MUST" requirements from the spec. By default it will issue warnings
-if the input fails any of the "SHOULD" recommendations, but validation
-will still pass. To turn these "best practice" warnings into errors
-and cause validation to fail, use the :code:`--strict` option with the
-command-line script, or create a ValidationOptions object with
-:code:`strict=True` when using the library.
-
-You cannot select which of the "MUST" requirement checks will be
-performed; all of them will always be performed. However, you may
-select which of the "SHOULD" checks to perform. Use the codes from the
-table below to enable or disable these checks. For example, to disable
-the checks for the report label and tool label vocabularies, use
-:code:`--disable 218,222` or :code:`disabled="218,222"`. All the other
-checks will still be performed. Conversely, to only check that custom
-property names adhere to the recommended format but not run any of the
-other "best practice" checks, use :code:`--enable 103` or
-:code:`enabled="103"`.
-
-Enabling supersedes disabling. Simultaneously enabling and disabling
-the same check will result in the validator performing that check.
-
-Some checks access Internet resources to determine valid values for
-certain properties. For instance, the 'mime-type' check accesses the
-IANA's list of registered MIME types. These web requests are cached to
-conserve bandwidth, will expire after one week, and are stored in a
-file called 'cache.sqlite' in the same directory the script is run
-from. The cache can be refreshed manually with the :code:`--refresh-
-cache` or :code:`refresh_cache=True`, or cleared with :code:`--clear-
-cache` or :code:`clear_cache=True`. This caching can be disabled
-entirely with :code:`--no-cache` or :code:`no_cache=True`.
-
-**Recommended Best Practice Check Codes**
-
-+--------+-----------------------------+----------------------------------------+
-|**Code**|**Name**                     |**Ensures...**                          |
-+--------+-----------------------------+----------------------------------------+
-|   1    | format-checks               | all 1xx checks are run                 |
-+--------+-----------------------------+----------------------------------------+
-|  101   | custom-prefix               | names of custom object types,          |
-|        |                             | properties, observable objects,        |
-|        |                             | observable object properties, and      |
-|        |                             | observable object extensions follow    |
-|        |                             | the correct format                     |
-+--------+-----------------------------+----------------------------------------+
-|  102   | custom-prefix-lax           | same as 101 but more lenient; no       |
-|        |                             | source identifier needed in prefix     |
-+--------+-----------------------------+----------------------------------------+
-|  111   | open-vocab-format           | values of open vocabularies follow the |
-|        |                             | correct format                         |
-+--------+-----------------------------+----------------------------------------+
-|  121   | kill-chain-names            | kill-chain-phase name and phase follow |
-|        |                             | the correct format                     |
-+--------+-----------------------------+----------------------------------------+
-|  141   | observable-object-keys      | observable object keys follow the      |
-|        |                             | correct format                         |
-+--------+-----------------------------+----------------------------------------+
-|  142   | observable-dictionary-keys  | dictionaries in cyber observable       |
-|        |                             | objects follow the correct format      |
-+--------+-----------------------------+----------------------------------------+
-|  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
-|        | format                      | follows the correct format             |
-+--------+-----------------------------+----------------------------------------+
-|  150   | hash-length                 | keys in 'hashes'-type properties are   |
-|        |                             | not too long                           |
-+--------+-----------------------------+----------------------------------------+
-|   2    | approved-values             | all 2xx checks are run                 |
-+--------+-----------------------------+----------------------------------------+
-|  201   | marking-definition-type     | marking definitions use a valid        |
-|        |                             | definition_type                        |
-+--------+-----------------------------+----------------------------------------+
-|  202   | relationship-types          | relationships are among those defined  |
-|        |                             | in the specification                   |
-+--------+-----------------------------+----------------------------------------+
-|  203   | duplicate-ids               | objects in a bundle with duplicate IDs |
-|        |                             | have different `modified` timestamps   |
-+--------+-----------------------------+----------------------------------------+
-|  210   | all-vocabs                  | all of the following open vocabulary   |
-|        |                             | checks are run                         |
-+--------+-----------------------------+----------------------------------------+
-|  211   | attack-motivation           | certain property values are from the   |
-|        |                             | attack_motivation vocabulary           |
-+--------+-----------------------------+----------------------------------------+
-|  212   | attack-resource-level       | certain property values are from the   |
-|        |                             | attack_resource_level vocabulary       |
-+--------+-----------------------------+----------------------------------------+
-|  213   | identity-class              | certain property values are from the   |
-|        |                             | identity_class vocabulary              |
-+--------+-----------------------------+----------------------------------------+
-|  214   | indicator-label             | certain property values are from the   |
-|        |                             | indicator_label vocabulary             |
-+--------+-----------------------------+----------------------------------------+
-|  215   | industry-sector             | certain property values are from the   |
-|        |                             | industry_sector vocabulary             |
-+--------+-----------------------------+----------------------------------------+
-|  216   | malware-label               | certain property values are from the   |
-|        |                             | malware_label vocabulary               |
-+--------+-----------------------------+----------------------------------------+
-|  218   | report-label                | certain property values are from the   |
-|        |                             | report_label vocabulary                |
-+--------+-----------------------------+----------------------------------------+
-|  219   | threat-actor-label          | certain property values are from the   |
-|        |                             | threat_actor_label vocabulary          |
-+--------+-----------------------------+----------------------------------------+
-|  220   | threat-actor-role           | certain property values are from the   |
-|        |                             | threat_actor_role vocabulary           |
-+--------+-----------------------------+----------------------------------------+
-|  221   | threat-actor-sophistication | certain property values are from the   |
-|        |                             | threat_actor_sophistication vocabulary |
-+--------+-----------------------------+----------------------------------------+
-|  222   | tool-label                  | certain property values are from the   |
-|        |                             | tool_label vocabulary                  |
-+--------+-----------------------------+----------------------------------------+
-|  241   | hash-algo                   | certain property values are from the   |
-|        |                             | hash-algo vocabulary                   |
-+--------+-----------------------------+----------------------------------------+
-|  242   | encryption-algo             | certain property values are from the   |
-|        |                             | encryption-algo vocabulary             |
-+--------+-----------------------------+----------------------------------------+
-|  243   | windows-pebinary-type       | certain property values are from the   |
-|        |                             | windows-pebinary-type vocabulary       |
-+--------+-----------------------------+----------------------------------------+
-|  244   | account-type                | certain property values are from the   |
-|        |                             | account-type vocabulary                |
-+--------+-----------------------------+----------------------------------------+
-|  270   | all-external-sources        | all of the following external source   |
-|        |                             | checks are run                         |
-+--------+-----------------------------+----------------------------------------+
-|  271   | mime-type                   | file.mime_type is a valid IANA MIME    |
-|        |                             | type                                   |
-+--------+-----------------------------+----------------------------------------+
-|  272   | protocols                   | certain property values are valid IANA |
-|        |                             | Service and Protocol names             |
-+--------+-----------------------------+----------------------------------------+
-|  273   | ipfix                       | certain property values are valid IANA |
-|        |                             | IP Flow Information Export (IPFIX)     |
-|        |                             | Entities                               |
-+--------+-----------------------------+----------------------------------------+
-|  274   | http-request-headers        | certain property values are valid HTTP |
-|        |                             | request header names                   |
-+--------+-----------------------------+----------------------------------------+
-|  275   | socket-options              | certain property values are valid      |
-|        |                             | socket options                         |
-+--------+-----------------------------+----------------------------------------+
-|  276   | pdf-doc-info                | certain property values are valid PDF  |
-|        |                             | Document Information Dictionary keys   |
-+--------+-----------------------------+----------------------------------------+
-|  301   | network-traffic-ports       | network-traffic objects contain both   |
-|        |                             | src_port and dst_port                  |
-+--------+-----------------------------+----------------------------------------+
-|  302   | extref-hashes               | external references SHOULD have hashes |
-|        |                             | if they have a url                     |
-+--------+-----------------------------+----------------------------------------+
+You can also validate a JSON string using ``validate_string()``, or a Python
+dictionary representing a STIX object using ``validate_instance()``. For more
+information, see the full documentation
+`here <https://stix2-validator.readthedocs.io/en/latest/usage.html>`_.
 
 Governance
 ==========
@@ -295,7 +84,7 @@ open.org/archives/cti/201609/msg00001.html>`_ and `approved
 <https://issues.oasis-open.org/browse/TCADMIN-2434>`_] by the `OASIS
 Cyber Threat Intelligence (CTI) TC <https://www.oasis-
 open.org/committees/cti/>`_ as an `OASIS TC Open Repository
-<https://www.oasis-open.org/resources/open-repositories/>`_ to support
+<https://www.oasis-open.org/resources/open-repositories/>`__ to support
 development of open source resources related to Technical Committee
 work.
 
@@ -328,8 +117,6 @@ repository, and the requirement for an `Individual Contributor License
 Agreement <https://www.oasis-open.org/resources/open-
 repositories/cla/individual-cla>`_ that governs intellectual property.
 
-.. _maintainers:
-
 `Maintainers`
 =============
 TC Open Repository `Maintainers <https://www.oasis-
@@ -356,7 +143,6 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 
 .. Initial Maintainers: Greg Back & Ivan Kirillov
 
-*  `Greg Back <mailto:gback@mitre.org>`_; GitHub ID: `https://github.com/gtback <https://github.com/gtback>`_; WWW: `MITRE <https://www.mitre.org>`__
 *  `Ivan Kirillov <mailto:ikirillov@mitre.org>`_; GitHub ID: `https://github.com/ikiril01 <https://github.com/ikiril01>`_; WWW: `MITRE <https://www.mitre.org>`__
 *  `Chris Lenk <mailto:clenk@mitre.org>`_; GitHub ID: `https://github.com/clenk <https://github.com/clenk>`_; WWW: `MITRE <https://www.mitre.org>`__
 
@@ -369,8 +155,6 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 *  `Open Source Licenses <https://www.oasis-open.org/resources/open-repositories/licenses>`_
 *  `Contributor License Agreements (CLAs) <https://www.oasis-open.org/resources/open-repositories/cla>`_
 *  `Maintainers' Guidelines and Agreement <https://www.oasis-open.org/resources/open-repositories/maintainers-guide>`__
-
-.. _feedback:
 
 `Feedback`
 ==========

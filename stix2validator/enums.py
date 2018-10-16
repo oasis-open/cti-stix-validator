@@ -1067,7 +1067,7 @@ OBSERVABLE_PROP_REFS = {
     },
     'process': {
         'opened_connection_refs': [
-            'ntwork-traffic'
+            'network-traffic'
         ],
         'creator_user_ref': [
             'user-account'
@@ -1471,7 +1471,7 @@ def ipfix():
         for line in data.iter_lines():
             if line:
                 line = line.decode("utf-8")
-                if re.match('^\d+(,[a-zA-Z0-9]+){2},', line):
+                if re.match(r'^\d+(,[a-zA-Z0-9]+){2},', line):
                     vals = line.split(',')
                     if vals[1]:
                         ilist.append(vals[1])

@@ -5,6 +5,7 @@ from collections import Iterable
 import io
 from itertools import chain
 import os
+import sys
 
 from jsonschema import Draft4Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
@@ -12,9 +13,9 @@ import simplejson as json
 from six import iteritems, string_types, text_type
 
 from . import musts, output, shoulds
-from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
-                     ValidationError, pretty_error)
-from .util import ValidationOptions
+from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
+                     SchemaInvalidError, ValidationError, pretty_error)
+from .util import ValidationOptions, clear_requests_cache, init_requests_cache
 
 DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas-2.1/')
 
@@ -174,6 +175,11 @@ class FileValidationResults(BaseResults):
         else:
             self._object_results = [object_results]
 
+    def log(self):
+        """Print (log) these file validation results.
+        """
+        output.print_file_results(self)
+
 
 class ObjectValidationResults(BaseResults):
     """Results of JSON schema validation for a single STIX object.
@@ -190,10 +196,12 @@ class ObjectValidationResults(BaseResults):
     Attributes:
         is_valid: ``True`` if the validation was successful and ``False``
             otherwise.
+        object_id: ID of the STIX object.
 
     """
-    def __init__(self, is_valid=False, errors=None, warnings=None):
+    def __init__(self, is_valid=False, object_id=None, errors=None, warnings=None):
         super(ObjectValidationResults, self).__init__(is_valid)
+        self.object_id = object_id
         self.errors = errors
         self.warnings = warnings
 
@@ -230,6 +238,11 @@ class ObjectValidationResults(BaseResults):
             d['errors'] = [x.as_dict() for x in self.errors]
 
         return d
+
+    def log(self):
+        """Print (log) these file validation results.
+        """
+        output.print_object_results(self)
 
 
 class ValidationErrorResults(BaseResults):
@@ -276,9 +289,10 @@ def list_json_files(directory, recursive=False):
     """
     json_files = []
 
-    for top, _, files in os.walk(directory):
+    for top, dirs, files in os.walk(directory):
+        dirs.sort()
         # Get paths to each file in `files`
-        paths = (os.path.join(top, f) for f in files)
+        paths = (os.path.join(top, f) for f in sorted(files))
 
         # Add all the .json files to our return collection
         json_files.extend(x for x in paths if is_json(x))
@@ -330,11 +344,16 @@ def run_validation(options):
             this validation run.
 
     """
-    # The JSON files to validate
+    if options.files == sys.stdin:
+        results = validate(options.files, options)
+        return [FileValidationResults(is_valid=results.is_valid,
+                                      filepath='stdin',
+                                      object_results=results)]
+
     try:
         files = get_json_files(options.files, options.recursive)
     except NoJSONFileFoundError as e:
-        output.error(e.message)
+        output.error(e)
 
     results = [validate_file(fn, options) for fn in files]
 
@@ -360,25 +379,31 @@ def validate_parsed_json(obj_json, options=None):
     if not options:
         options = ValidationOptions()
 
-    results = None
-    try:
-        if validating_list:
-            # Doing it this way instead of using a comprehension means that
-            # initial validation results will be retained, even if a later
-            # exception aborts the sequence.
-            results = []
-            for obj in obj_json:
-                results.append(validate_instance(obj, options))
-        else:
-            results = validate_instance(obj_json, options)
+    if not options.no_cache:
+        init_requests_cache(options.refresh_cache)
 
-    except SchemaInvalidError as ex:
-        error_result = ObjectValidationResults(is_valid=False,
-                                               errors=[str(ex)])
-        if validating_list:
-            results.append(error_result)
-        else:
+    results = None
+    if validating_list:
+        results = []
+        for obj in obj_json:
+            try:
+                results.append(validate_instance(obj, options))
+            except SchemaInvalidError as ex:
+                error_result = ObjectValidationResults(is_valid=False,
+                                                       object_id=obj.get('id', ''),
+                                                       errors=[str(ex)])
+                results.append(error_result)
+    else:
+        try:
+            results = validate_instance(obj_json, options)
+        except SchemaInvalidError as ex:
+            error_result = ObjectValidationResults(is_valid=False,
+                                                   object_id=obj_json.get('id', ''),
+                                                   errors=[str(ex)])
             results = error_result
+
+    if not options.no_cache and options.clear_cache:
+        clear_requests_cache()
 
     return results
 
@@ -435,8 +460,9 @@ def validate_file(fn, options=None):
                "validation will be performed: {error}")
         output.info(msg.format(fn=fn, error=str(ex)))
 
-    file_results.is_valid = all(object_result.is_valid
-                                for object_result in file_results.object_results)
+    file_results.is_valid = (all(object_result.is_valid
+                                 for object_result in file_results.object_results)
+                             and not file_results.fatal)
 
     return file_results
 
@@ -527,7 +553,8 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
 
     Returns:
         A generator for errors found when validating the object against the
-        appropriate schema.
+        appropriate schema, or None if schema_dir is None and the schema
+        cannot be found.
     """
     try:
         schema_path = find_schema(schema_dir, type)
@@ -538,12 +565,15 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
             schema_path = find_schema(schema_dir, default)
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
+            # Only raise an error when checking against default schemas, not custom
+            if schema_dir is not None:
+                return None
             raise SchemaInvalidError("Cannot locate a schema for the object's "
                                      "type, nor the base schema ({}.json).".format(default))
 
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
-        # If schema_dir is None the schema is custom and won't need to be modified.
+        # If schema_dir is not None the schema is custom and won't need to be modified.
         schema['allOf'][1]['properties']['objects'] = {
             "objects": {
                 "type": "object",
@@ -585,31 +615,39 @@ def _schema_validate(sdo, options):
 
     # Get validator for built-in schema
     base_sdo_errors = _get_error_generator(sdo['type'], sdo)
-    error_gens.append((base_sdo_errors, error_prefix))
+    if base_sdo_errors:
+        error_gens.append((base_sdo_errors, error_prefix))
 
     # Get validator for any user-supplied schema
     if options.schema_dir:
         custom_sdo_errors = _get_error_generator(sdo['type'], sdo, options.schema_dir)
-        error_gens.append((custom_sdo_errors, error_prefix))
+        if custom_sdo_errors:
+            error_gens.append((custom_sdo_errors, error_prefix))
 
     # Validate each cyber observable object separately
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
         for key, obj in iteritems(sdo['objects']):
+            if 'type' not in obj:
+                error_gens.append(([JSONError("Observable object must contain a 'type' property.", error_prefix)],
+                                   error_prefix + 'object \'' + key + '\': '))
+                continue
             # Get validator for built-in schemas
             base_obs_errors = _get_error_generator(obj['type'],
                                                    obj,
                                                    None,
                                                    'cyber-observable-core')
-            error_gens.append((base_obs_errors,
-                               error_prefix + 'object \'' + key + '\': '))
+            if base_obs_errors:
+                error_gens.append((base_obs_errors,
+                                   error_prefix + 'object \'' + key + '\': '))
 
             # Get validator for any user-supplied schema
             custom_obs_errors = _get_error_generator(obj['type'],
                                                      obj,
                                                      options.schema_dir,
                                                      'cyber-observable-core')
-            error_gens.append((custom_obs_errors,
-                               error_prefix + 'object \'' + key + '\': '))
+            if custom_obs_errors:
+                error_gens.append((custom_obs_errors,
+                                   error_prefix + 'object \'' + key + '\': '))
 
     return error_gens
 
@@ -642,6 +680,8 @@ def validate_instance(instance, options=None):
     if instance['type'] == 'bundle' and 'objects' in instance:
         # Validate each object in a bundle separately
         for sdo in instance['objects']:
+            if 'type' not in sdo:
+                raise ValidationError("Each object in bundle must have a 'type' property.")
             error_gens += _schema_validate(sdo, options)
     else:
         error_gens += _schema_validate(instance, options)
@@ -682,5 +722,5 @@ def validate_instance(instance, options=None):
     else:
         valid = True
 
-    return ObjectValidationResults(is_valid=valid, errors=error_list,
-                                   warnings=warnings)
+    return ObjectValidationResults(is_valid=valid, object_id=instance.get('id', ''),
+                                   errors=error_list, warnings=warnings)

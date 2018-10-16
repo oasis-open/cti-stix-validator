@@ -2,7 +2,7 @@ import copy
 import json
 
 from . import ValidatorTest
-from .. import validate_parsed_json, validate_string
+from .. import ValidationOptions, validate_parsed_json, validate_string
 
 VALID_INDICATOR = u"""
 {
@@ -18,6 +18,13 @@ VALID_INDICATOR = u"""
     "valid_from": "2016-04-06T20:03:48Z"
 }
 """
+
+ADDTNL_INVALID_SCHEMA = {
+    "type": "x-foo-bar",
+    "id": "x-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f",
+    "created": "2016-04-06T20:03:48.000Z",
+    "modified": "2016-04-06T20:03:48.000Z",
+}
 
 
 class IndicatorTestCases(ValidatorTest):
@@ -51,6 +58,11 @@ class IndicatorTestCases(ValidatorTest):
         indicator[long_property_name] = "abc123"
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
+
+    def test_custom_property_name_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['foobar'] = "abc123"
+        self.assertFalseWithOptions(indicator, strict_properties=True)
 
     def test_empty_list(self):
         indicator = copy.deepcopy(self.valid_indicator)
@@ -147,8 +159,15 @@ class IndicatorTestCases(ValidatorTest):
 
     def test_pattern_custom_object_prefix_lax(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern'] = """[x-foo":x_name = 'something']"""
+        indicator['pattern'] = """[x-foo:x_name = 'something']"""
         self.check_ignore(indicator, 'custom-prefix')
+
+    def test_pattern_custom_property_prefix_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[file:x_x_name = 'something']"""
+        self.assertTrueWithOptions(indicator)
+
+        self.assertFalseWithOptions(indicator, strict_properties=True)
 
     def test_pattern_list_object_property(self):
         indicator = copy.deepcopy(self.valid_indicator)
@@ -184,7 +203,20 @@ class IndicatorTestCases(ValidatorTest):
         new_obj['id'] = 'x-new-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f'
         self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
 
-        # now it's valid
+        # now they're valid
         new_obj['property1'] = 'fizzbuzz'
         new_obj['property2'] = 10
         self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
+
+    def test_additional_schemas_custom_type_invalid_schema(self):
+        self.assertFalseWithOptions(ADDTNL_INVALID_SCHEMA, schema_dir=self.custom_schemas)
+
+    def test_validate_parsed_json_list_additional_invalid_schema(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['name'] = 'Foobar'
+        objects = [indicator, ADDTNL_INVALID_SCHEMA]
+
+        options = ValidationOptions(schema_dir=self.custom_schemas)
+        results = validate_parsed_json(objects, options)
+        assert results[0].is_valid
+        assert not results[1].is_valid
