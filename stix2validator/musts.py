@@ -13,10 +13,10 @@ from .errors import JSONError, PatternError
 from .output import info
 from .util import cyber_observable_check, has_cyber_observable_data
 
-CUSTOM_TYPE_PREFIX_RE = re.compile("^x\-.+\-.+$")
-CUSTOM_TYPE_LAX_PREFIX_RE = re.compile("^x\-.+$")
-CUSTOM_PROPERTY_PREFIX_RE = re.compile("^x_.+_.+$")
-CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile("^x_.+$")
+CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
+CUSTOM_TYPE_LAX_PREFIX_RE = re.compile(r"^x\-.+$")
+CUSTOM_PROPERTY_PREFIX_RE = re.compile(r"^x_.+_.+$")
+CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile(r"^x_.+$")
 
 
 def timestamp(instance):
@@ -255,7 +255,7 @@ def artifact_mime_type(instance):
 
             else:
                 info("Can't reach IANA website; using regex for mime types.")
-                mime_re = re.compile('^(application|audio|font|image|message|model'
+                mime_re = re.compile(r'^(application|audio|font|image|message|model'
                                      '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
                 if not mime_re.match(obj['mime_type']):
                     yield JSONError("The 'mime_type' property of object '%s' "
@@ -269,7 +269,7 @@ def character_set(instance):
     """Ensure certain properties of cyber observable objects come from the IANA
     Character Set list.
     """
-    char_re = re.compile('^[a-zA-Z0-9_\(\)-]+$')
+    char_re = re.compile(r'^[a-zA-Z0-9_\(\)-]+$')
     for key, obj in instance['objects'].items():
         if ('type' in obj and obj['type'] == 'directory' and 'path_enc' in obj):
             if enums.char_sets():
@@ -413,8 +413,8 @@ def patterns(instance, options):
             yield PatternError(str(e), instance['id'])
         return
 
-    type_format_re = re.compile('^\\-?[a-z0-9]+(-[a-z0-9]+)*\\-?$')
-    property_format_re = re.compile('^[a-z0-9_]{3,250}$')
+    type_format_re = re.compile(r'^\-?[a-z0-9]+(-[a-z0-9]+)*\-?$')
+    property_format_re = re.compile(r'^[a-z0-9_]{3,250}$')
 
     p = Pattern(pattern)
     inspection = p.inspect().comparisons
