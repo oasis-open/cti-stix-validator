@@ -15,9 +15,8 @@ from six import iteritems, string_types, text_type
 from . import musts, output, shoulds
 from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
                      SchemaInvalidError, ValidationError, pretty_error)
-from .util import ValidationOptions, clear_requests_cache, init_requests_cache
-
-DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas-2.1/')
+from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
+                   init_requests_cache)
 
 
 def _is_iterable_non_string(val):
@@ -515,8 +514,7 @@ def find_schema(schema_dir, obj_type):
     """
     schema_filename = obj_type + '.json'
 
-    # If no schema directory given, use default bundled with this package
-    for root, dirnames, filenames in os.walk(schema_dir or DEFAULT_SCHEMA_DIR):
+    for root, dirnames, filenames in os.walk(schema_dir):
         if schema_filename in filenames:
             return os.path.join(root, schema_filename)
 
@@ -541,13 +539,15 @@ def load_schema(schema_path):
     return schema
 
 
-def _get_error_generator(type, obj, schema_dir=None, default='core'):
+def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, default='core'):
     """Get a generator for validating against the schema for the given object type.
 
     Args:
         type (str): The object type to find the schema for.
         obj: The object to be validated.
         schema_dir (str): The path in which to search for schemas.
+        version (str): The version of the STIX specification to validate
+            against. Only used to find base schemas when schema_dir is None.
         default (str): If the schema for the given type cannot be found, use
             the one with this name instead.
 
@@ -556,6 +556,12 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
         appropriate schema, or None if schema_dir is None and the schema
         cannot be found.
     """
+    # If no schema directory given, use default for the given STIX version,
+    # which comes bundled with this package
+    if schema_dir is None:
+        schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
+                                     + version + '/')
+
     try:
         schema_path = find_schema(schema_dir, type)
         schema = load_schema(schema_path)
@@ -614,7 +620,7 @@ def _schema_validate(sdo, options):
         error_prefix = ''
 
     # Get validator for built-in schema
-    base_sdo_errors = _get_error_generator(sdo['type'], sdo)
+    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=options.version)
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
@@ -635,6 +641,7 @@ def _schema_validate(sdo, options):
             base_obs_errors = _get_error_generator(obj['type'],
                                                    obj,
                                                    None,
+                                                   options.version,
                                                    'cyber-observable-core')
             if base_obs_errors:
                 error_gens.append((base_obs_errors,

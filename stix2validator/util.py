@@ -12,6 +12,8 @@ import requests_cache
 
 from .output import error, set_level, set_silent
 
+DEFAULT_VER = "2.1"
+
 CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
 the validator performs, along with the code to use with the --enable or
@@ -157,6 +159,11 @@ def parse_args(cmd_args, is_script=False):
              "against these schemas in addition to the STIX schemas bundled "
              "with this script."
     )
+    parser.add_argument(
+        "--version",
+        dest="version",
+        help="The version of the STIX specification to validate against."
+    )
 
     # Output options
     parser.add_argument(
@@ -255,6 +262,8 @@ def parse_args(cmd_args, is_script=False):
 
     if not is_script:
         args.files = ""
+    if not args.version:
+        args.version = DEFAULT_VER
 
     return ValidationOptions(args)
 
@@ -270,6 +279,7 @@ class ValidationOptions(object):
     Attributes:
         cmd_args: An instance of ``argparse.Namespace`` containing options
             supplied on the command line.
+        version: The version of the STIX specification to validate against.
         verbose: True if informational notes and more verbose error messages
             should be printed to stdout/stderr.
         silent: True if all output to stdout should be silenced.
@@ -294,13 +304,14 @@ class ValidationOptions(object):
             should be cleared after validation.
 
     """
-    def __init__(self, cmd_args=None, verbose=False, silent=False,
+    def __init__(self, cmd_args=None, version=DEFAULT_VER, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
                  refresh_cache=False, clear_cache=False):
 
         if cmd_args is not None:
+            self.version = cmd_args.version
             self.verbose = cmd_args.verbose
             self.silent = cmd_args.silent
             self.files = cmd_args.files
@@ -316,6 +327,7 @@ class ValidationOptions(object):
             self.clear_cache = cmd_args.clear_cache
         else:
             # input options
+            self.version = version
             self.files = files
             self.recursive = recursive
             self.schema_dir = schema_dir
