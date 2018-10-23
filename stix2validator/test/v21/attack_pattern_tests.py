@@ -7,6 +7,7 @@ from ... import validate_parsed_json, validate_string
 VALID_ATTACK_PATTERN = u"""
 {
   "type": "attack-pattern",
+  "spec_version": "2.1",
   "id": "attack-pattern--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",
   "created": "2016-02-12T08:17:27.000Z",
   "modified": "2016-02-12T08:17:27.000Z",

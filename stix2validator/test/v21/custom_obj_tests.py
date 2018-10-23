@@ -7,6 +7,7 @@ from ... import ValidationError, validate_parsed_json, validate_string
 VALID_CUSTOM_OBJECT = u"""
 {
   "type": "x-example-com-customobject",
+  "spec_version": "2.1",
   "id": "x-example-com-customobject--4527e5de-8572-446a-a57a-706f15467461",
   "created": "2016-08-01T00:00:00.000Z",
   "modified": "2016-08-01T00:00:00.000Z",

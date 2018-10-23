@@ -7,11 +7,12 @@ from ... import ValidationOptions, validate_parsed_json, validate_string
 VALID_INDICATOR = u"""
 {
     "type": "indicator",
+    "spec_version": "2.1",
     "id": "indicator--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f",
     "created_by_ref": "source--f431f809-377b-45e0-aa1c-6a4751cae5ff",
     "created": "2016-04-06T20:03:48.000Z",
     "modified": "2016-04-06T20:03:48.000Z",
-    "labels": ["malicious-activity"],
+    "indicator_types": ["malicious-activity"],
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
     "pattern": "[file:hashes.'SHA-256' = 'aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f']",
@@ -124,9 +125,9 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
-    def test_vocab_indicator_label(self):
+    def test_vocab_indicator_types(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['labels'] = ["suspicious"]
+        indicator['indicator_types'] = ["suspicious"]
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 

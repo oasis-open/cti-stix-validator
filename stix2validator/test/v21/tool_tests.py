@@ -7,12 +7,13 @@ from ... import validate_parsed_json, validate_string
 VALID_TOOL = u"""
 {
   "type": "tool",
+  "spec_version": "2.1",
   "id": "tool--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f",
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T20:03:48.000Z",
   "modified": "2016-04-06T20:03:48.000Z",
   "name": "VNC",
-  "labels": ["remote-access"],
+  "tool_types": ["remote-access"],
   "kill_chain_phases": [
     {
       "kill_chain_name": "lockheed-martin-cyber-kill-chain",
@@ -30,9 +31,9 @@ class ToolTestCases(ValidatorTest):
         results = validate_string(VALID_TOOL, self.options)
         self.assertTrue(results.is_valid)
 
-    def test_vocab_tool_label(self):
+    def test_vocab_tool_type(self):
         tool = copy.deepcopy(self.valid_tool)
-        tool['labels'] += ["multi-purpose"]
+        tool['tool_types'] += ["multi-purpose"]
         results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
@@ -73,7 +74,7 @@ class ToolTestCases(ValidatorTest):
     def test_format_and_value_checks(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['kill_chain_phases'][0]['phase_name'] = "Something_invalid"
-        tool['labels'] += ["something-not-in-vocab"]
+        tool['tool_types'] += ["something-not-in-vocab"]
 
         self.assertFalseWithOptions(tool, disabled='1')
         self.assertFalseWithOptions(tool, disabled='2')

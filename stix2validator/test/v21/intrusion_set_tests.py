@@ -7,6 +7,7 @@ from ... import validate_parsed_json, validate_string
 VALID_INTRUSION_SET = u"""
 {
   "type": "intrusion-set",
+  "spec_version": "2.1",
   "id": "intrusion-set--4e78f46f-a023-4e5f-bc24-71b3ca22ec29",
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T20:03:48.000Z",

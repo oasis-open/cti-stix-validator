@@ -10,10 +10,10 @@ VALID_BUNDLE = u"""
 {
   "type": "bundle",
   "id": "bundle--44af6c39-c09b-49c5-9de2-394224b04982",
-  "spec_version": "2.0",
   "objects": [
     {
       "type": "identity",
+      "spec_version": "2.1",
       "id": "identity--8ae20dde-83d4-4218-88fd-41ef0dabf9d1",
       "created": "2016-08-22T14:09:00.123Z",
       "modified": "2016-08-22T14:09:00.123Z",

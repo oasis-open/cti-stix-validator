@@ -4,7 +4,6 @@ import re
 from jsonschema import exceptions as schema_exceptions
 from six import python_2_unicode_compatible, text_type
 
-from . import enums
 from .util import CHECK_CODES
 
 
@@ -156,8 +155,9 @@ def pretty_error(error, verbose=False):
                          'proper format (lowercase ASCII a-z, 0-9, and '
                          'underscores; 3-250 characters)', msg)
         elif error.validator == 'not' and 'anyOf' in error.validator_value:
+            reserved_properties = [y for x in error.validator_value['anyOf'] for y in x['required']]
             msg = re.sub(r".+", "Contains a reserved property ('%s')"
-                         % "', '".join(enums.RESERVED_PROPERTIES), msg)
+                         % "', '".join(reserved_properties), msg)
     elif 'title' in error.schema and error.schema['title'] == 'cyber-observable-core':
         if error.validator == 'additionalProperties':
             msg = re.sub(r"Additional .+$", 'Custom observable properties must'

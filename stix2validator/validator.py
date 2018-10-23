@@ -12,11 +12,15 @@ from jsonschema import exceptions as schema_exceptions
 import simplejson as json
 from six import iteritems, string_types, text_type
 
-from . import musts, output, shoulds
+from . import output
 from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
                      SchemaInvalidError, ValidationError, pretty_error)
 from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
                    init_requests_cache)
+from .v20 import musts as musts20
+from .v20 import shoulds20
+from .v21 import musts as musts21
+from .v21 import shoulds21
 
 
 def _is_iterable_non_string(val):
@@ -598,6 +602,32 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
     return error_gen
 
 
+def _get_musts(options):
+    """Return the list of 'MUST' validators for the correct version of STIX.
+
+    Args:
+        options: ValidationOptions instance with validation options for this
+            validation run, including the STIX spec version.
+    """
+    if options.version == '2.0':
+        return musts20.list_musts(options)
+    else:
+        return musts21.list_musts(options)
+
+
+def _get_shoulds(options):
+    """Return the list of 'SHOULD' validators for the correct version of STIX.
+
+    Args:
+        options: ValidationOptions instance with validation options for this
+            validation run, including the STIX spec version.
+    """
+    if options.version == '2.0':
+        return shoulds20.list_shoulds(options)
+    else:
+        return shoulds21.list_shoulds(options)
+
+
 def _schema_validate(sdo, options):
     """Set up validation of a single STIX object against its type's schema.
     This does no actual validation; it just returns generators which must be
@@ -694,8 +724,8 @@ def validate_instance(instance, options=None):
         error_gens += _schema_validate(instance, options)
 
     # Custom validation
-    must_checks = musts.list_musts(options)
-    should_checks = shoulds.list_shoulds(options)
+    must_checks = _get_musts(options)
+    should_checks = _get_shoulds(options)
     output.info("Running the following additional checks: %s."
                 % ", ".join(x.__name__ for x in chain(must_checks, should_checks)))
     try:

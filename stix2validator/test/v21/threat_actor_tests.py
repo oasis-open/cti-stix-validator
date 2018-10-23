@@ -7,11 +7,12 @@ from ... import validate_parsed_json, validate_string
 VALID_THREAT_ACTOR = u"""
 {
   "type": "threat-actor",
+  "spec_version": "2.1",
   "id": "threat-actor--8e2e2d2b-17d4-4cbf-938f-98ee46b3cd3f",
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T20:03:48.000Z",
   "modified": "2016-04-06T20:03:48.000Z",
-  "labels": ["hacker"],
+  "threat_actor_types": ["hacker"],
   "name": "Evil Org",
   "description": "The Evil Org threat actor group"
 }
@@ -41,9 +42,9 @@ class ThreatActorTestCases(ValidatorTest):
 
         self.check_ignore(threat_actor, 'attack-resource-level')
 
-    def test_vocab_threat_actor_label(self):
+    def test_vocab_threat_actor_type(self):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
-        threat_actor['labels'] += ["anonymous"]
+        threat_actor['threat_actor_types'] += ["anonymous"]
         results = validate_parsed_json(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
