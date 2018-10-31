@@ -48,6 +48,8 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | in the specification                   |
 | 203  | duplicate-ids               | objects in a bundle with duplicate IDs |
 |      |                             | have different `modified` timestamps   |
+| 204  | enforce-relationship_refs   | all SDOs being referenced are in       |
+|      |                             | the same bundle                        |
 | 210  | all-vocabs                  | all of the following open vocabulary   |
 |      |                             | checks are run                         |
 | 211  | attack-motivation           | certain property values are from the   |
@@ -367,6 +369,7 @@ CHECK_CODES = {
     '201': 'marking-definition-type',
     '202': 'relationship-types',
     '203': 'duplicate-ids',
+    '204': 'enforce-relationship-refs',
     '210': 'all-vocabs',
     '211': 'attack-motivation',
     '212': 'attack-resource-level',
