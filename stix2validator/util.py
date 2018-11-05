@@ -48,8 +48,6 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | in the specification                   |
 | 203  | duplicate-ids               | objects in a bundle with duplicate IDs |
 |      |                             | have different `modified` timestamps   |
-| 204  | enforce-relationship_refs   | all SDOs being referenced are in       |
-|      |                             | the same bundle                        |
 | 210  | all-vocabs                  | all of the following open vocabulary   |
 |      |                             | checks are run                         |
 | 211  | attack-motivation           | certain property values are from the   |
@@ -253,6 +251,15 @@ def parse_args(cmd_args, is_script=False):
         help="Clear the cache of external source values after validation."
     )
 
+    parser.add_argument(
+        "--enforce_refs",
+        dest="enforce_refs",
+        action="store_true",
+        default=False,
+        help="Ensures that all SDOs being referenced by the SRO are contained "
+             "within the same bundle."
+    )
+
     args = parser.parse_args(cmd_args)
 
     if not is_script:
@@ -294,13 +301,15 @@ class ValidationOptions(object):
             validation.
         clear_cache: Specifies that the cache of values from external sources
             should be cleared after validation.
+        enforce_refs:Ensures that all SDOs being referenced by the SRO are
+            contained within the same bundle
 
     """
     def __init__(self, cmd_args=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
-                 refresh_cache=False, clear_cache=False):
+                 refresh_cache=False, clear_cache=False, enforce_refs=False):
 
         if cmd_args is not None:
             self.verbose = cmd_args.verbose
@@ -316,6 +325,7 @@ class ValidationOptions(object):
             self.no_cache = cmd_args.no_cache
             self.refresh_cache = cmd_args.refresh_cache
             self.clear_cache = cmd_args.clear_cache
+            self.enforce_refs = cmd_args.enforce_refs
         else:
             # input options
             self.files = files
@@ -330,6 +340,7 @@ class ValidationOptions(object):
             self.strict_properties = strict_properties
             self.disabled = disabled
             self.enabled = enabled
+            self.enforce_refs = enforce_refs
 
             # cache options
             self.no_cache = no_cache
@@ -369,7 +380,6 @@ CHECK_CODES = {
     '201': 'marking-definition-type',
     '202': 'relationship-types',
     '203': 'duplicate-ids',
-    '204': 'enforce-relationship-refs',
     '210': 'all-vocabs',
     '211': 'attack-motivation',
     '212': 'attack-resource-level',

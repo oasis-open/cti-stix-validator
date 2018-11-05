@@ -1032,12 +1032,13 @@ def extref_hashes(instance):
                 return JSONError("External reference '%s' has a URL but no hash."
                                  % (src), instance['id'], 'extref-hashes')
 
+
 def enforce_relationship_refs(instance):
     """Ensures that all SDOs being referenced by the SRO are contained
     within the same bundle"""
     if instance['type'] != 'bundle' or 'objects' not in instance:
         return
-    print "came here"
+
     rel_references = set()
 
     """Find and store all ids"""
@@ -1049,15 +1050,14 @@ def enforce_relationship_refs(instance):
     for obj in instance['objects']:
         if obj['type'] == 'relationship':
             if obj['source_ref'] not in rel_references:
-                yield JSONError("Relationship object %s makes reference to %s Which is not found in current bundle "
-                % (obj['id'], obj['source_ref']),'enforce-relationship-refs')
-
+                yield JSONError("Relationship object %s makes reference to %s "
+                                "Which is not found in current bundle "
+                                % (obj['id'], obj['source_ref']), 'enforce-relationship-refs')
 
             if obj['target_ref'] not in rel_references:
-                yield JSONError("Relationship object %s makes reference to %s Which is not found in current bundle "
-                % (obj['id'], obj['target_ref']),'enforce-relationship-refs')
-
-
+                yield JSONError("Relationship object %s makes reference to %s "
+                                "Which is not found in current bundle "
+                                % (obj['id'], obj['target_ref']), 'enforce-relationship-refs')
 
 
 def duplicate_ids(instance):
@@ -1119,7 +1119,6 @@ CHECKS = {
         network_traffic_ports,
         extref_hashes,
         duplicate_ids,
-        enforce_relationship_refs,
     ],
     'format-checks': [
         custom_object_prefix_strict,
@@ -1227,6 +1226,10 @@ def list_shoulds(options):
     """Construct the list of 'SHOULD' validators to be run by the validator.
     """
     validator_list = []
+    # --enforce_refs
+    # enable checking references in bundles if option selected
+    if options.enforce_refs is True:
+        validator_list.append(CHECKS['enforce_relationship_refs'])
 
     # Default: enable all
     if not options.disabled and not options.enabled:
@@ -1301,10 +1304,6 @@ def list_shoulds(options):
                 validator_list.append(CHECKS['network-traffic-ports'])
             if 'extref-hashes' not in options.disabled:
                 validator_list.append(CHECKS['extref-hashes'])
-            if 'enforce_relationship_refs' not in options.disabled:
-                validator_list.append(CHECKS['enforce_relationship_refs'])
-
-
 
     # --enable
     if options.enabled:
