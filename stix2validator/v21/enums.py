@@ -29,11 +29,12 @@ ATTACK_RESOURCE_LEVEL_OV = [
 IDENTITY_CLASS_OV = [
     "individual",
     "group",
+    "system",
     "organization",
     "class",
-    "unknown"
+    "unspecified",
 ]
-INDICATOR_LABEL_OV = [
+INDICATOR_TYPE_OV = [
     "anomalous-activity",
     "anonymization",
     "benign",
@@ -70,7 +71,7 @@ INDUSTRY_SECTOR_OV = [
     "transportation",
     "utilities"
 ]
-MALWARE_LABEL_OV = [
+MALWARE_TYPE_OV = [
     "adware",
     "backdoor",
     "bot",
@@ -89,7 +90,42 @@ MALWARE_LABEL_OV = [
     "virus",
     "worm"
 ]
-REPORT_LABEL_OV = [
+OPINION_ENUM = [
+    "strongly-disagree",
+    "disagree",
+    "neutral",
+    "agree",
+    "strongly-agree",
+]
+REGION_OV = [
+    "africa",
+    "eastern-africa",
+    "middle-africa",
+    "northern-africa",
+    "southern-africa",
+    "western-africa",
+    "americas",
+    "latin-america-caribbean",
+    "south-america",
+    "caribbean",
+    "central-america northern-america",
+    "asia",
+    "central-asia",
+    "eastern-asia",
+    "southern-asia",
+    "western-asia",
+    "europe eastern-europe",
+    "northern-europe",
+    "southern-europe",
+    "western-europe",
+    "oceana",
+    "australia-new-zealand",
+    "melanesia",
+    "micronesia",
+    "polynesia",
+    "antarctica",
+]
+REPORT_TYPE_OV = [
     "threat-report",
     "attack-pattern",
     "campaign",
@@ -101,7 +137,7 @@ REPORT_LABEL_OV = [
     "tool",
     "vulnerability"
 ]
-THREAT_ACTOR_LABEL_OV = [
+THREAT_ACTOR_TYPE_OV = [
     "activist",
     "competitor",
     "crime-syndicate",
@@ -132,7 +168,7 @@ THREAT_ACTOR_SOPHISTICATION_OV = [
     "innovator",
     "strategic"
 ]
-TOOL_LABEL_OV = [
+TOOL_TYPE_OV = [
     "denial-of-service",
     "exploitation",
     "information-gathering",
@@ -219,20 +255,20 @@ ATTACK_RESOURCE_LEVEL_USES = {
 IDENTITY_CLASS_USES = {
     "identity": ["identity_class"]
 }
-INDICATOR_LABEL_USES = {
-    "indicator": ["labels"]
+INDICATOR_TYPE_USES = {
+    "indicator": ["indicator_types"]
 }
 INDUSTRY_SECTOR_USES = {
     "identity": ["sectors"]
 }
-MALWARE_LABEL_USES = {
-    "malware": ["labels"]
+MALWARE_TYPE_USES = {
+    "malware": ["malware_types"]
 }
-REPORT_LABEL_USES = {
-    "report": ["labels"]
+REPORT_TYPE_USES = {
+    "report": ["report_types"]
 }
-THREAT_ACTOR_LABEL_USES = {
-    "threat-actor": ["labels"]
+THREAT_ACTOR_TYPE_USES = {
+    "threat-actor": ["threat_actor_types"]
 }
 THREAT_ACTOR_ROLE_USES = {
     "threat-actor": ["roles"]
@@ -240,8 +276,8 @@ THREAT_ACTOR_ROLE_USES = {
 THREAT_ACTOR_SOPHISTICATION_USES = {
     "threat-actor": ["sophistication"]
 }
-TOOL_LABEL_USES = {
-    "tool": ["labels"]
+TOOL_TYPE_USES = {
+    "tool": ["tool_types"]
 }
 
 
@@ -262,7 +298,8 @@ TYPES = [
     "bundle",
     "relationship",
     "sighting",
-    "marking-definition"
+    "language-content",
+    "marking-definition",
 ]
 
 OBSERVABLE_TYPES = [
@@ -375,6 +412,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
+        'roles',
         'identity_class',
         'sectors',
         'contact_information'
@@ -395,6 +433,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
+        'indicator_types',
         'pattern',
         'valid_from',
         'valid_until',
@@ -439,6 +478,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
+        'malware_types',
         'kill_chain_phases'
     ],
     "observed-data": [
@@ -476,6 +516,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
+        'report_types',
         'published',
         'object_refs'
     ],
@@ -495,6 +536,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
+        'threat_actor_types',
         'aliases',
         'roles',
         'goals',
@@ -520,6 +562,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
+        'tool_types',
         'kill_chain_phases',
         'tool_version'
     ],
@@ -586,11 +629,30 @@ PROPERTIES = {
         'where_sighted_refs',
         'summary'
     ],
-    "marking-definition": [
+    "language-content": [
         'type',
+        'spec_version',
         'id',
         'created_by_ref',
         'created',
+        'modified',
+        'revoked',
+        'labels',
+        'confidence',
+        'external_references',
+        'object_marking_refs',
+        'granular_markings',
+        'object_ref',
+        'object_modified',
+        'contents',
+    ],
+    "marking-definition": [
+        'type',
+        'spec_version',
+        'id',
+        'created_by_ref',
+        'created',
+        'lang',
         'external_references',
         'object_marking_refs',
         'granular_markings',
@@ -1359,7 +1421,7 @@ VOCAB_PROPERTIES = {
         'sectors'
     ],
     "indicator": [
-        'labels'
+        'indicator_types'
     ],
     "intrusion-set": [
         'resource_level',
@@ -1367,13 +1429,13 @@ VOCAB_PROPERTIES = {
         'secondary_motivations'
     ],
     "malware": [
-        'labels'
+        'malware_types'
     ],
     "report": [
-        'labels'
+        'report_types'
     ],
     "threat-actor": [
-        'labels',
+        'threat_actor_types',
         'roles',
         'sophistication',
         'resource_level',
@@ -1382,7 +1444,7 @@ VOCAB_PROPERTIES = {
         'personal_motivations'
     ],
     "tool": [
-        'labels'
+        'tool_types'
     ],
     "marking-definition": [
         'definition_type'

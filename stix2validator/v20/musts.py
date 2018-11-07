@@ -9,9 +9,9 @@ from stix2patterns.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
 
 from . import enums
-from .errors import JSONError, PatternError
-from .output import info
-from .util import cyber_observable_check, has_cyber_observable_data
+from ..errors import JSONError, PatternError
+from ..output import info
+from ..util import cyber_observable_check, has_cyber_observable_data
 
 CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
 CUSTOM_TYPE_LAX_PREFIX_RE = re.compile(r"^x\-.+$")

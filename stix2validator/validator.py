@@ -18,9 +18,9 @@ from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
 from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
                    init_requests_cache)
 from .v20 import musts as musts20
-from .v20 import shoulds20
+from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
-from .v21 import shoulds21
+from .v21 import shoulds as shoulds21
 
 
 def _is_iterable_non_string(val):

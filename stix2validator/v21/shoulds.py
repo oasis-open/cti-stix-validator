@@ -20,11 +20,11 @@ import re
 from six import string_types
 
 from . import enums
-from .errors import JSONError
+from ..errors import JSONError
+from ..output import info
+from ..util import cyber_observable_check
 from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
                     CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
-from .output import info
-from .util import cyber_observable_check
 
 PROTOCOL_RE = re.compile(r'^[a-zA-Z0-9-]{1,15}$')
 
@@ -210,8 +210,8 @@ def vocab_identity_class(instance):
                        'identity-class')
 
 
-def vocab_indicator_label(instance):
-    return check_vocab(instance, "INDICATOR_LABEL",
+def vocab_indicator_types(instance):
+    return check_vocab(instance, "INDICATOR_TYPE",
                        'indicator-label')
 
 
@@ -220,19 +220,19 @@ def vocab_industry_sector(instance):
                        'indicator-label')
 
 
-def vocab_malware_label(instance):
-    return check_vocab(instance, "MALWARE_LABEL",
-                       'malware-label')
+def vocab_malware_types(instance):
+    return check_vocab(instance, "MALWARE_TYPE",
+                       'malware-types')
 
 
-def vocab_report_label(instance):
-    return check_vocab(instance, "REPORT_LABEL",
-                       'report-label')
+def vocab_report_types(instance):
+    return check_vocab(instance, "REPORT_TYPE",
+                       'report-types')
 
 
-def vocab_threat_actor_label(instance):
-    return check_vocab(instance, "THREAT_ACTOR_LABEL",
-                       'threat-actor-label')
+def vocab_threat_actor_types(instance):
+    return check_vocab(instance, "THREAT_ACTOR_TYPE",
+                       'threat-actor-types')
 
 
 def vocab_threat_actor_role(instance):
@@ -245,9 +245,9 @@ def vocab_threat_actor_sophistication_level(instance):
                        'threat-actor-sophistication')
 
 
-def vocab_tool_label(instance):
-    return check_vocab(instance, "TOOL_LABEL",
-                       'tool-label')
+def vocab_tool_types(instance):
+    return check_vocab(instance, "TOOL_TYPE",
+                       'tool-types')
 
 
 def vocab_marking_definition(instance):
@@ -818,7 +818,7 @@ def protocols(instance):
 
 @cyber_observable_check
 def ipfix(instance):
-    """Ensure the 'protocols' property of network-traffic objects contains only
+    """Ensure the 'ipfix' property of network-traffic objects contains only
     values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
     """
     ipf_pattern = re.compile(r'^[a-z][a-zA-Z0-9]+')
@@ -1071,14 +1071,14 @@ CHECKS = {
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_identity_class,
-        vocab_indicator_label,
+        vocab_indicator_types,
         vocab_industry_sector,
-        vocab_malware_label,
-        vocab_report_label,
-        vocab_threat_actor_label,
+        vocab_malware_types,
+        vocab_report_types,
+        vocab_threat_actor_types,
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
-        vocab_tool_label,
+        vocab_tool_types,
         vocab_hash_algo,
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
@@ -1121,14 +1121,14 @@ CHECKS = {
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_identity_class,
-        vocab_indicator_label,
+        vocab_indicator_types,
         vocab_industry_sector,
-        vocab_malware_label,
-        vocab_report_label,
-        vocab_threat_actor_label,
+        vocab_malware_types,
+        vocab_report_types,
+        vocab_threat_actor_types,
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
-        vocab_tool_label,
+        vocab_tool_types,
         vocab_hash_algo,
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
@@ -1147,14 +1147,14 @@ CHECKS = {
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_identity_class,
-        vocab_indicator_label,
+        vocab_indicator_types,
         vocab_industry_sector,
-        vocab_malware_label,
-        vocab_report_label,
-        vocab_threat_actor_label,
+        vocab_malware_types,
+        vocab_report_types,
+        vocab_threat_actor_types,
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
-        vocab_tool_label,
+        vocab_tool_types,
         vocab_hash_algo,
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
@@ -1163,14 +1163,14 @@ CHECKS = {
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
     'identity-class': vocab_identity_class,
-    'indicator-label': vocab_indicator_label,
+    'indicator-types': vocab_indicator_types,
     'industry-sector': vocab_industry_sector,
-    'malware-label': vocab_malware_label,
-    'report-label': vocab_report_label,
-    'threat-actor-label': vocab_threat_actor_label,
+    'malware-types': vocab_malware_types,
+    'report-types': vocab_report_types,
+    'threat-actor-types': vocab_threat_actor_types,
     'threat-actor-role': vocab_threat_actor_role,
     'threat-actor-sophistication': vocab_threat_actor_sophistication_level,
-    'tool-label': vocab_tool_label,
+    'tool-types': vocab_tool_types,
     'hash-algo': vocab_hash_algo,
     'encryption-algo': vocab_encryption_algo,
     'windows-pebinary-type': vocab_windows_pebinary_type,
@@ -1240,22 +1240,22 @@ def list_shoulds(options):
                         validator_list.append(CHECKS['attack-resource-level'])
                     if 'identity-class' not in options.disabled:
                         validator_list.append(CHECKS['identity-class'])
-                    if 'indicator-label' not in options.disabled:
-                        validator_list.append(CHECKS['indicator-label'])
+                    if 'indicator-types' not in options.disabled:
+                        validator_list.append(CHECKS['indicator-types'])
                     if 'industry-sector' not in options.disabled:
                         validator_list.append(CHECKS['industry-sector'])
-                    if 'malware-label' not in options.disabled:
-                        validator_list.append(CHECKS['malware-label'])
-                    if 'report-label' not in options.disabled:
-                        validator_list.append(CHECKS['report-label'])
-                    if 'threat-actor-label' not in options.disabled:
-                        validator_list.append(CHECKS['threat-actor-label'])
+                    if 'malware-types' not in options.disabled:
+                        validator_list.append(CHECKS['malware-types'])
+                    if 'report-types' not in options.disabled:
+                        validator_list.append(CHECKS['report-types'])
+                    if 'threat-actor-types' not in options.disabled:
+                        validator_list.append(CHECKS['threat-actor-types'])
                     if 'threat-actor-role' not in options.disabled:
                         validator_list.append(CHECKS['threat-actor-role'])
                     if 'threat-actor-sophistication' not in options.disabled:
                         validator_list.append(CHECKS['threat-actor-sophistication'])
-                    if 'tool-label' not in options.disabled:
-                        validator_list.append(CHECKS['tool-label'])
+                    if 'tool-types' not in options.disabled:
+                        validator_list.append(CHECKS['tool-types'])
                     if 'hash-algo' not in options.disabled:
                         validator_list.append(CHECKS['hash-algo'])
                     if 'encryption-algo' not in options.disabled:

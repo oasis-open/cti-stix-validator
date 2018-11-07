@@ -20,11 +20,11 @@ import re
 from six import string_types
 
 from . import enums
-from .errors import JSONError
+from ..errors import JSONError
+from ..output import info
+from ..util import cyber_observable_check
 from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
                     CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
-from .output import info
-from .util import cyber_observable_check
 
 PROTOCOL_RE = re.compile(r'^[a-zA-Z0-9-]{1,15}$')
 
@@ -818,7 +818,7 @@ def protocols(instance):
 
 @cyber_observable_check
 def ipfix(instance):
-    """Ensure the 'protocols' property of network-traffic objects contains only
+    """Ensure the 'ipfix' property of network-traffic objects contains only
     values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
     """
     ipf_pattern = re.compile(r'^[a-z][a-zA-Z0-9]+')
