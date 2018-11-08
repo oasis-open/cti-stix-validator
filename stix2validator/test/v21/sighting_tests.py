@@ -7,6 +7,7 @@ from ... import validate_string
 VALID_SIGHTING = u"""
 {
   "type": "sighting",
+  "spec_version": "2.1",
   "id": "sighting--6b0e3956-95f3-4c04-a882-116832996da0",
   "created": "2016-08-22T14:09:00.123Z",
   "modified": "2016-08-22T14:09:00.123Z",

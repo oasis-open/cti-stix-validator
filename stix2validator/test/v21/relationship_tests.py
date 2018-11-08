@@ -7,6 +7,7 @@ from ... import validate_parsed_json, validate_string
 VALID_RELATIONSHIP = u"""
 {
     "type": "relationship",
+    "spec_version": "2.1",
     "id": "relationship--44298a74-ba52-4f0c-87a3-1824e67d7fad",
     "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
     "created": "2016-04-06T20:06:37.000Z",

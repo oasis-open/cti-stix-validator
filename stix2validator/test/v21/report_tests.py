@@ -38,7 +38,7 @@ class IdentityTestCases(ValidatorTest):
         results = validate_parsed_json(report, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.check_ignore(report, 'report-label')
+        self.check_ignore(report, 'report-types')
 
     def test_invalid_timestamp(self):
         report = copy.deepcopy(self.valid_report)

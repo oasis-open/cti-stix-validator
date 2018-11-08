@@ -212,12 +212,12 @@ def vocab_identity_class(instance):
 
 def vocab_indicator_types(instance):
     return check_vocab(instance, "INDICATOR_TYPE",
-                       'indicator-label')
+                       'indicator-types')
 
 
 def vocab_industry_sector(instance):
     return check_vocab(instance, "INDUSTRY_SECTOR",
-                       'indicator-label')
+                       'industry-sector')
 
 
 def vocab_malware_types(instance):

@@ -217,7 +217,7 @@ def vocab_indicator_label(instance):
 
 def vocab_industry_sector(instance):
     return check_vocab(instance, "INDUSTRY_SECTOR",
-                       'indicator-label')
+                       'industry-sector')
 
 
 def vocab_malware_label(instance):

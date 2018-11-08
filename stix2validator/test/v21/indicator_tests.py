@@ -131,7 +131,7 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.check_ignore(indicator, 'indicator-label')
+        self.check_ignore(indicator, 'indicator-types')
 
     def test_invalid_pattern(self):
         indicator = copy.deepcopy(self.valid_indicator)
@@ -191,6 +191,7 @@ class IndicatorTestCases(ValidatorTest):
         # no schema exists for this type
         new_obj = {
             "type": "x-type",
+            "spec_version": "2.1",
             "id": "x-type--353ed279-5f4f-4a79-bffc-b2e2ed08ea1f",
             "created": "2016-04-06T20:03:48.000Z",
             "modified": "2016-04-06T20:03:48.000Z",

@@ -37,7 +37,7 @@ class ToolTestCases(ValidatorTest):
         results = validate_parsed_json(tool, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.check_ignore(tool, 'tool-label')
+        self.check_ignore(tool, 'tool-types')
 
     def test_kill_chain_name(self):
         tool = copy.deepcopy(self.valid_tool)

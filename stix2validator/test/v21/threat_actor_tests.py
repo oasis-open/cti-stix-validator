@@ -48,7 +48,7 @@ class ThreatActorTestCases(ValidatorTest):
         results = validate_parsed_json(threat_actor, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.check_ignore(threat_actor, 'threat-actor-label')
+        self.check_ignore(threat_actor, 'threat-actor-types')
 
     def test_vocab_threat_actor_role(self):
         threat_actor = copy.deepcopy(self.valid_threat_actor)

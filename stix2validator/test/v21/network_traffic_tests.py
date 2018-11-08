@@ -7,6 +7,7 @@ from ... import validate_string
 VALID_NETWORK_TRAFFIC_DEFINITION = u"""
 {
   "type": "observed-data",
+  "spec_version": "2.1",
   "id": "observed-data--b67d30ff-02ac-498a-92f9-32f845f448cf",
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T19:58:16.000Z",
