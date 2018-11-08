@@ -20,9 +20,9 @@ import re
 from six import string_types
 
 from . import enums
-from ..errors import JSONError
 from ..output import info
 from ..util import cyber_observable_check
+from .errors import JSONError
 from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
                     CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
 

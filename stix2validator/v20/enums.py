@@ -1353,6 +1353,48 @@ VOCAB_PROPERTIES = {
     ]
 }
 
+# Mapping of check code numbers to names
+CHECK_CODES = {
+    '1': 'format-checks',
+    '101': 'custom-prefix',
+    '102': 'custom-prefix-lax',
+    '111': 'open-vocab-format',
+    '121': 'kill-chain-names',
+    '141': 'observable-object-keys',
+    '142': 'observable-dictionary-keys',
+    '149': 'windows-process-priority-format',
+    '150': 'hash-length',
+    '2': 'approved-values',
+    '201': 'marking-definition-type',
+    '202': 'relationship-types',
+    '203': 'duplicate-ids',
+    '210': 'all-vocabs',
+    '211': 'attack-motivation',
+    '212': 'attack-resource-level',
+    '213': 'identity-class',
+    '214': 'indicator-label',
+    '215': 'industry-sector',
+    '216': 'malware-label',
+    '218': 'report-label',
+    '219': 'threat-actor-label',
+    '220': 'threat-actor-role',
+    '221': 'threat-actor-sophistication',
+    '222': 'tool-label',
+    '241': 'hash-algo',
+    '242': 'encryption-algo',
+    '243': 'windows-pebinary-type',
+    '244': 'account-type',
+    '270': 'all-external-sources',
+    '271': 'mime-type',
+    '272': 'protocols',
+    '273': 'ipfix',
+    '274': 'http-request-headers',
+    '275': 'socket-options',
+    '276': 'pdf-doc-info',
+    '301': 'network-traffic-ports',
+    '302': 'extref-hashes',
+}
+
 
 def media_types():
     """Return a list of the IANA Media (MIME) Types, or an empty list if the

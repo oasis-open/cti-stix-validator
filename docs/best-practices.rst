@@ -33,7 +33,129 @@ or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
 :code:`clear_cache=True`. This caching can be disabled entirely with
 :code:`--no-cache` or :code:`no_cache=True`.
 
-**Recommended Best Practice Check Codes**
+**Recommended Best Practice Check Codes - STIX 2.1**
+
++--------+-----------------------------+----------------------------------------+
+|**Code**|**Name**                     |**Ensures...**                          |
++--------+-----------------------------+----------------------------------------+
+|   1    | format-checks               | all 1xx checks are run                 |
++--------+-----------------------------+----------------------------------------+
+|  101   | custom-prefix               | names of custom object types,          |
+|        |                             | properties, observable objects,        |
+|        |                             | observable object properties, and      |
+|        |                             | observable object extensions follow    |
+|        |                             | the correct format                     |
++--------+-----------------------------+----------------------------------------+
+|  102   | custom-prefix-lax           | same as 101 but more lenient; no       |
+|        |                             | source identifier needed in prefix     |
++--------+-----------------------------+----------------------------------------+
+|  111   | open-vocab-format           | values of open vocabularies follow the |
+|        |                             | correct format                         |
++--------+-----------------------------+----------------------------------------+
+|  121   | kill-chain-names            | kill-chain-phase name and phase follow |
+|        |                             | the correct format                     |
++--------+-----------------------------+----------------------------------------+
+|  141   | observable-object-keys      | observable object keys follow the      |
+|        |                             | correct format                         |
++--------+-----------------------------+----------------------------------------+
+|  142   | observable-dictionary-keys  | dictionaries in cyber observable       |
+|        |                             | objects follow the correct format      |
++--------+-----------------------------+----------------------------------------+
+|  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
+|        | format                      | follows the correct format             |
++--------+-----------------------------+----------------------------------------+
+|  150   | hash-length                 | keys in 'hashes'-type properties are   |
+|        |                             | not too long                           |
++--------+-----------------------------+----------------------------------------+
+|   2    | approved-values             | all 2xx checks are run                 |
++--------+-----------------------------+----------------------------------------+
+|  201   | marking-definition-type     | marking definitions use a valid        |
+|        |                             | definition_type                        |
++--------+-----------------------------+----------------------------------------+
+|  202   | relationship-types          | relationships are among those defined  |
+|        |                             | in the specification                   |
++--------+-----------------------------+----------------------------------------+
+|  203   | duplicate-ids               | objects in a bundle with duplicate IDs |
+|        |                             | have different `modified` timestamps   |
++--------+-----------------------------+----------------------------------------+
+|  210   | all-vocabs                  | all of the following open vocabulary   |
+|        |                             | checks are run                         |
++--------+-----------------------------+----------------------------------------+
+|  211   | attack-motivation           | certain property values are from the   |
+|        |                             | attack_motivation vocabulary           |
++--------+-----------------------------+----------------------------------------+
+|  212   | attack-resource-level       | certain property values are from the   |
+|        |                             | attack_resource_level vocabulary       |
++--------+-----------------------------+----------------------------------------+
+|  213   | identity-class              | certain property values are from the   |
+|        |                             | identity_class vocabulary              |
++--------+-----------------------------+----------------------------------------+
+|  214   | indicator-types             | certain property values are from the   |
+|        |                             | indicator_types vocabulary             |
++--------+-----------------------------+----------------------------------------+
+|  215   | industry-sector             | certain property values are from the   |
+|        |                             | industry_sector vocabulary             |
++--------+-----------------------------+----------------------------------------+
+|  216   | malware-types               | certain property values are from the   |
+|        |                             | malware_types vocabulary               |
++--------+-----------------------------+----------------------------------------+
+|  218   | report-types                | certain property values are from the   |
+|        |                             | report_types vocabulary                |
++--------+-----------------------------+----------------------------------------+
+|  219   | threat-actor-types          | certain property values are from the   |
+|        |                             | threat_actor_types vocabulary          |
++--------+-----------------------------+----------------------------------------+
+|  220   | threat-actor-role           | certain property values are from the   |
+|        |                             | threat_actor_role vocabulary           |
++--------+-----------------------------+----------------------------------------+
+|  221   | threat-actor-sophistication | certain property values are from the   |
+|        |                             | threat_actor_sophistication vocabulary |
++--------+-----------------------------+----------------------------------------+
+|  222   | tool-types                  | certain property values are from the   |
+|        |                             | tool_types vocabulary                  |
++--------+-----------------------------+----------------------------------------+
+|  241   | hash-algo                   | certain property values are from the   |
+|        |                             | hash-algo vocabulary                   |
++--------+-----------------------------+----------------------------------------+
+|  242   | encryption-algo             | certain property values are from the   |
+|        |                             | encryption-algo vocabulary             |
++--------+-----------------------------+----------------------------------------+
+|  243   | windows-pebinary-type       | certain property values are from the   |
+|        |                             | windows-pebinary-type vocabulary       |
++--------+-----------------------------+----------------------------------------+
+|  244   | account-type                | certain property values are from the   |
+|        |                             | account-type vocabulary                |
++--------+-----------------------------+----------------------------------------+
+|  270   | all-external-sources        | all of the following external source   |
+|        |                             | checks are run                         |
++--------+-----------------------------+----------------------------------------+
+|  271   | mime-type                   | file.mime_type is a valid IANA MIME    |
+|        |                             | type                                   |
++--------+-----------------------------+----------------------------------------+
+|  272   | protocols                   | certain property values are valid IANA |
+|        |                             | Service and Protocol names             |
++--------+-----------------------------+----------------------------------------+
+|  273   | ipfix                       | certain property values are valid IANA |
+|        |                             | IP Flow Information Export (IPFIX)     |
+|        |                             | Entities                               |
++--------+-----------------------------+----------------------------------------+
+|  274   | http-request-headers        | certain property values are valid HTTP |
+|        |                             | request header names                   |
++--------+-----------------------------+----------------------------------------+
+|  275   | socket-options              | certain property values are valid      |
+|        |                             | socket options                         |
++--------+-----------------------------+----------------------------------------+
+|  276   | pdf-doc-info                | certain property values are valid PDF  |
+|        |                             | Document Information Dictionary keys   |
++--------+-----------------------------+----------------------------------------+
+|  301   | network-traffic-ports       | network-traffic objects contain both   |
+|        |                             | src_port and dst_port                  |
++--------+-----------------------------+----------------------------------------+
+|  302   | extref-hashes               | external references SHOULD have hashes |
+|        |                             | if they have a url                     |
++--------+-----------------------------+----------------------------------------+
+
+**Recommended Best Practice Check Codes - STIX 2.0**
 
 +--------+-----------------------------+----------------------------------------+
 |**Code**|**Name**                     |**Ensures...**                          |

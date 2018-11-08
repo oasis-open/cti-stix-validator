@@ -1,9 +1,10 @@
 import copy
 import json
 
+from jsonschema import exceptions
+
 from . import ValidatorTest
 from ... import validate_parsed_json, validate_string
-from ...errors import JSONError
 
 VALID_IDENTITY = u"""
 {
@@ -21,7 +22,7 @@ class IdentityTestCases(ValidatorTest):
     valid_identity = json.loads(VALID_IDENTITY)
 
     def test_invalid_check(self):
-        self.assertRaises(JSONError, self.assertFalseWithOptions,
+        self.assertRaises(exceptions.ValidationError, self.assertFalseWithOptions,
                           self.valid_identity, enabled='abc')
 
     def test_wellformed_identity(self):

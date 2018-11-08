@@ -13,8 +13,8 @@ import simplejson as json
 from six import iteritems, string_types, text_type
 
 from . import output
-from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
-                     SchemaInvalidError, ValidationError, pretty_error)
+from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
+                     ValidationError, pretty_error)
 from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
                    init_requests_cache)
 from .v20 import musts as musts20
@@ -664,7 +664,7 @@ def _schema_validate(sdo, options):
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
         for key, obj in iteritems(sdo['objects']):
             if 'type' not in obj:
-                error_gens.append(([JSONError("Observable object must contain a 'type' property.", error_prefix)],
+                error_gens.append(([schema_exceptions.ValidationError("Observable object must contain a 'type' property.", error_prefix)],
                                    error_prefix + 'object \'' + key + '\': '))
                 continue
             # Get validator for built-in schemas
