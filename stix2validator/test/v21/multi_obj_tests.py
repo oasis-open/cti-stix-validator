@@ -8,6 +8,7 @@ MULTI_OBJ_JSON = u"""
 [
     {
       "type": "attack-pattern",
+      "spec_version": "2.1",
       "id": "attack-pattern--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",
       "created": "2016-02-12T08:17:27.000Z",
       "modified": "2016-02-12T08:17:27.000Z",
@@ -23,6 +24,7 @@ MULTI_OBJ_JSON = u"""
 
     {
       "type": "identity",
+      "spec_version": "2.1",
       "id": "identity--2d1c6ab3-5e4e-48ac-a32b-f0c01c2836a8",
       "created": "2014-08-08T15:50:10.983Z",
       "modified": "2014-08-08T15:50:10.983Z",

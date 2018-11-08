@@ -27,8 +27,7 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
         "archive-ext": {
           "contains_refs": [
             "1"
-          ],
-          "version": "5.0"
+          ]
         }
       }
     },
@@ -140,7 +139,8 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_windows_pebinary_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
-            "pe_type": "elf"
+            "pe_type": "elf",
+            "machine_hex": "014c",
         }
         self.assertFalseWithOptions(observed_data)
 
@@ -148,15 +148,17 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_vocab_encryption_algo(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['encryption_algorithm'] = "AES128-ECB"
+        observed_data['objects']['2'] = {
+            "type": "artifact",
+            "mime_type": "application/zip",
+            "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
+            "encryption_algorithm": "foo",
+            "decryption_key": "My voice is my passport"
+        }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['0']['is_encrypted'] = True
+        observed_data['objects']['2']['encryption_algorithm'] = "mime-type-indicated"
         self.assertTrueWithOptions(observed_data)
-
-        observed_data['objects']['0']['encryption_algorithm'] = "FOO"
-        self.assertFalseWithOptions(observed_data)
-        self.check_ignore(observed_data, 'encryption-algo')
 
     def test_vocab_file_hashes(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
@@ -579,7 +581,6 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2'] = {
             "type": "process",
             "pid": 314,
-            "name": "foobar.exe",
             "extensions": {
                 "windows-process-ext": {
                     "aslr_enabled": True,
@@ -768,12 +769,10 @@ class ObservedDataTestCases(ValidatorTest):
     def test_file_invalid_is_encrypted(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
-            "type": "file",
-            "hashes": {
-                "MD5": "8D98A25E9D0662B1F4CA3BF22D6F53E9"
-            },
-            "is_encrypted": False,
-            "encryption_algorithm": "RSA"
+            "type": "artifact",
+            "mime_type": "application/zip",
+            "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
+            "decryption_key": "My voice is my passport"
         }
         self.assertFalseWithOptions(observed_data)
 

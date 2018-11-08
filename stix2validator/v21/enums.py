@@ -668,7 +668,9 @@ OBSERVABLE_PROPERTIES = {
         'mime_type',
         'payload_bin',
         'url',
-        'hashes'
+        'hashes',
+        'encryption_algorithm',
+        'decryption_key',
     ],
     'autonomous-system': [
         'type',
@@ -731,9 +733,6 @@ OBSERVABLE_PROPERTIES = {
         'modified',
         'accessed',
         'parent_directory_ref',
-        'is_encrypted',
-        'encryption_algorithm',
-        'decryption_key',
         'contains_refs',
         'content_ref'
     ],
@@ -787,15 +786,13 @@ OBSERVABLE_PROPERTIES = {
         'extensions',
         'is_hidden',
         'pid',
-        'name',
         'created',
         'cwd',
-        'arguments',
         'command_line',
         'environment_variables',
         'opened_connection_refs',
         'creator_user_ref',
-        'binary_ref',
+        'image_ref',
         'parent_ref',
         'child_refs'
     ],
@@ -817,6 +814,7 @@ OBSERVABLE_PROPERTIES = {
         'type',
         'extensions',
         'user_id',
+        'credential',
         'account_login',
         'account_type',
         'display_name',
@@ -826,7 +824,7 @@ OBSERVABLE_PROPERTIES = {
         'is_disabled',
         'account_created',
         'account_expires',
-        'password_last_changed',
+        'credential_last_changed',
         'account_first_login',
         'account_last_login'
     ],
@@ -859,7 +857,6 @@ OBSERVABLE_PROPERTIES = {
 OBSERVABLE_EXTENSION_PROPERTIES = {
     'archive-ext': [
         'contains_refs',
-        'version',
         'comment'
     ],
     'ntfs-ext': [
@@ -877,7 +874,6 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'image_height',
         'image_width',
         'bits_per_pixel',
-        'image_compression_algorithm',
         'exif_tags'
     ],
     'windows-pebinary-ext': [
@@ -910,7 +906,6 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'address_family',
         'is_blocking',
         'is_listening',
-        'protocol_family',
         'options',
         'socket_type',
         'socket_descriptor',
@@ -926,7 +921,8 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'priority',
         'owner_sid',
         'window_title',
-        'startup_info'
+        'startup_info',
+        'integrity_level',
     ],
     'windows-service-ext': [
         'service_name',
@@ -1175,7 +1171,7 @@ OBSERVABLE_PROP_REFS = {
         'creator_user_ref': [
             'user-account'
         ],
-        'binary_ref': [
+        'image_ref': [
             'file'
         ],
         'parent_ref': [
@@ -1386,7 +1382,7 @@ TIMESTAMP_OBSERVABLE_PROPERTIES = {
     'user-account': [
         'account_created',
         'account_expires',
-        'password_last_changed',
+        'credential_last_changed',
         'account_first_login',
         'account_last_login',
     ],
