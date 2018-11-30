@@ -118,11 +118,8 @@ class ObservedDataTestCases(ValidatorTest):
                 "foo": "bar"
             }
         }
-        results = validate_parsed_json(observed_data, self.options)
-        self.assertTrue(len(results.errors) == 1)
-        self.assertFalse(results.is_valid)
-
-        self.check_ignore(observed_data, 'observable-dictionary-keys')
+        # STIX 2.1 removed dictionary key minimum length
+        self.assertTrueWithOptions(observed_data)
 
     def test_vocab_account_type(self):
         observed_data = copy.deepcopy(self.valid_observed_data)

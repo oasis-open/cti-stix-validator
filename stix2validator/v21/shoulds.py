@@ -497,14 +497,8 @@ def test_dict_keys(item, inst_id):
     not_caps_re = re.compile(r"^[^A-Z]+$")
     for k, v in item.items():
         if not not_caps_re.match(k):
-            yield JSONError("As a dictionary key for cyber observable "
-                            "objects, '%s' should be lowercase." % k,
-                            inst_id, 'observable-dictionary-keys')
-        if not len(k) <= 30:
-            yield JSONError("As a dictionary key for cyber observable "
-                            "objects, '%s' should be no longer than 30 "
-                            "characters long." % k, inst_id,
-                            'observable-dictionary-keys')
+            yield JSONError("As a dictionary key, '%s' should be lowercase."
+                            % k, inst_id, 'observable-dictionary-keys')
 
         if type(v) is dict and k not in enums.OBSERVABLE_DICT_KEY_EXCEPTIONS:
             for error in test_dict_keys(v, inst_id):
