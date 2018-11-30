@@ -41,6 +41,14 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
+    def test_invalid_lang(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['lang'] = "foo"
+        self.assertFalseWithOptions(indicator)
+
+        indicator['lang'] = "en"
+        self.assertTrueWithOptions(indicator)
+
     def test_custom_property_name_invalid_character(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['my_new_property!'] = "abc123"

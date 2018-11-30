@@ -312,7 +312,7 @@ def software_language(instance):
         if ('type' in obj and obj['type'] == 'software' and
                 'languages' in obj):
             for lang in obj['languages']:
-                if lang not in enums.LANG_CODES:
+                if lang not in enums.SOFTWARE_LANG_CODES:
                     yield JSONError("The 'languages' property of object '%s' "
                                     "contains an invalid ISO 639-2 language "
                                     " code ('%s')."

@@ -1564,7 +1564,7 @@ PDF_DID = [
     'Trapped'
 ]
 
-LANG_CODES = [
+SOFTWARE_LANG_CODES = [
     'aar', 'abk', 'ace', 'ach', 'ada', 'ady', 'afa', 'afh', 'afr', 'ain',
     'aka', 'akk', 'alb', 'sqi', 'ale', 'alg', 'alt', 'amh', 'ang', 'anp',
     'apa', 'ara', 'arc', 'arg', 'arm', 'hye', 'arn', 'arp', 'art', 'arw',

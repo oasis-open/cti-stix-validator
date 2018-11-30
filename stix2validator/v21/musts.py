@@ -303,6 +303,14 @@ def character_set(instance):
                                     % (key, obj['name_enc']), instance['id'])
 
 
+def language(instance):
+    """Ensure the 'lang' property of SDOs is a valid RFC 5646 language code.
+    """
+    if ('lang' in instance and instance['lang'] not in enums.LANG_CODES):
+                yield JSONError("'%s' is not a valid RFC 5646 language code."
+                                % instance['lang'], instance['id'])
+
+
 @cyber_observable_check
 def software_language(instance):
     """Ensure the 'language' property of software objects is a valid ISO 639-2
@@ -312,7 +320,7 @@ def software_language(instance):
         if ('type' in obj and obj['type'] == 'software' and
                 'languages' in obj):
             for lang in obj['languages']:
-                if lang not in enums.LANG_CODES:
+                if lang not in enums.SOFTWARE_LANG_CODES:
                     yield JSONError("The 'languages' property of object '%s' "
                                     "contains an invalid ISO 639-2 language "
                                     " code ('%s')."
@@ -482,6 +490,7 @@ def list_musts(options):
         observable_object_references,
         artifact_mime_type,
         character_set,
+        language,
         software_language,
         patterns
     ]
