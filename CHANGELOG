@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+1.1.1 - 2018-11-30
+
+* Added a flag to warn when all SDOs referenced by SROs are not contained in
+  the same bundle
+* Unpinned jsonschema version
+
 1.1.0 - 2018-10-16
 
 * Add ability to use stdin as input
