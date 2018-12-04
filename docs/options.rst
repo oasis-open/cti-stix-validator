@@ -50,4 +50,4 @@ constructor.
 |                          |                       | validation.                                            |
 +--------------------------+-----------------------+--------------------------------------------------------+
 
-For the list of checks that can be used with the "enabled" or "disabled" options, see the `Best Practices page <best-practices.rst>`_.
+For the list of checks that can be used with the "enabled" or "disabled" options, see the :doc:`Best Practices page <best-practices>`_.
