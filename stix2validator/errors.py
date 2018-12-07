@@ -95,7 +95,10 @@ def pretty_error(error, verbose=False):
     # Don't reword error messages from our validators,
     # only the default error messages from the jsonschema library
     if repr(error.schema) == '<unset>':
-        return error_loc + msg
+        try:
+            return error_loc + msg
+        except UnicodeDecodeError:
+            return error_loc + msg.decode('utf-8')
 
     # Reword error messages containing regexes
     if error.validator == 'pattern' and 'title' in error.schema:

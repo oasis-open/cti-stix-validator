@@ -14,6 +14,8 @@ from ..output import info
 from ..util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
 
+TYPE_FORMAT_RE = re.compile(r'^\-?[a-z0-9]+(-[a-z0-9]+)*\-?$')
+PROPERTY_FORMAT_RE = re.compile(r'^[a-z0-9_]{3,250}$')
 CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
 CUSTOM_TYPE_LAX_PREFIX_RE = re.compile(r"^x\-.+$")
 CUSTOM_PROPERTY_PREFIX_RE = re.compile(r"^x_.+_.+$")
@@ -422,9 +424,6 @@ def patterns(instance, options):
             yield PatternError(str(e), instance['id'])
         return
 
-    type_format_re = re.compile(r'^\-?[a-z0-9]+(-[a-z0-9]+)*\-?$')
-    property_format_re = re.compile(r'^[a-z0-9_]{3,250}$')
-
     p = Pattern(pattern)
     inspection = p.inspect().comparisons
     for objtype in inspection:
@@ -434,7 +433,7 @@ def patterns(instance, options):
         elif options.strict_types:
             yield PatternError("'%s' is not a valid STIX observable type"
                                % objtype, instance['id'])
-        elif (not type_format_re.match(objtype) or
+        elif (not TYPE_FORMAT_RE.match(objtype) or
               len(objtype) < 3 or len(objtype) > 250):
             yield PatternError("'%s' is not a valid observable type name"
                                % objtype, instance['id'])
@@ -461,7 +460,7 @@ def patterns(instance, options):
             elif options.strict_properties:
                 yield PatternError("'%s' is not a valid property for '%s' objects"
                                    % (prop, objtype), instance['id'])
-            elif not property_format_re.match(prop):
+            elif not PROPERTY_FORMAT_RE.match(prop):
                 yield PatternError("'%s' is not a valid observable property name"
                                    % prop, instance['id'])
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
@@ -478,6 +477,25 @@ def patterns(instance, options):
                                    "should start with 'x_'" % prop, instance['id'])
 
 
+def language_contents(instance):
+    """Ensure keys in Language Content's 'contents' dictionary are valid
+    language codes, and that the keys in the sub-dictionaries match the rules
+    for object property names.
+    """
+    if instance['type'] != 'language-content' or 'contents' not in instance:
+        return
+
+    for key, value in instance['contents'].items():
+        if key not in enums.LANG_CODES:
+            yield JSONError("Invalid key '%s' in 'contents' property must be"
+                            " an RFC 5646 code" % key, instance['id'])
+        for subkey, subvalue in value.items():
+            if not PROPERTY_FORMAT_RE.match(subkey):
+                yield JSONError("'%s' in '%s' of the 'contents' property is "
+                                "invalid and must match a valid property name"
+                                % (subkey, key), instance['id'], 'observable-dictionary-keys')
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -492,7 +510,8 @@ def list_musts(options):
         character_set,
         language,
         software_language,
-        patterns
+        patterns,
+        language_contents,
     ]
 
     # --strict-types

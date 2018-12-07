@@ -681,6 +681,7 @@ def _schema_validate(sdo, options):
             custom_obs_errors = _get_error_generator(obj['type'],
                                                      obj,
                                                      options.schema_dir,
+                                                     options.version,
                                                      'cyber-observable-core')
             if custom_obs_errors:
                 error_gens.append((custom_obs_errors,
