@@ -7,6 +7,7 @@ from ... import validate_parsed_json, validate_string
 VALID_MARKING_DEFINITION = u"""
 {
   "type": "marking-definition",
+  "spec_version": "2.1",
   "id": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
   "created": "2017-01-20T00:00:00.000Z",
   "definition_type": "tlp",

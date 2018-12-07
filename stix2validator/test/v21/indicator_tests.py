@@ -85,12 +85,6 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
-    def test_reserved_property_confidence(self):
-        indicator = copy.deepcopy(self.valid_indicator)
-        indicator['confidence'] = "Something"
-        results = validate_parsed_json(indicator, self.options)
-        self.assertEqual(results.is_valid, False)
-
     def test_reserved_property_severity(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['severity'] = "Something"
@@ -112,12 +106,6 @@ class IndicatorTestCases(ValidatorTest):
     def test_reserved_property_phone_numbers(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['phone_numbers'] = "Something"
-        results = validate_parsed_json(indicator, self.options)
-        self.assertEqual(results.is_valid, False)
-
-    def test_reserved_property_addresses(self):
-        indicator = copy.deepcopy(self.valid_indicator)
-        indicator['addresses'] = "Something"
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, False)
 
