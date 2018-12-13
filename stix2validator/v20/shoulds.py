@@ -1267,6 +1267,16 @@ def list_shoulds(options):
                 if 'all-external-sources' not in options.disabled:
                     if 'mime-type' not in options.disabled:
                         validator_list.append(CHECKS['mime-type'])
+                    if 'protocols' not in options.disabled:
+                        validator_list.append(CHECKS['protocols'])
+                    if 'ipfix' not in options.disabled:
+                        validator_list.append(CHECKS['ipfix'])
+                    if 'http-request-headers' not in options.disabled:
+                        validator_list.append(CHECKS['http-request-headers'])
+                    if 'socket-options' not in options.disabled:
+                        validator_list.append(CHECKS['socket-options'])
+                    if 'pdf-doc-info' not in options.disabled:
+                        validator_list.append(CHECKS['pdf-doc-info'])
 
             if 'network-traffic-ports' not in options.disabled:
                 validator_list.append(CHECKS['network-traffic-ports'])
