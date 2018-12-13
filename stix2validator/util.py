@@ -79,6 +79,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | threat_actor_sophistication vocabulary |
 | 222  | tool-types                  | certain property values are from the   |
 |      |                             | tool_types vocabulary                  |
+| 222  | region                      | certain property values are from the   |
+|      |                             | region vocabulary                      |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
 | 242  | encryption-algo             | certain property values are from the   |
@@ -102,6 +104,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | socket options                         |
 | 276  | pdf-doc-info                | certain property values are valid PDF  |
 |      |                             | Document Information Dictionary keys   |
+| 277  | countries                   | certain property values are valid ISO  |
+|      |                             | 3166-1 ALPHA-2 codes                   |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
 | 302  | extref-hashes               | external references SHOULD have hashes |

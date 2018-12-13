@@ -444,7 +444,7 @@ def vocab_encryption_algo(instance):
 @cyber_observable_check
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a
-    'pe-type' property that is from the account-type-ov vocabulary.
+    'pe-type' property that is from the windows-pebinary-type-ov vocabulary.
     """
     for key, obj in instance['objects'].items():
         if 'type' in obj and obj['type'] == 'file':

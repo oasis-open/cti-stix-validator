@@ -108,11 +108,13 @@ REGION_OV = [
     "latin-america-caribbean",
     "south-america",
     "caribbean",
-    "central-america northern-america",
+    "central-america",
+    "northern-america",
     "asia",
     "central-asia",
     "eastern-asia",
     "southern-asia",
+    "south-eastern-asia",
     "western-asia",
     "europe eastern-europe",
     "northern-europe",
@@ -261,6 +263,9 @@ INDICATOR_TYPE_USES = {
 INDUSTRY_SECTOR_USES = {
     "identity": ["sectors"]
 }
+REGION_USES = {
+    "location": ["region"]
+}
 MALWARE_TYPE_USES = {
     "malware": ["malware_types"]
 }
@@ -289,6 +294,7 @@ TYPES = [
     "identity",
     "indicator",
     "intrusion-set",
+    "location",
     "malware",
     "observed-data",
     "report",
@@ -461,6 +467,31 @@ PROPERTIES = {
         'resource_level',
         'primary_motivation',
         'secondary_motivations'
+    ],
+    "location": [
+        'type',
+        'spec_version',
+        'id',
+        'created_by_ref',
+        'created',
+        'modified',
+        'revoked',
+        'labels',
+        'confidence',
+        'lang',
+        'external_references',
+        'object_marking_refs',
+        'granular_markings',
+        'description',
+        'latittude',
+        'longitude',
+        'precision',
+        'region',
+        'country',
+        'administrative_area',
+        'city',
+        'code',
+        'postal_code',
     ],
     "malware": [
         'type',
@@ -1246,6 +1277,7 @@ COMMON_RELATIONSHIPS = [
 RELATIONSHIPS = {
     'attack-pattern': {
         'targets': [
+            'location',
             'vulnerability',
             'identity'
         ],
@@ -1259,7 +1291,9 @@ RELATIONSHIPS = {
             'intrusion-set',
             'threat-actor'
         ],
+        'originates-from': 'location',
         'targets': [
+            'location',
             'identity',
             'vulnerability'
         ],
@@ -1277,6 +1311,9 @@ RELATIONSHIPS = {
             'vulnerability'
         ]
     },
+    'identity': {
+        'located-at': 'location',
+    },
     'indicator': {
         'indicates': [
             'attack-pattern',
@@ -1289,8 +1326,10 @@ RELATIONSHIPS = {
     },
     'intrusion-set': {
         'attributed-to': 'threat-actor',
+        'originates-from': 'location',
         'targets': [
             'identity',
+            'location',
             'vulnerability',
         ],
         'uses': [
@@ -1300,8 +1339,10 @@ RELATIONSHIPS = {
         ],
     },
     'malware': {
+        'originates-from': 'location',
         'targets': [
             'identity',
+            'location',
             'vulnerability'
         ],
         'uses': 'tool',
@@ -1310,8 +1351,10 @@ RELATIONSHIPS = {
     'threat-actor': {
         'attributed-to': 'identity',
         'impersonates': 'identity',
+        'located-at': 'location',
         'targets': [
             'identity',
+            'location',
             'vulnerability'
         ],
         'uses': [
@@ -1323,6 +1366,7 @@ RELATIONSHIPS = {
     'tool': {
         'targets': [
             'identity',
+            'location',
             'vulnerability'
         ]
     }
@@ -1330,6 +1374,7 @@ RELATIONSHIPS = {
 
 
 # Mapping of official STIX objects to their timestamp properties
+# Common timestamp properties ('created', 'modified') are already included
 TIMESTAMP_PROPERTIES = {
     'campaign': [
         'first_seen',
@@ -1342,6 +1387,9 @@ TIMESTAMP_PROPERTIES = {
     'intrusion-set': [
         'first_seen',
         'last_seen',
+    ],
+    'language-content': [
+        'object_modified'
     ],
     'observed-data': [
         'first_observed',
@@ -1424,6 +1472,9 @@ VOCAB_PROPERTIES = {
         'primary_motivation',
         'secondary_motivations'
     ],
+    "location": [
+        'region',
+    ],
     "malware": [
         'malware_types'
     ],
@@ -1474,6 +1525,7 @@ CHECK_CODES = {
     '220': 'threat-actor-role',
     '221': 'threat-actor-sophistication',
     '222': 'tool-types',
+    '223': 'region',
     '241': 'hash-algo',
     '242': 'encryption-algo',
     '243': 'windows-pebinary-type',
@@ -1485,6 +1537,7 @@ CHECK_CODES = {
     '274': 'http-request-headers',
     '275': 'socket-options',
     '276': 'pdf-doc-info',
+    '277': 'countries',
     '301': 'network-traffic-ports',
     '302': 'extref-hashes',
 }
@@ -1742,6 +1795,35 @@ SOFTWARE_LANG_CODES = [
     'vol', 'vot', 'wak', 'wal', 'war', 'was', 'wel', 'cym', 'wen', 'wln',
     'wol', 'xal', 'xho', 'yao', 'yap', 'yid', 'yor', 'ypk', 'zap', 'zbl',
     'zen', 'zgh', 'zha', 'chi', 'zho', 'znd', 'zul', 'zun', 'zxx', 'zza'
+]
+
+COUNTRY_CODES = [
+    'AC', 'AD', 'AE', 'AF', 'AG', 'AI', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ',
+    'AR', 'AS', 'AT', 'AU', 'AW', 'AX', 'AZ', 'BA', 'BB', 'BD', 'BE', 'BF',
+    'BG', 'BH', 'BI', 'BJ', 'BL', 'BM', 'BN', 'BO', 'BQ', 'BR', 'BS', 'BT',
+    'BU', 'BV', 'BW', 'BX', 'BY', 'BZ', 'CA', 'CC', 'CD', 'CF', 'CG', 'CH',
+    'CI', 'CK', 'CL', 'CM', 'CN', 'CO', 'CP', 'CR', 'CS', 'CT', 'CU', 'CV',
+    'CW', 'CX', 'CY', 'CZ', 'DD', 'DE', 'DG', 'DJ', 'DK', 'DM', 'DO', 'DY',
+    'DZ', 'EA', 'EC', 'EE', 'EF', 'EG', 'EH', 'EM', 'EP', 'ER', 'ES', 'ET',
+    'EU', 'EV', 'EW', 'EZ', 'FI', 'FJ', 'FK', 'FL', 'FM', 'FO', 'FQ', 'FR',
+    'FX', 'GA', 'GB', 'GC', 'GD', 'GE', 'GF', 'GG', 'GH', 'GI', 'GL', 'GM',
+    'GN', 'GP', 'GQ', 'GR', 'GS', 'GT', 'GU', 'GW', 'GY', 'HK', 'HM', 'HN',
+    'HR', 'HT', 'HU', 'HV', 'IB', 'IC', 'ID', 'IE', 'IL', 'IM', 'IN', 'IO',
+    'IQ', 'IR', 'IS', 'IT', 'JA', 'JE', 'JM', 'JO', 'JP', 'JT', 'KE', 'KG',
+    'KH', 'KI', 'KM', 'KN', 'KP', 'KR', 'KW', 'KY', 'KZ', 'LA', 'LB', 'LC',
+    'LF', 'LI', 'LK', 'LR', 'LS', 'LT', 'LU', 'LV', 'LY', 'MA', 'MC', 'MD',
+    'ME', 'MF', 'MG', 'MH', 'MI', 'MK', 'ML', 'MM', 'MN', 'MO', 'MP', 'MQ',
+    'MR', 'MS', 'MT', 'MU', 'MV', 'MW', 'MX', 'MY', 'MZ', 'NA', 'NC', 'NE',
+    'NF', 'NG', 'NH', 'NI', 'NL', 'NO', 'NP', 'NQ', 'NR', 'NT', 'NU', 'NZ',
+    'OA', 'OM', 'PA', 'PC', 'PE', 'PF', 'PG', 'PH', 'PI', 'PK', 'PL', 'PM',
+    'PN', 'PR', 'PS', 'PT', 'PU', 'PW', 'PY', 'PZ', 'QA', 'RA', 'RB', 'RC',
+    'RE', 'RH', 'RI', 'RL', 'RM', 'RN', 'RO', 'RP', 'RS', 'RU', 'RW', 'SA',
+    'SB', 'SC', 'SD', 'SE', 'SF', 'SG', 'SH', 'SI', 'SJ', 'SK', 'SL', 'SM',
+    'SN', 'SO', 'SR', 'SS', 'ST', 'SU', 'SV', 'SX', 'SY', 'SZ', 'TA', 'TC',
+    'TD', 'TF', 'TG', 'TH', 'TJ', 'TK', 'TL', 'TM', 'TN', 'TO', 'TP', 'TR',
+    'TT', 'TV', 'TW', 'TZ', 'UA', 'UG', 'UK', 'UM', 'UN', 'US', 'UY', 'UZ',
+    'VA', 'VC', 'VD', 'VE', 'VG', 'VI', 'VN', 'VU', 'WF', 'WG', 'WK', 'WL',
+    'WO', 'WS', 'WV', 'YD', 'YE', 'YT', 'YU', 'YV', 'ZA', 'ZM', 'ZR', 'ZW',
 ]
 
 HTTP_REQUEST_HEADERS = [

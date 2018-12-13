@@ -250,6 +250,11 @@ def vocab_tool_types(instance):
                        'tool-types')
 
 
+def vocab_region(instance):
+    return check_vocab(instance, "REGION",
+                       'region')
+
+
 def vocab_marking_definition(instance):
     """Ensure that the `definition_type` property of `marking-definition`
     objects is one of the values in the STIX 2.0 specification.
@@ -444,7 +449,7 @@ def vocab_encryption_algo(instance):
 @cyber_observable_check
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a
-    'pe-type' property that is from the account-type-ov vocabulary.
+    'pe-type' property that is from the windows-pebinary-type-ov vocabulary.
     """
     for key, obj in instance['objects'].items():
         if 'type' in obj and obj['type'] == 'file':
@@ -907,6 +912,18 @@ def pdf_doc_info(instance):
                                     'pdf-doc-info')
 
 
+def countries(instance):
+    """Ensure that the `country` property of `location` objects is a valid
+    ISO 3166-1 ALPHA-2 Code.
+    """
+    if (instance['type'] == 'location' and 'country' in instance and not
+            instance['country'].upper() in enums.COUNTRY_CODES):
+
+        return JSONError("Location `country` should be a valid ISO 3166-1 "
+                         "ALPHA-2 Code.",
+                         instance['id'], 'marking-definition-type')
+
+
 @cyber_observable_check
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
@@ -1073,6 +1090,7 @@ CHECKS = {
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
         vocab_tool_types,
+        vocab_region,
         vocab_hash_algo,
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
@@ -1083,6 +1101,7 @@ CHECKS = {
         http_request_headers,
         socket_options,
         pdf_doc_info,
+        countries,
         network_traffic_ports,
         extref_hashes,
         duplicate_ids,
@@ -1123,6 +1142,7 @@ CHECKS = {
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
         vocab_tool_types,
+        vocab_region,
         vocab_hash_algo,
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
@@ -1133,6 +1153,7 @@ CHECKS = {
         http_request_headers,
         socket_options,
         pdf_doc_info,
+        countries,
     ],
     'marking-definition-type': vocab_marking_definition,
     'relationship-types': relationships_strict,
@@ -1149,6 +1170,7 @@ CHECKS = {
         vocab_threat_actor_role,
         vocab_threat_actor_sophistication_level,
         vocab_tool_types,
+        vocab_region,
         vocab_hash_algo,
         vocab_encryption_algo,
         vocab_windows_pebinary_type,
@@ -1165,6 +1187,7 @@ CHECKS = {
     'threat-actor-role': vocab_threat_actor_role,
     'threat-actor-sophistication': vocab_threat_actor_sophistication_level,
     'tool-types': vocab_tool_types,
+    'region': vocab_region,
     'hash-algo': vocab_hash_algo,
     'encryption-algo': vocab_encryption_algo,
     'windows-pebinary-type': vocab_windows_pebinary_type,
@@ -1183,6 +1206,7 @@ CHECKS = {
     'http-request-headers': http_request_headers,
     'socket-options': socket_options,
     'pdf-doc-info': pdf_doc_info,
+    'countries': countries,
     'network-traffic-ports': network_traffic_ports,
     'extref-hashes': extref_hashes,
 }
@@ -1250,6 +1274,8 @@ def list_shoulds(options):
                         validator_list.append(CHECKS['threat-actor-sophistication'])
                     if 'tool-types' not in options.disabled:
                         validator_list.append(CHECKS['tool-types'])
+                    if 'region' not in options.disabled:
+                        validator_list.append(CHECKS['region'])
                     if 'hash-algo' not in options.disabled:
                         validator_list.append(CHECKS['hash-algo'])
                     if 'encryption-algo' not in options.disabled:
@@ -1261,6 +1287,8 @@ def list_shoulds(options):
                 if 'all-external-sources' not in options.disabled:
                     if 'mime-type' not in options.disabled:
                         validator_list.append(CHECKS['mime-type'])
+                    if 'countries' not in options.disabled:
+                        validator_list.append(CHECKS['countries'])
 
             if 'network-traffic-ports' not in options.disabled:
                 validator_list.append(CHECKS['network-traffic-ports'])

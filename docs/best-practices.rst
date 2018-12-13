@@ -114,6 +114,9 @@ or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
 |  222   | tool-types                  | certain property values are from the   |
 |        |                             | tool_types vocabulary                  |
 +--------+-----------------------------+----------------------------------------+
+|  223   | region                      | certain property values are from the   |
+|        |                             | region vocabulary                      |
++--------+-----------------------------+----------------------------------------+
 |  241   | hash-algo                   | certain property values are from the   |
 |        |                             | hash-algo vocabulary                   |
 +--------+-----------------------------+----------------------------------------+
@@ -147,6 +150,9 @@ or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
 +--------+-----------------------------+----------------------------------------+
 |  276   | pdf-doc-info                | certain property values are valid PDF  |
 |        |                             | Document Information Dictionary keys   |
++--------+-----------------------------+----------------------------------------+
+|  277   | countries                   | certain property values are valid ISO  |
+|        |                             | 3166-1 ALPHA-2 codes                   |
 +--------+-----------------------------+----------------------------------------+
 |  301   | network-traffic-ports       | network-traffic objects contain both   |
 |        |                             | src_port and dst_port                  |
