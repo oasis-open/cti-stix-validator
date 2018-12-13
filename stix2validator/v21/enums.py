@@ -90,13 +90,6 @@ MALWARE_TYPE_OV = [
     "virus",
     "worm"
 ]
-OPINION_ENUM = [
-    "strongly-disagree",
-    "disagree",
-    "neutral",
-    "agree",
-    "strongly-agree",
-]
 REGION_OV = [
     "africa",
     "eastern-africa",

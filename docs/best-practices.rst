@@ -120,9 +120,6 @@ or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
 |  241   | hash-algo                   | certain property values are from the   |
 |        |                             | hash-algo vocabulary                   |
 +--------+-----------------------------+----------------------------------------+
-|  242   | encryption-algo             | certain property values are from the   |
-|        |                             | encryption-algo vocabulary             |
-+--------+-----------------------------+----------------------------------------+
 |  243   | windows-pebinary-type       | certain property values are from the   |
 |        |                             | windows-pebinary-type vocabulary       |
 +--------+-----------------------------+----------------------------------------+

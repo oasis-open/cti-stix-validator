@@ -428,25 +428,6 @@ def vocab_hash_algo(instance):
 
 
 @cyber_observable_check
-def vocab_encryption_algo(instance):
-    """Ensure file objects' 'encryption_algorithm' property is from the
-    encryption-algo-ov vocabulary.
-    """
-    for key, obj in instance['objects'].items():
-        if 'type' in obj and obj['type'] == 'file':
-            try:
-                enc_algo = obj['encryption_algorithm']
-            except KeyError:
-                continue
-            if enc_algo not in enums.ENCRYPTION_ALGO_OV:
-                yield JSONError("Object '%s' has an 'encryption_algorithm' of "
-                                "'%s', which is not a value in the "
-                                "encryption-algo-ov vocabulary."
-                                % (key, enc_algo), instance['id'],
-                                'encryption-algo')
-
-
-@cyber_observable_check
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a
     'pe-type' property that is from the windows-pebinary-type-ov vocabulary.
@@ -1092,7 +1073,6 @@ CHECKS = {
         vocab_tool_types,
         vocab_region,
         vocab_hash_algo,
-        vocab_encryption_algo,
         vocab_windows_pebinary_type,
         vocab_account_type,
         mime_type,
@@ -1144,7 +1124,6 @@ CHECKS = {
         vocab_tool_types,
         vocab_region,
         vocab_hash_algo,
-        vocab_encryption_algo,
         vocab_windows_pebinary_type,
         vocab_account_type,
         mime_type,
@@ -1172,7 +1151,6 @@ CHECKS = {
         vocab_tool_types,
         vocab_region,
         vocab_hash_algo,
-        vocab_encryption_algo,
         vocab_windows_pebinary_type,
         vocab_account_type,
     ],
@@ -1189,7 +1167,6 @@ CHECKS = {
     'tool-types': vocab_tool_types,
     'region': vocab_region,
     'hash-algo': vocab_hash_algo,
-    'encryption-algo': vocab_encryption_algo,
     'windows-pebinary-type': vocab_windows_pebinary_type,
     'account-type': vocab_account_type,
     'all-external-sources': [
@@ -1279,8 +1256,6 @@ def list_shoulds(options):
                         validator_list.append(CHECKS['region'])
                     if 'hash-algo' not in options.disabled:
                         validator_list.append(CHECKS['hash-algo'])
-                    if 'encryption-algo' not in options.disabled:
-                        validator_list.append(CHECKS['encryption-algo'])
                     if 'windows-pebinary-type' not in options.disabled:
                         validator_list.append(CHECKS['windows-pebinary-type'])
                     if 'account-type' not in options.disabled:

@@ -83,8 +83,6 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | region vocabulary                      |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
-| 242  | encryption-algo             | certain property values are from the   |
-|      |                             | encryption-algo vocabulary             |
 | 243  | windows-pebinary-type       | certain property values are from the   |
 |      |                             | windows-pebinary-type vocabulary       |
 | 244  | account-type                | certain property values are from the   |
