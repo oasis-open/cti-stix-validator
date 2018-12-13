@@ -16,7 +16,7 @@ ATTACK_MOTIVATION_OV = [
     "personal-gain",
     "personal-satisfaction",
     "revenge",
-    "unpredictable"
+    "unpredictable",
 ]
 ATTACK_RESOURCE_LEVEL_OV = [
     "individual",
@@ -24,7 +24,7 @@ ATTACK_RESOURCE_LEVEL_OV = [
     "contest",
     "team",
     "organization",
-    "government"
+    "government",
 ]
 IDENTITY_CLASS_OV = [
     "individual",
@@ -40,7 +40,7 @@ INDICATOR_TYPE_OV = [
     "benign",
     "compromised",
     "malicious-activity",
-    "attribution"
+    "attribution",
 ]
 INDUSTRY_SECTOR_OV = [
     "agriculture",
@@ -69,7 +69,7 @@ INDUSTRY_SECTOR_OV = [
     "technology",
     "telecommunications",
     "transportation",
-    "utilities"
+    "utilities",
 ]
 MALWARE_TYPE_OV = [
     "adware",
@@ -88,7 +88,7 @@ MALWARE_TYPE_OV = [
     "spyware",
     "trojan",
     "virus",
-    "worm"
+    "worm",
 ]
 REGION_OV = [
     "africa",
@@ -130,7 +130,7 @@ REPORT_TYPE_OV = [
     "observed-data",
     "threat-actor",
     "tool",
-    "vulnerability"
+    "vulnerability",
 ]
 THREAT_ACTOR_TYPE_OV = [
     "activist",
@@ -143,7 +143,7 @@ THREAT_ACTOR_TYPE_OV = [
     "nation-state",
     "sensationalist",
     "spy",
-    "terrorist"
+    "terrorist",
 ]
 THREAT_ACTOR_ROLE_OV = [
     "agent",
@@ -152,7 +152,7 @@ THREAT_ACTOR_ROLE_OV = [
     "infrastructure-architect",
     "infrastructure-operator",
     "malware-author",
-    "sponsor"
+    "sponsor",
 ]
 THREAT_ACTOR_SOPHISTICATION_OV = [
     "none",
@@ -161,7 +161,7 @@ THREAT_ACTOR_SOPHISTICATION_OV = [
     "advanced",
     "expert",
     "innovator",
-    "strategic"
+    "strategic",
 ]
 TOOL_TYPE_OV = [
     "denial-of-service",
@@ -170,7 +170,7 @@ TOOL_TYPE_OV = [
     "network-capture",
     "credential-exploitation",
     "remote-access",
-    "vulnerability-scanning"
+    "vulnerability-scanning",
 ]
 HASH_ALGO_OV = [
     "MD5",
@@ -186,7 +186,7 @@ HASH_ALGO_OV = [
     "SHA3-384",
     "SHA3-512",
     "ssdeep",
-    "WHIRLPOOL"
+    "WHIRLPOOL",
 ]
 ENCRYPTION_ALGO_OV = [
     "AES128-ECB",
@@ -208,12 +208,12 @@ ENCRYPTION_ALGO_OV = [
     "CAST128-CBC",
     "CAST256-CBC",
     "RSA",
-    "DSA"
+    "DSA",
 ]
 WINDOWS_PEBINARY_TYPE_OV = [
     "exe",
     "dll",
-    "sys"
+    "sys",
 ]
 ACCOUNT_TYPE_OV = [
     "unix",
@@ -227,7 +227,7 @@ ACCOUNT_TYPE_OV = [
     "facebook",
     "skype",
     "twitter",
-    "kavi"
+    "kavi",
 ]
 
 
@@ -235,47 +235,47 @@ ACCOUNT_TYPE_OV = [
 ATTACK_MOTIVATION_USES = {
     "intrusion-set": [
         "primary_motivation",
-        "secondary_motivations"
+        "secondary_motivations",
     ],
     "threat-actor": [
         "primary_motivation",
         "secondary_motivations",
-        "personal_motivations"
+        "personal_motivations",
     ]
 }
 ATTACK_RESOURCE_LEVEL_USES = {
     "intrusion-set": ["resource_level"],
-    "threat-actor": ["resource_level"]
+    "threat-actor": ["resource_level"],
 }
 IDENTITY_CLASS_USES = {
-    "identity": ["identity_class"]
+    "identity": ["identity_class"],
 }
 INDICATOR_TYPE_USES = {
-    "indicator": ["indicator_types"]
+    "indicator": ["indicator_types"],
 }
 INDUSTRY_SECTOR_USES = {
-    "identity": ["sectors"]
+    "identity": ["sectors"],
 }
 REGION_USES = {
-    "location": ["region"]
+    "location": ["region"],
 }
 MALWARE_TYPE_USES = {
-    "malware": ["malware_types"]
+    "malware": ["malware_types"],
 }
 REPORT_TYPE_USES = {
-    "report": ["report_types"]
+    "report": ["report_types"],
 }
 THREAT_ACTOR_TYPE_USES = {
-    "threat-actor": ["threat_actor_types"]
+    "threat-actor": ["threat_actor_types"],
 }
 THREAT_ACTOR_ROLE_USES = {
-    "threat-actor": ["roles"]
+    "threat-actor": ["roles"],
 }
 THREAT_ACTOR_SOPHISTICATION_USES = {
-    "threat-actor": ["sophistication"]
+    "threat-actor": ["sophistication"],
 }
 TOOL_TYPE_USES = {
-    "tool": ["tool_types"]
+    "tool": ["tool_types"],
 }
 
 
@@ -321,13 +321,13 @@ OBSERVABLE_TYPES = [
     "url",
     "user-account",
     "windows-registry-key",
-    "x509-certificate"
+    "x509-certificate",
 ]
 
 # List of default marking definition types
 MARKING_DEFINITION_TYPES = [
     "statement",
-    "tlp"
+    "tlp",
 ]
 
 # List of object types which have a `kill-chain-phases` property
@@ -335,7 +335,7 @@ KILL_CHAIN_PHASE_USES = [
     "attack-pattern",
     "indicator",
     "malware",
-    "tool"
+    "tool",
 ]
 
 
@@ -357,7 +357,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
-        'kill_chain_phases'
+        'kill_chain_phases',
     ],
     "campaign": [
         'type',
@@ -377,7 +377,7 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
-        'objective'
+        'objective',
     ],
     "course-of-action": [
         'type',
@@ -395,7 +395,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
-        'action'
+        'action',
     ],
     "identity": [
         'type',
@@ -416,7 +416,7 @@ PROPERTIES = {
         'roles',
         'identity_class',
         'sectors',
-        'contact_information'
+        'contact_information',
     ],
     "indicator": [
         'type',
@@ -438,7 +438,7 @@ PROPERTIES = {
         'pattern',
         'valid_from',
         'valid_until',
-        'kill_chain_phases'
+        'kill_chain_phases',
     ],
     "intrusion-set": [
         'type',
@@ -461,7 +461,7 @@ PROPERTIES = {
         'goals',
         'resource_level',
         'primary_motivation',
-        'secondary_motivations'
+        'secondary_motivations',
     ],
     "location": [
         'type',
@@ -505,7 +505,7 @@ PROPERTIES = {
         'name',
         'description',
         'malware_types',
-        'kill_chain_phases'
+        'kill_chain_phases',
     ],
     "note": [
         'type',
@@ -543,7 +543,7 @@ PROPERTIES = {
         'first_observed',
         'last_observed',
         'number_observed',
-        'objects'
+        'objects',
     ],
     "opinion": [
         'type',
@@ -582,7 +582,7 @@ PROPERTIES = {
         'description',
         'report_types',
         'published',
-        'object_refs'
+        'object_refs',
     ],
     "threat-actor": [
         'type',
@@ -608,7 +608,7 @@ PROPERTIES = {
         'resource_level',
         'primary_motivation',
         'secondary_motivations',
-        'personal_motivations'
+        'personal_motivations',
     ],
     "tool": [
         'type',
@@ -645,12 +645,12 @@ PROPERTIES = {
         'object_marking_refs',
         'granular_markings',
         'name',
-        'description'
+        'description',
     ],
     "bundle": [
         'type',
         'id',
-        'objects'
+        'objects',
     ],
     "relationship": [
         'type',
@@ -669,7 +669,9 @@ PROPERTIES = {
         'relationship_type',
         'description',
         'source_ref',
-        'target_ref'
+        'target_ref',
+        'start_time',
+        'stop_time',
     ],
     "sighting": [
         'type',
@@ -691,7 +693,7 @@ PROPERTIES = {
         'sighting_of_ref',
         'observed_data_refs',
         'where_sighted_refs',
-        'summary'
+        'summary',
     ],
     "language-content": [
         'type',
@@ -721,7 +723,7 @@ PROPERTIES = {
         'object_marking_refs',
         'granular_markings',
         'definition_type',
-        'definition'
+        'definition',
     ]
 }
 # Mappings of official Cyber Observable Objects to their official properties
@@ -741,7 +743,7 @@ OBSERVABLE_PROPERTIES = {
         'extensions',
         'number',
         'name',
-        'rir'
+        'rir',
     ],
     'directory': [
         'type',
@@ -751,20 +753,20 @@ OBSERVABLE_PROPERTIES = {
         'created',
         'modified',
         'accessed',
-        'contains_refs'
+        'contains_refs',
     ],
     'domain-name': [
         'type',
         'extensions',
         'value',
-        'resolves_to_refs'
+        'resolves_to_refs',
     ],
     'email-addr': [
         'type',
         'extensions',
         'value',
         'display_name',
-        'belongs_to_ref'
+        'belongs_to_ref',
     ],
     'email-message': [
         'type',
@@ -782,7 +784,7 @@ OBSERVABLE_PROPERTIES = {
         'additional_header_fields',
         'body',
         'body_multipart',
-        'raw_email_ref'
+        'raw_email_ref',
     ],
     'file': [
         'type',
@@ -798,31 +800,31 @@ OBSERVABLE_PROPERTIES = {
         'accessed',
         'parent_directory_ref',
         'contains_refs',
-        'content_ref'
+        'content_ref',
     ],
     'ipv4-addr': [
         'type',
         'extensions',
         'value',
         'resolves_to_refs',
-        'belongs_to_refs'
+        'belongs_to_refs',
     ],
     'ipv6-addr': [
         'type',
         'extensions',
         'value',
         'resolves_to_refs',
-        'belongs_to_refs'
+        'belongs_to_refs',
     ],
     'mac-addr': [
         'type',
         'extensions',
-        'value'
+        'value',
     ],
     'mutex': [
         'type',
         'extensions',
-        'name'
+        'name',
     ],
     'network-traffic': [
         'type',
@@ -843,7 +845,7 @@ OBSERVABLE_PROPERTIES = {
         'src_payload_ref',
         'dst_payload_ref',
         'encapsulates_refs',
-        'encapsulated_by_ref'
+        'encapsulated_by_ref',
     ],
     'process': [
         'type',
@@ -858,7 +860,7 @@ OBSERVABLE_PROPERTIES = {
         'creator_user_ref',
         'image_ref',
         'parent_ref',
-        'child_refs'
+        'child_refs',
     ],
     'software': [
         'type',
@@ -867,12 +869,12 @@ OBSERVABLE_PROPERTIES = {
         'cpe',
         'languages',
         'vendor',
-        'version'
+        'version',
     ],
     'url': [
         'type',
         'extensions',
-        'value'
+        'value',
     ],
     'user-account': [
         'type',
@@ -890,7 +892,7 @@ OBSERVABLE_PROPERTIES = {
         'account_expires',
         'credential_last_changed',
         'account_first_login',
-        'account_last_login'
+        'account_last_login',
     ],
     'windows-registry-key': [
         'type',
@@ -899,7 +901,7 @@ OBSERVABLE_PROPERTIES = {
         'values',
         'modified',
         'creator_user_ref',
-        'number_of_subkeys'
+        'number_of_subkeys',
     ],
     'x509-certificate': [
         'type',
@@ -915,30 +917,30 @@ OBSERVABLE_PROPERTIES = {
         'subject',
         'subject_public_key_modulus',
         'subject_public_key_exponent',
-        'x509_v3_extensions'
+        'x509_v3_extensions',
     ]
 }
 OBSERVABLE_EXTENSION_PROPERTIES = {
     'archive-ext': [
         'contains_refs',
-        'comment'
+        'comment',
     ],
     'ntfs-ext': [
         'sid',
-        'alternate_data_streams'
+        'alternate_data_streams',
     ],
     'pdf-ext': [
         'version',
         'is_optimized',
         'document_info_dict',
         'pdfid0',
-        'pdfid1'
+        'pdfid1',
     ],
     'raster-image-ext': [
         'image_height',
         'image_width',
         'bits_per_pixel',
-        'exif_tags'
+        'exif_tags',
     ],
     'windows-pebinary-ext': [
         'pe_type',
@@ -952,7 +954,7 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'characteristics_hex',
         'file_header_hashes',
         'optional_header',
-        'sections'
+        'sections',
     ],
     'http-request-ext': [
         'request_method',
@@ -960,11 +962,11 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'request_version',
         'request_header',
         'message_body_length',
-        'message_body_data_ref'
+        'message_body_data_ref',
     ],
     'icmp-ext': [
         'icmp_type_hex',
-        'icmp_code_hex'
+        'icmp_code_hex',
     ],
     'socket-ext': [
         'address_family',
@@ -973,11 +975,11 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'options',
         'socket_type',
         'socket_descriptor',
-        'socket_handle'
+        'socket_handle',
     ],
     'tcp-ext': [
         'src_flags_hex',
-        'dst_flags_hex'
+        'dst_flags_hex',
     ],
     'windows-process-ext': [
         'aslr_enabled',
@@ -996,13 +998,13 @@ OBSERVABLE_EXTENSION_PROPERTIES = {
         'start_type',
         'service_dll_refs',
         'service_type',
-        'service_status'
+        'service_status',
     ],
     'unix-account-ext': [
         'gid',
         'groups',
         'home_dir',
-        'shell'
+        'shell',
     ]
 }
 # Mappings of properties of embedded cyber observable types
@@ -1012,14 +1014,14 @@ OBSERVABLE_EMBEDDED_PROPERTIES = {
             'body',
             'body_raw_ref',
             'content_type',
-            'content_disposition'
+            'content_disposition',
         ]
     },
     'windows-registry-key': {
         'values': [
             'name',
             'data',
-            'data_type'
+            'data_type',
         ]
     },
     'x509-certificate': {
@@ -1039,7 +1041,7 @@ OBSERVABLE_EMBEDDED_PROPERTIES = {
             'private_key_usage_period_not_before',
             'private_key_usage_period_not_after',
             'certificate_policies',
-            'policy_mappings'
+            'policy_mappings',
         ]
     }
 }
@@ -1048,7 +1050,7 @@ OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES = {
         'alternate_data_streams': [
             'name',
             'hashes',
-            'size'
+            'size',
         ]
     },
     'windows-pebinary-ext': {
@@ -1083,13 +1085,13 @@ OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES = {
             'size_of_heap_commit',
             'loader_flags_hex',
             'number_of_rva_and_sizes',
-            'hashes'
+            'hashes',
         ],
         'sections': [
             'name',
             'size',
             'entropy',
-            'hashes'
+            'hashes',
         ]
     }
 }
@@ -1101,20 +1103,20 @@ OBSERVABLE_EXTENSIONS = {
         'ntfs-ext',
         'pdf-ext',
         'raster-image-ext',
-        'windows-pebinary-ext'
+        'windows-pebinary-ext',
     ],
     'network-traffic': [
         'http-request-ext',
         'icmp-ext',
         'socket-ext',
-        'tcp-ext'
+        'tcp-ext',
     ],
     'process': [
         'windows-process-ext',
         'windows-service-ext',
     ],
     'user-account': [
-        'unix-account-ext'
+        'unix-account-ext',
     ]
 }
 
@@ -1123,76 +1125,76 @@ OBSERVABLE_PROP_REFS = {
     'directory': {
         'contains_refs': [
             'file',
-            'directory'
+            'directory',
         ]
     },
     'domain-name': {
         'resolves_to_refs': [
             'ipv4-addr',
             'ipv6-addr',
-            'domain-name'
+            'domain-name',
         ]
     },
     'email-addr': {
         'belongs_to_ref': [
-            'user-account'
+            'user-account',
         ]
     },
     'email-message': {
         'from_ref': [
-            'email-addr'
+            'email-addr',
         ],
         'sender_ref': [
-            'email-addr'
+            'email-addr',
         ],
         'to_refs': [
-            'email-addr'
+            'email-addr',
         ],
         'cc_refs': [
-            'email-addr'
+            'email-addr',
         ],
         'bcc_refs': [
-            'email-addr'
+            'email-addr',
         ],
         'raw_email_ref': [
-            'artifact'
+            'artifact',
         ],
         'body_multipart': {
             'body_raw_ref': [
                 'artifact',
-                'file'
+                'file',
             ]
         }
     },
     'file': {
         'parent_directory_ref': [
-            'directory'
+            'directory',
         ],
         'content_ref': [
-            'artifact'
+            'artifact',
         ],
         'extensions': {
             'archive-ext': {
                 'contains_refs': [
-                    'file'
+                    'file',
                 ]
             }
         }
     },
     'ipv4-addr': {
         'resolves_to_refs': [
-            'mac-addr'
+            'mac-addr',
         ],
         'belongs_to_refs': [
-            'autonomous-system'
+            'autonomous-system',
         ]
     },
     'ipv6-addr': {
         'resolves_to_refs': [
-            'mac-addr'
+            'mac-addr',
         ],
         'belongs_to_refs': [
-            'autonomous-system'
+            'autonomous-system',
         ]
     },
     'network-traffic': {
@@ -1200,61 +1202,61 @@ OBSERVABLE_PROP_REFS = {
             'ipv4-addr',
             'ipv6-addr',
             'mac-addr',
-            'domain-name'
+            'domain-name',
         ],
         'dst_ref': [
             'ipv4-addr',
             'ipv6-addr',
             'mac-addr',
-            'domain-name'
+            'domain-name',
         ],
         'src_payload_ref': [
-            'artifact'
+            'artifact',
         ],
         'dst_payload_ref': [
-            'artifact'
+            'artifact',
         ],
         'encapsulates_refs': [
-            'network-traffic'
+            'network-traffic',
         ],
         'encapsulated_by_ref': [
-            'network-traffic'
+            'network-traffic',
         ],
         'extensions': {
             'http-request-ext': {
                 'message_body_data_ref': [
-                    'artifact'
+                    'artifact',
                 ]
             }
         }
     },
     'process': {
         'opened_connection_refs': [
-            'network-traffic'
+            'network-traffic',
         ],
         'creator_user_ref': [
-            'user-account'
+            'user-account',
         ],
         'image_ref': [
-            'file'
+            'file',
         ],
         'parent_ref': [
-            'process'
+            'process',
         ],
         'child_refs': [
-            'process'
+            'process',
         ],
         'extensions': {
             'windows-service-ext': {
                 'service_dll_refs': [
-                    'file'
+                    'file',
                 ]
             }
         }
     },
     'windows-registry-key': {
         'creator_user_ref': [
-            'user-account'
+            'user-account',
         ]
     }
 }
@@ -1272,7 +1274,7 @@ OBSERVABLE_DICT_KEY_EXCEPTIONS = [
     'options',
     'environment_variables',
     'key',
-    'startup_info'
+    'startup_info',
 ]
 
 # Reserved properties and objects
@@ -1284,10 +1286,10 @@ RESERVED_PROPERTIES = [
 ]
 RESERVED_OBJECTS = [
     'incident',
-    'infrastructure'
+    'infrastructure',
 ]
 OBSERVABLE_RESERVED_OBJECTS = [
-    'action'
+    'action',
 ]
 
 
@@ -1296,14 +1298,14 @@ NON_SDOS = [
     'language-content',
     'marking-definition',
     'sighting',
-    'relationship'
+    'relationship',
 ]
 
 # List of relationship types common to all object types
 COMMON_RELATIONSHIPS = [
     'derived-from',
     'duplicate-of',
-    'related-to'
+    'related-to',
 ]
 
 # Mapping of official STIX objects to their official relationships
@@ -1312,28 +1314,28 @@ RELATIONSHIPS = {
         'targets': [
             'location',
             'vulnerability',
-            'identity'
+            'identity',
         ],
         'uses': [
             'malware',
-            'tool'
+            'tool',
         ]
     },
     'campaign': {
         'attributed-to': [
             'intrusion-set',
-            'threat-actor'
+            'threat-actor',
         ],
         'originates-from': 'location',
         'targets': [
             'location',
             'identity',
-            'vulnerability'
+            'vulnerability',
         ],
         'uses': [
             'attack-pattern',
             'malware',
-            'tool'
+            'tool',
         ]
     },
     'course-of-action': {
@@ -1341,7 +1343,7 @@ RELATIONSHIPS = {
             'attack-pattern',
             'malware',
             'tool',
-            'vulnerability'
+            'vulnerability',
         ]
     },
     'identity': {
@@ -1354,7 +1356,7 @@ RELATIONSHIPS = {
             'intrusion-set',
             'malware',
             'threat-actor',
-            'tool'
+            'tool',
         ],
     },
     'intrusion-set': {
@@ -1368,7 +1370,7 @@ RELATIONSHIPS = {
         'uses': [
             'attack-pattern',
             'malware',
-            'tool'
+            'tool',
         ],
     },
     'malware': {
@@ -1376,10 +1378,10 @@ RELATIONSHIPS = {
         'targets': [
             'identity',
             'location',
-            'vulnerability'
+            'vulnerability',
         ],
         'uses': 'tool',
-        'variant-of': 'malware'
+        'variant-of': 'malware',
     },
     'threat-actor': {
         'attributed-to': 'identity',
@@ -1388,19 +1390,19 @@ RELATIONSHIPS = {
         'targets': [
             'identity',
             'location',
-            'vulnerability'
+            'vulnerability',
         ],
         'uses': [
             'attack-pattern',
             'malware',
-            'tool'
+            'tool',
         ]
     },
     'tool': {
         'targets': [
             'identity',
             'location',
-            'vulnerability'
+            'vulnerability',
         ]
     }
 }
@@ -1430,6 +1432,10 @@ TIMESTAMP_PROPERTIES = {
     ],
     'report': [
         'published',
+    ],
+    'relationship': [
+        'start_time',
+        'stop_time',
     ],
     'sighting': [
         'first_seen',
@@ -1495,24 +1501,24 @@ TIMESTAMP_EMBEDDED_PROPERTIES = {
 VOCAB_PROPERTIES = {
     "identity": [
         'identity_class',
-        'sectors'
+        'sectors',
     ],
     "indicator": [
-        'indicator_types'
+        'indicator_types',
     ],
     "intrusion-set": [
         'resource_level',
         'primary_motivation',
-        'secondary_motivations'
+        'secondary_motivations',
     ],
     "location": [
         'region',
     ],
     "malware": [
-        'malware_types'
+        'malware_types',
     ],
     "report": [
-        'report_types'
+        'report_types',
     ],
     "threat-actor": [
         'threat_actor_types',
@@ -1521,13 +1527,13 @@ VOCAB_PROPERTIES = {
         'resource_level',
         'primary_motivation',
         'secondary_motivations',
-        'personal_motivations'
+        'personal_motivations',
     ],
     "tool": [
-        'tool_types'
+        'tool_types',
     ],
     "marking-definition": [
-        'definition_type'
+        'definition_type',
     ]
 }
 

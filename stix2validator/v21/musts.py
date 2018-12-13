@@ -496,6 +496,16 @@ def language_contents(instance):
                                 % (subkey, key), instance['id'], 'observable-dictionary-keys')
 
 
+def relationsthip_times(instance):
+    """Ensure `modified` property must be later or equal to `created` property
+    """
+    if 'start_time' in instance and 'stop_time' in instance and \
+            instance['stop_time'] <= instance['start_time']:
+        msg = "'stop_time' (%s) must be later than 'start_time' (%s)"
+        return JSONError(msg % (instance['stop_time'], instance['start_time']),
+                         instance['id'])
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -512,6 +522,7 @@ def list_musts(options):
         software_language,
         patterns,
         language_contents,
+        relationsthip_times,
     ]
 
     # --strict-types

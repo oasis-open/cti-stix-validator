@@ -98,3 +98,15 @@ class RelationshipTestCases(ValidatorTest):
         relationship = copy.deepcopy(self.valid_relationship)
         del relationship['relationship_type']
         self.assertFalseWithOptions(relationship)
+
+    def test_invalid_stop_time(self):
+        relationship = copy.deepcopy(self.valid_relationship)
+        relationship['start_time'] = "2016-04-06T20:06:37.000Z"
+        relationship['stop_time'] = "2016-04-06T20:06:37.000Z"
+        self.assertFalseWithOptions(relationship)
+
+        relationship['stop_time'] = "2016-01-01T00:00:00.000Z"
+        self.assertFalseWithOptions(relationship)
+
+        relationship['stop_time'] = "2016-05-07T20:06:37.000Z"
+        self.assertTrueWithOptions(relationship)
