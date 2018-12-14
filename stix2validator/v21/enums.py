@@ -377,6 +377,7 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
+        'last_seen',
         'objective',
     ],
     "course-of-action": [
@@ -458,6 +459,7 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
+        'last_seen',
         'goals',
         'resource_level',
         'primary_motivation',
@@ -1495,6 +1497,30 @@ TIMESTAMP_EMBEDDED_PROPERTIES = {
             'private_key_usage_period_not_after',
         ],
     },
+}
+
+# Mapping of STIX Object timestamp properties with a comparison requirement
+# E.g. MUST be greater than or equal to
+# created/modified are already checked
+TIMESTAMP_COMPARE = {
+    "campaign": [
+        ('last_seen', 'ge', 'first_seen'),
+    ],
+    "indicator": [
+        ('valid_until', 'gt', 'valid_from'),
+    ],
+    "intrusion-set": [
+        ('last_seen', 'ge', 'first_seen'),
+    ],
+    "observed-data": [
+        ('last_observed', 'ge', 'first_observed'),
+    ],
+    "relationship": [
+        ('stop_time', 'gt', 'start_time'),
+    ],
+    "sighting": [
+        ('last_seen', 'gt', 'first_seen'),
+    ],
 }
 
 # Mapping of official STIX objects to their open-vocab properties

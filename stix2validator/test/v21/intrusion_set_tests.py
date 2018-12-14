@@ -48,3 +48,15 @@ class IntrusionSetTestCases(ValidatorTest):
         self.assertEqual(results.is_valid, False)
 
         self.check_ignore(intrusion_set, 'attack-resource-level')
+
+    def test_invalid_seen_time(self):
+        intrusion_set = copy.deepcopy(self.valid_intrusion_set)
+        intrusion_set['first_seen'] = "2016-04-06T20:06:37.000Z"
+        intrusion_set['last_seen'] = "2016-04-06T20:06:37.000Z"
+        self.assertTrueWithOptions(intrusion_set)
+
+        intrusion_set['last_seen'] = "2016-01-01T00:00:00.000Z"
+        self.assertFalseWithOptions(intrusion_set)
+
+        intrusion_set['last_seen'] = "2016-05-07T20:06:37.000Z"
+        self.assertTrueWithOptions(intrusion_set)

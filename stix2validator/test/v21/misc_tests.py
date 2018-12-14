@@ -116,7 +116,7 @@ def test_validate_string_invalid_timestamp(caplog):
     assert not results.is_valid
 
     print_results(results)
-    assert re.search("'modified' .+ must be later or equal to 'created'", caplog.text)
+    assert re.search("'modified' .+ must be later than or equal to 'created'", caplog.text)
 
 
 def test_print_results_invalid_parameter():

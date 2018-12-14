@@ -853,3 +853,15 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['2']['url'] = "http://www.example.com/file.txt"
         self.assertTrueWithOptions(observed_data)
+
+    def test_invalid_seen_time(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['first_observed'] = "2016-04-06T20:06:37.000Z"
+        observed_data['last_observed'] = "2016-04-06T20:06:37.000Z"
+        self.assertTrueWithOptions(observed_data)
+
+        observed_data['last_observed'] = "2016-01-01T00:00:00.000Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['last_observed'] = "2016-05-07T20:06:37.000Z"
+        self.assertTrueWithOptions(observed_data)

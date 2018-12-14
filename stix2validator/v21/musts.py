@@ -1,6 +1,7 @@
 """Mandatory (MUST) requirement checking functions
 """
 
+import operator
 import re
 
 from dateutil import parser
@@ -72,14 +73,29 @@ def timestamp(instance):
                                                     % (obj['type'], tprop, obj[embed][tprop], str(e)), instance['id'])
 
 
-def modified_created(instance):
-    """`modified` property must be later or equal to `created` property
+def timestamp_compare(instance):
+    """Ensure timestamp properties with a comparison requirement are valid.
+
+    E.g. `modified` must be later or equal to `created`.
     """
-    if 'modified' in instance and 'created' in instance and \
-            instance['modified'] < instance['created']:
-        msg = "'modified' (%s) must be later or equal to 'created' (%s)"
-        return JSONError(msg % (instance['modified'], instance['created']),
-                         instance['id'])
+    compares = [('modified', 'ge', 'created')]
+    additional_compares = enums.TIMESTAMP_COMPARE.get(instance.get('type', ''), [])
+    compares.extend(additional_compares)
+
+    for first, op, second in compares:
+        comp = getattr(operator, op)
+        if op == 'gt':
+            comp_str = 'later than'
+        elif op == 'ge':
+            comp_str = 'later than or equal to'
+        else:
+            raise ValueError('Unknown operator: {}'.format(op))
+
+        if first in instance and second in instance and \
+                not comp(instance[first], instance[second]):
+            msg = "'%s' (%s) must be %s '%s' (%s)"
+            return JSONError(msg % (first, instance[first], comp_str, second, instance[second]),
+                             instance['id'])
 
 
 def object_marking_circular_refs(instance):
@@ -496,22 +512,12 @@ def language_contents(instance):
                                 % (subkey, key), instance['id'], 'observable-dictionary-keys')
 
 
-def relationsthip_times(instance):
-    """Ensure `modified` property must be later or equal to `created` property
-    """
-    if 'start_time' in instance and 'stop_time' in instance and \
-            instance['stop_time'] <= instance['start_time']:
-        msg = "'stop_time' (%s) must be later than 'start_time' (%s)"
-        return JSONError(msg % (instance['stop_time'], instance['start_time']),
-                         instance['id'])
-
-
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
     validator_list = [
         timestamp,
-        modified_created,
+        timestamp_compare,
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,
@@ -522,7 +528,6 @@ def list_musts(options):
         software_language,
         patterns,
         language_contents,
-        relationsthip_times,
     ]
 
     # --strict-types

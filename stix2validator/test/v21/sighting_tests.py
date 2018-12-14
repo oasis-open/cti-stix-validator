@@ -40,3 +40,15 @@ class IdentityTestCases(ValidatorTest):
         sighting = copy.deepcopy(self.valid_sighting)
         sighting['where_sighted_refs'].append("tool--36ffb872-1dd9-446e-b6f5-d58527e5b5d2")
         self.assertFalseWithOptions(sighting)
+
+    def test_invalid_seen_time(self):
+        sighting = copy.deepcopy(self.valid_sighting)
+        sighting['first_seen'] = "2016-04-06T20:06:37.000Z"
+        sighting['last_seen'] = "2016-04-06T20:06:37.000Z"
+        self.assertFalseWithOptions(sighting)
+
+        sighting['last_seen'] = "2016-01-01T00:00:00.000Z"
+        self.assertFalseWithOptions(sighting)
+
+        sighting['last_seen'] = "2016-05-07T20:06:37.000Z"
+        self.assertTrueWithOptions(sighting)
