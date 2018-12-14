@@ -19,11 +19,6 @@ Python functions to check them. The "SHOULD" requirements are all
 checked by Python functions, and options may be used to ignore some or
 all of these recommended "best practices."
 
-The only exception to this is the mandatory requirement that an
-object's 'type' be one of those defined by a STIX Object in the
-specification. This rules out custom objects, so this check was made
-optional.
-
 The STIX Validator uses the `stix2-patterns validator
 <https://github.com/oasis-open/cti-pattern-validator>`_ to check that
 Indicator patterns conform to the STIX Patterning language and only

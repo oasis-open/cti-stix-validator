@@ -33,7 +33,8 @@ or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
 :code:`clear_cache=True`. This caching can be disabled entirely with
 :code:`--no-cache` or :code:`no_cache=True`.
 
-**Recommended Best Practice Check Codes - STIX 2.1**
+Check Codes - STIX 2.1
+----------------------
 
 +--------+-----------------------------+----------------------------------------+
 |**Code**|**Name**                     |**Ensures...**                          |
@@ -158,7 +159,8 @@ or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
 |        |                             | if they have a url                     |
 +--------+-----------------------------+----------------------------------------+
 
-**Recommended Best Practice Check Codes - STIX 2.0**
+Check Codes - STIX 2.0
+----------------------
 
 +--------+-----------------------------+----------------------------------------+
 |**Code**|**Name**                     |**Ensures...**                          |
