@@ -73,6 +73,17 @@ def timestamp(instance):
                                                     % (obj['type'], tprop, obj[embed][tprop], str(e)), instance['id'])
 
 
+def get_comparison_string(op):
+    """Return a string explaining the given comparison operator.
+    """
+    if op == 'gt':
+        return 'later than'
+    elif op == 'ge':
+        return 'later than or equal to'
+    else:
+        raise ValueError('Unknown operator: {}'.format(op))
+
+
 def timestamp_compare(instance):
     """Ensure timestamp properties with a comparison requirement are valid.
 
@@ -84,18 +95,32 @@ def timestamp_compare(instance):
 
     for first, op, second in compares:
         comp = getattr(operator, op)
-        if op == 'gt':
-            comp_str = 'later than'
-        elif op == 'ge':
-            comp_str = 'later than or equal to'
-        else:
-            raise ValueError('Unknown operator: {}'.format(op))
+        comp_str = get_comparison_string(op)
 
         if first in instance and second in instance and \
                 not comp(instance[first], instance[second]):
             msg = "'%s' (%s) must be %s '%s' (%s)"
-            return JSONError(msg % (first, instance[first], comp_str, second, instance[second]),
-                             instance['id'])
+            yield JSONError(msg % (first, instance[first], comp_str, second, instance[second]),
+                            instance['id'])
+
+
+@cyber_observable_check
+def observable_timestamp_compare(instance):
+    """Ensure cyber observable timestamp properties with a comparison
+    requirement are valid.
+    """
+    for key, obj in instance['objects'].items():
+        compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(obj.get('type', ''), [])
+        print(compares)
+        for first, op, second in compares:
+            comp = getattr(operator, op)
+            comp_str = get_comparison_string(op)
+
+            if first in obj and second in obj and \
+                    not comp(obj[first], obj[second]):
+                msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
+                yield JSONError(msg % (key, first, obj[first], comp_str, second, obj[second]),
+                                instance['id'])
 
 
 def object_marking_circular_refs(instance):
@@ -518,6 +543,7 @@ def list_musts(options):
     validator_list = [
         timestamp,
         timestamp_compare,
+        observable_timestamp_compare,
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,

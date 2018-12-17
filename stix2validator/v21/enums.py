@@ -1523,6 +1523,13 @@ TIMESTAMP_COMPARE = {
     ],
 }
 
+# Mapping of STIX Object timestamp properties with a comparison requirement
+TIMESTAMP_COMPARE_OBSERVABLE = {
+    "network-traffic": [
+        ('end', 'gt', 'start'),
+    ],
+}
+
 # Mapping of official STIX objects to their open-vocab properties
 VOCAB_PROPERTIES = {
     "identity": [
