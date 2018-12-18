@@ -663,7 +663,7 @@ def _schema_validate(sdo, options):
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
         # Check if observed data property is in dictionary format
         if not isinstance(sdo['objects'], dict):
-            error_gens.append(([JSONError("Observed Data objects must be in dict format.", error_prefix)],
+            error_gens.append(([schema_exceptions.ValidationError("Observed Data objects must be in dict format.", error_prefix)],
                               error_prefix))
             return error_gens
 

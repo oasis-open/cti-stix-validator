@@ -828,6 +828,16 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['1']['extensions']['x-example-com-foobar-ext']['foo_value'] = 'something else'
         self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
 
+    def test_invalid_objects_property(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects'] = [
+            {
+                "type": "windows-registry-key",
+                "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\WSALG2"
+            }
+            ]
+        self.assertFalseWithOptions(observed_data)
+
     def test_url(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
