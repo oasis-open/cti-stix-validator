@@ -267,6 +267,15 @@ def parse_args(cmd_args, is_script=False):
         help="Clear the cache of external source values after validation."
     )
 
+    parser.add_argument(
+        "--enforce_refs",
+        dest="enforce_refs",
+        action="store_true",
+        default=False,
+        help="Ensures that all SDOs being referenced by the SRO are contained "
+             "within the same bundle."
+    )
+
     args = parser.parse_args(cmd_args)
 
     if not is_script:
@@ -311,13 +320,15 @@ class ValidationOptions(object):
             validation.
         clear_cache: Specifies that the cache of values from external sources
             should be cleared after validation.
+        enforce_refs:Ensures that all SDOs being referenced by the SRO are
+            contained within the same bundle
 
     """
     def __init__(self, cmd_args=None, version=DEFAULT_VER, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
-                 refresh_cache=False, clear_cache=False):
+                 refresh_cache=False, clear_cache=False, enforce_refs=False):
 
         if cmd_args is not None:
             self.version = cmd_args.version
@@ -334,6 +345,7 @@ class ValidationOptions(object):
             self.no_cache = cmd_args.no_cache
             self.refresh_cache = cmd_args.refresh_cache
             self.clear_cache = cmd_args.clear_cache
+            self.enforce_refs = cmd_args.enforce_refs
         else:
             # input options
             self.version = version
@@ -349,6 +361,7 @@ class ValidationOptions(object):
             self.strict_properties = strict_properties
             self.disabled = disabled
             self.enabled = enabled
+            self.enforce_refs = enforce_refs
 
             # cache options
             self.no_cache = no_cache

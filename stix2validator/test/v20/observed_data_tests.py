@@ -842,6 +842,16 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects']['2']['value'] = "http://www.example.com/file.txt"
         self.assertTrueWithOptions(observed_data)
 
+    def test_invalid_objects_property(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['objects'] = [
+            {
+                "type": "windows-registry-key",
+                "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\WSALG2"
+            }
+            ]
+        self.assertFalseWithOptions(observed_data)
+
     def test_url_in_artifact(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
