@@ -60,7 +60,7 @@ class RelationshipTestCases(ValidatorTest):
     def test_relationship_types_invalid_type(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
+        relationship['target_ref'] = "campaign--9c1f891b-659a-4f7f-80ea-31b940d417b5"
         relationship['relationship_type'] = "mitigates"
         results = validate_parsed_json(relationship, self.options)
         self.assertEqual(results.is_valid, False)
@@ -80,7 +80,7 @@ class RelationshipTestCases(ValidatorTest):
     def test_relationship_types_valid(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "tool--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship['target_ref'] = "vulnerability--9c1f891b-459a-6f7f-80ea-31b17b5940d4"
+        relationship['target_ref'] = "vulnerability--9c1f891b-659a-4f7f-80ea-31b17b5940d4"
         relationship['relationship_type'] = "targets"
         results = validate_parsed_json(relationship, self.options)
         self.assertTrue(results.is_valid)
@@ -88,7 +88,7 @@ class RelationshipTestCases(ValidatorTest):
     def test_relationship_types_common(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['source_ref'] = "malware--31b940d4-6f7f-459a-80ea-9c1f17b5891b"
-        relationship['target_ref'] = "campaign--9c1f891b-459a-6f7f-80ea-31b940d417b5"
+        relationship['target_ref'] = "campaign--9c1f891b-659a-4f7f-80ea-31b940d417b5"
         relationship['relationship_type'] = "related-to"
         results = validate_parsed_json(relationship, self.options)
         self.assertTrue(results.is_valid)
