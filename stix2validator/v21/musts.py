@@ -177,11 +177,11 @@ def marking_selector_syntax(instance):
                     try:
                         idx = int(index_match.group(1))
                         obj = obj[idx]
-                    except IndexError as e:
+                    except IndexError:
                         yield JSONError("'%s' is not a valid selector because"
                                         " %s is not a valid index."
                                         % (selector, idx), instance['id'])
-                    except KeyError as e:
+                    except KeyError:
                         yield JSONError("'%s' is not a valid selector because"
                                         " '%s' is not a list."
                                         % (selector, prev_segmt), instance['id'])
@@ -192,7 +192,7 @@ def marking_selector_syntax(instance):
                         yield JSONError("'%s' is not a valid selector because"
                                         " %s is not a property."
                                         % (selector, e), instance['id'])
-                    except TypeError as e:
+                    except TypeError:
                         yield JSONError("'%s' is not a valid selector because"
                                         " '%s' is not a property."
                                         % (selector, segmt), instance['id'])
