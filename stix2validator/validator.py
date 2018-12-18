@@ -588,7 +588,6 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON '
                                  'reference failed to resolve')
-
     return error_gen
 
 
@@ -626,6 +625,12 @@ def _schema_validate(sdo, options):
 
     # Validate each cyber observable object separately
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
+        # Check if observed data property is in dictionary format
+        if not isinstance(sdo['objects'], dict):
+            error_gens.append(([JSONError("Observed Data objects must be in dict format.", error_prefix)],
+                              error_prefix))
+            return error_gens
+
         for key, obj in iteritems(sdo['objects']):
             if 'type' not in obj:
                 error_gens.append(([JSONError("Observable object must contain a 'type' property.", error_prefix)],
