@@ -1,6 +1,6 @@
 [submodule "stix2validator/schemas-2.0"]
 	path = stix2validator/schemas-2.0
-	url = https://github.com:oasis-open/cti-stix2-json-schemas.git
+	url = https://github.com/oasis-open/cti-stix2-json-schemas.git
 [submodule "stix2validator/schemas-2.1"]
 	path = stix2validator/schemas-2.1
-	url = https://github.com:oasis-open/cti-stix2-json-schemas.git
+	url = https://github.com/oasis-open/cti-stix2-json-schemas.git
