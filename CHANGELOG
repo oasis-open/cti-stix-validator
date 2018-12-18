@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+1.1.2 - 2018-12-18
+
+* Fixed packaging issue (#83)
+* Improved error message when observed-data.objects is a list instead of a
+  dictionary
+
 1.1.1 - 2018-11-30
 
 * Added a flag to warn when all SDOs referenced by SROs are not contained in
