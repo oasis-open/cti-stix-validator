@@ -1,1 +1,1 @@
-recursive-include stix2validator/schemas/schemas *.json
+recursive-include stix2validator/schemas* *.json

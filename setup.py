@@ -51,7 +51,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     keywords="stix stix2 json validation validator stix-validator stix2-validator",
-    packages=find_packages(exclude=['*.test']),
+    packages=find_packages(exclude=['*.test.*']),
     install_requires=install_requires,
     include_package_data=True,
     entry_points={
