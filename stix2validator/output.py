@@ -1,9 +1,6 @@
 import logging
-import sys
 
 from colorama import Fore, Style, init
-
-from . import codes
 
 init(autoreset=True)
 _GREEN = Fore.GREEN
@@ -34,17 +31,15 @@ def set_silent(silence_output=False):
     _SILENT = silence_output
 
 
-def error(msg, status=codes.EXIT_FAILURE):
+def error(msg):
     """Print a message to the stderr prepended by '[X]' and calls
     ```sys.exit(status)``.
 
     Args:
         msg: The error message to print.
-        status: The exit status code. Defaults to ``EXIT_FAILURE`` (1).
 
     """
     logger.error(_RED + "[X] %s\n" % str(msg))
-    sys.exit(status)
 
 
 def info(msg):

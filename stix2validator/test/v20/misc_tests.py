@@ -6,8 +6,8 @@ import sys
 
 import pytest
 
-from ... import (ValidationOptions, print_results, run_validation,
-                 validate_file, validate_string)
+from ... import (NoJSONFileFoundError, ValidationOptions, print_results,
+                 run_validation, validate_file, validate_string)
 from .tool_tests import VALID_TOOL
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
@@ -41,7 +41,7 @@ def test_run_validation(caplog):
 
 def test_run_validation_nonexistent_file():
     options = ValidationOptions(files='asdf.json', version="2.0")
-    with pytest.raises(SystemExit):
+    with pytest.raises(NoJSONFileFoundError):
         run_validation(options)
 
 

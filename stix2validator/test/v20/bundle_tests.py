@@ -57,8 +57,9 @@ class BundleTestCases(ValidatorTest):
 
     def test_silent_and_verbose(self):
         bundle = json.loads(VALID_BUNDLE)
-        with pytest.raises(SystemExit):
+        with pytest.raises(ValueError) as exc:
             self.assertFalseWithOptions(bundle, silent=True, verbose=True)
+        assert 'silent or verbose, but not both' in str(exc)
 
     def test_bundle_sdo_missing_type(self):
         bundle = copy.deepcopy(self.valid_bundle)
