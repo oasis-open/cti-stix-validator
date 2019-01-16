@@ -268,11 +268,11 @@ def parse_args(cmd_args, is_script=False):
     )
 
     parser.add_argument(
-        "--enforce_refs",
+        "--enforce-refs",
         dest="enforce_refs",
         action="store_true",
         default=False,
-        help="Ensures that all SDOs being referenced by the SRO are contained "
+        help="Ensures that all SDOs being referenced by SROs are contained "
              "within the same bundle."
     )
 
