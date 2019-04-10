@@ -12,12 +12,15 @@ from jsonschema import exceptions as schema_exceptions
 import simplejson as json
 from six import iteritems, string_types, text_type
 
-from . import musts, output, shoulds
-from .errors import (JSONError, NoJSONFileFoundError, SchemaError,
-                     SchemaInvalidError, ValidationError, pretty_error)
-from .util import ValidationOptions, clear_requests_cache, init_requests_cache
-
-DEFAULT_SCHEMA_DIR = os.path.abspath(os.path.dirname(__file__) + '/schemas/')
+from . import output
+from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
+                     ValidationError, pretty_error)
+from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
+                   init_requests_cache)
+from .v20 import musts as musts20
+from .v20 import shoulds as shoulds20
+from .v21 import musts as musts21
+from .v21 import shoulds as shoulds21
 
 
 def _is_iterable_non_string(val):
@@ -350,10 +353,7 @@ def run_validation(options):
                                       filepath='stdin',
                                       object_results=results)]
 
-    try:
-        files = get_json_files(options.files, options.recursive)
-    except NoJSONFileFoundError as e:
-        output.error(e)
+    files = get_json_files(options.files, options.recursive)
 
     results = [validate_file(fn, options) for fn in files]
 
@@ -515,8 +515,7 @@ def find_schema(schema_dir, obj_type):
     """
     schema_filename = obj_type + '.json'
 
-    # If no schema directory given, use default bundled with this package
-    for root, dirnames, filenames in os.walk(schema_dir or DEFAULT_SCHEMA_DIR):
+    for root, dirnames, filenames in os.walk(schema_dir):
         if schema_filename in filenames:
             return os.path.join(root, schema_filename)
 
@@ -541,13 +540,15 @@ def load_schema(schema_path):
     return schema
 
 
-def _get_error_generator(type, obj, schema_dir=None, default='core'):
+def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, default='core'):
     """Get a generator for validating against the schema for the given object type.
 
     Args:
         type (str): The object type to find the schema for.
         obj: The object to be validated.
         schema_dir (str): The path in which to search for schemas.
+        version (str): The version of the STIX specification to validate
+            against. Only used to find base schemas when schema_dir is None.
         default (str): If the schema for the given type cannot be found, use
             the one with this name instead.
 
@@ -556,6 +557,12 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
         appropriate schema, or None if schema_dir is None and the schema
         cannot be found.
     """
+    # If no schema directory given, use default for the given STIX version,
+    # which comes bundled with this package
+    if schema_dir is None:
+        schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
+                                     + version + '/')
+
     try:
         schema_path = find_schema(schema_dir, type)
         schema = load_schema(schema_path)
@@ -591,6 +598,32 @@ def _get_error_generator(type, obj, schema_dir=None, default='core'):
     return error_gen
 
 
+def _get_musts(options):
+    """Return the list of 'MUST' validators for the correct version of STIX.
+
+    Args:
+        options: ValidationOptions instance with validation options for this
+            validation run, including the STIX spec version.
+    """
+    if options.version == '2.0':
+        return musts20.list_musts(options)
+    else:
+        return musts21.list_musts(options)
+
+
+def _get_shoulds(options):
+    """Return the list of 'SHOULD' validators for the correct version of STIX.
+
+    Args:
+        options: ValidationOptions instance with validation options for this
+            validation run, including the STIX spec version.
+    """
+    if options.version == '2.0':
+        return shoulds20.list_shoulds(options)
+    else:
+        return shoulds21.list_shoulds(options)
+
+
 def _schema_validate(sdo, options):
     """Set up validation of a single STIX object against its type's schema.
     This does no actual validation; it just returns generators which must be
@@ -613,7 +646,7 @@ def _schema_validate(sdo, options):
         error_prefix = ''
 
     # Get validator for built-in schema
-    base_sdo_errors = _get_error_generator(sdo['type'], sdo)
+    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=options.version)
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
@@ -627,19 +660,20 @@ def _schema_validate(sdo, options):
     if sdo['type'] == 'observed-data' and 'objects' in sdo:
         # Check if observed data property is in dictionary format
         if not isinstance(sdo['objects'], dict):
-            error_gens.append(([JSONError("Observed Data objects must be in dict format.", error_prefix)],
+            error_gens.append(([schema_exceptions.ValidationError("Observed Data objects must be in dict format.", error_prefix)],
                               error_prefix))
             return error_gens
 
         for key, obj in iteritems(sdo['objects']):
             if 'type' not in obj:
-                error_gens.append(([JSONError("Observable object must contain a 'type' property.", error_prefix)],
+                error_gens.append(([schema_exceptions.ValidationError("Observable object must contain a 'type' property.", error_prefix)],
                                    error_prefix + 'object \'' + key + '\': '))
                 continue
             # Get validator for built-in schemas
             base_obs_errors = _get_error_generator(obj['type'],
                                                    obj,
                                                    None,
+                                                   options.version,
                                                    'cyber-observable-core')
             if base_obs_errors:
                 error_gens.append((base_obs_errors,
@@ -649,6 +683,7 @@ def _schema_validate(sdo, options):
             custom_obs_errors = _get_error_generator(obj['type'],
                                                      obj,
                                                      options.schema_dir,
+                                                     options.version,
                                                      'cyber-observable-core')
             if custom_obs_errors:
                 error_gens.append((custom_obs_errors,
@@ -692,8 +727,8 @@ def validate_instance(instance, options=None):
         error_gens += _schema_validate(instance, options)
 
     # Custom validation
-    must_checks = musts.list_musts(options)
-    should_checks = shoulds.list_shoulds(options)
+    must_checks = _get_musts(options)
+    should_checks = _get_shoulds(options)
     output.info("Running the following additional checks: %s."
                 % ", ".join(x.__name__ for x in chain(must_checks, should_checks)))
     try:

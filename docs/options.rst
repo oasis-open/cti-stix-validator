@@ -18,6 +18,9 @@ constructor.
 | ``--schemas SCHEMA_DIR`` |                       | validated against these schemas in addition to the     |
 |                          |                       | STIX schemas bundled with this script.                 |
 +--------------------------+-----------------------+--------------------------------------------------------+
+| ``--version``            | ``version``           | The version of the STIX specification to validate      |
+|                          |                       | against (e.g. "2.0").                                  |
++--------------------------+-----------------------+--------------------------------------------------------+
 | ``-v``, ``--verbose``    | ``verbose``           | Print informational notes and more verbose error       |
 |                          |                       | messages.                                              |
 +--------------------------+-----------------------+--------------------------------------------------------+
@@ -49,5 +52,8 @@ constructor.
 | ``--clear-cache``        | ``clear_cache``       | Clear the cache of external source values after        |
 |                          |                       | validation.                                            |
 +--------------------------+-----------------------+--------------------------------------------------------+
+| ``--enforce-refs``       | ``enforce_refs``      | Ensures that all SDOs being referenced by SROs are     |
+|                          |                       | contained within the same bundle.                      |
++--------------------------+-----------------------+--------------------------------------------------------+
 
-For the list of checks that can be used with the "enabled" or "disabled" options, see the `Best Practices page <best-practices.rst>`_.
+For the list of checks that can be used with the "enabled" or "disabled" options, see the :doc:`Best Practices page <best-practices>`.

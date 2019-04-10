@@ -10,12 +10,19 @@ import textwrap
 from appdirs import AppDirs
 import requests_cache
 
-from .output import error, set_level, set_silent
+from .output import set_level, set_silent
+from .v20.enums import CHECK_CODES as CHECK_CODES20
+from .v21.enums import CHECK_CODES as CHECK_CODES21
+
+DEFAULT_VER = "2.1"
 
 CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
 the validator performs, along with the code to use with the --enable or
 --disable options. By default, the validator checks all of them.
+
+This table is for STIX version {}. For older versions, please refer to
+https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 
 +------+-----------------------------+----------------------------------------+
 | Code | Name                        | Ensures...                             |
@@ -56,26 +63,26 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | attack_resource_level vocabulary       |
 | 213  | identity-class              | certain property values are from the   |
 |      |                             | identity_class vocabulary              |
-| 214  | indicator-label             | certain property values are from the   |
-|      |                             | indicator_label vocabulary             |
+| 214  | indicator-types             | certain property values are from the   |
+|      |                             | indicator_types vocabulary             |
 | 215  | industry-sector             | certain property values are from the   |
 |      |                             | industry_sector vocabulary             |
-| 216  | malware-label               | certain property values are from the   |
-|      |                             | malware_label vocabulary               |
-| 218  | report-label                | certain property values are from the   |
-|      |                             | report_label vocabulary                |
-| 219  | threat-actor-label          | certain property values are from the   |
-|      |                             | threat_actor_label vocabulary          |
+| 216  | malware-types               | certain property values are from the   |
+|      |                             | malware_types vocabulary               |
+| 218  | report-types                | certain property values are from the   |
+|      |                             | report_types vocabulary                |
+| 219  | threat-actor-types          | certain property values are from the   |
+|      |                             | threat_actor_types vocabulary          |
 | 220  | threat-actor-role           | certain property values are from the   |
 |      |                             | threat_actor_role vocabulary           |
 | 221  | threat-actor-sophistication | certain property values are from the   |
 |      |                             | threat_actor_sophistication vocabulary |
-| 222  | tool-label                  | certain property values are from the   |
-|      |                             | tool_label vocabulary                  |
+| 222  | tool-types                  | certain property values are from the   |
+|      |                             | tool_types vocabulary                  |
+| 222  | region                      | certain property values are from the   |
+|      |                             | region vocabulary                      |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
-| 242  | encryption-algo             | certain property values are from the   |
-|      |                             | encryption-algo vocabulary             |
 | 243  | windows-pebinary-type       | certain property values are from the   |
 |      |                             | windows-pebinary-type vocabulary       |
 | 244  | account-type                | certain property values are from the   |
@@ -95,12 +102,14 @@ the validator performs, along with the code to use with the --enable or
 |      |                             | socket options                         |
 | 276  | pdf-doc-info                | certain property values are valid PDF  |
 |      |                             | Document Information Dictionary keys   |
+| 277  | countries                   | certain property values are valid ISO  |
+|      |                             | 3166-1 ALPHA-2 codes                   |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
 | 302  | extref-hashes               | external references SHOULD have hashes |
 |      |                             | if they have a url                     |
 +------+-----------------------------+----------------------------------------+
-"""
+""".format(DEFAULT_VER)
 
 
 class NewlinesHelpFormatter(RawDescriptionHelpFormatter):
@@ -156,6 +165,13 @@ def parse_args(cmd_args, is_script=False):
         help="Custom schema directory. If provided, input will be validated "
              "against these schemas in addition to the STIX schemas bundled "
              "with this script."
+    )
+    parser.add_argument(
+        "--version",
+        dest="version",
+        default=DEFAULT_VER,
+        help="The version of the STIX specification to validate against (e.g. "
+             "\"2.0\")."
     )
 
     # Output options
@@ -252,11 +268,11 @@ def parse_args(cmd_args, is_script=False):
     )
 
     parser.add_argument(
-        "--enforce_refs",
+        "--enforce-refs",
         dest="enforce_refs",
         action="store_true",
         default=False,
-        help="Ensures that all SDOs being referenced by the SRO are contained "
+        help="Ensures that all SDOs being referenced by SROs are contained "
              "within the same bundle."
     )
 
@@ -264,6 +280,8 @@ def parse_args(cmd_args, is_script=False):
 
     if not is_script:
         args.files = ""
+    if not args.version:
+        args.version = DEFAULT_VER
 
     return ValidationOptions(args)
 
@@ -279,6 +297,7 @@ class ValidationOptions(object):
     Attributes:
         cmd_args: An instance of ``argparse.Namespace`` containing options
             supplied on the command line.
+        version: The version of the STIX specification to validate against.
         verbose: True if informational notes and more verbose error messages
             should be printed to stdout/stderr.
         silent: True if all output to stdout should be silenced.
@@ -305,13 +324,14 @@ class ValidationOptions(object):
             contained within the same bundle
 
     """
-    def __init__(self, cmd_args=None, verbose=False, silent=False,
+    def __init__(self, cmd_args=None, version=DEFAULT_VER, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
                  refresh_cache=False, clear_cache=False, enforce_refs=False):
 
         if cmd_args is not None:
+            self.version = cmd_args.version
             self.verbose = cmd_args.verbose
             self.silent = cmd_args.silent
             self.files = cmd_args.files
@@ -328,6 +348,7 @@ class ValidationOptions(object):
             self.enforce_refs = cmd_args.enforce_refs
         else:
             # input options
+            self.version = version
             self.files = files
             self.recursive = recursive
             self.schema_dir = schema_dir
@@ -349,63 +370,25 @@ class ValidationOptions(object):
 
         # Set the output level (e.g., quiet vs. verbose)
         if self.silent and self.verbose:
-            error('Error: Output can either be silent or verbose, but not both.')
+            raise ValueError('Error: Output can either be silent or verbose, but not both.')
         set_level(self.verbose)
         set_silent(self.silent)
+
+        if self.version == '2.0':
+            check_codes = CHECK_CODES20
+        else:  # Default version
+            check_codes = CHECK_CODES21
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names
         if self.disabled:
-            self.disabled = self.disabled.split(",")
-            self.disabled = [CHECK_CODES[x] if x in CHECK_CODES else x
+            self.disabled = self.disabled.split(',')
+            self.disabled = [check_codes[x] if x in check_codes else x
                              for x in self.disabled]
         if self.enabled:
-            self.enabled = self.enabled.split(",")
-            self.enabled = [CHECK_CODES[x] if x in CHECK_CODES else x
+            self.enabled = self.enabled.split(',')
+            self.enabled = [check_codes[x] if x in check_codes else x
                             for x in self.enabled]
-
-
-# Mapping of check code numbers to names
-CHECK_CODES = {
-    '1': 'format-checks',
-    '101': 'custom-prefix',
-    '102': 'custom-prefix-lax',
-    '111': 'open-vocab-format',
-    '121': 'kill-chain-names',
-    '141': 'observable-object-keys',
-    '142': 'observable-dictionary-keys',
-    '149': 'windows-process-priority-format',
-    '150': 'hash-length',
-    '2': 'approved-values',
-    '201': 'marking-definition-type',
-    '202': 'relationship-types',
-    '203': 'duplicate-ids',
-    '210': 'all-vocabs',
-    '211': 'attack-motivation',
-    '212': 'attack-resource-level',
-    '213': 'identity-class',
-    '214': 'indicator-label',
-    '215': 'industry-sector',
-    '216': 'malware-label',
-    '218': 'report-label',
-    '219': 'threat-actor-label',
-    '220': 'threat-actor-role',
-    '221': 'threat-actor-sophistication',
-    '222': 'tool-label',
-    '241': 'hash-algo',
-    '242': 'encryption-algo',
-    '243': 'windows-pebinary-type',
-    '244': 'account-type',
-    '270': 'all-external-sources',
-    '271': 'mime-type',
-    '272': 'protocols',
-    '273': 'ipfix',
-    '274': 'http-request-headers',
-    '275': 'socket-options',
-    '276': 'pdf-doc-info',
-    '301': 'network-traffic-ports',
-    '302': 'extref-hashes',
-}
 
 
 def has_cyber_observable_data(instance):

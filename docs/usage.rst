@@ -61,6 +61,24 @@ other than the default:
   options = ValidationOptions(strict=True)
   results = validate_string(stix_json_string, options)
 
+STIX 2 Versions
+---------------
+
+By default the validator will check content against the latest version of
+the STIX 2 specification. However, older versions can be checked with the
+``version`` option. For example:
+
+::
+
+  $ stix2_validator --version=2.0 <stix_file.json>
+
+or in Python:
+
+.. code:: python
+
+  options = ValidationOptions(strict=True, version="2.0")
+  results = validate_string(stix_json_string, options)
+
 Additional Schemas
 ------------------
 
