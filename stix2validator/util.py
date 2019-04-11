@@ -401,6 +401,13 @@ def has_cyber_observable_data(instance):
         return True
     return False
 
+def check_spec(instance):
+    """ Returns spec_version if it exists, otherwise returns False
+    """
+    if 'spec_version' in instance:
+        return instance['spec_version']
+    return False
+
 
 def cyber_observable_check(original_function):
     """Decorator for functions that require cyber observable data.
