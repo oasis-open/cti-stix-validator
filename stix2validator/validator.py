@@ -15,8 +15,8 @@ from six import iteritems, string_types, text_type
 from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
-from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
-                   init_requests_cache, check_spec)
+from .util import (DEFAULT_VER, ValidationOptions, check_spec,
+                   clear_requests_cache, init_requests_cache)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
@@ -378,11 +378,8 @@ def validate_parsed_json(obj_json, options=None):
 
     if not options:
         options = ValidationOptions()
-    
-    version_check = check_spec(obj_json)
-    if version_check:
-        options.version = version_check
-    
+
+    options = check_spec(obj_json, options)
 
     if not options.no_cache:
         init_requests_cache(options.refresh_cache)

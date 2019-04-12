@@ -4,11 +4,11 @@ from collections import Iterable
 import datetime
 import errno
 import os
+import requests_cache
 import sys
 import textwrap
 
 from appdirs import AppDirs
-import requests_cache
 
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
@@ -401,12 +401,19 @@ def has_cyber_observable_data(instance):
         return True
     return False
 
-def check_spec(instance):
-    """ Returns spec_version if it exists, otherwise returns False
+
+def check_spec(instance, options):
+    """ Updates options if spec_version exists in instance and
+    returns options.
     """
     if 'spec_version' in instance:
-        return instance['spec_version']
-    return False
+        options.version = instance['spec_version']
+        if options.version == '2.0':
+            options.check_codes = CHECK_CODES20
+        else:
+            options.check_codes = CHECK_CODES21
+        return options
+    return options
 
 
 def cyber_observable_check(original_function):
