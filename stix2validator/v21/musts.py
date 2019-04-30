@@ -350,8 +350,8 @@ def language(instance):
     """Ensure the 'lang' property of SDOs is a valid RFC 5646 language code.
     """
     if ('lang' in instance and instance['lang'] not in enums.LANG_CODES):
-                yield JSONError("'%s' is not a valid RFC 5646 language code."
-                                % instance['lang'], instance['id'])
+        yield JSONError("'%s' is not a valid RFC 5646 language code."
+                        % instance['lang'], instance['id'])
 
 
 @cyber_observable_check

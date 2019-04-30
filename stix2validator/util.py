@@ -4,11 +4,11 @@ from collections import Iterable
 import datetime
 import errno
 import os
-import requests_cache
 import sys
 import textwrap
 
 from appdirs import AppDirs
+import requests_cache
 
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
