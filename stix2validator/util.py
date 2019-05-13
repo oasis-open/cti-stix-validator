@@ -348,7 +348,7 @@ class ValidationOptions(object):
             self.enforce_refs = cmd_args.enforce_refs
         else:
             # input options
-            self.version = version
+            self.version = None
             self.files = files
             self.recursive = recursive
             self.schema_dir = schema_dir
@@ -403,17 +403,59 @@ def has_cyber_observable_data(instance):
 
 
 def check_spec(instance, options):
-    """ Updates options if spec_version exists in instance and
-    returns options.
+    """ Updates options if spec_version exists in instance or if the command line option
+    given differes and returns options and a list of any resulting warnings"
     """
-    if 'spec_version' in instance:
-        options.version = instance['spec_version']
-        if options.version == '2.0':
-            options.check_codes = CHECK_CODES20
-        else:
-            options.check_codes = CHECK_CODES21
-        return options
-    return options
+    warnings = []
+    if options.version:
+        try:
+            if instance['type'] == 'bundle' and 'spec_version' in instance:
+                if instance['spec_version'] != options.version:
+                    instance['spec_version'] = options.version
+                    warnings.append(instance['id'] + ": spec_version mismatch with command-"
+                                    "line option. Defaulting to spec_version " + options.version)
+            if instance['type'] == 'bundle' and 'objects' in instance:
+                for obj in instance['objects']:
+                    if 'spec_version' in obj:
+                        if obj['spec_version'] != options.version:
+                            obj['spec_version'] = options.version
+                            warnings.append(obj['id'] + ": spec_version mismatch with command-"
+                                            "line option. Defaulting to spec_version "
+                                            + options.version)
+        except Exception:
+            pass
+
+    else:
+        if 'spec_version' in instance:
+            options.version = instance['spec_version']
+        try:
+            if instance['type'] == 'bundle' and 'objects' in instance:
+                for obj in instance['objects']:
+                    if 'spec_version' in obj:
+                        options.version = obj['spec_version']
+        except Exception:
+            pass
+
+        if not options.version:
+            options.version = "2.0"
+
+    if options.version == '2.0':
+        options.check_codes = CHECK_CODES20
+    else:
+        options.check_codes = CHECK_CODES21
+
+    if options.disabled:
+        if isinstance(options.disabled, str):
+            options.disabled = options.disabled.split(',')
+        options.disabled = [options.check_codes[x] if x in options.check_codes else x
+                            for x in options.disabled]
+    if options.enabled:
+        if isinstance(options.enabled, str):
+            options.enabled = options.enabled.split(',')
+        options.enabled = [options.check_codes[x] if x in options.check_codes else x
+                           for x in options.enabled]
+
+    return (options, warnings)
 
 
 def cyber_observable_check(original_function):

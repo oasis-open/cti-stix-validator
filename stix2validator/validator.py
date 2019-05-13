@@ -379,7 +379,7 @@ def validate_parsed_json(obj_json, options=None):
     if not options:
         options = ValidationOptions()
 
-    options = check_spec(obj_json, options)
+    options = check_spec(obj_json, options)[0]
 
     if not options.no_cache:
         init_requests_cache(options.refresh_cache)
@@ -716,6 +716,10 @@ def validate_instance(instance, options=None):
     if not options:
         options = ValidationOptions()
 
+    spec_warnings = []
+
+    options, spec_warnings = check_spec(instance, options)
+
     error_gens = []
 
     # Schema validation
@@ -743,6 +747,7 @@ def validate_instance(instance, options=None):
         else:
             chained_errors = errors
             warnings = [pretty_error(x, options.verbose) for x in warnings]
+            warnings.extend(spec_warnings)
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
                                  'failed to resolve')
