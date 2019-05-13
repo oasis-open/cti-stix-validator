@@ -324,7 +324,7 @@ class ValidationOptions(object):
             contained within the same bundle
 
     """
-    def __init__(self, cmd_args=None, version=DEFAULT_VER, verbose=False, silent=False,
+    def __init__(self, cmd_args=None, version=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
@@ -348,7 +348,10 @@ class ValidationOptions(object):
             self.enforce_refs = cmd_args.enforce_refs
         else:
             # input options
-            self.version = None
+            if version is not None:
+                self.version = version
+            else:
+                self.version = None
             self.files = files
             self.recursive = recursive
             self.schema_dir = schema_dir
