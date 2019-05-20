@@ -16,7 +16,7 @@ from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
 from .util import (DEFAULT_VER, ValidationOptions, check_spec,
-                   clear_requests_cache, init_requests_cache)
+                   clear_requests_cache, init_requests_cache, set_check_codes)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
@@ -379,8 +379,6 @@ def validate_parsed_json(obj_json, options=None):
     if not options:
         options = ValidationOptions()
 
-    options = check_spec(obj_json, options)[0]
-
     if not options.no_cache:
         init_requests_cache(options.refresh_cache)
 
@@ -647,6 +645,13 @@ def _schema_validate(sdo, options):
     else:
         error_prefix = ''
 
+    if options.version is None and 'spec_version' in sdo:
+        options.version = sdo['spec_version']
+    if options.version is None:
+        options.version = "2.1"
+
+    options = set_check_codes(options)
+
     # Get validator for built-in schema
     base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=options.version)
     if base_sdo_errors:
@@ -716,14 +721,12 @@ def validate_instance(instance, options=None):
     if not options:
         options = ValidationOptions()
 
-    spec_warnings = []
-
-    options, spec_warnings = check_spec(instance, options)
-
     error_gens = []
 
     # Schema validation
     if instance['type'] == 'bundle' and 'objects' in instance:
+        if options.version is None and 'spec_version' in instance:
+            options.version = instance['spec_version']
         # Validate each object in a bundle separately
         for sdo in instance['objects']:
             if 'type' not in sdo:
@@ -731,6 +734,8 @@ def validate_instance(instance, options=None):
             error_gens += _schema_validate(sdo, options)
     else:
         error_gens += _schema_validate(instance, options)
+
+    spec_warnings = check_spec(instance, options)
 
     # Custom validation
     must_checks = _get_musts(options)
@@ -763,11 +768,11 @@ def validate_instance(instance, options=None):
         for error in gen:
             msg = prefix + pretty_error(error, options.verbose)
             error_list.append(SchemaError(msg))
-
+    if options.strict:
+        error_list.extend(spec_warnings)
     if error_list:
         valid = False
     else:
         valid = True
-
     return ObjectValidationResults(is_valid=valid, object_id=instance.get('id', ''),
                                    errors=error_list, warnings=warnings)

@@ -394,54 +394,7 @@ class ValidationOptions(object):
                             for x in self.enabled]
 
 
-def has_cyber_observable_data(instance):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
-    """
-    if (instance['type'] == 'observed-data' and
-            'objects' in instance and
-            type(instance['objects']) is dict):
-        return True
-    return False
-
-
-def check_spec(instance, options):
-    """ Updates options if spec_version exists in instance or if the command line option
-    given differes and returns options and a list of any resulting warnings"
-    """
-    warnings = []
-    if options.version:
-        try:
-            if instance['type'] == 'bundle' and 'spec_version' in instance:
-                if instance['spec_version'] != options.version:
-                    instance['spec_version'] = options.version
-                    warnings.append(instance['id'] + ": spec_version mismatch with command-"
-                                    "line option. Defaulting to spec_version " + options.version)
-            if instance['type'] == 'bundle' and 'objects' in instance:
-                for obj in instance['objects']:
-                    if 'spec_version' in obj:
-                        if obj['spec_version'] != options.version:
-                            obj['spec_version'] = options.version
-                            warnings.append(obj['id'] + ": spec_version mismatch with command-"
-                                            "line option. Defaulting to spec_version "
-                                            + options.version)
-        except Exception:
-            pass
-
-    else:
-        if 'spec_version' in instance:
-            options.version = instance['spec_version']
-        try:
-            if instance['type'] == 'bundle' and 'objects' in instance:
-                for obj in instance['objects']:
-                    if 'spec_version' in obj:
-                        options.version = obj['spec_version']
-        except Exception:
-            pass
-
-        if not options.version:
-            options.version = "2.0"
-
+def set_check_codes(options):
     if options.version == '2.0':
         options.check_codes = CHECK_CODES20
     else:
@@ -457,8 +410,43 @@ def check_spec(instance, options):
             options.enabled = options.enabled.split(',')
         options.enabled = [options.check_codes[x] if x in options.check_codes else x
                            for x in options.enabled]
+    return options
 
-    return (options, warnings)
+
+def has_cyber_observable_data(instance):
+    """Return True only if the given instance is an observed-data object
+    containing STIX Cyber Observable objects.
+    """
+    if (instance['type'] == 'observed-data' and
+            'objects' in instance and
+            type(instance['objects']) is dict):
+        return True
+    return False
+
+
+def check_spec(instance, options):
+    """ Checks to see if there are differences in command-line option
+    provided spec_version and the spec_version found with bundles
+    and/or objects.
+    """
+    warnings = []
+    if options.version:
+        try:
+            if instance['type'] == 'bundle' and 'spec_version' in instance:
+                if instance['spec_version'] != options.version:
+                    warnings.append(instance['id'] + ": spec_version mismatch with command-"
+                                    "line option. Defaulting to spec_version " + options.version)
+            if instance['type'] == 'bundle' and 'objects' in instance:
+                for obj in instance['objects']:
+                    if 'spec_version' in obj:
+                        if obj['spec_version'] != options.version:
+                            warnings.append(obj['id'] + ": spec_version mismatch with command-"
+                                            "line option. Defaulting to spec_version "
+                                            + options.version)
+        except Exception:
+            pass
+
+    return warnings
 
 
 def cyber_observable_check(original_function):

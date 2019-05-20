@@ -92,7 +92,7 @@ class SpecVersionTestCases(ValidatorTest):
                 elif cmd_version == "2.1" and bundle_version == "2.0":
                     self.assertFalse(results.is_valid)
                     self.assertTrue(len(results.errors) == 1)
-                    self.assertTrue(len(results.warnings) == 1)
+                    self.assertTrue(len(results.warnings) == 2)
 
                 elif cmd_version == "2.1" and bundle_version == "2.1":
                     self.assertFalse(results.is_valid)
@@ -114,10 +114,10 @@ class SpecVersionTestCases(ValidatorTest):
 
                 elif cmd_version == "2.0" and obj_version == "2.1":
                     self.assertTrue(results.is_valid)
-                    self.assertTrue(len(results.warnings) == 1)
+                    self.assertTrue(len(results.warnings) == 2)
 
                 elif cmd_version == "2.1" and obj_version == "2.0":
-                    self.assertTrue(len(results.warnings) == 0)
+                    self.assertTrue(len(results.warnings) == 1)
                     self.assertTrue(results.is_valid)
 
                 elif cmd_version == "2.1" and obj_version == "2.1":
@@ -141,25 +141,24 @@ class SpecVersionTestCases(ValidatorTest):
                         self.assertTrue(len(results.warnings) == 1)
 
                     if cmd_version == "2.1" and bundle_version == "2.0" and obj_version == "2.0":
-
                         self.assertTrue(results.is_valid)
-                        self.assertTrue(len(results.warnings) == 1)
+                        self.assertTrue(len(results.warnings) == 3)
 
                     if cmd_version == "2.0" and bundle_version == "2.1" and obj_version == "2.0":
                         self.assertTrue(results.is_valid)
-                        self.assertTrue(len(results.warnings) == 1)
+                        self.assertTrue(len(results.warnings) == 2)
 
                     if cmd_version == "2.0" and bundle_version == "2.0" and obj_version == "2.1":
                         self.assertTrue(results.is_valid)
-                        self.assertTrue(len(results.warnings) == 1)
+                        self.assertTrue(len(results.warnings) == 2)
 
                     if cmd_version == "2.1" and bundle_version == "2.1" and obj_version == "2.0":
                         self.assertTrue(results.is_valid)
-                        self.assertTrue(len(results.warnings) == 1)
+                        self.assertTrue(len(results.warnings) == 2)
 
                     if cmd_version == "2.0" and bundle_version == "2.1" and obj_version == "2.1":
                         self.assertTrue(results.is_valid)
-                        self.assertTrue(len(results.warnings) == 1)
+                        self.assertTrue(len(results.warnings) == 3)
 
                     if cmd_version == "2.1" and bundle_version == "2.1" and obj_version == "2.1":
                         self.assertTrue(results.is_valid)
