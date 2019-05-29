@@ -377,40 +377,28 @@ class ValidationOptions(object):
         set_level(self.verbose)
         set_silent(self.silent)
 
+        self.set_check_codes()
+
+    def set_check_codes(self):
+        """Set which checks are enabled/disabled.
+        """
         if self.version == '2.0':
             check_codes = CHECK_CODES20
-        else:  # Default version
+        else:
             check_codes = CHECK_CODES21
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names
         if self.disabled:
-            self.disabled = self.disabled.split(',')
+            if isinstance(self.disabled, str):
+                self.disabled = self.disabled.split(',')
             self.disabled = [check_codes[x] if x in check_codes else x
                              for x in self.disabled]
         if self.enabled:
-            self.enabled = self.enabled.split(',')
+            if isinstance(self.enabled, str):
+                self.enabled = self.enabled.split(',')
             self.enabled = [check_codes[x] if x in check_codes else x
                             for x in self.enabled]
-
-
-def set_check_codes(options):
-    if options.version == '2.0':
-        options.check_codes = CHECK_CODES20
-    else:
-        options.check_codes = CHECK_CODES21
-
-    if options.disabled:
-        if isinstance(options.disabled, str):
-            options.disabled = options.disabled.split(',')
-        options.disabled = [options.check_codes[x] if x in options.check_codes else x
-                            for x in options.disabled]
-    if options.enabled:
-        if isinstance(options.enabled, str):
-            options.enabled = options.enabled.split(',')
-        options.enabled = [options.check_codes[x] if x in options.check_codes else x
-                           for x in options.enabled]
-    return options
 
 
 def has_cyber_observable_data(instance):

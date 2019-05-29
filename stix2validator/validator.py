@@ -16,7 +16,7 @@ from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
 from .util import (DEFAULT_VER, ValidationOptions, check_spec,
-                   clear_requests_cache, init_requests_cache, set_check_codes)
+                   clear_requests_cache, init_requests_cache)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
@@ -650,7 +650,7 @@ def _schema_validate(sdo, options):
     if options.version is None:
         options.version = "2.1"
 
-    options = set_check_codes(options)
+    options.set_check_codes()
 
     # Get validator for built-in schema
     base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=options.version)
