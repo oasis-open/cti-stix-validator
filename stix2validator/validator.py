@@ -724,6 +724,7 @@ def validate_instance(instance, options=None):
     error_gens = []
 
     # Schema validation
+    error_gens += _schema_validate(instance, options)
     if instance['type'] == 'bundle' and 'objects' in instance:
         if options.version is None and 'spec_version' in instance:
             options.version = instance['spec_version']
@@ -732,8 +733,6 @@ def validate_instance(instance, options=None):
             if 'type' not in sdo:
                 raise ValidationError("Each object in bundle must have a 'type' property.")
             error_gens += _schema_validate(sdo, options)
-    else:
-        error_gens += _schema_validate(instance, options)
 
     spec_warnings = check_spec(instance, options)
 
