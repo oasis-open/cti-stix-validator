@@ -1614,7 +1614,7 @@ RELATIONSHIPS = {
         ],
         'consists-of': [
             'infrastructure',
-            'observed-data', //TODO ALL SCOs
+            'observed-data',
         ],
         'controls': [
             'infrastructure',
