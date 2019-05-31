@@ -79,8 +79,24 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | threat_actor_sophistication vocabulary |
 | 222  | tool-types                  | certain property values are from the   |
 |      |                             | tool_types vocabulary                  |
-| 222  | region                      | certain property values are from the   |
+| 223  | region                      | certain property values are from the   |
 |      |                             | region vocabulary                      |
+| 224  | course-of-action-type       | certain property values are from the   |
+|      |                             | course-of-action-type vocabulary       |
+| 225  | grouping-context            | certain property values are from the   |
+|      |                             | grouping-context vocabulary            |
+| 226  | implementation-languages    | certain property values are from the   |
+|      |                             | implementation-languages vocabulary    |
+| 227  | infrastructure-types        | certain property values are from the   |
+|      |                             | infrastructure-types vocabulary        |
+| 228  | malware-av-result           | certain property values are from the   |
+|      |                             | malware-av-result vocabulary           |
+| 228  | malware-capabilities        | certain property values are from the   |
+|      |                             | malware-capabilities vocabulary        |
+| 230  | opinion                     | certain property values are from the   |
+|      |                             | opinion vocabulary                     |
+| 231  | processor-architecture      | certain property values are from the   |
+|      |                             | processor-architectures vocabulary     |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
 | 243  | windows-pebinary-type       | certain property values are from the   |

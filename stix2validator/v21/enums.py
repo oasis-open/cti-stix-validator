@@ -45,7 +45,7 @@ IDENTITY_CLASS_OV = [
     "class",
     "unspecified",
 ]
-IMPLEMENTATION_LANGUAGE_OV = [
+IMPLEMENTATION_LANGUAGES_OV = [
     "applescript",
     "bash",
     "c",
@@ -377,8 +377,8 @@ GROUPING_CONTEXT_USES = {
 IDENTITY_CLASS_USES = {
     "identity": ["identity_class"],
 }
-IMPLEMENTATION_LANGUAGE_USES = {
-    "malware": ["implemenation_languages"],
+IMPLEMENTATION_LANGUAGES_USES = {
+    "malware": ["implementation_languages"],
 }
 INDICATOR_TYPE_USES = {
     "indicator": ["indicator_types"],
@@ -1955,7 +1955,7 @@ CHECK_CODES = {
     '224': 'course-of-action-type',
     '225': 'grouping-context',
     '226': 'implementation-languages',
-    '227': 'infrastructure-type',
+    '227': 'infrastructure-types',
     '228': 'malware-av-result',
     '229': 'malware-capabilities',
     '230': 'opinion',

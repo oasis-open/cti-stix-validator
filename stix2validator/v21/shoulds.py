@@ -220,8 +220,8 @@ def vocab_identity_class(instance):
                        'identity-class')
 
 
-def vocab_implementation_language(instance):
-    return check_vocab(instance, "IMPLEMENTATION_LANGUAGE",
+def vocab_implementation_languages(instance):
+    return check_vocab(instance, "IMPLEMENTATION_LANGUAGES",
                        'implementation-languages')
 
 
@@ -1104,7 +1104,7 @@ CHECKS = {
         vocab_attack_resource_level,
         vocab_course_of_action_type,
         vocab_grouping_context,
-        vocab_implementation_language,
+        vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_av_result,
         vocab_malware_capabilities,
@@ -1163,7 +1163,7 @@ CHECKS = {
         vocab_attack_resource_level,
         vocab_course_of_action_type,
         vocab_grouping_context,
-        vocab_implementation_language,
+        vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_av_result,
         vocab_malware_capabilities,
@@ -1198,7 +1198,7 @@ CHECKS = {
         vocab_attack_resource_level,
         vocab_course_of_action_type,
         vocab_grouping_context,
-        vocab_implementation_language,
+        vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_av_result,
         vocab_malware_capabilities,
@@ -1222,7 +1222,7 @@ CHECKS = {
     'attack-resource-level': vocab_attack_resource_level,
     'course-of-action-type': vocab_course_of_action_type,
     'grouping-context': vocab_grouping_context,
-    'implementation-language': vocab_implementation_language,
+    'implementation-languages': vocab_implementation_languages,
     'infrastructure-types': vocab_infrastructure_types,
     'malware-av-result': vocab_malware_av_result,
     'malware-capabilities': vocab_malware_capabilities,
