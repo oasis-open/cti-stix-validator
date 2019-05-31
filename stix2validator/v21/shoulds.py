@@ -205,14 +205,34 @@ def vocab_attack_resource_level(instance):
                        'attack-resource-level')
 
 
+def vocab_course_of_action_type(instance):
+    return check_vocab(instance, "COURSE_OF_ACTION_TYPE",
+                       'course-of-action-type')
+
+
+def vocab_grouping_context(instance):
+    return check_vocab(instance, "GROUPING_CONTEXT",
+                       'grouping-context')
+
+
 def vocab_identity_class(instance):
     return check_vocab(instance, "IDENTITY_CLASS",
                        'identity-class')
 
 
+def vocab_implementation_language(instance):
+    return check_vocab(instance, "IMPLEMENTATION_LANGUAGE",
+                       'implementation-languages')
+
+
 def vocab_indicator_types(instance):
     return check_vocab(instance, "INDICATOR_TYPE",
                        'indicator-types')
+
+
+def vocab_infrastructure_types(instance):
+    return check_vocab(instance, "INFRASTRUCTURE_TYPE",
+                       'infrastructure-types')
 
 
 def vocab_industry_sector(instance):
@@ -223,6 +243,26 @@ def vocab_industry_sector(instance):
 def vocab_malware_types(instance):
     return check_vocab(instance, "MALWARE_TYPE",
                        'malware-types')
+
+
+def vocab_malware_av_result(instance):
+    return check_vocab(instance, "MALWARE_AV_RESULT",
+                       'malware-av-result')
+
+
+def vocab_malware_capabilities(instance):
+    return check_vocab(instance, "MALWARE_CAPABILITIES",
+                       'malware-capabilities')
+
+
+def vocab_opinion(instance):
+    return check_vocab(instance, "OPINION",
+                       'opinion')
+
+
+def vocab_processor_architecture(instance):
+    return check_vocab(instance, "PROCESSOR_ARCHITECTURE",
+                       'processor-architecture')
 
 
 def vocab_report_types(instance):
@@ -1062,6 +1102,14 @@ CHECKS = {
         relationships_strict,
         vocab_attack_motivation,
         vocab_attack_resource_level,
+        vocab_course_of_action_type,
+        vocab_grouping_context,
+        vocab_implementation_language,
+        vocab_infrastructure_type,
+        vocab_malware_av_result,
+        vocab_malware_capabilities,
+        vocab_opinion,
+        vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
         vocab_industry_sector,
@@ -1113,6 +1161,14 @@ CHECKS = {
         duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
+        vocab_course_of_action_type,
+        vocab_grouping_context,
+        vocab_implementation_language,
+        vocab_infrastructure_type,
+        vocab_malware_av_result,
+        vocab_malware_capabilities,
+        vocab_opinion,
+        vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
         vocab_industry_sector,
@@ -1140,6 +1196,14 @@ CHECKS = {
     'all-vocabs': [
         vocab_attack_motivation,
         vocab_attack_resource_level,
+        vocab_course_of_action_type,
+        vocab_grouping_context,
+        vocab_implementation_language,
+        vocab_infrastructure_type,
+        vocab_malware_av_result,
+        vocab_malware_capabilities,
+        vocab_opinion,
+        vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
         vocab_industry_sector,
@@ -1156,6 +1220,14 @@ CHECKS = {
     ],
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
+    'course-of-action-type': vocab_course_of_action_type,
+    'grouping-context': vocab_grouping_context,
+    'implementation-language': vocab_implementation_language,
+    'infrastructure-type': vocab_infrastructure_type,
+    'malware-av-result': vocab_malware_av_result,
+    'malware-capabilities': vocab_malware_capabilities,
+    'opinion': vocab_opinion,
+    'processor-architecture': vocab_processor_architecture,
     'identity-class': vocab_identity_class,
     'indicator-types': vocab_indicator_types,
     'industry-sector': vocab_industry_sector,
