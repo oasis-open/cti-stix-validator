@@ -57,6 +57,7 @@ def custom_object_prefix_strict(instance):
     """
     if (instance['type'] not in enums.TYPES and
             instance['type'] not in enums.RESERVED_OBJECTS and
+            instance['type'] not in enums.OBSERVABLE_TYPES and
             not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
         yield JSONError("Custom object type '%s' should start with 'x-' "
                         "followed by a source unique identifier (like a "
