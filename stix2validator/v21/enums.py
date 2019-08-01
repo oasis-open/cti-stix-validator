@@ -1,4 +1,4 @@
-"""STIX 2.0 open vocabularies and other lists
+"""STIX 2.1 WD04 open vocabularies and other lists
 """
 
 import re
@@ -26,6 +26,17 @@ ATTACK_RESOURCE_LEVEL_OV = [
     "organization",
     "government",
 ]
+COURSE_OF_ACTION_TYPE_OV = [
+    "textual:text/plain",
+    "textual:text/html",
+    "textual:text/md",
+    "textual:pdf",
+]
+GROUPING_CONTEXT_OV = [
+    "suspicious-activity",
+    "malware-analysis",
+    "unspecified",
+]
 IDENTITY_CLASS_OV = [
     "individual",
     "group",
@@ -34,6 +45,27 @@ IDENTITY_CLASS_OV = [
     "class",
     "unspecified",
 ]
+IMPLEMENTATION_LANGUAGES_OV = [
+    "applescript",
+    "bash",
+    "c",
+    "c++",
+    "c#",
+    "go",
+    "java",
+    "javascript",
+    "lua",
+    "objective-c",
+    "php",
+    "powershell",
+    "python",
+    "scala",
+    "swift",
+    "typescript",
+    "visual-basic",
+    "x86-32",
+    "x86-64",
+]
 INDICATOR_TYPE_OV = [
     "anomalous-activity",
     "anonymization",
@@ -41,6 +73,7 @@ INDICATOR_TYPE_OV = [
     "compromised",
     "malicious-activity",
     "attribution",
+    "unknown",
 ]
 INDUSTRY_SECTOR_OV = [
     "agriculture",
@@ -71,11 +104,32 @@ INDUSTRY_SECTOR_OV = [
     "transportation",
     "utilities",
 ]
+INFRASTRUCTURE_TYPE_OV = [
+    "amplification",
+    "anonymization",
+    "botnet",
+    "command-and-control",
+    "exfiltration",
+    "hosting-malware",
+    "hosting-target-lists",
+    "phishing",
+    "reconnaissance",
+    "staging",
+    "undefined",
+]
+MALWARE_AV_RESULT_OV = [
+    "malicious",
+    "suspicious",
+    "benign",
+    "unknown",
+]
 MALWARE_TYPE_OV = [
     "adware",
     "backdoor",
     "bot",
+    "bootkit",
     "ddos",
+    "downloader",
     "dropper",
     "exploit-kit",
     "keylogger",
@@ -87,8 +141,67 @@ MALWARE_TYPE_OV = [
     "screen-capture",
     "spyware",
     "trojan",
+    "unknown",
     "virus",
+    "webshell",
+    "wiper",
     "worm",
+]
+MALWARE_CAPABILITIES_OV = [
+    "accesses-remote-machines",
+    "anti-debugging",
+    "anti-disassembly",
+    "anti-emulation",
+    "anti-memory-forensics",
+    "anti-sandbox",
+    "anti-vm",
+    "captures-input-peripherals",
+    "captures-output-peripherals",
+    "captures-system-state-data",
+    "cleans-traces-of-infection",
+    "commits-fraud",
+    "communicates-with-c2",
+    "compromises-data-availability",
+    "compromises-data-integrity",
+    "compromises-system-availability",
+    "controls-local-machine",
+    "degrades-security-software",
+    "degrades-system-updates",
+    "determines-c2-server",
+    "emails-spam",
+    "escalates-privileges",
+    "evades-av",
+    "exfiltrates-data",
+    "fingerprints-host",
+    "hides-artifacts",
+    "hides-executing-code",
+    "infects-files",
+    "infects-remote-machines",
+    "installs-other-components",
+    "persists-after-system-reboot",
+    "prevents-artifact-access",
+    "prevents-artifact-deletion",
+    "probes-network-environment",
+    "self-modifies",
+    "steals-authentication-credentials",
+    "violates-system-operational-integrity",
+]
+OPINION_OV = [
+    "strongly-disagree",
+    "disagree",
+    "neutral",
+    "agree",
+    "strongly-agree",
+]
+PROCESSOR_ARCHITECTURE_OV = [
+    "alpha",
+    "arm",
+    "ia-64",
+    "mips",
+    "powerpc",
+    "sparc",
+    "x86",
+    "x86-64",
 ]
 REGION_OV = [
     "africa",
@@ -109,11 +222,12 @@ REGION_OV = [
     "southern-asia",
     "south-eastern-asia",
     "western-asia",
-    "europe eastern-europe",
+    "europe",
+    "eastern-europe",
     "northern-europe",
     "southern-europe",
     "western-europe",
-    "oceana",
+    "oceania",
     "australia-new-zealand",
     "melanesia",
     "micronesia",
@@ -126,6 +240,7 @@ REPORT_TYPE_OV = [
     "campaign",
     "identity",
     "indicator",
+    "intrusion-set",
     "malware",
     "observed-data",
     "threat-actor",
@@ -171,6 +286,7 @@ TOOL_TYPE_OV = [
     "credential-exploitation",
     "remote-access",
     "vulnerability-scanning",
+    "unknown",
 ]
 HASH_ALGO_OV = [
     "MD5",
@@ -196,6 +312,7 @@ ENCRYPTION_ALGO_OV = [
     "AES128-CTR",
     "AES128-XTS",
     "AES128-GCM",
+    "AES-256-GCM",
     "Salsa20",
     "Salsa12",
     "Salsa8",
@@ -209,6 +326,7 @@ ENCRYPTION_ALGO_OV = [
     "CAST256-CBC",
     "RSA",
     "DSA",
+    "mime-type-indicated",
 ]
 WINDOWS_PEBINARY_TYPE_OV = [
     "exe",
@@ -218,7 +336,9 @@ WINDOWS_PEBINARY_TYPE_OV = [
 ACCOUNT_TYPE_OV = [
     "unix",
     "windows local",
+    "windows-local",
     "windows domain",
+    "windows-domain",
     "ldap",
     "tacacs",
     "radius",
@@ -247,20 +367,44 @@ ATTACK_RESOURCE_LEVEL_USES = {
     "intrusion-set": ["resource_level"],
     "threat-actor": ["resource_level"],
 }
+COURSE_OF_ACTION_TYPE_USES = {
+    "course-of-action": ["action_type"],
+}
+GROUPING_CONTEXT_USES = {
+    "grouping": ["context"],
+}
 IDENTITY_CLASS_USES = {
     "identity": ["identity_class"],
+}
+IMPLEMENTATION_LANGUAGES_USES = {
+    "malware": ["implementation_languages"],
 }
 INDICATOR_TYPE_USES = {
     "indicator": ["indicator_types"],
 }
+INFRASTRUCTURE_TYPE_USES = {
+    "infrastructure": ["infrastructure_types"],
+}
 INDUSTRY_SECTOR_USES = {
     "identity": ["sectors"],
+}
+MALWARE_AV_RESULT_USES = {
+    "malware-analysis": ["av_result"],
+}
+MALWARE_CAPABILITIES_USES = {
+    "malware": ["capabilities"],
 }
 REGION_USES = {
     "location": ["region"],
 }
 MALWARE_TYPE_USES = {
     "malware": ["malware_types"],
+}
+OPINION_USES = {
+    "opinion": ["opinion"],
+}
+PROCESSOR_ARCHITECTURE_USES = {
+    "malware": ["architecture_execution_envs"],
 }
 REPORT_TYPE_USES = {
     "report": ["report_types"],
@@ -284,11 +428,14 @@ TYPES = [
     "attack-pattern",
     "campaign",
     "course-of-action",
+    "grouping",
     "identity",
     "indicator",
+    "infrastructure",
     "intrusion-set",
     "location",
     "malware",
+    "malware-analysis",
     "note",
     "observed-data",
     "opinion",
@@ -334,6 +481,7 @@ MARKING_DEFINITION_TYPES = [
 KILL_CHAIN_PHASE_USES = [
     "attack-pattern",
     "indicator",
+    "infrastructure",
     "malware",
     "tool",
 ]
@@ -396,7 +544,29 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
-        'action',
+        'action_type',
+        'os_execution_envs',
+        'action_bin',
+        'action_reference',
+    ],
+    "grouping": [
+        'type',
+        'spec_version',
+        'id',
+        'created_by_ref',
+        'created',
+        'modified',
+        'revoked',
+        'labels',
+        'confidence',
+        'lang',
+        'external_references',
+        'object_marking_refs',
+        'granular_markings',
+        'name',
+        'description',
+        'context',
+        'object_refs',
     ],
     "identity": [
         'type',
@@ -440,6 +610,27 @@ PROPERTIES = {
         'valid_from',
         'valid_until',
         'kill_chain_phases',
+    ],
+    "infrastructure": [
+        'type',
+        'spec_version',
+        'id',
+        'created_by_ref',
+        'created',
+        'modified',
+        'revoked',
+        'labels',
+        'confidence',
+        'lang',
+        'external_references',
+        'object_marking_refs',
+        'granular_markings',
+        'name',
+        'description',
+        'infrastructure_types',
+        'kill_chain_phases',
+        'first_seen',
+        'last_seen',
     ],
     "intrusion-set": [
         'type',
@@ -507,7 +698,45 @@ PROPERTIES = {
         'name',
         'description',
         'malware_types',
+        'is_family',
+        'aliases',
         'kill_chain_phases',
+        'first_seen',
+        'last_seen',
+        'os_execution_envs',
+        'architecture_execution_envs',
+        'implementation_languages',
+        'capabilities',
+        'sample_refs',
+    ],
+    "malware-analysis": [
+        'type',
+        'spec_version',
+        'id',
+        'created_by_ref',
+        'created',
+        'modified',
+        'revoked',
+        'labels',
+        'confidence',
+        'lang',
+        'external_references',
+        'object_marking_refs',
+        'granular_markings',
+        'product',
+        'version',
+        'configuration_version',
+        'modules',
+        'av_engine_version',
+        'av_definition_version',
+        'submitted',
+        'analysis_started',
+        'analysis_ended',
+        'av_result',
+        'host_vm',
+        'operating_system',
+        'installed_software',
+        'analysis_sco_refs',
     ],
     "note": [
         'type',
@@ -546,6 +775,7 @@ PROPERTIES = {
         'last_observed',
         'number_observed',
         'objects',
+        'object_refs',
     ],
     "opinion": [
         'type',
@@ -629,6 +859,7 @@ PROPERTIES = {
         'name',
         'description',
         'tool_types',
+        'aliases',
         'kill_chain_phases',
         'tool_version'
     ],
@@ -724,6 +955,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'name',
         'definition_type',
         'definition',
     ]
@@ -917,6 +1149,7 @@ OBSERVABLE_PROPERTIES = {
         'validity_not_before',
         'validity_not_after',
         'subject',
+        'subject_public_key_algorithm',
         'subject_public_key_modulus',
         'subject_public_key_exponent',
         'x509_v3_extensions',
@@ -1282,13 +1515,12 @@ OBSERVABLE_DICT_KEY_EXCEPTIONS = [
 # Reserved properties and objects
 RESERVED_PROPERTIES = [
     'severity',
-    'action',
     'usernames',
     'phone_numbers',
 ]
 RESERVED_OBJECTS = [
     'incident',
-    'infrastructure',
+    'action',
 ]
 OBSERVABLE_RESERVED_OBJECTS = [
     'action',
@@ -1313,6 +1545,7 @@ COMMON_RELATIONSHIPS = [
 # Mapping of official STIX objects to their official relationships
 RELATIONSHIPS = {
     'attack-pattern': {
+        'delivers': 'malware',
         'targets': [
             'location',
             'vulnerability',
@@ -1328,6 +1561,7 @@ RELATIONSHIPS = {
             'intrusion-set',
             'threat-actor',
         ],
+        'compromises': 'infrastructure',
         'originates-from': 'location',
         'targets': [
             'location',
@@ -1336,15 +1570,22 @@ RELATIONSHIPS = {
         ],
         'uses': [
             'attack-pattern',
+            'infrastructure',
             'malware',
             'tool',
         ]
     },
     'course-of-action': {
+        'investigates': 'indicator',
         'mitigates': [
             'attack-pattern',
+            'indicator',
             'malware',
             'tool',
+            'vulnerability',
+        ],
+        'remediates': [
+            'malware',
             'vulnerability',
         ]
     },
@@ -1355,11 +1596,55 @@ RELATIONSHIPS = {
         'indicates': [
             'attack-pattern',
             'campaign',
+            'infrastructure',
             'intrusion-set',
             'malware',
             'threat-actor',
             'tool',
         ],
+    },
+    'infrastructure': {
+        'communicates-with': [
+            'infrastructure',
+            'ipv4-addr',
+            'ipv6-addr',
+            'domain-name',
+            'url',
+        ],
+        'consists-of': [
+            'infrastructure',
+            'observed-data',
+            'artifact',
+            'autonomous-system',
+            'directory',
+            'domain-name',
+            'email-addr',
+            'email-message',
+            'file',
+            'ipv4-addr',
+            'ipv6-addr',
+            'mac-addr',
+            'mutex',
+            'network-traffic',
+            'process',
+            'software',
+            'url',
+            'user-account',
+            'windows-registry-key',
+            'x509-certificate',
+        ],
+        'controls': [
+            'infrastructure',
+            'malware',
+        ],
+        'delivers': 'malware',
+        'has': 'vulnerability',
+        'hosts': [
+            'tool',
+            'malware',
+        ],
+        'located-at': 'location',
+        'uses': 'infrastructure',
     },
     'intrusion-set': {
         'attributed-to': 'threat-actor',
@@ -1376,17 +1661,55 @@ RELATIONSHIPS = {
         ],
     },
     'malware': {
+        'authored-by': [
+            'threat-actor',
+            'intrusion-set',
+        ],
+        'beacons-to': 'infrastructure',
+        'exfiltrates-to': 'infrastructure',
+        'communicates-with': [
+            'ipv4-addr',
+            'ipv6-addr',
+            'domain-name',
+            'url',
+        ],
+        'controls': 'malware',
+        'downloads': [
+            'malware',
+            'file',
+            'tool',
+        ],
+        'drops': [
+            'malware',
+            'file',
+            'tool',
+        ],
+        'exploits': 'vulnerability',
         'originates-from': 'location',
         'targets': [
             'identity',
+            'infrastructure',
             'location',
-            'vulnerability',
         ],
-        'uses': 'tool',
+        'uses': [
+            'attack-pattern',
+            'infrastructure',
+            'malware',
+            'tool',
+        ],
         'variant-of': 'malware',
+    },
+    'malware-analysis': {
+        'characterizes': 'malware',
+        'av-analysis-of': 'malware',
+        'static-analysis-of': 'malware',
+        'dynamic-analysis-of': 'malware',
     },
     'threat-actor': {
         'attributed-to': 'identity',
+        'compromises': 'infrastructure',
+        'hosts': 'infrastructure',
+        'owns': 'infrastructure',
         'impersonates': 'identity',
         'located-at': 'location',
         'targets': [
@@ -1396,16 +1719,27 @@ RELATIONSHIPS = {
         ],
         'uses': [
             'attack-pattern',
+            'infrastructure',
             'malware',
             'tool',
-        ]
+        ],
     },
     'tool': {
+        'delivers': 'malware',
+        'drops': 'malware',
+        'uses': 'infrastructure',
         'targets': [
             'identity',
+            'infrastructure',
             'location',
             'vulnerability',
         ]
+    },
+    'vulnerability': {
+        'impacts': [
+            'infrastructure',
+            'tool',
+        ],
     }
 }
 
@@ -1421,12 +1755,25 @@ TIMESTAMP_PROPERTIES = {
         'valid_from',
         'valid_until',
     ],
+    'infrastructure': [
+        'first_seen',
+        'last_seen',
+    ],
     'intrusion-set': [
         'first_seen',
         'last_seen',
     ],
     'language-content': [
         'object_modified'
+    ],
+    'malware': [
+        'first_seen',
+        'last_seen',
+    ],
+    'malware-analysis': [
+        'submitted',
+        'analysis_started',
+        'analysis_ended',
     ],
     'observed-data': [
         'first_observed',
@@ -1509,7 +1856,13 @@ TIMESTAMP_COMPARE = {
     "indicator": [
         ('valid_until', 'gt', 'valid_from'),
     ],
+    "infrastructure": [
+        ('last_seen', 'ge', 'first_seen'),
+    ],
     "intrusion-set": [
+        ('last_seen', 'ge', 'first_seen'),
+    ],
+    "malware": [
         ('last_seen', 'ge', 'first_seen'),
     ],
     "observed-data": [
@@ -1532,12 +1885,21 @@ TIMESTAMP_COMPARE_OBSERVABLE = {
 
 # Mapping of official STIX objects to their open-vocab properties
 VOCAB_PROPERTIES = {
+    "course-of-action": [
+        'action_type',
+    ],
+    "grouping-of-action": [
+        'context',
+    ],
     "identity": [
         'identity_class',
         'sectors',
     ],
     "indicator": [
         'indicator_types',
+    ],
+    "infrastructure": [
+        'infrastructure_types',
     ],
     "intrusion-set": [
         'resource_level',
@@ -1549,6 +1911,15 @@ VOCAB_PROPERTIES = {
     ],
     "malware": [
         'malware_types',
+        'architecture_execution_envs',
+        'implementation_languages',
+        'capabilities',
+    ],
+    "malware-analysis": [
+        'av_result',
+    ],
+    "opinion": [
+        'opinion',
     ],
     "report": [
         'report_types',
@@ -1598,6 +1969,14 @@ CHECK_CODES = {
     '221': 'threat-actor-sophistication',
     '222': 'tool-types',
     '223': 'region',
+    '224': 'course-of-action-type',
+    '225': 'grouping-context',
+    '226': 'implementation-languages',
+    '227': 'infrastructure-types',
+    '228': 'malware-av-result',
+    '229': 'malware-capabilities',
+    '230': 'opinion',
+    '231': 'processor-architecture',
     '241': 'hash-algo',
     '242': 'encryption-algo',
     '243': 'windows-pebinary-type',
