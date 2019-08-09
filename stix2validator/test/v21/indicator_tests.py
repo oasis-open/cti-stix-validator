@@ -213,8 +213,7 @@ class IndicatorTestCases(ValidatorTest):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['name'] = 'Foobar'
         objects = [indicator, ADDTNL_INVALID_SCHEMA]
-
-        options = ValidationOptions(schema_dir=self.custom_schemas)
+        options = ValidationOptions(schema_dir=self.custom_schemas, version="2.1")
         results = validate_parsed_json(objects, options)
         assert results[0].is_valid
         assert not results[1].is_valid

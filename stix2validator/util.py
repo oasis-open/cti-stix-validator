@@ -324,7 +324,7 @@ class ValidationOptions(object):
             contained within the same bundle
 
     """
-    def __init__(self, cmd_args=None, version=DEFAULT_VER, verbose=False, silent=False,
+    def __init__(self, cmd_args=None, version=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
@@ -374,19 +374,29 @@ class ValidationOptions(object):
         set_level(self.verbose)
         set_silent(self.silent)
 
-        if self.version == '2.0':
+        self.set_check_codes()
+
+    def set_check_codes(self, version=None):
+        """Set which checks are enabled/disabled.
+        """
+        if version is None:
+            version = self.version
+
+        if version == '2.0':
             check_codes = CHECK_CODES20
-        else:  # Default version
+        else:
             check_codes = CHECK_CODES21
 
         # Convert string of comma-separated checks to a list,
         # and convert check code numbers to names
         if self.disabled:
-            self.disabled = self.disabled.split(',')
+            if isinstance(self.disabled, str):
+                self.disabled = self.disabled.split(',')
             self.disabled = [check_codes[x] if x in check_codes else x
                              for x in self.disabled]
         if self.enabled:
-            self.enabled = self.enabled.split(',')
+            if isinstance(self.enabled, str):
+                self.enabled = self.enabled.split(',')
             self.enabled = [check_codes[x] if x in check_codes else x
                             for x in self.enabled]
 
@@ -400,6 +410,30 @@ def has_cyber_observable_data(instance):
             type(instance['objects']) is dict):
         return True
     return False
+
+
+def check_spec(instance, options):
+    """ Checks to see if there are differences in command-line option
+    provided spec_version and the spec_version found with bundles
+    and/or objects.
+    """
+    warnings = []
+    if options.version:
+        try:
+            if instance['type'] == 'bundle' and 'spec_version' in instance:
+                if instance['spec_version'] != options.version:
+                    warnings.append(instance['id'] + ": spec_version mismatch with supplied"
+                                    " option. Treating as {} content.".format(options.version))
+            if instance['type'] == 'bundle' and 'objects' in instance:
+                for obj in instance['objects']:
+                    if 'spec_version' in obj:
+                        if obj['spec_version'] != options.version:
+                            warnings.append(obj['id'] + ": spec_version mismatch with supplied"
+                                            " option. Treating as {} content.".format(options.version))
+        except Exception:
+            pass
+
+    return warnings
 
 
 def cyber_observable_check(original_function):

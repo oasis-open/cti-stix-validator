@@ -15,8 +15,8 @@ from six import iteritems, string_types, text_type
 from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
-from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
-                   init_requests_cache)
+from .util import (DEFAULT_VER, ValidationOptions, check_spec,
+                   clear_requests_cache, init_requests_cache)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
@@ -645,8 +645,17 @@ def _schema_validate(sdo, options):
     else:
         error_prefix = ''
 
+    if options.version:
+        version = options.version
+    elif options.version is None and 'spec_version' in sdo:
+        version = sdo['spec_version']
+    else:
+        version = DEFAULT_VER
+
+    options.set_check_codes(version)
+
     # Get validator for built-in schema
-    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=options.version)
+    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=version)
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
@@ -673,7 +682,7 @@ def _schema_validate(sdo, options):
             base_obs_errors = _get_error_generator(obj['type'],
                                                    obj,
                                                    None,
-                                                   options.version,
+                                                   version,
                                                    'cyber-observable-core')
             if base_obs_errors:
                 error_gens.append((base_obs_errors,
@@ -683,7 +692,7 @@ def _schema_validate(sdo, options):
             custom_obs_errors = _get_error_generator(obj['type'],
                                                      obj,
                                                      options.schema_dir,
-                                                     options.version,
+                                                     version,
                                                      'cyber-observable-core')
             if custom_obs_errors:
                 error_gens.append((custom_obs_errors,
@@ -717,14 +726,17 @@ def validate_instance(instance, options=None):
     error_gens = []
 
     # Schema validation
+    error_gens += _schema_validate(instance, options)
     if instance['type'] == 'bundle' and 'objects' in instance:
+        if options.version is None and 'spec_version' in instance:
+            options.version = instance['spec_version']
         # Validate each object in a bundle separately
         for sdo in instance['objects']:
             if 'type' not in sdo:
                 raise ValidationError("Each object in bundle must have a 'type' property.")
             error_gens += _schema_validate(sdo, options)
-    else:
-        error_gens += _schema_validate(instance, options)
+
+    spec_warnings = check_spec(instance, options)
 
     # Custom validation
     must_checks = _get_musts(options)
@@ -741,6 +753,7 @@ def validate_instance(instance, options=None):
         else:
             chained_errors = errors
             warnings = [pretty_error(x, options.verbose) for x in warnings]
+            warnings.extend(spec_warnings)
     except schema_exceptions.RefResolutionError:
         raise SchemaInvalidError('Invalid JSON schema: a JSON reference '
                                  'failed to resolve')
@@ -756,11 +769,11 @@ def validate_instance(instance, options=None):
         for error in gen:
             msg = prefix + pretty_error(error, options.verbose)
             error_list.append(SchemaError(msg))
-
+    if options.strict:
+        error_list.extend(spec_warnings)
     if error_list:
         valid = False
     else:
         valid = True
-
     return ObjectValidationResults(is_valid=valid, object_id=instance.get('id', ''),
                                    errors=error_list, warnings=warnings)
