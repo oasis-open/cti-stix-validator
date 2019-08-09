@@ -145,8 +145,7 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 
 *  `Ivan Kirillov <mailto:ikirillov@mitre.org>`_; GitHub ID: `https://github.com/ikiril01 <https://github.com/ikiril01>`_; WWW: `MITRE <https://www.mitre.org>`__
 *  `Chris Lenk <mailto:clenk@mitre.org>`_; GitHub ID: `https://github.com/clenk <https://github.com/clenk>`_; WWW: `MITRE <https://www.mitre.org>`__
--  `Jason Keirstead <mailto:Jason.Keirstead@ca.ibm.com>`__; GitHub ID:
-   https://github.com/JasonKeirstead; WWW: `IBM <http://www.ibm.com/>`__
+*  `Jason Keirstead <mailto:Jason.Keirstead@ca.ibm.com>`__; GitHub ID: `https://github.com/JasonKeirstead <https://github.com/JasonKeirstead>`_; WWW: `IBM <http://www.ibm.com/>`__
 
 .. _aboutOpenRepos:
 
