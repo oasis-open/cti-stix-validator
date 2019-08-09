@@ -348,10 +348,7 @@ class ValidationOptions(object):
             self.enforce_refs = cmd_args.enforce_refs
         else:
             # input options
-            if version is not None:
-                self.version = version
-            else:
-                self.version = None
+            self.version = version
             self.files = files
             self.recursive = recursive
             self.schema_dir = schema_dir
@@ -379,10 +376,13 @@ class ValidationOptions(object):
 
         self.set_check_codes()
 
-    def set_check_codes(self):
+    def set_check_codes(self, version=None):
         """Set which checks are enabled/disabled.
         """
-        if self.version == '2.0':
+        if version is None:
+            version = self.version
+
+        if version == '2.0':
             check_codes = CHECK_CODES20
         else:
             check_codes = CHECK_CODES21
@@ -422,15 +422,14 @@ def check_spec(instance, options):
         try:
             if instance['type'] == 'bundle' and 'spec_version' in instance:
                 if instance['spec_version'] != options.version:
-                    warnings.append(instance['id'] + ": spec_version mismatch with command-"
-                                    "line option. Defaulting to spec_version " + options.version)
+                    warnings.append(instance['id'] + ": spec_version mismatch with supplied"
+                                    " option. Treating as {} content.".format(options.version))
             if instance['type'] == 'bundle' and 'objects' in instance:
                 for obj in instance['objects']:
                     if 'spec_version' in obj:
                         if obj['spec_version'] != options.version:
-                            warnings.append(obj['id'] + ": spec_version mismatch with command-"
-                                            "line option. Defaulting to spec_version "
-                                            + options.version)
+                            warnings.append(obj['id'] + ": spec_version mismatch with supplied"
+                                            " option. Treating as {} content.".format(options.version))
         except Exception:
             pass
 

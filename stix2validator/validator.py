@@ -645,15 +645,17 @@ def _schema_validate(sdo, options):
     else:
         error_prefix = ''
 
-    if options.version is None and 'spec_version' in sdo:
-        options.version = sdo['spec_version']
-    if options.version is None:
-        options.version = "2.1"
+    if options.version:
+        version = options.version
+    elif options.version is None and 'spec_version' in sdo:
+        version = sdo['spec_version']
+    else:
+        version = DEFAULT_VER
 
-    options.set_check_codes()
+    options.set_check_codes(version)
 
     # Get validator for built-in schema
-    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=options.version)
+    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=version)
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
@@ -680,7 +682,7 @@ def _schema_validate(sdo, options):
             base_obs_errors = _get_error_generator(obj['type'],
                                                    obj,
                                                    None,
-                                                   options.version,
+                                                   version,
                                                    'cyber-observable-core')
             if base_obs_errors:
                 error_gens.append((base_obs_errors,
@@ -690,7 +692,7 @@ def _schema_validate(sdo, options):
             custom_obs_errors = _get_error_generator(obj['type'],
                                                      obj,
                                                      options.schema_dir,
-                                                     options.version,
+                                                     version,
                                                      'cyber-observable-core')
             if custom_obs_errors:
                 error_gens.append((custom_obs_errors,

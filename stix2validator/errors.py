@@ -215,7 +215,7 @@ def pretty_error(error, verbose=False):
         except TypeError:
             msg = msg + ':\n' + remove_u(text_type(error.schema))
 
-    # reword forbidden property or value errors
+    # Reword forbidden property or value errors
     elif error.validator == 'not':
         if 'enum' in error.validator_value:
             msg = re.sub(r"\{.+\} is not allowed for '(.+)'$", r"'\g<1>' is "
@@ -244,6 +244,16 @@ def pretty_error(error, verbose=False):
             elif 'type' in error.instance and error.instance['type'] in ['process', 'x509-certificate']:
                 if error.instance.keys() == ['type']:
                     msg = "must contain at least one property (other than `type`) from this object."
+            elif "'not': {'enum':" in text_type(error.validator_value):
+                try:
+                    defined_objs = error.validator_value[1]['allOf'][1]['properties']['type']['not']['enum']
+                    if error.instance['type'] in defined_objs:
+                        # Avoid long 'is not valid under any of the given schemas' message
+                        # when object doesn't match the schema for its spec-defined type.
+                        # Real error will show up as separate error.
+                        msg = '{} is not a valid {} object'.format(error.instance, error.instance['type'])
+                except KeyError:
+                    raise TypeError
             else:
                 raise TypeError
         except TypeError:
