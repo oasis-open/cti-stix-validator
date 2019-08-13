@@ -229,8 +229,8 @@ def parse_args(cmd_args, is_script=False):
         dest="strict_types",
         action="store_true",
         default=False,
-        help="Ensure that no custom object types are used, only those defined"
-             " in the STIX specification."
+        help="Warn if custom object types other than those defined in the STIX"
+             " specification are used."
     )
 
     parser.add_argument(
@@ -238,8 +238,8 @@ def parse_args(cmd_args, is_script=False):
         dest="strict_properties",
         action="store_true",
         default=False,
-        help="Ensure that no custom properties are used, only those defined"
-             " in the STIX specification."
+        help="Warn if custom properties other than those defined in the STIX"
+             " specification are used."
     )
 
     parser.add_argument(
