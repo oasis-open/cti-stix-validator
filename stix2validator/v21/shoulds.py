@@ -24,6 +24,7 @@ from . import enums
 from ..errors import PatternError
 from ..output import info
 from ..util import cyber_observable_check, has_cyber_observable_data
+from ..v20.shoulds import enforce_relationship_refs
 from .errors import JSONError
 from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
                     CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
@@ -1240,6 +1241,7 @@ CHECKS = {
     'marking-definition-type': vocab_marking_definition,
     'relationship-types': relationships_strict,
     'duplicate-ids': duplicate_ids,
+    'enforce_relationship_refs': enforce_relationship_refs,
     'all-vocabs': [
         vocab_attack_motivation,
         vocab_attack_resource_level,
@@ -1297,6 +1299,10 @@ def list_shoulds(options):
     """Construct the list of 'SHOULD' validators to be run by the validator.
     """
     validator_list = []
+    # --enforce_refs
+    # enable checking references in bundles if option selected
+    if options.enforce_refs is True:
+        validator_list.append(CHECKS['enforce_relationship_refs'])
 
     # --strict-types
     if options.strict_types:
