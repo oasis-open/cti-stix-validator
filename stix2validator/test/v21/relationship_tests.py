@@ -84,8 +84,6 @@ class RelationshipTestCases(ValidatorTest):
         relationship['target_ref'] = "vulnerability--280d1c0d-51d1-4ee8-951f-1fb434a38686"
         relationship['relationship_type'] = "targets"
         results = validate_parsed_json(relationship, self.options)
-        from stix2validator import print_results
-        print_results(results)
         self.assertTrue(results.is_valid)
 
     def test_relationship_types_common(self):
