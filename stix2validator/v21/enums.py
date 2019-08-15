@@ -56,9 +56,11 @@ IMPLEMENTATION_LANGUAGES_OV = [
     "javascript",
     "lua",
     "objective-c",
+    "perl",
     "php",
     "powershell",
     "python",
+    "ruby",
     "scala",
     "swift",
     "typescript",
@@ -370,8 +372,15 @@ ATTACK_RESOURCE_LEVEL_USES = {
 COURSE_OF_ACTION_TYPE_USES = {
     "course-of-action": ["action_type"],
 }
+ENCRYPTION_ALGO_USES = {
+    "artifact": ["encryption_algorithm"],
+}
 GROUPING_CONTEXT_USES = {
     "grouping": ["context"],
+}
+HASH_ALGO_USES = {
+    "file": ["hashes"],
+    "windows-pebinary-ext": ["file_header_hashes"],
 }
 IDENTITY_CLASS_USES = {
     "identity": ["identity_class"],
@@ -404,7 +413,7 @@ OPINION_USES = {
     "opinion": ["opinion"],
 }
 PROCESSOR_ARCHITECTURE_USES = {
-    "malware": ["architecture_execution_envs"],
+    "malware": ["architecture_execution_envs", "os_execution_envs"],
 }
 REPORT_TYPE_USES = {
     "report": ["report_types"],
@@ -506,6 +515,7 @@ PROPERTIES = {
         'name',
         'description',
         'kill_chain_phases',
+        'aliases',
     ],
     "campaign": [
         'type',
@@ -547,6 +557,7 @@ PROPERTIES = {
         'action_type',
         'os_execution_envs',
         'action_bin',
+        'action_type',
         'action_reference',
     ],
     "grouping": [
@@ -594,6 +605,8 @@ PROPERTIES = {
         'spec_version',
         'id',
         'created_by_ref',
+        "pattern_type",
+        "pattern_version",
         'created',
         'modified',
         'revoked',
@@ -613,6 +626,7 @@ PROPERTIES = {
     ],
     "infrastructure": [
         'type',
+        "aliases",
         'spec_version',
         'id',
         'created_by_ref',
@@ -658,6 +672,7 @@ PROPERTIES = {
     ],
     "location": [
         'type',
+        'name',
         'spec_version',
         'id',
         'created_by_ref',
@@ -678,7 +693,7 @@ PROPERTIES = {
         'country',
         'administrative_area',
         'city',
-        'code',
+        'street_address',
         'postal_code',
     ],
     "malware": [
@@ -727,15 +742,15 @@ PROPERTIES = {
         'version',
         'configuration_version',
         'modules',
-        'av_engine_version',
-        'av_definition_version',
+        'analysis_engine_version',
+        'analysis_definition_version',
         'submitted',
         'analysis_started',
         'analysis_ended',
         'av_result',
-        'host_vm',
-        'operating_system',
-        'installed_software',
+        'host_vm_ref',
+        'operating_system_ref',
+        'installed_software_refs',
         'analysis_sco_refs',
     ],
     "note": [
@@ -821,6 +836,8 @@ PROPERTIES = {
         'spec_version',
         'id',
         'created_by_ref',
+        'first_seen',
+        'last_seen',
         'created',
         'modified',
         'revoked',
@@ -910,6 +927,7 @@ PROPERTIES = {
         'type',
         'spec_version',
         'id',
+        'description',
         'created_by_ref',
         'created',
         'modified',
@@ -964,6 +982,11 @@ PROPERTIES = {
 OBSERVABLE_PROPERTIES = {
     'artifact': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'mime_type',
         'payload_bin',
@@ -974,6 +997,11 @@ OBSERVABLE_PROPERTIES = {
     ],
     'autonomous-system': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'number',
         'name',
@@ -981,22 +1009,37 @@ OBSERVABLE_PROPERTIES = {
     ],
     'directory': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'path',
         'path_enc',
-        'created',
-        'modified',
-        'accessed',
+        'ctime',
+        'mtime',
+        'atime',
         'contains_refs',
     ],
     'domain-name': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'value',
         'resolves_to_refs',
     ],
     'email-addr': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'value',
         'display_name',
@@ -1004,6 +1047,11 @@ OBSERVABLE_PROPERTIES = {
     ],
     'email-message': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'is_multipart',
         'date',
@@ -1016,12 +1064,18 @@ OBSERVABLE_PROPERTIES = {
         'subject',
         'received_lines',
         'additional_header_fields',
+        'message_id'
         'body',
         'body_multipart',
         'raw_email_ref',
     ],
     'file': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'hashes',
         'size',
@@ -1029,15 +1083,20 @@ OBSERVABLE_PROPERTIES = {
         'name_enc',
         'magic_number_hex',
         'mime_type',
-        'created',
-        'modified',
-        'accessed',
+        'ctime',
+        'mtime',
+        'atime',
         'parent_directory_ref',
         'contains_refs',
         'content_ref',
     ],
     'ipv4-addr': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'value',
         'resolves_to_refs',
@@ -1045,6 +1104,11 @@ OBSERVABLE_PROPERTIES = {
     ],
     'ipv6-addr': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'value',
         'resolves_to_refs',
@@ -1052,16 +1116,31 @@ OBSERVABLE_PROPERTIES = {
     ],
     'mac-addr': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'value',
     ],
     'mutex': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'name',
     ],
     'network-traffic': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'start',
         'end',
@@ -1083,6 +1162,11 @@ OBSERVABLE_PROPERTIES = {
     ],
     'process': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'is_hidden',
         'pid',
@@ -1098,6 +1182,11 @@ OBSERVABLE_PROPERTIES = {
     ],
     'software': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'name',
         'cpe',
@@ -1107,11 +1196,21 @@ OBSERVABLE_PROPERTIES = {
     ],
     'url': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'value',
     ],
     'user-account': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'user_id',
         'credential',
@@ -1130,15 +1229,25 @@ OBSERVABLE_PROPERTIES = {
     ],
     'windows-registry-key': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'key',
         'values',
-        'modified',
+        'modified_time',
         'creator_user_ref',
         'number_of_subkeys',
     ],
     'x509-certificate': [
         'type',
+        'id',
+        'spec_version',
+        'object_marking_refs',
+        'granular_markings',
+        'defanged',
         'extensions',
         'is_self_signed',
         'hashes',
@@ -1602,6 +1711,7 @@ RELATIONSHIPS = {
             'threat-actor',
             'tool',
         ],
+        'based-on': 'observed-data'
     },
     'infrastructure': {
         'communicates-with': [
@@ -1728,6 +1838,7 @@ RELATIONSHIPS = {
         'delivers': 'malware',
         'drops': 'malware',
         'uses': 'infrastructure',
+        'has': 'vulnerability',
         'targets': [
             'identity',
             'infrastructure',
@@ -1735,12 +1846,6 @@ RELATIONSHIPS = {
             'vulnerability',
         ]
     },
-    'vulnerability': {
-        'impacts': [
-            'infrastructure',
-            'tool',
-        ],
-    }
 }
 
 
@@ -1793,7 +1898,8 @@ TIMESTAMP_PROPERTIES = {
 }
 
 
-# Mapping of official STIX Cyber Observable objects to their timestamp properties
+# Mapping of official STIX Cyber Observable objects to their timestamp
+# properties
 TIMESTAMP_OBSERVABLE_PROPERTIES = {
     'directory': [
         'created',
@@ -1831,7 +1937,8 @@ TIMESTAMP_OBSERVABLE_PROPERTIES = {
     ],
 }
 
-# Mapping of STIX Cyber Observable object to their timestamp-typed embedded properties
+# Mapping of STIX Cyber Observable object to their timestamp-typed
+# embedded properties
 TIMESTAMP_EMBEDDED_PROPERTIES = {
     'file': {
         'extensions': [

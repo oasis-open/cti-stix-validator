@@ -18,6 +18,7 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
   "objects": {
     "0": {
       "type": "file",
+      "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
       "name": "foo.zip",
       "hashes": {
         "MD5": "B365B9A80A06906FC9B400C06C33FF43"
@@ -33,6 +34,7 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
     },
     "1": {
       "type": "file",
+      "id": "file--5fcb3990-706e-4fb4-aef2-352c54b034a5",
       "hashes": {
         "MD5": "A2FD2B3F4D5A1BD5E7D283299E01DCE9"
       },
@@ -125,6 +127,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "user-account",
+            "id": "user-account--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "user_id": "1001",
             "account_login": "bwayne",
             "account_type": "superhero"
@@ -147,6 +150,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "mime_type": "application/zip",
             "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
             "encryption_algorithm": "foo",
@@ -170,6 +174,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "url": "http://www.example.com/file.txt",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
@@ -183,6 +188,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
+            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
             }
@@ -237,7 +243,12 @@ class ObservedDataTestCases(ValidatorTest):
             }
         }
         self.assertFalseWithOptions(observed_data)
-
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "exe",
+            "file_header_hashes": {
+                "MD5": "1C19FC56AEF2048C1CD3A5E67B099350"
+            }
+        }
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_pebinary_multiple_hashes(self):
@@ -254,9 +265,19 @@ class ObservedDataTestCases(ValidatorTest):
             }
         }
         results = validate_parsed_json(observed_data, self.options)
-        self.assertTrue(len(results.errors) == 2)
+        self.assertTrue(len(results.errors) == 3)
         self.assertFalse(results.is_valid)
-
+        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+            "pe_type": "exe",
+            "file_header_hashes": {
+                "MD5": "1C19FC56AEF2048C1CD3A5E67B099350"
+            },
+            "optional_header": {
+                "hashes": {
+                    "MD5": "1C19FC56AEF2048C1CD3A5E67B099350"
+                }
+            }
+        }
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_ntfs_alternate_data_streams_hashes(self):
@@ -280,6 +301,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['abc'] = {
             "type": "x509-certificate",
+            "id": "x509-certificate--5fcb3990-706e-4fb4-aef2-352c54b034a5",
             "hashes": {
                 "MD5": "B4D33B0C7306351B9ED96578465C5579"
             }
@@ -406,6 +428,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
+            "id": "x509-certificate--5fcb3990-706e-4fb4-aef2-352c54b034a5",
             "x509_v3_extensions": {
               "issuer_alternative_name": "Example Corp",
               "foo": "bar"
@@ -419,6 +442,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
+            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
               "issuer_alternative_name": "Example Corp",
               "foo": "bar"
@@ -440,6 +464,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "windows-registry-key",
+            "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "key": "hkey_local_machine\\system\\bar\\foo",
             "values": [
                 {
@@ -459,6 +484,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "windows-registry-key",
+            "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "key": "hkey_local_machine\\system\\bar\\foo",
             "values": [
                 {
@@ -525,6 +551,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
           "type": "directory",
+          "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "path": "C:\\Windows\\System32",
           "contains_refs": ['0']
         }
@@ -535,6 +562,7 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['3'] = {
           "type": "ipv4-addr",
+          "id": "ipv4-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "value": "203.0.113.1"
         }
         observed_data['objects']['2']['contains_refs'] = ['3']
@@ -547,6 +575,7 @@ class ObservedDataTestCases(ValidatorTest):
 
         observed_data['objects']['2'] = {
           "type": "directory",
+          "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "path": "C:\\Windows\\System32",
           "contains_refs": ['0']
         }
@@ -566,6 +595,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "windows-registry-key",
+            "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "key": "HKLM\\system\\bar\\foo"
         }
         self.assertFalseWithOptions(observed_data)
@@ -577,6 +607,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "process",
+            "id": "process--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "pid": 314,
             "extensions": {
                 "windows-process-ext": {
@@ -605,6 +636,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "url": "http://www.example.com/file.txt",
             "hashes": {
                 "MD5": "B4D33B0C7306351B9ED96578465C5579"
@@ -631,6 +663,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
           "type": "directory",
+          "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "path": "C:\\Windows\\System32",
           "path_enc": "bla.bla.bla"
         }
@@ -643,6 +676,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "file",
+            "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "name": "foo.pdf",
             "extensions": {
                 "pdf-ext": {
@@ -661,6 +695,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "software",
+            "id": "software--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "name": "word",
             "languages": ["bbb"]
         }
@@ -673,6 +708,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "email-addr",
+            "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "value": "John Doe <jdoe@example.com>",
             "display_name": "John Doe"
         }
@@ -685,16 +721,19 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
           "type": "email-addr",
+          "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "value": "jdoe@example.com",
           "display_name": "John Doe"
         }
         observed_data['objects']['3'] = {
           "type": "email-addr",
+          "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "value": "mary@example.com",
           "display_name": "Mary Smith"
         }
         observed_data['objects']['4'] = {
             "type": "email-message",
+            "id": "email-message--5fcb3990-706e-4fb4-aef2-352c54b034a5",
             "is_multipart": False,
             "from_ref": "2",
             "to_refs": ["3"],
@@ -727,6 +766,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "email-message",
+            "id": "email-message--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "is_multipart": True,
             "body_multipart": [
                 {
@@ -748,6 +788,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "mime_type": "image/jpeg",
             "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
             "hashes": {
@@ -767,6 +808,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "mime_type": "application/zip",
             "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
             "decryption_key": "My voice is my passport"
@@ -801,6 +843,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "x509-certificate",
+            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
               "private_key_usage_period_not_before": "2016-11-31T08:17:27.000000Z"
             }
@@ -811,6 +854,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "x-new-observable",
+            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "foo": 100
         }
         self.assertFalseWithOptions(observed_data, schema_dir=self.custom_schemas)
@@ -833,6 +877,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects'] = [
             {
                 "type": "windows-registry-key",
+                "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
                 "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\WSALG2"
             }
             ]
@@ -842,6 +887,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "url",
+            "id": "url--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "value": "foo",
         }
         self.assertFalseWithOptions(observed_data)
@@ -853,6 +899,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {
             "type": "artifact",
+            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "url": "foo",
             "hashes": {
                 "MD5": "B4D33B0C7306351B9ED96578465C5579"

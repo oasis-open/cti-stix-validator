@@ -211,6 +211,11 @@ def vocab_course_of_action_type(instance):
                        'course-of-action-type')
 
 
+def vocab_encryption_algo(instance):
+    return check_vocab(instance, "ENCRYPTION_ALGO",
+                       'encryption-algo')
+
+
 def vocab_grouping_context(instance):
     return check_vocab(instance, "GROUPING_CONTEXT",
                        'grouping-context')
@@ -485,6 +490,17 @@ def vocab_windows_pebinary_type(instance):
                                 "value in the windows-pebinary-type-ov vocabulary."
                                 % (key, pe_type), instance['id'],
                                 'windows-pebinary-type')
+            try:
+                hash_types = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
+            except KeyError:
+                continue
+            for hash in hash_types:
+                if hash not in enums.HASH_ALGO_OV:
+                    yield JSONError("Object '%s' has a Windows PE Binary File "
+                                    "extension with a 'file_header hash' of '%s', which is not a "
+                                    "value in the windows-pebinary-type-ov vocabulary."
+                                    % (key, hash), instance['id'],
+                                    'windows-pebinary-type')
 
 
 @cyber_observable_check
@@ -964,6 +980,19 @@ def windows_process_priority_format(instance):
 
 
 @cyber_observable_check
+def malware_analysis_product(instance):
+    """Ensure product name is all lowercase with words seperated by a dash
+    """
+    name_re = re.compile(r'[a-z]+\-[a-z]+')
+    if 'product' in instance and instance['type]'] == 'malware-analysis':
+        p_name = instance['product']
+        if not name_re.match(p_name):
+            yield JSONError("The 'product' property of object '%s' should"
+                            " be all lowercase with words seperated by dash." % instance['id'], instance['id'],
+                            'malware-analysis-product')
+
+
+@cyber_observable_check
 def hash_length(instance):
     """Ensure keys in 'hashes'-type properties are no more than 30 characters long.
     """
@@ -1092,6 +1121,7 @@ CHECKS = {
         custom_property_prefix_strict,
         open_vocab_values,
         kill_chain_phase_names,
+        malware_analysis_product,
         observable_object_keys,
         observable_dictionary_keys,
         custom_observable_object_prefix_strict,
@@ -1140,6 +1170,7 @@ CHECKS = {
         custom_property_prefix_strict,
         open_vocab_values,
         kill_chain_phase_names,
+        malware_analysis_product,
         observable_object_keys,
         observable_dictionary_keys,
         custom_observable_object_prefix_strict,
@@ -1222,6 +1253,7 @@ CHECKS = {
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
     'course-of-action-type': vocab_course_of_action_type,
+    'encryption-algo': vocab_encryption_algo,
     'grouping-context': vocab_grouping_context,
     'implementation-languages': vocab_implementation_languages,
     'infrastructure-types': vocab_infrastructure_types,
@@ -1254,6 +1286,7 @@ CHECKS = {
     'mime-type': mime_type,
     'protocols': protocols,
     'ipfix': ipfix,
+    'malware_analysis_product': malware_analysis_product,
     'http-request-headers': http_request_headers,
     'socket-options': socket_options,
     'pdf-doc-info': pdf_doc_info,

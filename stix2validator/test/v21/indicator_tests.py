@@ -15,6 +15,7 @@ VALID_INDICATOR = u"""
     "indicator_types": ["malicious-activity"],
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
+    "pattern_type": "stix",
     "pattern": "[file:hashes.'SHA-256' = 'aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f']",
     "valid_from": "2016-04-06T20:03:48Z"
 }

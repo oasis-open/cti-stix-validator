@@ -12,7 +12,8 @@ from jsonschema import exceptions as schema_exceptions
 import simplejson as json
 from six import iteritems, string_types, text_type
 
-from . import output
+import output
+
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
 from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,

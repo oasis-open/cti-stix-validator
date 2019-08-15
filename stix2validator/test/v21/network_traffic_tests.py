@@ -18,10 +18,12 @@ VALID_NETWORK_TRAFFIC_DEFINITION = u"""
   "objects": {
     "0": {
       "type": "ipv4-addr",
+      "id" : "ipv4-addr--5fcb3990-706e-4fb4-aef2-352c54b034a5",
       "value": "203.0.113.5"
     },
     "1": {
       "type": "network-traffic",
+      "id" : "network-traffic--280d1c0d-51d1-4ee8-951f-1fb434a38686",
       "src_ref": "0",
       "src_port": 24678,
       "dst_port": 80,
@@ -100,7 +102,7 @@ class ObservedDataTestCases(ValidatorTest):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         net_traffic['objects']['1']['extensions'] = {
             "http-request-ext": {
-                "request_method": "get",
+                "request_method": ["get"],
                 "request_value": "/download.html",
                 "request_version": "http/1.1",
                 "request_header": {
