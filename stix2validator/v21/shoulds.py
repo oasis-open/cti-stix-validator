@@ -979,17 +979,16 @@ def windows_process_priority_format(instance):
                                 'windows-process-priority-format')
 
 
-@cyber_observable_check
 def malware_analysis_product(instance):
     """Ensure product name is all lowercase with words seperated by a dash
     """
-    name_re = re.compile(r'[a-z]+\-[a-z]+')
-    if 'product' in instance and instance['type]'] == 'malware-analysis':
+    name_re = re.compile(r'^[a-z]+\-[a-z]+$')
+    if 'product' in instance and instance['type'] == 'malware-analysis':
         p_name = instance['product']
         if not name_re.match(p_name):
             yield JSONError("The 'product' property of object '%s' should"
                             " be all lowercase with words seperated by dash." % instance['id'], instance['id'],
-                            'malware-analysis-product')
+                            'format-checks')
 
 
 @cyber_observable_check
@@ -1184,6 +1183,7 @@ CHECKS = {
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
     'observable-object-keys': observable_object_keys,
+    'malware-analysis-product': malware_analysis_product,
     'observable-dictionary-keys': observable_dictionary_keys,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
@@ -1317,6 +1317,8 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['custom-prefix-lax'])
                 if 'open-vocab-format' not in options.disabled:
                     validator_list.append(CHECKS['open-vocab-format'])
+                if'malware-analysis-product' not in options.disabled:
+                    validator_list.append(CHECKS['malware-analysis-product'])
                 if 'kill-chain-names' not in options.disabled:
                     validator_list.append(CHECKS['kill-chain-names'])
                 if 'observable-object-keys' not in options.disabled:

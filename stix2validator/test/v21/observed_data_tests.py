@@ -727,13 +727,13 @@ class ObservedDataTestCases(ValidatorTest):
         }
         observed_data['objects']['3'] = {
           "type": "email-addr",
-          "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+          "id": "email-addr--0100e4d8-e690-4399-958d-e540a86fba9e",
           "value": "mary@example.com",
           "display_name": "Mary Smith"
         }
         observed_data['objects']['4'] = {
             "type": "email-message",
-            "id": "email-message--5fcb3990-706e-4fb4-aef2-352c54b034a5",
+            "id": "email-message--d3f4ef30-b14e-49c5-92d5-946e150e4ca3",
             "is_multipart": False,
             "from_ref": "2",
             "to_refs": ["3"],

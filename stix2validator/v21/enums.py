@@ -1064,7 +1064,7 @@ OBSERVABLE_PROPERTIES = {
         'subject',
         'received_lines',
         'additional_header_fields',
-        'message_id'
+        'message_id',
         'body',
         'body_multipart',
         'raw_email_ref',
