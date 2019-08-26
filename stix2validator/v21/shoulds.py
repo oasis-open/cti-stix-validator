@@ -20,6 +20,8 @@ import uuid
 
 from six import string_types
 
+from cpe import CPE
+
 from . import enums
 from ..output import info
 from ..util import cyber_observable_check
@@ -151,8 +153,22 @@ def uuid_check(instance):
     try:
         uuid.UUID(instance['id'].split("--")[-1], version=5)
     except ValueError:
-        yield JSONError("Given ID value %s is not a valid uuid5 ID" % instance['id'],
+        yield JSONError("Given ID value %s is not a valid uuid5 ID." % instance['id'],
                         instance['id'], 'format-checks')
+
+
+def os_execution_envs_check(instance):
+    """Checks to see if provided os execution env is a valid CPE v2.3 entry
+    """
+    if 'os_execution_envs' not in instance:
+        return
+    for os_env in instance['os_execution_envs']:
+        try:
+            CPE(os_env, CPE.VERSION_2_3)
+        except NotImplementedError:
+            yield JSONError("Provided os execution environment %s is not"
+                            " CPE v2.3 compliant." % os_env, instance['id'],
+                            'format-checks')
 
 
 def open_vocab_values(instance):
@@ -1193,6 +1209,7 @@ CHECKS = {
         extref_hashes,
         duplicate_ids,
         uuid_check,
+        os_execution_envs_check,
     ],
     'format-checks': [
         custom_object_prefix_strict,
@@ -1206,6 +1223,7 @@ CHECKS = {
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
         windows_process_priority_format,
+        os_execution_envs_check,
         hash_length,
         uuid_check,
     ],
@@ -1220,6 +1238,7 @@ CHECKS = {
     'observable-dictionary-keys': observable_dictionary_keys,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
+    "os-execution-envs": os_execution_envs_check,
     'approved-values': [
         vocab_marking_definition,
         relationships_strict,

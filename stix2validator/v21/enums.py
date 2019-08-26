@@ -418,7 +418,7 @@ OPINION_USES = {
     "opinion": ["opinion"],
 }
 PROCESSOR_ARCHITECTURE_USES = {
-    "malware": ["architecture_execution_envs", "os_execution_envs"],
+    "malware": ["architecture_execution_envs"],
 }
 REPORT_TYPE_USES = {
     "report": ["report_types"],
