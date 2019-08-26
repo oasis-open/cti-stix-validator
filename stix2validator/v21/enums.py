@@ -261,6 +261,7 @@ THREAT_ACTOR_TYPE_OV = [
     "sensationalist",
     "spy",
     "terrorist",
+    "unknown",
 ]
 THREAT_ACTOR_ROLE_OV = [
     "agent",
@@ -379,7 +380,11 @@ GROUPING_CONTEXT_USES = {
     "grouping": ["context"],
 }
 HASH_ALGO_USES = {
+    "artifact": ["hashes"],
     "file": ["hashes"],
+    "ntfs-ext": ["hashes"],
+    "sections": ["hashes"],
+    "x509-certificate": ["hashes"],
     "windows-pebinary-ext": ["file_header_hashes"],
 }
 IDENTITY_CLASS_USES = {
@@ -1227,10 +1232,11 @@ OBSERVABLE_PROPERTIES = {
         'account_first_login',
         'account_last_login',
     ],
-    'windows-registry-key': [
+    'windows-registry-kx509-certificate': [
         'type',
         'id',
         'spec_version',
+        'x509-certificate',
         'object_marking_refs',
         'granular_markings',
         'defanged',
@@ -1698,6 +1704,13 @@ RELATIONSHIPS = {
             'vulnerability',
         ]
     },
+    'domain-name': {
+        'resolves-to': [
+            'domain-name',
+            'ipv4-addr',
+            'ipv6-addr',
+        ]
+    },
     'identity': {
         'located-at': 'location',
     },
@@ -1758,7 +1771,10 @@ RELATIONSHIPS = {
     },
     'intrusion-set': {
         'attributed-to': 'threat-actor',
+        'compromises': 'infrastructure',
+        'hosts': 'infrastructure',
         'originates-from': 'location',
+        'owns': 'infrastructure',
         'targets': [
             'identity',
             'location',
@@ -1766,9 +1782,18 @@ RELATIONSHIPS = {
         ],
         'uses': [
             'attack-pattern',
+            'infrastructure',
             'malware',
             'tool',
         ],
+    },
+    'ipv4-addr': {
+        'resolves-to': 'mac-addr',
+        'belongs-to': 'autonomous-system',
+    },
+    'ipv6-addr': {
+        'resolves-to': 'mac-addr',
+        'belongs-to': 'autonomous-system',
     },
     'malware': {
         'authored-by': [
@@ -1846,6 +1871,12 @@ RELATIONSHIPS = {
             'vulnerability',
         ]
     },
+    'vulnerability': {
+        "impacts": [
+            'infrastructure',
+            'tools',
+        ]
+    },
 }
 
 
@@ -1894,6 +1925,10 @@ TIMESTAMP_PROPERTIES = {
     'sighting': [
         'first_seen',
         'last_seen',
+    ],
+    'threat-actor': [
+        'first_seen',
+        'last_seen'
     ],
 }
 
@@ -1954,7 +1989,7 @@ TIMESTAMP_EMBEDDED_PROPERTIES = {
 }
 
 # Mapping of STIX Object timestamp properties with a comparison requirement
-# E.g. MUST be greater than or equal to
+# E.g. MUST be greater than or equal tovalues
 # created/modified are already checked
 TIMESTAMP_COMPARE = {
     "campaign": [
@@ -1981,6 +2016,9 @@ TIMESTAMP_COMPARE = {
     "sighting": [
         ('last_seen', 'gt', 'first_seen'),
     ],
+    'threat-actor': [
+        ('last_seen', 'ge', 'first_seen')
+    ]
 }
 
 # Mapping of STIX Object timestamp properties with a comparison requirement
@@ -1992,8 +2030,15 @@ TIMESTAMP_COMPARE_OBSERVABLE = {
 
 # Mapping of official STIX objects to their open-vocab properties
 VOCAB_PROPERTIES = {
+    "artifact": [
+        'encryption_algorithm',
+        'hashes'
+    ],
     "course-of-action": [
         'action_type',
+    ],
+    "file": [
+        "hashes",
     ],
     "grouping-of-action": [
         'context',
@@ -2025,11 +2070,17 @@ VOCAB_PROPERTIES = {
     "malware-analysis": [
         'av_result',
     ],
+    "ntfs-ext": [
+        'hashes',
+    ],
     "opinion": [
         'opinion',
     ],
     "report": [
         'report_types',
+    ],
+    "sections": [
+        "hashes",
     ],
     "threat-actor": [
         'threat_actor_types',
@@ -2045,8 +2096,26 @@ VOCAB_PROPERTIES = {
     ],
     "marking-definition": [
         'definition_type',
+    ],
+    "windows-pebinary-ext": [
+        "file_header_hashes",
+    ],
+    "x509-certificate": [
+        "hashes",
     ]
 }
+
+DEPRECATED_PROPERTIES = {
+    'domain-name': ['resolves_to_refs'],
+    'ipv4-addr': [
+        'resolves_to_refs',
+        'belongs_to_refs'],
+    'ipv6-addr': [
+        'resolves_to_refs'
+        'belongs_to_refs'],
+    'observed-data': ['objects'],
+}
+
 
 # Mapping of check code numbers to names
 CHECK_CODES = {
@@ -2088,6 +2157,9 @@ CHECK_CODES = {
     '242': 'encryption-algo',
     '243': 'windows-pebinary-type',
     '244': 'account-type',
+    '245': 'malware-analysis-product',
+    '246': 'deprecated-property-check',
+    '247': 'indicator-property-check',
     '270': 'all-external-sources',
     '271': 'mime-type',
     '272': 'protocols',

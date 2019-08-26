@@ -13,6 +13,7 @@ import requests_cache
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
 from .v21.enums import CHECK_CODES as CHECK_CODES21
+from .v21.enums import OBSERABLE_TYPES as OBSERABLE_TYPES
 
 DEFAULT_VER = "2.1"
 
@@ -415,6 +416,10 @@ def has_cyber_observable_data(instance):
             'objects' in instance and
             type(instance['objects']) is dict):
         return True
+    if('spec_version' in instance):
+        if(instance['spec_version'] == "2.1"):
+            if(instance['type'] in OBSERABLE_TYPES):
+                return True
     return False
 
 

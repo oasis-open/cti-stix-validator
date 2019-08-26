@@ -16,6 +16,7 @@ To add a new check:
 from collections import Iterable
 from itertools import chain
 import re
+import uuid
 
 from six import string_types
 
@@ -115,6 +116,43 @@ def custom_property_prefix_lax(instance):
                             "future versions of the STIX 2 specification." %
                             prop_name, instance['id'],
                             'custom-prefix-lax')
+
+
+def deprecated_property_check(instance):
+    """Check to see if any included properties are deprecated within the spec
+    """
+    if instance['type'] not in enums.DEPRECATED_PROPERTIES:
+        return
+
+    properties = enums.DEPRECATED_PROPERTIES[instance['type']]
+    for property_type in properties:
+        if property_type in instance:
+            yield JSONError("Included property '%s' is deprecated within the indicated"
+                            " spec version." % property_type, instance['id'],
+                            'deprecated-property-check')
+
+
+def indicator_property_check(instance):
+    """Check to see if name and decription properties are present
+    """
+    if instance['type'] != "indicator":
+        return
+    if "name" not in instance or "description" not in instance:
+        yield JSONError("Both the name and description properties SHOULD be"
+                        " present.", instance['id'],
+                        'indicator-property-check')
+
+
+def uuid_check(instance):
+    """Checks to see if UUID is compliant with version 5
+    """
+    if 'id' not in instance:
+        return
+    try:
+        uuid.UUID(instance['id'].split("--")[-1], version=5)
+    except ValueError:
+        yield JSONError("Given ID value %s is not a valid uuid5 ID" % instance['id'],
+                        instance['id'], 'format-checks')
 
 
 def open_vocab_values(instance):
@@ -490,17 +528,6 @@ def vocab_windows_pebinary_type(instance):
                                 "value in the windows-pebinary-type-ov vocabulary."
                                 % (key, pe_type), instance['id'],
                                 'windows-pebinary-type')
-            try:
-                hash_types = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
-            except KeyError:
-                continue
-            for hash in hash_types:
-                if hash not in enums.HASH_ALGO_OV:
-                    yield JSONError("Object '%s' has a Windows PE Binary File "
-                                    "extension with a 'file_header hash' of '%s', which is not a "
-                                    "value in the windows-pebinary-type-ov vocabulary."
-                                    % (key, hash), instance['id'],
-                                    'windows-pebinary-type')
 
 
 @cyber_observable_check
@@ -1128,6 +1155,8 @@ CHECKS = {
         custom_observable_properties_prefix_strict,
         windows_process_priority_format,
         hash_length,
+        indicator_property_check,
+        deprecated_property_check,
         vocab_marking_definition,
         relationships_strict,
         vocab_attack_motivation,
@@ -1163,6 +1192,7 @@ CHECKS = {
         network_traffic_ports,
         extref_hashes,
         duplicate_ids,
+        uuid_check,
     ],
     'format-checks': [
         custom_object_prefix_strict,
@@ -1177,13 +1207,16 @@ CHECKS = {
         custom_observable_properties_prefix_strict,
         windows_process_priority_format,
         hash_length,
+        uuid_check,
     ],
     'custom-prefix': custom_prefix_strict,
     'custom-prefix-lax': custom_prefix_lax,
+    'deprecated-property-check': deprecated_property_check,
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
     'observable-object-keys': observable_object_keys,
     'malware-analysis-product': malware_analysis_product,
+    'indicator-property-check': indicator_property_check,
     'observable-dictionary-keys': observable_dictionary_keys,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
@@ -1386,6 +1419,10 @@ def list_shoulds(options):
 
             if 'network-traffic-ports' not in options.disabled:
                 validator_list.append(CHECKS['network-traffic-ports'])
+            if 'indicator-property-check' not in options.disabled:
+                validator_list.append(CHECKS['indicator-property-check'])
+            if 'deprecated-property-check' not in options.disabled:
+                validator_list.append(CHECKS['deprecated-property-check'])
             if 'extref-hashes' not in options.disabled:
                 validator_list.append(CHECKS['extref-hashes'])
 
