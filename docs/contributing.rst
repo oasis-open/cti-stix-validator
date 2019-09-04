@@ -27,12 +27,13 @@ the repository on GitHub and clone your fork instead of the main repo:
 
     git clone https://github.com/yourusername/cti-stix-validator.git
 
-2. Install develoment-related dependencies:
+2. Install develoment-related dependencies and set up git submodules:
 
 .. prompt:: bash
 
     cd cti-stix-validator
     pip install -r requirements.txt
+    git submodule update --init --recursive
 
 3. Install `pre-commit <http://pre-commit.com/#usage>`_ git hooks:
 
