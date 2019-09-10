@@ -118,8 +118,35 @@ Check Codes - STIX 2.1
 |  223   | region                      | certain property values are from the   |
 |        |                             | region vocabulary                      |
 +--------+-----------------------------+----------------------------------------+
+|  224   | course-of-action-tyoe       | certain property values are from the   |
+|        |                             | course-of-action vocabulary            |
++--------+-----------------------------+----------------------------------------+
+|  225   | grouping-context            | certain property values are from the   |
+|        |                             | grouping-context vocabulary            |
++--------+-----------------------------+----------------------------------------+
+|  226   | implementation-languages    | certain property values are from the   |
+|        |                             | implementation-languages vocabulary    |
++--------+-----------------------------+----------------------------------------+
+|  227   | infrastructure-types        | certain property values are from the   |
+|        |                             | infrastructure vocabulary              |
++--------+-----------------------------+----------------------------------------+
+|  228   | malware-av-result           | certain property values are from the   |
+|        |                             | malware-av-result vocabulary           |
++--------+-----------------------------+----------------------------------------+
+|  229   | malware-capabilities        | certain property values are from the   |
+|        |                             | malware-capabilities vocabulary        |
++--------+-----------------------------+----------------------------------------+
+|  230   | opinion                     | certain property values are from the   |
+|        |                             | opinion vocabulary                     |
++--------+-----------------------------+----------------------------------------+
+|  231   | processor-architecture      | certain property values are from the   |
+|        |                             | processor-architecture vocabulary      |
++--------+-----------------------------+----------------------------------------+
 |  241   | hash-algo                   | certain property values are from the   |
 |        |                             | hash-algo vocabulary                   |
++--------+-----------------------------+----------------------------------------+
+|  242   | encryption-algo             | certain property values are from the   |
+|        |                             | encryption-algo vocabulary             |
 +--------+-----------------------------+----------------------------------------+
 |  243   | windows-pebinary-type       | certain property values are from the   |
 |        |                             | windows-pebinary-type vocabulary       |

@@ -15,44 +15,40 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
   "first_observed": "2015-12-21T19:00:00Z",
   "last_observed": "2015-12-21T19:00:00Z",
   "number_observed": 50,
-  "objects": {
-    "0": {
+  "object_refs": [
+    "ipv4-address--efcd5e80-570d-4131-b213-62cb18eaa6a8",
+    "domain-name--ecb120bf-2694-4902-a737-62b74539a41b"
+    ]
+}
+"""
+
+VALID_OBJECT = u"""
+{
       "type": "file",
       "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+      "spec_version": "2.1",
       "name": "foo.zip",
       "hashes": {
         "MD5": "B365B9A80A06906FC9B400C06C33FF43"
       },
       "mime_type": "application/zip",
       "extensions": {
-        "archive-ext": {
-          "contains_refs": [
-            "1"
-          ]
+        "ntfs-ext": {
+            "alternate_data_streams": [
+                {
+                "name": "second.stream",
+                "size": 25536
+                }
+                ]
+             }
         }
-      }
-    },
-    "1": {
-      "type": "file",
-      "id": "file--5fcb3990-706e-4fb4-aef2-352c54b034a5",
-      "hashes": {
-        "MD5": "A2FD2B3F4D5A1BD5E7D283299E01DCE9"
-      },
-      "name": "qwerty.dll"
-    }
-  },
-  "granular_markings": [
-    {
-      "marking_ref": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
-      "selectors": [ "objects.0.type" ]
-    }
-  ]
 }
 """
 
 
 class ObservedDataTestCases(ValidatorTest):
     valid_observed_data = json.loads(VALID_OBSERVED_DATA_DEFINITION)
+    valid_object = json.loads(VALID_OBJECT)
 
     def test_wellformed_observed_data(self):
         results = validate_string(VALID_OBSERVED_DATA_DEFINITION, self.options)
@@ -63,69 +59,38 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['number_observed'] = -1
         self.assertFalseWithOptions(observed_data)
 
-    def test_selector_invalid_property(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['granular_markings'][0]['selectors'][0] = "foobar"
-        self.assertFalseWithOptions(observed_data)
-
-    def test_selector_invalid_index(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['granular_markings'][0]['selectors'] = [
-            "objects.0.extensions.archive-ext.contains_refs.[5]"
-        ]
-        self.assertFalseWithOptions(observed_data)
-
-    def test_selector_invalid_list(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['granular_markings'][0]['selectors'] = [
-          "objects.[0].extensions"
-        ]
-        self.assertFalseWithOptions(observed_data)
-
-    def test_selector_invalid_property2(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['granular_markings'][0]['selectors'] = [
-          "objects.[0].extensions.archive-ext.contains_refs.[0].type"
-        ]
-        self.assertFalseWithOptions(observed_data)
-
-    def test_selectors_multiple(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['granular_markings'][0]['selectors'] = [
-          "objects.0.extensions.archive-ext.contains_refs.[5]",
-          "objects.0.addons",
-          "objects.9"
-        ]
-        results = validate_parsed_json(observed_data, self.options)
-        self.assertTrue(len(results.errors) == 3)
-        self.assertFalse(results.is_valid)
-
     def test_dict_key_uppercase(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['x_s_dicts'] = {
-            'FOOBAR': {
-                "foo": "bar"
+        observed_data = {
+            "type": "file",
+            "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "name": "foo.zip",
+            "x_s_dicts": {
+                "FOOBAR": {
+                     "foo": "bar"
+                }
             }
         }
         results = validate_parsed_json(observed_data, self.options)
         self.assertTrue(len(results.errors) == 1)
-        self.assertFalse(results.is_valid)
 
         self.check_ignore(observed_data, 'observable-dictionary-keys')
 
     def test_dict_key_length(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['x_s_dicts'] = {
-            'foofoobarfoofoobarbarfoofoobarbarbar': {
-                "foo": "bar"
-            }
+        observed_data = {
+            "type": "file",
+            "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "name": "foo.zip",
+            "x_s_dicts": {
+                "foofoobarfoofoobarbarfoofoobarbarbar": {
+                    "foo": "bar"
+                }
+            },
         }
         # STIX 2.1 removed dictionary key minimum length
         self.assertTrueWithOptions(observed_data)
 
     def test_vocab_account_type(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "user-account",
             "id": "user-account--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "user_id": "1001",
@@ -137,8 +102,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'account-type')
 
     def test_vocab_windows_pebinary_type(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "elf",
             "machine_hex": "014c",
         }
@@ -147,8 +112,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'windows-pebinary-type')
 
     def test_vocab_encryption_algo(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "artifact",
             "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "mime_type": "application/zip",
@@ -158,12 +122,12 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['encryption_algorithm'] = "mime-type-indicated"
+        observed_data['encryption_algorithm'] = "mime-type-indicated"
         self.assertTrueWithOptions(observed_data)
 
     def test_vocab_file_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['hashes'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['hashes'] = {
             "something": "foobar"
         }
         self.assertFalseWithOptions(observed_data)
@@ -171,8 +135,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_artifact_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "artifact",
             "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "url": "http://www.example.com/file.txt",
@@ -185,8 +148,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_certificate_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "x509-certificate",
             "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "hashes": {
@@ -198,8 +160,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_pebinary_sections_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "exe",
             "sections": [
                 {
@@ -216,8 +178,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_pebinary_optional_header_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "exe",
             "optional_header": {
                 "hashes": {
@@ -229,21 +191,21 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.check_ignore(observed_data, 'hash-algo')
 
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext']['optional_header']['hashes'] = {
+        observed_data['extensions']['windows-pebinary-ext']['optional_header']['hashes'] = {
             "x_foo": "1C19FC56AEF2048C1CD3A5E67B099350"
         }
         self.assertTrueWithOptions(observed_data)
 
     def test_vocab_pebinary_file_header_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "exe",
             "file_header_hashes": {
                 "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
             }
         }
         self.assertFalseWithOptions(observed_data)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "exe",
             "file_header_hashes": {
                 "MD5": "1C19FC56AEF2048C1CD3A5E67B099350"
@@ -252,8 +214,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_pebinary_multiple_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "exe",
             "file_header_hashes": {
                 "foo": "1C19FC56AEF2048C1CD3A5E67B099350"
@@ -265,9 +227,9 @@ class ObservedDataTestCases(ValidatorTest):
             }
         }
         results = validate_parsed_json(observed_data, self.options)
-        self.assertTrue(len(results.errors) == 3)
+        self.assertTrue(len(results.errors) == 2)
         self.assertFalse(results.is_valid)
-        observed_data['objects']['0']['extensions']['windows-pebinary-ext'] = {
+        observed_data['extensions']['windows-pebinary-ext'] = {
             "pe_type": "exe",
             "file_header_hashes": {
                 "MD5": "1C19FC56AEF2048C1CD3A5E67B099350"
@@ -281,8 +243,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'hash-algo')
 
     def test_vocab_ntfs_alternate_data_streams_hashes(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['ntfs-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['ntfs-ext'] = {
             "alternate_data_streams": [
                   {
                       "name": "second.stream",
@@ -297,56 +259,9 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.check_ignore(observed_data, 'hash-algo')
 
-    def test_observable_object_keys(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['abc'] = {
-            "type": "x509-certificate",
-            "id": "x509-certificate--5fcb3990-706e-4fb4-aef2-352c54b034a5",
-            "hashes": {
-                "MD5": "B4D33B0C7306351B9ED96578465C5579"
-            }
-        }
-        self.assertFalseWithOptions(observed_data)
-
-        self.check_ignore(observed_data, 'observable-object-keys')
-
-    def test_observable_object_no_type(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        del observed_data['objects']['0']['type']
-        self.assertFalseWithOptions(observed_data)
-
-    def test_observable_object_types(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['type'] = "x--foo"
-        self.assertFalseWithOptions(observed_data)
-        observed_data['objects']['0']['type'] = "FOO"
-        self.assertFalseWithOptions(observed_data)
-        observed_data['objects']['0']['type'] = "a"
-        self.assertFalseWithOptions(observed_data)
-        observed_data['objects']['0']['type'] = "foo"
-        self.assertFalseWithOptions(observed_data)
-
-        self.check_ignore(observed_data, 'custom-prefix,custom-prefix-lax')
-
-        observed_data['objects']['0']['type'] = "x-c-foo"
-        self.assertTrueWithOptions(observed_data)
-        self.assertFalseWithOptions(observed_data, strict_types=True, strict_properties=True)
-
-    def test_observable_object_types_prefix_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['type'] = "foo"
-        self.assertFalseWithOptions(observed_data,
-                                    disabled='custom-prefix')
-        observed_data['objects']['0']['type'] = "x-foo"
-        self.assertFalseWithOptions(observed_data)
-        self.check_ignore(observed_data,
-                          'custom-prefix')
-        self.assertFalseWithOptions(observed_data,
-                                    disabled='custom-prefix-lax')
-
     def test_observable_object_extensions(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['foobar'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['foobar'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data)
@@ -357,15 +272,15 @@ class ObservedDataTestCases(ValidatorTest):
                           'custom-prefix,custom-prefix-lax')
 
     def test_observable_object_extensions_prefix_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['foobar'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['foobar'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
 
-        del observed_data['objects']['0']['extensions']['foobar']
-        observed_data['objects']['0']['extensions']['x-foobar'] = {
+        del observed_data['extensions']['foobar']
+        observed_data['extensions']['x-foobar'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data)
@@ -375,8 +290,8 @@ class ObservedDataTestCases(ValidatorTest):
                                     disabled='custom-prefix-lax')
 
     def test_observable_object_custom_properties(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['foo'] = "bar"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['foo'] = "bar"
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data,
@@ -385,38 +300,38 @@ class ObservedDataTestCases(ValidatorTest):
                                     disabled='custom-prefix-lax')
 
     def test_observable_object_custom_properties_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['foo'] = "bar"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['foo'] = "bar"
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
 
-        del observed_data['objects']['0']['foo']
-        observed_data['objects']['0']['x_foo'] = "bar"
+        del observed_data['foo']
+        observed_data['x_foo'] = "bar"
         self.check_ignore(observed_data,
                           'custom-prefix')
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix-lax')
 
     def test_observable_object_custom_properties_strict(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['x_x_foo'] = "bar"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['x_x_foo'] = "bar"
         self.assertFalseWithOptions(observed_data, strict_properties=True)
 
     def test_observable_object_extension_custom_properties(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['archive-ext']['foo'] = "bar"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']["ntfs-ext"]['foo'] = "bar"
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data, 'custom-prefix,custom-prefix-lax')
 
     def test_observable_object_extension_custom_properties_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['archive-ext']['foo'] = "bar"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']["ntfs-ext"]['foo'] = "bar"
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
 
-        del observed_data['objects']['0']['extensions']['archive-ext']['foo']
-        observed_data['objects']['0']['extensions']['archive-ext']['x_foo'] = "bar"
+        del observed_data['extensions']["ntfs-ext"]['foo']
+        observed_data['extensions']["ntfs-ext"]['x_foo'] = "bar"
         self.check_ignore(observed_data, 'custom-prefix')
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix-lax')
@@ -425,8 +340,7 @@ class ObservedDataTestCases(ValidatorTest):
                                     strict_properties=True)
 
     def test_observable_object_embedded_custom_properties(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "x509-certificate",
             "id": "x509-certificate--5fcb3990-706e-4fb4-aef2-352c54b034a5",
             "x509_v3_extensions": {
@@ -439,8 +353,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'custom-prefix,custom-prefix-lax')
 
     def test_observable_object_embedded_custom_properties_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "x509-certificate",
             "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
@@ -451,8 +364,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
 
-        del observed_data['objects']['2']['x509_v3_extensions']['foo']
-        observed_data['objects']['2']['x509_v3_extensions']['x_foo'] = "bar"
+        del observed_data['x509_v3_extensions']['foo']
+        observed_data['x509_v3_extensions']['x_foo'] = "bar"
         self.check_ignore(observed_data, 'custom-prefix')
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix-lax')
@@ -461,8 +374,7 @@ class ObservedDataTestCases(ValidatorTest):
                                     strict_properties=True)
 
     def test_observable_object_embedded_dict_custom_properties(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "windows-registry-key",
             "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "key": "hkey_local_machine\\system\\bar\\foo",
@@ -481,8 +393,7 @@ class ObservedDataTestCases(ValidatorTest):
                           'custom-prefix,custom-prefix-lax')
 
     def test_observable_object_embedded_dict_custom_properties_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "windows-registry-key",
             "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "key": "hkey_local_machine\\system\\bar\\foo",
@@ -498,8 +409,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
 
-        del observed_data['objects']['2']['values'][0]['foo']
-        observed_data['objects']['2']['values'][0]['x_foo'] = "bar"
+        del observed_data['values'][0]['foo']
+        observed_data['values'][0]['x_foo'] = "bar"
         self.check_ignore(observed_data, 'custom-prefix')
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix-lax')
@@ -508,8 +419,8 @@ class ObservedDataTestCases(ValidatorTest):
                                     strict_properties=True)
 
     def test_observable_object_extension_embedded_custom_properties(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['ntfs-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['ntfs-ext'] = {
             "alternate_data_streams": [
                   {
                       "name": "second.stream",
@@ -524,21 +435,20 @@ class ObservedDataTestCases(ValidatorTest):
                           'custom-prefix,custom-prefix-lax')
 
     def test_observable_object_extension_embedded_custom_properties_lax(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['ntfs-ext'] = {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['ntfs-ext'] = {
             "alternate_data_streams": [
                   {
                       "name": "second.stream",
                       "size": 25536,
-                      "foo": "bar"
+                      "foo": "bar",
                   }
               ]
         }
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
-
-        del observed_data['objects']['0']['extensions']['ntfs-ext']['alternate_data_streams'][0]['foo']
-        observed_data['objects']['0']['extensions']['ntfs-ext']['alternate_data_streams'][0]['x_foo'] = "bar"
+        del observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['foo']
+        observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['x_foo'] = "bar"
         self.check_ignore(observed_data,
                           'custom-prefix')
         self.assertFalseWithOptions(observed_data,
@@ -547,65 +457,28 @@ class ObservedDataTestCases(ValidatorTest):
                                     disabled='custom-prefix',
                                     strict_properties=True)
 
-    def test_observable_object_property_reference(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-          "type": "directory",
-          "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
-          "path": "C:\\Windows\\System32",
-          "contains_refs": ['0']
-        }
-        self.assertTrueWithOptions(observed_data)
-
-        observed_data['objects']['2']['contains_refs'] = ['999']
-        self.assertFalseWithOptions(observed_data)
-
-        observed_data['objects']['3'] = {
-          "type": "ipv4-addr",
-          "id": "ipv4-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
-          "value": "203.0.113.1"
-        }
-        observed_data['objects']['2']['contains_refs'] = ['3']
-        self.assertFalseWithOptions(observed_data)
-
-    def test_observable_object_embedded_property_reference(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['extensions']['archive-ext']['contains_refs'][0] = '999'
-        self.assertFalseWithOptions(observed_data)
-
-        observed_data['objects']['2'] = {
-          "type": "directory",
-          "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
-          "path": "C:\\Windows\\System32",
-          "contains_refs": ['0']
-        }
-        observed_data['objects']['0']['extensions']['archive-ext']['contains_refs'][0] = '2'
-        self.assertFalseWithOptions(observed_data)
-
     def test_observable_object_reserved_property(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['type'] = 'action'
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['type'] = 'action'
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['0']['type'] = 'file'
-        observed_data['objects']['0']['action'] = True
+        observed_data['type'] = 'file'
+        observed_data['action'] = True
         self.assertFalseWithOptions(observed_data)
 
     def test_windows_registry_key_truncated(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "windows-registry-key",
             "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "key": "HKLM\\system\\bar\\foo"
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['key'] = "hkey_local_machine\\system\\bar\\foo"
+        observed_data['key'] = "hkey_local_machine\\system\\bar\\foo"
         self.assertTrueWithOptions(observed_data)
 
     def test_vocab_windows_process_priority(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "process",
             "id": "process--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "pid": 314,
@@ -620,21 +493,20 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['extensions']['windows-process-ext']['priority'] = 'HIGH_PRIORITY_CLASS'
+        observed_data['extensions']['windows-process-ext']['priority'] = 'HIGH_PRIORITY_CLASS'
         self.assertTrueWithOptions(observed_data)
 
         self.check_ignore(observed_data, 'windows-process-priority-format')
 
     def test_file_mime_type(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['mime_type'] = "bla"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['mime_type'] = "bla"
         self.assertFalseWithOptions(observed_data)
 
         self.check_ignore(observed_data, 'mime-type')
 
     def test_artifact_mime_type(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "artifact",
             "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "url": "http://www.example.com/file.txt",
@@ -645,23 +517,22 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['mime_type'] = "text/plain"
+        observed_data['mime_type'] = "text/plain"
         self.assertTrueWithOptions(observed_data)
 
-        del observed_data['objects']['2']['url']
+        del observed_data['url']
         self.assertFalseWithOptions(observed_data)
 
     def test_file_character_set(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['0']['name_enc'] = "bla.bla.bla"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['name_enc'] = "bla.bla.bla"
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['0']['name_enc'] = "ISO-8859-2"
+        observed_data['name_enc'] = "ISO-8859-2"
         self.assertTrueWithOptions(observed_data)
 
     def test_directory_character_set(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
           "type": "directory",
           "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
           "path": "C:\\Windows\\System32",
@@ -669,12 +540,11 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['path_enc'] = "US-ASCII"
+        observed_data['path_enc'] = "US-ASCII"
         self.assertTrueWithOptions(observed_data)
 
     def test_pdf_doc_info(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "file",
             "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "name": "foo.pdf",
@@ -692,8 +562,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'pdf-doc-info')
 
     def test_software_language(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "software",
             "id": "software--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "name": "word",
@@ -701,12 +570,11 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['languages'][0] = 'eng'
+        observed_data['languages'][0] = 'eng'
         self.assertTrueWithOptions(observed_data)
 
     def test_email_address_invalid_value(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "email-addr",
             "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "value": "John Doe <jdoe@example.com>",
@@ -714,29 +582,14 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['value'] = 'jdoe@example.com'
+        observed_data['value'] = 'jdoe@example.com'
         self.assertTrueWithOptions(observed_data)
 
     def test_email_message_multipart(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-          "type": "email-addr",
-          "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
-          "value": "jdoe@example.com",
-          "display_name": "John Doe"
-        }
-        observed_data['objects']['3'] = {
-          "type": "email-addr",
-          "id": "email-addr--0100e4d8-e690-4399-958d-e540a86fba9e",
-          "value": "mary@example.com",
-          "display_name": "Mary Smith"
-        }
-        observed_data['objects']['4'] = {
+        observed_data = {
             "type": "email-message",
             "id": "email-message--d3f4ef30-b14e-49c5-92d5-946e150e4ca3",
             "is_multipart": False,
-            "from_ref": "2",
-            "to_refs": ["3"],
             "date": "1997-11-21T15:55:06Z",
             "subject": "Saying Hello",
             "body_multipart": [
@@ -758,35 +611,12 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        del observed_data['objects']['4']['body_multipart']
-        observed_data['objects']['4']['body'] = "Hello World"
-        self.assertTrueWithOptions(observed_data)
-
-    def test_email_message_multipart_body_raw_refs(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "email-message",
-            "id": "email-message--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
-            "is_multipart": True,
-            "body_multipart": [
-                {
-                    "content_type": "text/plain; charset=utf-8",
-                    "body": "Cats are cute!"
-                },
-                {
-                    "body_raw_ref": "999"
-                }
-            ]
-
-        }
-        self.assertFalseWithOptions(observed_data)
-
-        observed_data['objects']['2']['body_multipart'][1]['body_raw_ref'] = "0"
+        del observed_data['body_multipart']
+        observed_data['body'] = "Hello World"
         self.assertTrueWithOptions(observed_data)
 
     def test_artifact_url_payloadbin(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "artifact",
             "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "mime_type": "image/jpeg",
@@ -798,15 +628,14 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        del observed_data['objects']['2']['url']
+        del observed_data['url']
         self.assertTrueWithOptions(observed_data)
 
-        observed_data['objects']['2']['payload_bin'] = "failing test"
+        observed_data['payload_bin'] = "failing test"
         self.assertFalseWithOptions(observed_data)
 
     def test_file_invalid_is_encrypted(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "artifact",
             "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "mime_type": "application/zip",
@@ -816,32 +645,31 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
     def test_hash_length(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data = copy.deepcopy(self.valid_object)
         hash_name = "abcdefghijklmnopqrstuvwxyz0123456789"
-        observed_data['objects']['0']['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
+        observed_data['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
         self.assertFalseWithOptions(observed_data)
 
-        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data = copy.deepcopy(self.valid_object)
         hash_name = "MD"
-        observed_data['objects']['0']['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
+        observed_data['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
         self.assertFalseWithOptions(observed_data)
 
     def test_invalid_accessed_timestamp(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1']['created'] = "2016-11-31T08:17:27.000000Z"
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['created'] = "2016-11-31T08:17:27.000000Z"
         self.assertFalseWithOptions(observed_data)
 
     def test_invalid_extension_timestamp(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1']['extensions'] = {'windows-pebinary-ext': {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions'] = {'windows-pebinary-ext': {
             "pe_type": "dll",
             "time_date_stamp": "2016-11-31T08:17:27Z",
         }}
         self.assertFalseWithOptions(observed_data)
 
     def test_invalid_observable_embedded_timestamp(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "x509-certificate",
             "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
@@ -850,54 +678,40 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-    def test_additional_schemas_custom_observable(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
-            "type": "x-new-observable",
-            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
-            "foo": 100
-        }
-        self.assertFalseWithOptions(observed_data, schema_dir=self.custom_schemas)
-
-        observed_data['objects']['2']['foo'] = 'something'
-        self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
-
     def test_additional_schemas_custom_extension(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['1']['extensions'] = {'x-example-com-foobar-ext': {
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions'] = {'x-example-com-foobar-ext': {
             "bar_value": "something",
         }}
         self.assertFalseWithOptions(observed_data, schema_dir=self.custom_schemas)
 
-        observed_data['objects']['1']['extensions']['x-example-com-foobar-ext']['foo_value'] = 'something else'
+        observed_data['extensions']['x-example-com-foobar-ext']['foo_value'] = 'something else'
         self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
 
+    """
     def test_invalid_objects_property(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects'] = [
-            {
+        observed_data = {
                 "type": "windows-registry-key",
                 "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
                 "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\WSALG2"
             }
-            ]
+
         self.assertFalseWithOptions(observed_data)
+    """
 
     def test_url(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "url",
             "id": "url--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "value": "foo",
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['value'] = "http://www.example.com/file.txt"
+        observed_data['value'] = "http://www.example.com/file.txt"
         self.assertTrueWithOptions(observed_data)
 
     def test_url_in_artifact(self):
-        observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['objects']['2'] = {
+        observed_data = {
             "type": "artifact",
             "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "url": "foo",
@@ -908,7 +722,7 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['objects']['2']['url'] = "http://www.example.com/file.txt"
+        observed_data['url'] = "http://www.example.com/file.txt"
         self.assertTrueWithOptions(observed_data)
 
     def test_invalid_seen_time(self):

@@ -355,6 +355,9 @@ ACCOUNT_TYPE_OV = [
 
 
 # Dictionaries mapping object types to properties that use a given vocabulary
+ACCOUNT_TYPE_USES = {
+    "user-account": ["account_type"],
+}
 ATTACK_MOTIVATION_USES = {
     "intrusion-set": [
         "primary_motivation",
@@ -1232,11 +1235,10 @@ OBSERVABLE_PROPERTIES = {
         'account_first_login',
         'account_last_login',
     ],
-    'windows-registry-kx509-certificate': [
+    'windows-registry-key': [
         'type',
         'id',
         'spec_version',
-        'x509-certificate',
         'object_marking_refs',
         'granular_markings',
         'defanged',
@@ -1937,17 +1939,17 @@ TIMESTAMP_PROPERTIES = {
 # properties
 TIMESTAMP_OBSERVABLE_PROPERTIES = {
     'directory': [
-        'created',
-        'modified',
-        'accessed',
+        'ctime',
+        'mtime',
+        'atime',
     ],
     'email-message': [
         'date',
     ],
     'file': [
-        'created',
-        'modified',
-        'accessed',
+        'ctime',
+        'mtime',
+        'atime',
     ],
     'network-traffic': [
         'start',
@@ -1964,7 +1966,7 @@ TIMESTAMP_OBSERVABLE_PROPERTIES = {
         'account_last_login',
     ],
     'windows-registry-key': [
-        'modified',
+        'modified_time',
     ],
     'x509-certificate': [
         'validity_not_before',
