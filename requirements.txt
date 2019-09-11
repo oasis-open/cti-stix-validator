@@ -1,5 +1,4 @@
 bumpversion
-cpe
 pre-commit
 pytest
 pytest-cov
