@@ -474,7 +474,7 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['key'] = "hkey_local_machine\\system\\bar\\foo"
+        observed_data["key"] = "hkey_local_machine\\system\\bar\\foo"
         self.assertTrueWithOptions(observed_data)
 
     def test_vocab_windows_process_priority(self):
