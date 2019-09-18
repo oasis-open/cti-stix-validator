@@ -1281,7 +1281,7 @@ def windows_process_priority_format(instance):
 def malware_analysis_product(instance):
     """Ensure product name is all lowercase with words seperated by a dash
     """
-    name_re = re.compile(r'^[a-z]+\-[a-z]+$')
+    name_re = re.compile(r'^[a-z0-9-]+$')
     if 'product' in instance and instance['type'] == 'malware-analysis':
         p_name = instance['product']
         if not name_re.match(p_name):
