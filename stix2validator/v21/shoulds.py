@@ -22,38 +22,12 @@ from cpe import CPE
 
 from . import enums
 from ..output import info
+from ..util import cyber_observable_check
 from .errors import JSONError
 from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
                     CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
 
 PROTOCOL_RE = re.compile(r'^[a-zA-Z0-9-]{1,15}$')
-
-
-def has_cyber_observable_data(instance):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
-    """
-    if (instance['type'] == 'observed-data' and
-            'objects' in instance and
-            type(instance['objects']) is dict):
-        return True
-    if(instance['type'] in enums.OBSERVABLE_TYPES):
-        return True
-    return False
-
-
-def cyber_observable_check(original_function):
-    """Decorator for functions that require cyber observable data.
-    """
-    def new_function(*args, **kwargs):
-        if not has_cyber_observable_data(args[0]):
-            return
-        func = original_function(*args, **kwargs)
-        if isinstance(func, Iterable):
-            for x in original_function(*args, **kwargs):
-                yield x
-    new_function.__name__ = original_function.__name__
-    return new_function
 
 
 def custom_prefix_strict(instance):
@@ -451,25 +425,12 @@ def valid_hash_value(hashname):
         return False
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def vocab_hash_algo(instance):
     """Ensure objects with 'hashes' properties only use values from the
     hash-algo-ov vocabulary.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            for error in hash_algo_helper(obj['id'], obj):
-                yield error
-    else:
-        if 'id' in instance:
-            for error in hash_algo_helper(instance['id'], instance):
-                yield error
-
-
-def hash_algo_helper(key, instance):
-    """helper function to vocab_hash_algo() to help maintain deprecated
-    observed-data.objects property
-    """
+    key = instance['id']
     if 'type' not in instance:
         return
 
@@ -565,68 +526,44 @@ def hash_algo_helper(key, instance):
                                     % (key, h), instance['id'], 'hash-algo')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a
     'pe-type' property that is from the windows-pebinary-type-ov vocabulary.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            help_val = vocab_windows_pebinary_type_helper(obj['id'], obj)
-            if isinstance(help_val, JSONError):
-                yield help_val
-    else:
-        if 'id' in instance:
-            help_val = vocab_windows_pebinary_type_helper(instance['id'], instance)
-            if isinstance(help_val, JSONError):
-                yield help_val
-
-
-def vocab_windows_pebinary_type_helper(key, instance):
+    key = instance['id']
     if 'type' in instance and instance['type'] == 'file':
         try:
             pe_type = instance['extensions']['windows-pebinary-ext']['pe_type']
         except KeyError:
             return
         if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
-            "came here"
-            return JSONError("Object '%s' has a Windows PE Binary File "
-                             "extension with a 'pe_type' of '%s', which is not a "
-                             "value in the windows-pebinary-type-ov vocabulary."
-                             % (key, pe_type), instance['id'],
-                             'windows-pebinary-type')
+            yield JSONError("Object '%s' has a Windows PE Binary File "
+                            "extension with a 'pe_type' of '%s', which is not a "
+                            "value in the windows-pebinary-type-ov vocabulary."
+                            % (key, pe_type), instance['id'],
+                            'windows-pebinary-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def vocab_account_type(instance):
     """Ensure a user-account objects' 'account-type' property is from the
     account-type-ov vocabulary.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            help_val = vocab_account_type_helper(obj['id'], obj)
-            if isinstance(help_val, JSONError):
-                yield help_val
-    else:
-        help_val = vocab_account_type_helper(instance, instance['id'])
-        if isinstance(help_val, JSONError):
-            yield help_val
-
-
-def vocab_account_type_helper(instance, key):
+    key = instance['id']
     if 'type' in instance and instance['type'] == 'user-account':
         try:
             acct_type = instance['account_type']
         except KeyError:
             return
         if acct_type not in enums.ACCOUNT_TYPE_OV:
-            return JSONError("Object '%s' is a User Account Object "
-                             "with an 'account_type' of '%s', which is not a "
-                             "value in the account-type-ov vocabulary."
-                             % (key, acct_type), instance['id'], 'account-type')
+            yield JSONError("Object '%s' is a User Account Object "
+                            "with an 'account_type' of '%s', which is not a "
+                            "value in the account-type-ov vocabulary."
+                            % (key, acct_type), instance['id'], 'account-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1", True)
 def observable_object_keys(instance):
     """Ensure observable-objects keys are non-negative integers.
     """
@@ -654,148 +591,84 @@ def test_dict_keys(item, inst_id):
                 yield error
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def observable_dictionary_keys(instance):
     """Ensure dictionaries in the cyber observable layer have lowercase keys
     no longer than 30 characters.
     """
-    if instance['type'] == 'observed-data':
-        for error in test_dict_keys(instance['objects'], instance['id']):
-            yield error
-    else:
-        for error in test_dict_keys(instance, instance['id']):
-            yield error
+    for error in test_dict_keys(instance, instance['id']):
+        yield error
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_object_prefix_strict(instance):
     """Ensure custom observable objects follow strict naming style conventions.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
-                    obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
-                    not CUSTOM_TYPE_PREFIX_RE.match(obj['type'])):
-                yield JSONError("Custom Observable Object type '%s' should start "
-                                "with 'x-' followed by a source unique identifier "
-                                "(like a domain name with dots replaced by "
-                                "hyphens), a hyphen and then the name."
-                                % obj['type'], instance['id'],
-                                'custom-prefix')
-    else:
-        if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
-                instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
-                not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
-            yield JSONError("Custom Observable Object type '%s' should start "
-                            "with 'x-' followed by a source unique identifier "
-                            "(like a domain name with dots replaced by "
-                            "hyphens), a hyphen and then the name."
-                            % instance['type'], instance['id'],
-                            'custom-prefix')
+    if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
+            instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+            not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom Observable Object type '%s' should start "
+                        "with 'x-' followed by a source unique identifier "
+                        "(like a domain name with dots replaced by "
+                        "hyphens), a hyphen and then the name."
+                        % instance['type'], instance['id'],
+                        'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_object_prefix_lax(instance):
     """Ensure custom observable objects follow naming style conventions.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
-                    obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
-                    not CUSTOM_TYPE_LAX_PREFIX_RE.match(obj['type'])):
-                yield JSONError("Custom Observable Object type '%s' should start "
-                                "with 'x-'."
-                                % obj['type'], instance['id'],
-                                'custom-prefix-lax')
-    else:
-        if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
-                instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
-                not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])):
-            yield JSONError("Custom Observable Object type '%s' should start "
-                            "with 'x-'."
-                            % instance['type'], instance['id'],
-                            'custom-prefix-lax')
+    if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
+            instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+            not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom Observable Object type '%s' should start "
+                        "with 'x-'."
+                        % instance['type'], instance['id'],
+                        'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_object_extension_prefix_strict(instance):
     """Ensure custom observable object extensions follow strict naming style
     conventions.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if not ('extensions' in obj and 'type' in obj and
-                    obj['type'] in enums.OBSERVABLE_EXTENSIONS):
-                continue
-            for ext_key in obj['extensions']:
-                if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
-                        not CUSTOM_TYPE_PREFIX_RE.match(ext_key)):
-                    yield JSONError("Custom Cyber Observable Object extension type"
-                                    " '%s' should start with 'x-' followed by a source "
-                                    "unique identifier (like a domain name with dots "
-                                    "replaced by hyphens), a hyphen and then the name."
-                                    % ext_key, instance['id'],
-                                    'custom-prefix')
-    else:
-        if not ('extensions' in instance and 'type' in instance and
-                instance['type'] in enums.OBSERVABLE_EXTENSIONS):
-            return
-        for ext_key in instance['extensions']:
-            if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
-                    not CUSTOM_TYPE_PREFIX_RE.match(ext_key)):
-                yield JSONError("Custom Cyber Observable Object extension type"
-                                " '%s' should start with 'x-' followed by a source "
-                                "unique identifier (like a domain name with dots "
-                                "replaced by hyphens), a hyphen and then the name."
-                                % ext_key, instance['id'],
-                                'custom-prefix')
+    if not ('extensions' in instance and 'type' in instance and
+            instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
+                not CUSTOM_TYPE_PREFIX_RE.match(ext_key)):
+            yield JSONError("Custom Cyber Observable Object extension type"
+                            " '%s' should start with 'x-' followed by a source "
+                            "unique identifier (like a domain name with dots "
+                            "replaced by hyphens), a hyphen and then the name."
+                            % ext_key, instance['id'],
+                            'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_object_extension_prefix_lax(instance):
     """Ensure custom observable object extensions follow naming style
     conventions.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if not ('extensions' in obj and 'type' in obj and
-                    obj['type'] in enums.OBSERVABLE_EXTENSIONS):
-                continue
-            for ext_key in obj['extensions']:
-                if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
-                        not CUSTOM_TYPE_LAX_PREFIX_RE.match(ext_key)):
-                    yield JSONError("Custom Cyber Observable Object extension type"
-                                    " '%s' should start with 'x-'."
-                                    % ext_key, instance['id'],
-                                    'custom-prefix-lax')
-    else:
-        if not ('extensions' in instance and 'type' in instance and
-                instance['type'] in enums.OBSERVABLE_EXTENSIONS):
-            return
-        for ext_key in instance['extensions']:
-            if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
-                    not CUSTOM_TYPE_LAX_PREFIX_RE.match(ext_key)):
-                yield JSONError("Custom Cyber Observable Object extension type"
-                                " '%s' should start with 'x-'."
-                                % ext_key, instance['id'],
-                                'custom-prefix-lax')
+    if not ('extensions' in instance and 'type' in instance and
+            instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
+                not CUSTOM_TYPE_LAX_PREFIX_RE.match(ext_key)):
+            yield JSONError("Custom Cyber Observable Object extension type"
+                            " '%s' should start with 'x-'."
+                            % ext_key, instance['id'],
+                            'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_properties_prefix_strict(instance):
     """Ensure observable object custom properties follow strict naming style
     conventions.
     """
-    if instance['type'] == 'observed-data' and 'objects' in instance:
-        for key, obj in instance['objects'].items():
-            for error in custom_observable_properties_prefix_strict_helper(obj['id'], obj):
-                yield error
-    else:
-        for error in custom_observable_properties_prefix_strict_helper(instance['id'], instance):
-            yield error
-
-
-def custom_observable_properties_prefix_strict_helper(key, instance):
     if 'type' not in instance:
         return
     type_ = instance['type']
@@ -879,21 +752,11 @@ def custom_observable_properties_prefix_strict_helper(key, instance):
                                                     'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_properties_prefix_lax(instance):
     """Ensure observable object custom properties follow naming style
     conventions.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            for error in custom_observable_properties_prefix_lax_helper(instance['id'], obj):
-                yield error
-    else:
-        for error in custom_observable_properties_prefix_lax_helper(instance['id'], instance):
-            yield error
-
-
-def custom_observable_properties_prefix_lax_helper(key, instance):
     if 'type' not in instance:
         return
     type_ = instance['type']
@@ -960,172 +823,99 @@ def custom_observable_properties_prefix_lax_helper(key, instance):
                                                     'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def network_traffic_ports(instance):
     """Ensure network-traffic objects contain both src_port and dst_port.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'network-traffic' and
-                    ('src_port' not in obj or 'dst_port' not in obj)):
-                yield JSONError("The Network Traffic object '%s' should contain "
-                                "both the 'src_port' and 'dst_port' properties."
-                                % key, instance['id'], 'network-traffic-ports')
-    else:
-        if ('type' in instance and instance['type'] == 'network-traffic' and
-                ('src_port' not in instance or 'dst_port' not in instance)):
-            yield JSONError("The Network Traffic object '%s' should contain "
-                            "both the 'src_port' and 'dst_port' properties."
-                            % instance['id'], instance['id'], 'network-traffic-ports')
+    if ('type' in instance and instance['type'] == 'network-traffic' and
+            ('src_port' not in instance or 'dst_port' not in instance)):
+        yield JSONError("The Network Traffic object '%s' should contain "
+                        "both the 'src_port' and 'dst_port' properties."
+                        % instance['id'], instance['id'], 'network-traffic-ports')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def mime_type(instance):
     """Ensure the 'mime_type' property of file objects comes from the Template
     column in the IANA media type registry.
     """
     mime_pattern = re.compile(r'^(application|audio|font|image|message|model'
                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'file' and 'mime_type' in obj):
-                if enums.media_types():
-                    if obj['mime_type'] not in enums.media_types():
-                        yield JSONError("The 'mime_type' property of object '%s' "
-                                        "('%s') should be an IANA registered MIME "
-                                        "Type of the form 'type/subtype'."
-                                        % (key, obj['mime_type']), instance['id'],
-                                        'mime-type')
-                else:
-                    info("Can't reach IANA website; using regex for mime types.")
-                    if not mime_pattern.match(obj['mime_type']):
-                        yield JSONError("The 'mime_type' property of object '%s' "
-                                        "('%s') should be an IANA MIME Type of the"
-                                        " form 'type/subtype'."
-                                        % (key, obj['mime_type']), instance['id'],
-                                        'mime-type')
-    else:
-        if ('type' in instance and instance['type'] == 'file' and 'mime_type' in instance):
-            if enums.media_types():
-                if instance['mime_type'] not in enums.media_types():
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA registered MIME "
-                                    "Type of the form 'type/subtype'."
-                                    % (instance['id'], instance['mime_type']), instance['id'],
-                                    'mime-type')
-            else:
-                info("Can't reach IANA website; using regex for mime types.")
-                if not mime_pattern.match(instance['mime_type']):
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA MIME Type of the"
-                                    " form 'type/subtype'."
-                                    % (instance['id'], obj['mime_type']), instance['id'],
-                                    'mime-type')
+    if ('type' in instance and instance['type'] == 'file' and 'mime_type' in instance):
+        if enums.media_types():
+            if instance['mime_type'] not in enums.media_types():
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') should be an IANA registered MIME "
+                                "Type of the form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'],
+                                'mime-type')
+        else:
+            info("Can't reach IANA website; using regex for mime types.")
+            if not mime_pattern.match(instance['mime_type']):
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') should be an IANA MIME Type of the"
+                                " form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'],
+                                'mime-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def protocols(instance):
     """Ensure the 'protocols' property of network-traffic objects contains only
     values from the IANA Service Name and Transport Protocol Port Number
     Registry.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'network-traffic' and
-                    'protocols' in obj):
-                for prot in obj['protocols']:
-                    if enums.protocols():
-                        if prot not in enums.protocols():
-                            yield JSONError("The 'protocols' property of object "
-                                            "'%s' contains a value ('%s') not in "
-                                            "IANA Service Name and Transport "
-                                            "Protocol Port Number Registry."
-                                            % (key, prot), instance['id'],
-                                            'protocols')
-                    else:
-                        info("Can't reach IANA website; using regex for protocols.")
-                        if not PROTOCOL_RE.match(prot):
-                            yield JSONError("The 'protocols' property of object "
-                                            "'%s' contains a value ('%s') not in "
-                                            "IANA Service Name and Transport "
-                                            "Protocol Port Number Registry."
-                                            % (key, prot), instance['id'],
-                                            'protocols')
-    else:
-        if ('type' in instance and instance['type'] == 'network-traffic' and
-                'protocols' in instance):
-            for prot in instance['protocols']:
-                if enums.protocols():
-                    if prot not in enums.protocols():
-                        yield JSONError("The 'protocols' property of object "
-                                        "'%s' contains a value ('%s') not in "
-                                        "IANA Service Name and Transport "
-                                        "Protocol Port Number Registry."
-                                        % (instance['id'], prot), instance['id'],
-                                        'protocols')
-                else:
-                    info("Can't reach IANA website; using regex for protocols.")
-                    if not PROTOCOL_RE.match(prot):
-                        yield JSONError("The 'protocols' property of object "
-                                        "'%s' contains a value ('%s') not in "
-                                        "IANA Service Name and Transport "
-                                        "Protocol Port Number Registry."
-                                        % (instance['id'], prot), instance['id'],
-                                        'protocols')
+    if ('type' in instance and instance['type'] == 'network-traffic' and
+            'protocols' in instance):
+        for prot in instance['protocols']:
+            if enums.protocols():
+                if prot not in enums.protocols():
+                    yield JSONError("The 'protocols' property of object "
+                                    "'%s' contains a value ('%s') not in "
+                                    "IANA Service Name and Transport "
+                                    "Protocol Port Number Registry."
+                                    % (instance['id'], prot), instance['id'],
+                                    'protocols')
+            else:
+                info("Can't reach IANA website; using regex for protocols.")
+                if not PROTOCOL_RE.match(prot):
+                    yield JSONError("The 'protocols' property of object "
+                                    "'%s' contains a value ('%s') not in "
+                                    "IANA Service Name and Transport "
+                                    "Protocol Port Number Registry."
+                                    % (instance['id'], prot), instance['id'],
+                                    'protocols')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def ipfix(instance):
     """Ensure the 'ipfix' property of network-traffic objects contains only
     values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
     """
     ipf_pattern = re.compile(r'^[a-z][a-zA-Z0-9]+')
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'network-traffic' and
-                    'ipfix' in obj):
-                for ipf in obj['ipfix']:
-                    if enums.ipfix():
-                        if ipf not in enums.ipfix():
-                            yield JSONError("The 'ipfix' property of object "
-                                            "'%s' contains a key ('%s') not in "
-                                            "IANA IP Flow Information Export "
-                                            "(IPFIX) Entities Registry."
-                                            % (key, ipf), instance['id'],
-                                            'ipfix')
-                    else:
-                        info("Can't reach IANA website; using regex for ipfix.")
-                        if not ipf_pattern.match(ipf):
-                            yield JSONError("The 'ipfix' property of object "
-                                            "'%s' contains a key ('%s') not in "
-                                            "IANA IP Flow Information Export "
-                                            "(IPFIX) Entities Registry."
-                                            % (key, ipf), instance['id'],
-                                            'ipfix')
-    else:
-        if ('type' in instance and instance['type'] == 'network-traffic' and
-                'ipfix' in instance):
-            for ipf in instance['ipfix']:
-                if enums.ipfix():
-                    if ipf not in enums.ipfix():
-                        yield JSONError("The 'ipfix' property of object "
-                                        "'%s' contains a key ('%s') not in "
-                                        "IANA IP Flow Information Export "
-                                        "(IPFIX) Entities Registry."
-                                        % (instance['id'], ipf), instance['id'],
-                                        'ipfix')
-                else:
-                    info("Can't reach IANA website; using regex for ipfix.")
-                    if not ipf_pattern.match(ipf):
-                        yield JSONError("The 'ipfix' property of object "
-                                        "'%s' contains a key ('%s') not in "
-                                        "IANA IP Flow Information Export "
-                                        "(IPFIX) Entities Registry."
-                                        % (instance['id'], ipf), instance['id'],
-                                        'ipfix')
+    if ('type' in instance and instance['type'] == 'network-traffic' and
+            'ipfix' in instance):
+        for ipf in instance['ipfix']:
+            if enums.ipfix():
+                if ipf not in enums.ipfix():
+                    yield JSONError("The 'ipfix' property of object "
+                                    "'%s' contains a key ('%s') not in "
+                                    "IANA IP Flow Information Export "
+                                    "(IPFIX) Entities Registry."
+                                    % (instance['id'], ipf), instance['id'],
+                                    'ipfix')
+            else:
+                info("Can't reach IANA website; using regex for ipfix.")
+                if not ipf_pattern.match(ipf):
+                    yield JSONError("The 'ipfix' property of object "
+                                    "'%s' contains a key ('%s') not in "
+                                    "IANA IP Flow Information Export "
+                                    "(IPFIX) Entities Registry."
+                                    % (instance['id'], ipf), instance['id'],
+                                    'ipfix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def http_request_headers(instance):
     """Ensure the keys of the 'request_headers' property of the http-request-
     ext extension of network-traffic objects conform to the format for HTTP
@@ -1134,108 +924,60 @@ def http_request_headers(instance):
     not differentiate between request and response headers, and leaves out
     several common non-standard request fields listed elsewhere.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'network-traffic'):
-                try:
-                    headers = obj['extensions']['http-request-ext']['request_header']
-                except KeyError:
-                    continue
+    if ('type' in instance and instance['type'] == 'network-traffic'):
+        try:
+            headers = instance['extensions']['http-request-ext']['request_header']
+        except KeyError:
+            return
 
-                for hdr in headers:
-                    if hdr not in enums.HTTP_REQUEST_HEADERS:
-                        yield JSONError("The 'request_header' property of object "
-                                        "'%s' contains an invalid HTTP request "
-                                        "header ('%s')."
-                                        % (key, hdr), instance['id'],
-                                        'http-request-headers')
-    else:
-        if ('type' in instance and instance['type'] == 'network-traffic'):
-            try:
-                headers = instance['extensions']['http-request-ext']['request_header']
-            except KeyError:
-                return
-
-            for hdr in headers:
-                if hdr not in enums.HTTP_REQUEST_HEADERS:
-                    yield JSONError("The 'request_header' property of object "
-                                    "'%s' contains an invalid HTTP request "
-                                    "header ('%s')."
-                                    % (instance['id'], hdr), instance['id'],
-                                    'http-request-headers')
+        for hdr in headers:
+            if hdr not in enums.HTTP_REQUEST_HEADERS:
+                yield JSONError("The 'request_header' property of object "
+                                "'%s' contains an invalid HTTP request "
+                                "header ('%s')."
+                                % (instance['id'], hdr), instance['id'],
+                                'http-request-headers')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def socket_options(instance):
     """Ensure the keys of the 'options' property of the socket-ext extension of
     network-traffic objects are only valid socket options (SO_*).
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'network-traffic'):
-                try:
-                    options = obj['extensions']['socket-ext']['options']
-                except KeyError:
-                    continue
+    if ('type' in instance and instance['type'] == 'network-traffic'):
+        try:
+            options = instance['extensions']['socket-ext']['options']
+        except KeyError:
+            return
 
-                for opt in options:
-                    if opt not in enums.SOCKET_OPTIONS:
-                        yield JSONError("The 'options' property of object '%s' "
-                                        "contains a key ('%s') that is not a valid"
-                                        " socket option (SO_*)."
-                                        % (key, opt), instance['id'], 'socket-options')
-    else:
-        if ('type' in instance and instance['type'] == 'network-traffic'):
-            try:
-                options = instance['extensions']['socket-ext']['options']
-            except KeyError:
-                return
-
-            for opt in options:
-                if opt not in enums.SOCKET_OPTIONS:
-                    yield JSONError("The 'options' property of object '%s' "
-                                    "contains a key ('%s') that is not a valid"
-                                    " socket option (SO_*)."
-                                    % (instance['id'], opt), instance['id'], 'socket-options')
+        for opt in options:
+            if opt not in enums.SOCKET_OPTIONS:
+                yield JSONError("The 'options' property of object '%s' "
+                                "contains a key ('%s') that is not a valid"
+                                " socket option (SO_*)."
+                                % (instance['id'], opt), instance['id'], 'socket-options')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def pdf_doc_info(instance):
     """Ensure the keys of the 'document_info_dict' property of the pdf-ext
     extension of file objects are only valid PDF Document Information
     Dictionary Keys.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'file'):
-                try:
-                    did = obj['extensions']['pdf-ext']['document_info_dict']
-                except KeyError:
-                    continue
+    if ('type' in instance and instance['type'] == 'file'):
+        try:
+            did = instance['extensions']['pdf-ext']['document_info_dict']
+        except KeyError:
+            return
 
-                for elem in did:
-                    if elem not in enums.PDF_DID:
-                        yield JSONError("The 'document_info_dict' property of "
-                                        "object '%s' contains a key ('%s') that is"
-                                        " not a valid PDF Document Information "
-                                        "Dictionary key."
-                                        % (key, elem), instance['id'],
-                                        'pdf-doc-info')
-    else:
-        if ('type' in instance and instance['type'] == 'file'):
-            try:
-                did = instance['extensions']['pdf-ext']['document_info_dict']
-            except KeyError:
-                return
-
-            for elem in did:
-                if elem not in enums.PDF_DID:
-                    yield JSONError("The 'document_info_dict' property of "
-                                    "object '%s' contains a key ('%s') that is"
-                                    " not a valid PDF Document Information "
-                                    "Dictionary key."
-                                    % (instance['id'], elem), instance['id'],
-                                    'pdf-doc-info')
+        for elem in did:
+            if elem not in enums.PDF_DID:
+                yield JSONError("The 'document_info_dict' property of "
+                                "object '%s' contains a key ('%s') that is"
+                                " not a valid PDF Document Information "
+                                "Dictionary key."
+                                % (instance['id'], elem), instance['id'],
+                                'pdf-doc-info')
 
 
 def countries(instance):
@@ -1250,32 +992,20 @@ def countries(instance):
                          instance['id'], 'marking-definition-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
     """
     class_suffix_re = re.compile(r'.+_CLASS$')
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if 'type' in obj and obj['type'] == 'process':
-                try:
-                    priority = obj['extensions']['windows-process-ext']['priority']
-                except KeyError:
-                    continue
-                if not class_suffix_re.match(priority):
-                    yield JSONError("The 'priority' property of object '%s' should"
-                                    " end in '_CLASS'." % key, instance['id'],
-                                    'windows-process-priority-format')
-    else:
-        if 'type' in instance and instance['type'] == 'process':
-            try:
-                priority = instance['extensions']['windows-process-ext']['priority']
-            except KeyError:
-                return
-            if not class_suffix_re.match(priority):
-                yield JSONError("The 'priority' property of object '%s' should"
-                                " end in '_CLASS'." % instance['id'], instance['id'],
-                                'windows-process-priority-format')
+    if 'type' in instance and instance['type'] == 'process':
+        try:
+            priority = instance['extensions']['windows-process-ext']['priority']
+        except KeyError:
+            return
+        if not class_suffix_re.match(priority):
+            yield JSONError("The 'priority' property of object '%s' should"
+                            " end in '_CLASS'." % instance['id'], instance['id'],
+                            'windows-process-priority-format')
 
 
 def malware_analysis_product(instance):
@@ -1290,22 +1020,11 @@ def malware_analysis_product(instance):
                             'format-checks')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def hash_length(instance):
     """Ensure keys in 'hashes'-type properties are no more than 30 characters long.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            help_val = hash_length_helper(key, obj)
-            if isinstance(help_val, JSONError):
-                yield help_val
-    else:
-        help_val = hash_length_helper(instance['id'], instance)
-        if isinstance(help_val, JSONError):
-            yield help_val
-
-
-def hash_length_helper(key, instance):
+    key = instance['id']
     if 'type' not in instance:
         return
 

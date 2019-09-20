@@ -187,7 +187,7 @@ def check_observable_refs(refs, obj_prop, enum_prop, embed_obj_prop, enum_vals,
                             % (obj_prop, key, valids), instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def observable_object_references(instance):
     """Ensure certain observable object properties reference the correct type
     of object.
@@ -240,7 +240,7 @@ def observable_object_references(instance):
                                 yield x
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def artifact_mime_type(instance):
     """Ensure the 'mime_type' property of artifact objects comes from the
     Template column in the IANA media type registry.
@@ -265,7 +265,7 @@ def artifact_mime_type(instance):
                                     % (key, obj['mime_type']), instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def character_set(instance):
     """Ensure certain properties of cyber observable objects come from the IANA
     Character Set list.
@@ -303,7 +303,7 @@ def character_set(instance):
                                     % (key, obj['name_enc']), instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def software_language(instance):
     """Ensure the 'language' property of software objects is a valid ISO 639-2
     language code.

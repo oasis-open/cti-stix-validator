@@ -12,8 +12,8 @@ import requests_cache
 
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
+from .v21 import enums
 from .v21.enums import CHECK_CODES as CHECK_CODES21
-from .v21.enums import OBSERVABLE_TYPES as OBSERVABLE_TYPES
 
 DEFAULT_VER = "2.1"
 
@@ -408,7 +408,7 @@ class ValidationOptions(object):
                             for x in self.enabled]
 
 
-def has_cyber_observable_data(instance):
+def has_cyber_observable_data(instance, version="2.0"):
     """Return True only if the given instance is an observed-data object
     containing STIX Cyber Observable objects.
     """
@@ -416,25 +416,45 @@ def has_cyber_observable_data(instance):
             'objects' in instance and
             type(instance['objects']) is dict):
         return True
-    if('spec_version' in instance):
-        if(instance['spec_version'] == "2.1"):
-            if(instance['type'] in OBSERVABLE_TYPES):
-                return True
+    if(version == "2.1"):
+        if(instance['type'] in enums.OBSERVABLE_TYPES):
+            return True
     return False
 
 
-def cyber_observable_check(original_function):
-    """Decorator for functions that require cyber observable data.
-    """
-    def new_function(*args, **kwargs):
-        if not has_cyber_observable_data(args[0]):
-            return
-        func = original_function(*args, **kwargs)
-        if isinstance(func, Iterable):
-            for x in original_function(*args, **kwargs):
-                yield x
-    new_function.__name__ = original_function.__name__
-    return new_function
+def cyber_observable_check(version, observed=False):
+    def inner_cyber_observable_check(original_function):
+        """Decorator for functions that require cyber observable data.
+        """
+        def new_function(*args, **kwargs):
+            """ Checks to see if instance provided (arg[0]) contains observable
+            data as a top level object or within the observed-data sdo and loops
+            through objects in the latter case to keep checks consistent.
+            """
+            if version == "2.1" and not observed:
+                if not has_cyber_observable_data(args[0], version="2.1"):
+                    return
+                if('objects' in args[0]):
+                    for obj in args[0]['objects']:
+                        func = original_function(args[0], **kwargs)
+                        if isinstance(func, Iterable):
+                            for x in original_function(args[0], **kwargs):
+                                yield x
+                else:
+                    func = original_function(*args, **kwargs)
+                    if isinstance(func, Iterable):
+                        for x in original_function(args[0], **kwargs):
+                            yield x
+            else:
+                if not has_cyber_observable_data(args[0]):
+                    return
+                func = original_function(*args, **kwargs)
+                if isinstance(func, Iterable):
+                    for x in original_function(*args, **kwargs):
+                        yield x
+        new_function.__name__ = original_function.__name__
+        return new_function
+    return inner_cyber_observable_check
 
 
 def init_requests_cache(refresh_cache=False):

@@ -1,7 +1,5 @@
 """Mandatory (MUST) requirement checking functions
 """
-
-from collections import Iterable
 import operator
 import re
 
@@ -13,6 +11,7 @@ from stix2patterns.validator import run_validator as pattern_validator
 from . import enums
 from ..errors import PatternError
 from ..output import info
+from ..util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
 
 TYPE_FORMAT_RE = re.compile(r'^\-?[a-z0-9]+(-[a-z0-9]+)*\-?$')
@@ -21,33 +20,6 @@ CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
 CUSTOM_TYPE_LAX_PREFIX_RE = re.compile(r"^x\-.+$")
 CUSTOM_PROPERTY_PREFIX_RE = re.compile(r"^x_.+_.+$")
 CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile(r"^x_.+$")
-
-
-def has_cyber_observable_data(instance):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
-    """
-    if (instance['type'] == 'observed-data' and
-            'objects' in instance and
-            type(instance['objects']) is dict):
-        return True
-    if(instance['type'] in enums.OBSERVABLE_TYPES):
-        return True
-    return False
-
-
-def cyber_observable_check(original_function):
-    """Decorator for functions that require cyber observable data.
-    """
-    def new_function(*args, **kwargs):
-        if not has_cyber_observable_data(args[0]):
-            return
-        func = original_function(*args, **kwargs)
-        if isinstance(func, Iterable):
-            for x in original_function(*args, **kwargs):
-                yield x
-    new_function.__name__ = original_function.__name__
-    return new_function
 
 
 def timestamp(instance):
@@ -67,7 +39,7 @@ def timestamp(instance):
                 yield JSONError("'%s': '%s' is not a valid timestamp: %s"
                                 % (tprop, instance[tprop], str(e)), instance['id'])
 
-    if has_cyber_observable_data(instance):
+    if has_cyber_observable_data(instance, "2.1"):
         if instance['type'] == 'observable-data':
             for key, obj in instance['objects'].items():
                 if 'type' not in obj:
@@ -162,34 +134,21 @@ def timestamp_compare(instance):
                             instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def observable_timestamp_compare(instance):
     """Ensure cyber observable timestamp properties with a comparison
     requirement are valid.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(obj.get('type', ''), [])
-            for first, op, second in compares:
-                comp = getattr(operator, op)
-                comp_str = get_comparison_string(op)
+    compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(instance.get('type', ''), [])
+    for first, op, second in compares:
+        comp = getattr(operator, op)
+        comp_str = get_comparison_string(op)
 
-                if first in obj and second in obj and \
-                        not comp(obj[first], obj[second]):
-                    msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
-                    yield JSONError(msg % (key, first, obj[first], comp_str, second, obj[second]),
-                                    instance['id'])
-    else:
-        compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(instance.get('type', ''), [])
-        for first, op, second in compares:
-            comp = getattr(operator, op)
-            comp_str = get_comparison_string(op)
-
-            if first in instance and second in instance and \
-                    not comp(instance[first], instance[second]):
-                msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
-                yield JSONError(msg % (instance['id'], first, instance[first], comp_str, second, instance[second]),
-                                instance['id'])
+        if first in instance and second in instance and \
+                not comp(instance[first], instance[second]):
+            msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
+            yield JSONError(msg % (instance['id'], first, instance[first], comp_str, second, instance[second]),
+                            instance['id'])
 
 
 def object_marking_circular_refs(instance):
@@ -299,7 +258,7 @@ def check_observable_refs(refs, obj_prop, enum_prop, embed_obj_prop, enum_vals,
                             % (obj_prop, key, valids), instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1", True)
 def observable_object_references(instance):
     """Ensure certain observable object properties reference the correct type
     of object.
@@ -358,96 +317,65 @@ def observable_object_references_helper(obj, key, instance):
                             yield x
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def artifact_mime_type(instance):
     """Ensure the 'mime_type' property of artifact objects comes from the
     Template column in the IANA media type registry.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'artifact' and 'mime_type' in obj):
-                if enums.media_types():
-                    if obj['mime_type'] not in enums.media_types():
-                        yield JSONError("The 'mime_type' property of object '%s' "
-                                        "('%s') must be an IANA registered MIME "
-                                        "Type of the form 'type/subtype'."
-                                        % (key, obj['mime_type']), instance['id'])
+    if ('type' in instance and instance['type'] == 'artifact' and 'mime_type' in instance):
+        if enums.media_types():
+            if instance['mime_type'] not in enums.media_types():
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') must be an IANA registered MIME "
+                                "Type of the form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'])
 
-                else:
-                    info("Can't reach IANA website; using regex for mime types.")
-                    mime_re = re.compile(r'^(application|audio|font|image|message|model'
-                                         '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-                    if not mime_re.match(obj['mime_type']):
-                        yield JSONError("The 'mime_type' property of object '%s' "
-                                        "('%s') should be an IANA MIME Type of the"
-                                        " form 'type/subtype'."
-                                        % (key, obj['mime_type']), instance['id'])
-    else:
-        if ('type' in instance and instance['type'] == 'artifact' and 'mime_type' in instance):
-            if enums.media_types():
-                if instance['mime_type'] not in enums.media_types():
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') must be an IANA registered MIME "
-                                    "Type of the form 'type/subtype'."
-                                    % (instance['id'], instance['mime_type']), instance['id'])
-
-            else:
-                info("Can't reach IANA website; using regex for mime types.")
-                mime_re = re.compile(r'^(application|audio|font|image|message|model'
-                                     '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-                if not mime_re.match(instance['mime_type']):
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA MIME Type of the"
-                                    " form 'type/subtype'."
-                                    % (instance['id'], instance['mime_type']), instance['id'])
+        else:
+            info("Can't reach IANA website; using regex for mime types.")
+            mime_re = re.compile(r'^(application|audio|font|image|message|model'
+                                 '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
+            if not mime_re.match(instance['mime_type']):
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') should be an IANA MIME Type of the"
+                                " form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'])
 
 
-@cyber_observable_check
-def character_set(instance):
+@cyber_observable_check("2.1")
+def character_set(obj):
     """Ensure certain properties of cyber observable objects come from the IANA
     Character Set list.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            help_val = character_set_helper(key, obj)
-            if isinstance(help_val, JSONError):
-                yield help_val
-    else:
-        help_val = character_set_helper(instance['id'], instance)
-        if isinstance(help_val, JSONError):
-            yield help_val
-
-
-def character_set_helper(key, obj):
+    key = obj['id']
     char_re = re.compile(r'^[a-zA-Z0-9_\(\)-]+$')
     if ('type' in obj and obj['type'] == 'directory' and 'path_enc' in obj):
         if enums.char_sets():
             if obj['path_enc'] not in enums.char_sets():
-                return JSONError("The 'path_enc' property of object '%s' "
-                                 "('%s') must be an IANA registered "
-                                 "character set."
-                                 % (key, obj['path_enc']), obj['id'])
+                yield JSONError("The 'path_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set."
+                                % (key, obj['path_enc']), obj['id'])
         else:
             info("Can't reach IANA website; using regex for character_set.")
             if not char_re.match(obj['path_enc']):
-                return JSONError("The 'path_enc' property of object '%s' "
-                                 "('%s') must be an IANA registered "
-                                 "character set."
-                                 % (key, obj['path_enc']), obj['id'])
+                yield JSONError("The 'path_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set."
+                                % (key, obj['path_enc']), obj['id'])
 
     if ('type' in obj and obj['type'] == 'file' and 'name_enc' in obj):
         if enums.char_sets():
             if obj['name_enc'] not in enums.char_sets():
-                return JSONError("The 'name_enc' property of object '%s' "
-                                 "('%s') must be an IANA registered "
-                                 "character set."
-                                 % (key, obj['name_enc']), obj['id'])
+                yield JSONError("The 'name_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set."
+                                % (key, obj['name_enc']), obj['id'])
         else:
             info("Can't reach IANA website; using regex for character_set.")
             if not char_re.match(obj['name_enc']):
-                return JSONError("The 'name_enc' property of object '%s' "
-                                 "('%s') must be an IANA registered "
-                                 "character set." % (key, obj['name_enc']), obj['id'])
+                yield JSONError("The 'name_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set." % (key, obj['name_enc']), obj['id'])
 
 
 def language(instance):
@@ -458,30 +386,19 @@ def language(instance):
                         % instance['lang'], instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def software_language(instance):
     """Ensure the 'language' property of software objects is a valid ISO 639-2
     language code.
     """
-    if instance['type'] == 'observed-data':
-        for key, obj in instance['objects'].items():
-            if ('type' in obj and obj['type'] == 'software' and
-                    'languages' in obj):
-                for lang in obj['languages']:
-                    if lang not in enums.SOFTWARE_LANG_CODES:
-                        yield JSONError("The 'languages' property of object '%s' "
-                                        "contains an invalid ISO 639-2 language "
-                                        " code ('%s')."
-                                        % (key, lang), instance['id'])
-    else:
-        if ('type' in instance and instance['type'] == 'software' and
-                'languages' in instance):
-            for lang in instance['languages']:
-                if lang not in enums.SOFTWARE_LANG_CODES:
-                    yield JSONError("The 'languages' property of object '%s' "
-                                    "contains an invalid ISO 639-2 language "
-                                    " code ('%s')."
-                                    % (instance['id'], lang), instance['id'])
+    if ('type' in instance and instance['type'] == 'software' and
+            'languages' in instance):
+        for lang in instance['languages']:
+            if lang not in enums.SOFTWARE_LANG_CODES:
+                yield JSONError("The 'languages' property of object '%s' "
+                                "contains an invalid ISO 639-2 language "
+                                " code ('%s')."
+                                % (instance['id'], lang), instance['id'])
 
 
 def types_strict(instance):
@@ -492,7 +409,7 @@ def types_strict(instance):
         yield JSONError("Object type '%s' is not one of those defined in the"
                         " specification." % instance['type'], instance['id'])
 
-    if has_cyber_observable_data(instance) and instance['type'] == 'observable-data':
+    if has_cyber_observable_data(instance, "2.1") and instance['type'] == 'observable-data':
         for key, obj in instance['objects'].items():
             if 'type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES:
                 yield JSONError("Observable object %s is type '%s' which is "
@@ -514,7 +431,7 @@ def properties_strict(instance):
             yield JSONError("Property '%s' is not one of those defined in the"
                             " specification." % prop, instance['id'])
 
-    if has_cyber_observable_data(instance):
+    if has_cyber_observable_data(instance, "2.1"):
         if instance['type'] == 'observable_data':
             for key, obj in instance['objects'].items():
                 for error in properties_strict_helper(obj, instance['id']):
