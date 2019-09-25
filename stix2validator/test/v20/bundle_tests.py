@@ -59,7 +59,7 @@ class BundleTestCases(ValidatorTest):
         bundle = json.loads(VALID_BUNDLE)
         with pytest.raises(ValueError) as exc:
             self.assertFalseWithOptions(bundle, silent=True, verbose=True)
-        assert 'silent or verbose, but not both' in str(exc)
+        assert 'silent or verbose, but not both' in str(exc.value)
 
     def test_bundle_sdo_missing_type(self):
         bundle = copy.deepcopy(self.valid_bundle)

@@ -123,7 +123,7 @@ def test_validate_string_invalid_timestamp(caplog):
 def test_print_results_invalid_parameter():
     with pytest.raises(ValueError) as excinfo:
         print_results('these results are valid')
-    assert 'Argument to print_results() must be' in str(excinfo)
+    assert 'Argument to print_results() must be' in str(excinfo.value)
 
 
 def test_run_validation_stdin(monkeypatch):
