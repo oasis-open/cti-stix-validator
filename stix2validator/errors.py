@@ -222,9 +222,9 @@ def pretty_error(error, verbose=False):
                          "not an allowed value", msg)
         elif ('target_ref' in error.schema_path or
               'source_ref' in error.schema_path):
-                msg = "Relationships cannot link bundles, marking definitions"\
-                      ", sightings, or other relationships. This field must "\
-                      "contain the id of an SDO."
+            msg = "Relationships cannot link bundles, marking definitions"\
+                  ", sightings, or other relationships. This field must "\
+                  "contain the id of an SDO."
         elif 'sighting_of_ref' in error.schema_path:
             msg = "'sighting_of_ref' must refer to a STIX Domain Object or "\
                   "Custom Object"
