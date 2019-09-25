@@ -516,7 +516,7 @@ def find_schema(schema_dir, obj_type):
     schema_filename = obj_type + '.json'
 
     for root, dirnames, filenames in os.walk(schema_dir):
-        if "examples" not in root:
+        if "examples" in root:
             continue
         if schema_filename in filenames:
             return os.path.join(root, schema_filename)
