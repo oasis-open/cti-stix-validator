@@ -16,9 +16,8 @@ from itertools import chain
 import re
 import uuid
 
-from six import string_types
-
 from cpe import CPE
+from six import string_types
 
 from . import enums
 from ..output import info
