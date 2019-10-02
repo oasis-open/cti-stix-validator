@@ -78,7 +78,7 @@ class ObservedDataTestCases(ValidatorTest):
         net_traffic = copy.deepcopy(self.valid_net_traffic)
         net_traffic['extensions'] = {
             "http-request-ext": {
-                "request_method": ["get"],
+                "request_method": "get",
                 "request_value": "/download.html",
                 "request_version": "http/1.1",
                 "request_header": {
