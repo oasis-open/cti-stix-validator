@@ -1,6 +1,8 @@
 import os
 import unittest
 
+from stix2validator import print_results
+
 from ... import ValidationOptions, validate_parsed_json
 
 
@@ -31,7 +33,6 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(strict=True, **kwargs)
         results = validate_parsed_json(instance, options)
-        from stix2validator import print_results
         print_results(results)
         self.assertTrue(results.is_valid)
 
@@ -49,6 +50,5 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(strict=True, **kwargs)
         results = validate_parsed_json(instance, options)
-        from stix2validator import print_results
         print_results(results)
         self.assertEqual(results.is_valid, False)
