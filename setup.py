@@ -34,6 +34,7 @@ setup(
     version=get_version(),
     description='APIs and scripts for validating STIX 2.0 documents.',
     long_description=readme,
+    long_description_content_type='text/x-rst',
     url="https://github.com/oasis-open/cti-stix-validator",
     author='OASIS Cyber Threat Intelligence Technical Committee',
     author_email='cti-users@lists.oasis-open.org',

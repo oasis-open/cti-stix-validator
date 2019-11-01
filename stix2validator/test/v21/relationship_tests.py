@@ -110,3 +110,36 @@ class RelationshipTestCases(ValidatorTest):
 
         relationship['stop_time'] = "2016-05-07T20:06:37.000Z"
         self.assertTrueWithOptions(relationship)
+
+    def test_enforce_refs(self):
+        invalid_bundle = u"""
+        {
+          "type": "bundle",
+          "id": "bundle--44af6c39-c09b-49c5-9de2-394224b04982",
+          "objects": [
+            {
+          "type": "malware",
+          "id": "malware--fdd60b30-b67c-11e3-b0b9-f01faf20d111",
+          "created": "2014-02-20T09:16:08.989Z",
+          "modified": "2014-02-20T09:16:08.989Z",
+          "name": "Poison Ivy",
+          "labels": [
+            "remote-access-trojan"
+          ]
+        },
+        {
+          "type": "relationship",
+          "id": "relationship--f191e70e-1736-47c3-b0f9-fdfe01387eb1",
+          "created": "2014-02-20T09:16:08.989Z",
+          "modified": "2014-02-20T09:16:08.989Z",
+          "relationship_type": "indicates",
+          "source_ref": "indicator--a932fcc6-e032-176c-126f-cb970a5a1adf",
+          "target_ref": "malware--fdd60b30-b67c-11e3-b0b9-f01faf20d111"
+        }
+          ]
+        }
+        """
+        self.options.enforce_refs = True
+        results = validate_string(invalid_bundle, self.options)
+        self.options.enforce_refs = False
+        self.assertTrue(len(results.errors) >= 1)

@@ -401,92 +401,6 @@ def software_language(instance):
                                 % (instance['id'], lang), instance['id'])
 
 
-def types_strict(instance):
-    """Ensure that no custom object types are used, but only the official ones
-    from the specification.
-    """
-    if instance['type'] not in enums.TYPES:
-        yield JSONError("Object type '%s' is not one of those defined in the"
-                        " specification." % instance['type'], instance['id'])
-
-    if has_cyber_observable_data(instance, "2.1") and instance['type'] == 'observable-data':
-        for key, obj in instance['objects'].items():
-            if 'type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES:
-                yield JSONError("Observable object %s is type '%s' which is "
-                                "not one of those defined in the "
-                                "specification."
-                                % (key, obj['type']), instance['id'])
-
-
-def properties_strict(instance):
-    """Ensure that no custom properties are used, but only the official ones
-    from the specification.
-    """
-    if instance['type'] not in enums.TYPES and instance['type'] not in enums.OBSERVABLE_TYPES:
-        return  # only check properties for official objects
-
-    defined_props = enums.PROPERTIES.get(instance['type'], [])
-    for prop in instance.keys():
-        if prop not in defined_props:
-            yield JSONError("Property '%s' is not one of those defined in the"
-                            " specification." % prop, instance['id'])
-
-    if has_cyber_observable_data(instance, "2.1"):
-        if instance['type'] == 'observable_data':
-            for key, obj in instance['objects'].items():
-                for error in properties_strict_helper(obj, instance['id']):
-                    yield error
-        else:
-            for error in properties_strict_helper(instance, instance['id']):
-                yield error
-
-
-def properties_strict_helper(obj, obj_id):
-    type_ = obj.get('type', '')
-    if type_ not in enums.OBSERVABLE_PROPERTIES:
-        return  # custom observable types handled outside this function
-    observable_props = enums.OBSERVABLE_PROPERTIES.get(type_, [])
-    embedded_props = enums.OBSERVABLE_EMBEDDED_PROPERTIES.get(type_, {})
-    extensions = enums.OBSERVABLE_EXTENSIONS.get(type_, [])
-    for prop in obj.keys():
-        if prop not in observable_props:
-            yield JSONError("Property '%s' is not one of those defined in the"
-                            " specification for %s objects."
-                            % (prop, type_), obj_id)
-        # Check properties of embedded cyber observable types
-        elif prop in embedded_props:
-            embedded_prop_keys = embedded_props.get(prop, [])
-            for embedded_key in obj[prop]:
-                if isinstance(embedded_key, dict):
-                    for embedded in embedded_key:
-                        if embedded not in embedded_prop_keys:
-                            yield JSONError("Property '%s' is not one of those defined in the"
-                                            " specification for the %s property in %s objects."
-                                            % (embedded, prop, type_), obj_id)
-                elif embedded_key not in embedded_prop_keys:
-                    yield JSONError("Property '%s' is not one of those defined in the"
-                                    " specification for the %s property in %s objects."
-                                    % (embedded_key, prop, type_), obj_id)
-
-    # Check properties of embedded cyber observable types
-    for ext_key in obj.get('extensions', {}):
-        if ext_key not in extensions:
-            continue  # don't check custom extensions
-        extension_props = enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key]
-        for ext_prop in obj['extensions'][ext_key]:
-            if ext_prop not in extension_props:
-                yield JSONError("Property '%s' is not one of those defined in the"
-                                " specification for the %s extension in %s objects."
-                                % (ext_prop, ext_key, type_), obj_id)
-            embedded_ext_props = enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES.get(ext_key, {}).get(ext_prop, [])
-            if embedded_ext_props:
-                for embed_ext_prop in obj['extensions'][ext_key].get(ext_prop, []):
-                    if embed_ext_prop not in embedded_ext_props:
-                        yield JSONError("Property '%s' in the %s property of the %s extension "
-                                        "is not one of those defined in the specification."
-                                        % (embed_ext_prop, ext_prop, ext_key), obj_id)
-
-
 def patterns(instance, options):
     """Ensure that the syntax of the pattern of an indicator is valid, and that
     objects and properties referenced by the pattern are valid.
@@ -511,9 +425,6 @@ def patterns(instance, options):
         # Check observable object types
         if objtype in enums.OBSERVABLE_TYPES:
             pass
-        elif options.strict_types:
-            yield PatternError("'%s' is not a valid STIX observable type"
-                               % objtype, instance['id'])
         elif (not TYPE_FORMAT_RE.match(objtype) or
               len(objtype) < 3 or len(objtype) > 250):
             yield PatternError("'%s' is not a valid observable type name"
@@ -538,9 +449,6 @@ def patterns(instance, options):
             prop = path[0]
             if objtype in enums.OBSERVABLE_PROPERTIES and prop in enums.OBSERVABLE_PROPERTIES[objtype]:
                 continue
-            elif options.strict_properties:
-                yield PatternError("'%s' is not a valid property for '%s' objects"
-                                   % (prop, objtype), instance['id'])
             elif not PROPERTY_FORMAT_RE.match(prop):
                 yield PatternError("'%s' is not a valid observable property name"
                                    % prop, instance['id'])
@@ -595,13 +503,5 @@ def list_musts(options):
         patterns,
         language_contents,
     ]
-
-    # --strict-types
-    if options.strict_types:
-        validator_list.append(types_strict)
-
-    # --strict-properties
-    if options.strict_properties:
-        validator_list.append(properties_strict)
 
     return validator_list

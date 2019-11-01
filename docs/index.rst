@@ -35,6 +35,7 @@ a glance whether validation passed.
    usage
    options
    best-practices
+   contributing
 
 
 Indices and tables
