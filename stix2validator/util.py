@@ -12,8 +12,8 @@ import requests_cache
 
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
-from .v21 import enums
 from .v21.enums import CHECK_CODES as CHECK_CODES21
+from .v21.enums import OBSERVABLE_TYPES as OBSERVABLE_TYPES21
 
 DEFAULT_VER = "2.1"
 
@@ -426,9 +426,8 @@ def has_cyber_observable_data(instance, version="2.0"):
             'objects' in instance and
             type(instance['objects']) is dict):
         return True
-    if(version == "2.1"):
-        if(instance['type'] in enums.OBSERVABLE_TYPES):
-            return True
+    if version == "2.1" and instance['type'] in OBSERVABLE_TYPES21:
+        return True
     return False
 
 
@@ -449,7 +448,7 @@ def cyber_observable_check(version, requires_objects=False):
             if version == "2.1" and not requires_objects:
                 if not has_cyber_observable_data(args[0], version="2.1"):
                     return
-                if('objects' in args[0]):
+                if 'objects' in args[0]:
                     for obj in args[0]['objects']:
                         func = original_function(args[0], **kwargs)
                         if isinstance(func, Iterable):
