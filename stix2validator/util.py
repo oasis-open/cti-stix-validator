@@ -432,16 +432,21 @@ def has_cyber_observable_data(instance, version="2.0"):
     return False
 
 
-def cyber_observable_check(version, observed=False):
+def cyber_observable_check(version, requires_objects=False):
     def inner_cyber_observable_check(original_function):
         """Decorator for functions that require cyber observable data.
+
+        Args:
+            version (str): the cyber observable data's STIX specification version
+            requires_objects (bool): True if the function requires the 'objects'
+                property, deprecated in 2.1
         """
         def new_function(*args, **kwargs):
             """ Checks to see if instance provided (arg[0]) contains observable
             data as a top level object or within the observed-data sdo and loops
             through objects in the latter case to keep checks consistent.
             """
-            if version == "2.1" and not observed:
+            if version == "2.1" and not requires_objects:
                 if not has_cyber_observable_data(args[0], version="2.1"):
                     return
                 if('objects' in args[0]):
@@ -462,6 +467,7 @@ def cyber_observable_check(version, observed=False):
                 if isinstance(func, Iterable):
                     for x in original_function(*args, **kwargs):
                         yield x
+
         new_function.__name__ = original_function.__name__
         return new_function
     return inner_cyber_observable_check
