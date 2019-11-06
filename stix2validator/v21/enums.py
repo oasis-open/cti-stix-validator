@@ -405,9 +405,6 @@ INFRASTRUCTURE_TYPE_USES = {
 INDUSTRY_SECTOR_USES = {
     "identity": ["sectors"],
 }
-MALWARE_AV_RESULT_USES = {
-    "malware-analysis": ["av_result"],
-}
 MALWARE_CAPABILITIES_USES = {
     "malware": ["capabilities"],
 }
@@ -2069,9 +2066,6 @@ VOCAB_PROPERTIES = {
         'implementation_languages',
         'capabilities',
     ],
-    "malware-analysis": [
-        'av_result',
-    ],
     "ntfs-ext": [
         'hashes',
     ],
@@ -2151,10 +2145,9 @@ CHECK_CODES = {
     '225': 'grouping-context',
     '226': 'implementation-languages',
     '227': 'infrastructure-types',
-    '228': 'malware-av-result',
-    '229': 'malware-capabilities',
-    '230': 'opinion',
-    '231': 'processor-architecture',
+    '228': 'malware-capabilities',
+    '229': 'opinion',
+    '230': 'processor-architecture',
     '241': 'hash-algo',
     '242': 'encryption-algo',
     '243': 'windows-pebinary-type',

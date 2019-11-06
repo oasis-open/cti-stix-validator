@@ -130,16 +130,13 @@ Check Codes - STIX 2.1
 |  227   | infrastructure-types        | certain property values are from the   |
 |        |                             | infrastructure vocabulary              |
 +--------+-----------------------------+----------------------------------------+
-|  228   | malware-av-result           | certain property values are from the   |
-|        |                             | malware-av-result vocabulary           |
-+--------+-----------------------------+----------------------------------------+
-|  229   | malware-capabilities        | certain property values are from the   |
+|  228   | malware-capabilities        | certain property values are from the   |
 |        |                             | malware-capabilities vocabulary        |
 +--------+-----------------------------+----------------------------------------+
-|  230   | opinion                     | certain property values are from the   |
+|  229   | opinion                     | certain property values are from the   |
 |        |                             | opinion vocabulary                     |
 +--------+-----------------------------+----------------------------------------+
-|  231   | processor-architecture      | certain property values are from the   |
+|  230   | processor-architecture      | certain property values are from the   |
 |        |                             | processor-architecture vocabulary      |
 +--------+-----------------------------+----------------------------------------+
 |  241   | hash-algo                   | certain property values are from the   |
