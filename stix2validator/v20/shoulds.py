@@ -18,7 +18,7 @@ from itertools import chain
 import re
 
 from six import string_types
-from stix2patterns.pattern import Pattern
+from stix2patterns.v20.pattern import Pattern
 
 from . import enums
 from ..errors import PatternError

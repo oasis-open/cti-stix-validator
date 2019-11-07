@@ -5,7 +5,7 @@ import re
 
 from dateutil import parser
 from six import string_types
-from stix2patterns.pattern import Pattern
+from stix2patterns.v20.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
 
 from . import enums
@@ -329,7 +329,7 @@ def patterns(instance, options):
     pattern = instance['pattern']
     if not isinstance(pattern, string_types):
         return  # This error already caught by schemas
-    errors = pattern_validator(pattern)
+    errors = pattern_validator(pattern, stix_version='2.0')
 
     # Check pattern syntax
     if errors:
