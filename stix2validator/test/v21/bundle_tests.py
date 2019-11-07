@@ -47,6 +47,13 @@ class BundleTestCases(ValidatorTest):
         bundle['version'] = 1
         self.assertFalseWithOptions(bundle)
 
+    def test_bundle_uuidv5(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        bundle['id'] = "bundle--44af6c39-c09b-59c5-9de2-394224b04982"
+        self.assertFalseWithOptions(bundle)
+
+        self.check_ignore(bundle, 'uuid-check')
+
     def test_bundle_duplicate_ids(self):
         bundle = copy.deepcopy(self.valid_bundle)
         bundle['objects'].append(bundle['objects'][0].copy())

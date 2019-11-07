@@ -146,15 +146,22 @@ def indicator_property_check(instance):
 
 
 def uuid_check(instance):
-    """Checks to see if UUID is compliant with version 5
+    """Ensure Domain Objects, Relationship Objects, Meta Objects, and Bundles
+    use UUIDv4 for their IDs, and Cyber Observables use UUIDv5.
+
+    Process objects are an exception; they are recommended to use UUIDv4.
     """
     if 'id' not in instance:
         return
-    try:
-        uuid.UUID(instance['id'].split("--")[-1], version=5)
-    except ValueError:
-        yield JSONError("Given ID value %s is not a valid uuid5 ID." % instance['id'],
-                        instance['id'], 'format-checks')
+
+    object_id = uuid.UUID(instance['id'].split("--")[-1])
+    if has_cyber_observable_data(instance, "2.1") and instance['type'] != 'process':
+        if object_id.version != 5:
+            yield JSONError("Cyber Observable ID value %s is not a valid UUIDv5 ID."
+                            % instance['id'], instance['id'], 'uuid-check')
+    elif object_id.version != 4:
+        yield JSONError("Given ID value %s is not a valid UUIDv4 ID."
+                        % instance['id'], instance['id'], 'uuid-check')
 
 
 def os_execution_envs_check(instance):

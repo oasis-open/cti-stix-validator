@@ -7,7 +7,7 @@ from ... import validate_string
 VALID_NETWORK_TRAFFIC_DEFINITION = u"""
   {
     "type": "network-traffic",
-    "id" : "network-traffic--280d1c0d-51d1-4ee8-951f-1fb434a38686",
+    "id" : "network-traffic--280d1c0d-51d1-5ee8-951f-1fb434a38686",
     "src_ref": "ipv4-addr--e42c19c8-f9fe-5ae9-9fc8-22c398f78fb",
     "src_port": 24678,
     "dst_port": 80,

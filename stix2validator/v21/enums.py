@@ -2118,6 +2118,7 @@ CHECK_CODES = {
     '1': 'format-checks',
     '101': 'custom-prefix',
     '102': 'custom-prefix-lax',
+    '103': 'uuid-check',
     '111': 'open-vocab-format',
     '121': 'kill-chain-names',
     '141': 'observable-object-keys',

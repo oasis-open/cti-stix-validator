@@ -25,7 +25,7 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
 VALID_OBJECT = u"""
 {
       "type": "file",
-      "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+      "id": "file--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
       "spec_version": "2.1",
       "name": "foo.zip",
       "hashes": {
@@ -34,14 +34,14 @@ VALID_OBJECT = u"""
       "mime_type": "application/zip",
       "extensions": {
         "ntfs-ext": {
-            "alternate_data_streams": [
-                {
-                "name": "second.stream",
-                "size": 25536
-                }
-                ]
-             }
+          "alternate_data_streams": [
+            {
+              "name": "second.stream",
+              "size": 25536
+            }
+          ]
         }
+      }
 }
 """
 
@@ -62,7 +62,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_dict_key_uppercase(self):
         observed_data = {
             "type": "file",
-            "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "file--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "name": "foo.zip",
             "x_s_dicts": {
                 "FOOBAR": {
@@ -78,7 +78,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_dict_key_length(self):
         observed_data = {
             "type": "file",
-            "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "file--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "name": "foo.zip",
             "x_s_dicts": {
                 "foofoobarfoofoobarbarfoofoobarbarbar": {
@@ -92,7 +92,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_account_type(self):
         observed_data = {
             "type": "user-account",
-            "id": "user-account--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "user-account--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "user_id": "1001",
             "account_login": "bwayne",
             "account_type": "superhero"
@@ -114,7 +114,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_encryption_algo(self):
         observed_data = {
             "type": "artifact",
-            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "artifact--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "mime_type": "application/zip",
             "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
             "encryption_algorithm": "foo",
@@ -137,7 +137,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_artifact_hashes(self):
         observed_data = {
             "type": "artifact",
-            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "artifact--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "url": "http://www.example.com/file.txt",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
@@ -150,7 +150,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_vocab_certificate_hashes(self):
         observed_data = {
             "type": "x509-certificate",
-            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "x509-certificate--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "hashes": {
                 "foo": "B4D33B0C7306351B9ED96578465C5579"
             }
@@ -355,7 +355,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_observable_object_embedded_custom_properties_lax(self):
         observed_data = {
             "type": "x509-certificate",
-            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "x509-certificate--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
               "issuer_alternative_name": "Example Corp",
               "foo": "bar"
@@ -376,7 +376,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_observable_object_embedded_dict_custom_properties(self):
         observed_data = {
             "type": "windows-registry-key",
-            "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "key": "hkey_local_machine\\system\\bar\\foo",
             "values": [
                 {
@@ -395,7 +395,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_observable_object_embedded_dict_custom_properties_lax(self):
         observed_data = {
             "type": "windows-registry-key",
-            "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "key": "hkey_local_machine\\system\\bar\\foo",
             "values": [
                 {
@@ -469,7 +469,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_windows_registry_key_truncated(self):
         observed_data = {
             "type": "windows-registry-key",
-            "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "key": "HKLM\\system\\bar\\foo"
         }
         self.assertFalseWithOptions(observed_data)
@@ -498,6 +498,24 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.check_ignore(observed_data, 'windows-process-priority-format')
 
+    def test_process_uuidv5(self):
+        # Process is the only SCO not recommended to use UUIDv4
+        observed_data = {
+            "type": "process",
+            "id": "process--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
+            "pid": 314,
+        }
+        self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'uuid-check')
+
+    def test_uuidv4(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['id'] = "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4"
+        self.assertFalseWithOptions(observed_data)
+
+        self.check_ignore(observed_data, 'uuid-check')
+
     def test_file_mime_type(self):
         observed_data = copy.deepcopy(self.valid_object)
         observed_data['mime_type'] = "bla"
@@ -508,7 +526,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_artifact_mime_type(self):
         observed_data = {
             "type": "artifact",
-            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "artifact--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "url": "http://www.example.com/file.txt",
             "hashes": {
                 "MD5": "B4D33B0C7306351B9ED96578465C5579"
@@ -534,7 +552,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_directory_character_set(self):
         observed_data = {
           "type": "directory",
-          "id": "directory--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+          "id": "directory--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
           "path": "C:\\Windows\\System32",
           "path_enc": "bla.bla.bla"
         }
@@ -546,7 +564,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_pdf_doc_info(self):
         observed_data = {
             "type": "file",
-            "id": "file--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "file--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "name": "foo.pdf",
             "extensions": {
                 "pdf-ext": {
@@ -564,7 +582,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_software_language(self):
         observed_data = {
             "type": "software",
-            "id": "software--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "software--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "name": "word",
             "languages": ["bbb"]
         }
@@ -576,7 +594,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_email_address_invalid_value(self):
         observed_data = {
             "type": "email-addr",
-            "id": "email-addr--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "email-addr--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "value": "John Doe <jdoe@example.com>",
             "display_name": "John Doe"
         }
@@ -588,7 +606,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_email_message_multipart(self):
         observed_data = {
             "type": "email-message",
-            "id": "email-message--d3f4ef30-b14e-49c5-92d5-946e150e4ca3",
+            "id": "email-message--d3f4ef30-b14e-59c5-92d5-946e150e4ca3",
             "is_multipart": False,
             "date": "1997-11-21T15:55:06Z",
             "subject": "Saying Hello",
@@ -618,7 +636,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_artifact_url_payloadbin(self):
         observed_data = {
             "type": "artifact",
-            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "artifact--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "mime_type": "image/jpeg",
             "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
             "hashes": {
@@ -637,7 +655,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_file_invalid_is_encrypted(self):
         observed_data = {
             "type": "artifact",
-            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "artifact--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "mime_type": "application/zip",
             "payload_bin": "VBORw0KGgoAAAANSUhEUgAAADI==",
             "decryption_key": "My voice is my passport"
@@ -671,7 +689,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_invalid_observable_embedded_timestamp(self):
         observed_data = {
             "type": "x509-certificate",
-            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "x509-certificate--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
               "private_key_usage_period_not_before": "2016-11-31T08:17:27.000000Z"
             }
@@ -693,7 +711,7 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['objects'] = [
             {
                 "type": "windows-registry-key",
-                "id": "windows-registry-key--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+                "id": "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
                 "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\WSALG2"
             }
             ]
@@ -702,7 +720,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_url(self):
         observed_data = {
             "type": "url",
-            "id": "url--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "url--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "value": "foo",
         }
         self.assertFalseWithOptions(observed_data)
@@ -713,7 +731,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_url_in_artifact(self):
         observed_data = {
             "type": "artifact",
-            "id": "artifact--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
+            "id": "artifact--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "url": "foo",
             "hashes": {
                 "MD5": "B4D33B0C7306351B9ED96578465C5579"
