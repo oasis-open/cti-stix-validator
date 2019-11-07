@@ -218,3 +218,25 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(objects, options)
         assert results[0].is_valid
         assert not results[1].is_valid
+
+    def test_indicator_missing_name(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator['name']
+        self.assertFalseWithOptions(indicator)
+
+        self.check_ignore(indicator, 'indicator-properties')
+
+    def test_indicator_missing_description(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator['description']
+        self.assertFalseWithOptions(indicator)
+
+        self.check_ignore(indicator, 'indicator-properties')
+
+    def test_indicator_missing_name_description(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator['name']
+        del indicator['description']
+        self.assertFalseWithOptions(indicator)
+
+        self.check_ignore(indicator, 'indicator-properties')

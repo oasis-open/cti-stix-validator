@@ -667,6 +667,7 @@ class ObservedDataTestCases(ValidatorTest):
         hash_name = "abcdefghijklmnopqrstuvwxyz0123456789"
         observed_data['hashes'][hash_name] = "8D98A25E9D0662B1F4CA3BF22D6F53E9"
         self.assertFalseWithOptions(observed_data)
+        self.check_ignore(observed_data, ['hash-length', 'hash-algo'])
 
         observed_data = copy.deepcopy(self.valid_object)
         hash_name = "MD"
@@ -753,4 +754,18 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
         observed_data['last_observed'] = "2016-05-07T20:06:37.000Z"
+        self.assertTrueWithOptions(observed_data)
+
+    def test_domain_name_deprecated_property(self):
+        observed_data = {
+            "type": "domain-name",
+            "spec_version": "2.1",
+            "id": "domain-name--ecb120bf-2694-5902-a737-62b74539a41b",
+            "value": "example.com",
+            "resolves_to_refs": ["ipv4-addr--efcd5e80-570d-4131-b213-62cb18eaa6a8"]
+        }
+        self.assertFalseWithOptions(observed_data)
+        self.check_ignore(observed_data, 'deprecated-properties')
+
+        del observed_data['resolves_to_refs']
         self.assertTrueWithOptions(observed_data)

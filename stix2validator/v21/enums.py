@@ -2123,8 +2123,10 @@ CHECK_CODES = {
     '121': 'kill-chain-names',
     '141': 'observable-object-keys',
     '142': 'observable-dictionary-keys',
+    '143': 'malware-analysis-product',
     '149': 'windows-process-priority-format',
     '150': 'hash-length',
+    '151': 'os-execution-envs',
     '2': 'approved-values',
     '201': 'marking-definition-type',
     '202': 'relationship-types',
@@ -2153,9 +2155,6 @@ CHECK_CODES = {
     '242': 'encryption-algo',
     '243': 'windows-pebinary-type',
     '244': 'account-type',
-    '245': 'malware-analysis-product',
-    '246': 'deprecated-property-check',
-    '247': 'indicator-property-check',
     '270': 'all-external-sources',
     '271': 'mime-type',
     '272': 'protocols',
@@ -2166,6 +2165,8 @@ CHECK_CODES = {
     '277': 'countries',
     '301': 'network-traffic-ports',
     '302': 'extref-hashes',
+    '303': 'indicator-properties',
+    '304': 'deprecated-properties',
 }
 
 

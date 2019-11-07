@@ -33,8 +33,7 @@ class MalwareTestCases(ValidatorTest):
     def test_invalid_action_type(self):
         coa = copy.deepcopy(self.valid_course_of_action)
         coa['action_type'] = "invalid"
-        results = validate_parsed_json(coa, self.options)
-        self.assertEqual(results.is_valid, False)
+        self.assertFalseWithOptions(coa)
 
         self.check_ignore(coa, 'course-of-action-type')
 
@@ -47,5 +46,11 @@ class MalwareTestCases(ValidatorTest):
     def test_invalid_action_bin_and_reference(self):
         coa = copy.deepcopy(self.valid_course_of_action)
         coa['action_bin'] = "SGVsbG8gV29ybGQ="
-        results = validate_parsed_json(coa, self.options)
-        self.assertEqual(results.is_valid, False)
+        self.assertFalseWithOptions(coa)
+
+    def test_invalid_os_execution_envs(self):
+        coa = copy.deepcopy(self.valid_course_of_action)
+        coa['os_execution_envs'] = ["f==00"]
+        self.assertFalseWithOptions(coa)
+
+        self.check_ignore(coa, 'os-execution-envs')

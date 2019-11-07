@@ -131,7 +131,7 @@ def deprecated_property_check(instance):
         if property_type in instance:
             yield JSONError("Included property '%s' is deprecated within the indicated"
                             " spec version." % property_type, instance['id'],
-                            'deprecated-property-check')
+                            'deprecated-properties')
 
 
 def indicator_property_check(instance):
@@ -142,7 +142,7 @@ def indicator_property_check(instance):
     if "name" not in instance or "description" not in instance:
         yield JSONError("Both the name and description properties SHOULD be"
                         " present.", instance['id'],
-                        'indicator-property-check')
+                        'indicator-properties')
 
 
 def uuid_check(instance):
@@ -175,7 +175,7 @@ def os_execution_envs_check(instance):
         except NotImplementedError:
             yield JSONError("Provided os execution environment %s is not"
                             " CPE v2.3 compliant." % os_env, instance['id'],
-                            'format-checks')
+                            'os-execution-envs')
 
 
 def open_vocab_values(instance):
@@ -432,7 +432,7 @@ def valid_hash_value(hashname):
 @cyber_observable_check("2.1")
 def vocab_hash_algo(instance):
     """Ensure objects with 'hashes' properties only use values from the
-    hash-algo-ov vocabulary.
+    hash-algorithm-ov vocabulary.
     """
     key = instance['id']
     if 'type' not in instance:
@@ -448,7 +448,7 @@ def vocab_hash_algo(instance):
                 if not (valid_hash_value(h)):
                     yield JSONError("Object '%s' has a 'hashes' dictionary"
                                     " with a hash of type '%s', which is not a "
-                                    "value in the hash-algo-ov vocabulary nor a "
+                                    "value in the hash-algorithm-ov vocabulary nor a "
                                     "custom value prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
@@ -466,7 +466,7 @@ def vocab_hash_algo(instance):
                                         " with an alternate data stream that has a"
                                         " 'hashes' dictionary with a hash of type "
                                         "'%s', which is not a value in the "
-                                        "hash-algo-ov vocabulary nor a custom "
+                                        "hash-algorithm-ov vocabulary nor a custom "
                                         "value prepended with 'x_'."
                                         % (key, h), instance['id'], 'hash-algo')
 
@@ -480,7 +480,7 @@ def vocab_hash_algo(instance):
                     yield JSONError("Object '%s' has a Windows PE Binary "
                                     "File extension with a file header hash of "
                                     "'%s', which is not a value in the "
-                                    "hash-algo-ov vocabulary nor a custom value "
+                                    "hash-algorithm-ov vocabulary nor a custom value "
                                     "prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
@@ -494,7 +494,7 @@ def vocab_hash_algo(instance):
                     yield JSONError("Object '%s' has a Windows PE Binary "
                                     "File extension with an optional header that "
                                     "has a hash of '%s', which is not a value in "
-                                    "the hash-algo-ov vocabulary nor a custom "
+                                    "the hash-algorithm-ov vocabulary nor a custom "
                                     "value prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
@@ -511,7 +511,7 @@ def vocab_hash_algo(instance):
                         yield JSONError("Object '%s' has a Windows PE "
                                         "Binary File extension with a section that"
                                         " has a hash of '%s', which is not a value"
-                                        " in the hash-algo-ov vocabulary nor a "
+                                        " in the hash-algorithm-ov vocabulary nor a "
                                         "custom value prepended with 'x_'."
                                         % (key, h), instance['id'], 'hash-algo')
 
@@ -525,7 +525,7 @@ def vocab_hash_algo(instance):
                 if not (valid_hash_value(h)):
                     yield JSONError("Object '%s' has a 'hashes' dictionary"
                                     " with a hash of type '%s', which is not a "
-                                    "value in the hash-algo-ov vocabulary nor a "
+                                    "value in the hash-algorithm-ov vocabulary nor a "
                                     "custom value prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
@@ -1021,7 +1021,7 @@ def malware_analysis_product(instance):
         if not name_re.match(p_name):
             yield JSONError("The 'product' property of object '%s' should"
                             " be all lowercase with words seperated by dash." % instance['id'], instance['id'],
-                            'format-checks')
+                            'malware-analysis-product')
 
 
 @cyber_observable_check("2.1")
@@ -1043,7 +1043,7 @@ def hash_length(instance):
                     return JSONError("Object '%s' has a 'hashes' dictionary"
                                      " with a hash of type '%s', which is "
                                      "longer than 30 characters."
-                                     % (key, h), instance['id'], 'hash-algo')
+                                     % (key, h), instance['id'], 'hash-length')
 
         try:
             ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
@@ -1060,7 +1060,7 @@ def hash_length(instance):
                                          " 'hashes' dictionary with a hash of type "
                                          "'%s', which is longer than 30 "
                                          "characters."
-                                         % (key, h), instance['id'], 'hash-algo')
+                                         % (key, h), instance['id'], 'hash-length')
 
         try:
             head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
@@ -1073,7 +1073,7 @@ def hash_length(instance):
                                      "File extension with a file header hash of "
                                      "'%s', which is longer than 30 "
                                      "characters."
-                                     % (key, h), instance['id'], 'hash-algo')
+                                     % (key, h), instance['id'], 'hash-length')
 
         try:
             hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
@@ -1086,7 +1086,7 @@ def hash_length(instance):
                                      "File extension with an optional header that "
                                      "has a hash of '%s', which is longer "
                                      "than 30 characters."
-                                     % (key, h), instance['id'], 'hash-algo')
+                                     % (key, h), instance['id'], 'hash-length')
 
         try:
             sections = instance['extensions']['windows-pebinary-ext']['sections']
@@ -1102,7 +1102,7 @@ def hash_length(instance):
                                          "Binary File extension with a section that"
                                          " has a hash of '%s', which is "
                                          "longer than 30 characters."
-                                         % (key, h), instance['id'], 'hash-algo')
+                                         % (key, h), instance['id'], 'hash-length')
 
     elif instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
         try:
@@ -1115,7 +1115,7 @@ def hash_length(instance):
                     return JSONError("Object '%s' has a 'hashes' dictionary"
                                      " with a hash of type '%s', which is "
                                      "longer than 30 characters."
-                                     % (key, h), instance['id'], 'hash-algo')
+                                     % (key, h), instance['id'], 'hash-length')
 
 
 def extref_hashes(instance):
@@ -1261,20 +1261,21 @@ CHECKS = {
     'all': [
         custom_object_prefix_strict,
         custom_property_prefix_strict,
+        uuid_check,
         open_vocab_values,
         kill_chain_phase_names,
-        malware_analysis_product,
         observable_object_keys,
         observable_dictionary_keys,
         custom_observable_object_prefix_strict,
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
+        malware_analysis_product,
         windows_process_priority_format,
         hash_length,
-        indicator_property_check,
-        deprecated_property_check,
+        os_execution_envs_check,
         vocab_marking_definition,
         relationships_strict,
+        duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
         vocab_course_of_action_type,
@@ -1306,35 +1307,33 @@ CHECKS = {
         countries,
         network_traffic_ports,
         extref_hashes,
-        duplicate_ids,
-        uuid_check,
-        os_execution_envs_check,
+        indicator_property_check,
+        deprecated_property_check,
     ],
     'format-checks': [
         custom_object_prefix_strict,
         custom_property_prefix_strict,
+        uuid_check,
         open_vocab_values,
         kill_chain_phase_names,
-        malware_analysis_product,
         observable_object_keys,
         observable_dictionary_keys,
         custom_observable_object_prefix_strict,
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
+        malware_analysis_product,
         windows_process_priority_format,
-        os_execution_envs_check,
         hash_length,
-        uuid_check,
+        os_execution_envs_check,
     ],
     'custom-prefix': custom_prefix_strict,
     'custom-prefix-lax': custom_prefix_lax,
-    'deprecated-property-check': deprecated_property_check,
+    'uuid-check': uuid_check,
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
     'observable-object-keys': observable_object_keys,
-    'malware-analysis-product': malware_analysis_product,
-    'indicator-property-check': indicator_property_check,
     'observable-dictionary-keys': observable_dictionary_keys,
+    'malware-analysis-product': malware_analysis_product,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
     "os-execution-envs": os_execution_envs_check,
@@ -1435,13 +1434,14 @@ CHECKS = {
     'mime-type': mime_type,
     'protocols': protocols,
     'ipfix': ipfix,
-    'malware_analysis_product': malware_analysis_product,
     'http-request-headers': http_request_headers,
     'socket-options': socket_options,
     'pdf-doc-info': pdf_doc_info,
     'countries': countries,
     'network-traffic-ports': network_traffic_ports,
     'extref-hashes': extref_hashes,
+    'indicator-properties': indicator_property_check,
+    'deprecated-properties': deprecated_property_check,
 }
 
 
@@ -1478,18 +1478,20 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['custom-prefix-lax'])
                 if 'open-vocab-format' not in options.disabled:
                     validator_list.append(CHECKS['open-vocab-format'])
-                if'malware-analysis-product' not in options.disabled:
-                    validator_list.append(CHECKS['malware-analysis-product'])
                 if 'kill-chain-names' not in options.disabled:
                     validator_list.append(CHECKS['kill-chain-names'])
                 if 'observable-object-keys' not in options.disabled:
                     validator_list.append(CHECKS['observable-object-keys'])
                 if 'observable-dictionary-keys' not in options.disabled:
                     validator_list.append(CHECKS['observable-dictionary-keys'])
+                if 'malware-analysis-product' not in options.disabled:
+                    validator_list.append(CHECKS['malware-analysis-product'])
                 if 'windows-process-priority-format' not in options.disabled:
                     validator_list.append(CHECKS['windows-process-priority-format'])
                 if 'hash-length' not in options.disabled:
                     validator_list.append(CHECKS['hash-length'])
+                if 'os-execution-envs' not in options.disabled:
+                    validator_list.append(CHECKS['os-execution-envs'])
 
             if 'approved-values' not in options.disabled:
                 if 'marking-definition-type' not in options.disabled:
@@ -1547,12 +1549,12 @@ def list_shoulds(options):
 
             if 'network-traffic-ports' not in options.disabled:
                 validator_list.append(CHECKS['network-traffic-ports'])
-            if 'indicator-property-check' not in options.disabled:
-                validator_list.append(CHECKS['indicator-property-check'])
-            if 'deprecated-property-check' not in options.disabled:
-                validator_list.append(CHECKS['deprecated-property-check'])
             if 'extref-hashes' not in options.disabled:
                 validator_list.append(CHECKS['extref-hashes'])
+            if 'indicator-properties' not in options.disabled:
+                validator_list.append(CHECKS['indicator-properties'])
+            if 'deprecated-properties' not in options.disabled:
+                validator_list.append(CHECKS['deprecated-properties'])
 
     # --enable
     if options.enabled:

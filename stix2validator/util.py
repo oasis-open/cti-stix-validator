@@ -36,6 +36,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | the correct format                     |
 | 102  | custom-prefix-lax           | same as 101 but more lenient; no       |
 |      |                             | source identifier needed in prefix     |
+| 103  | uuid-check                  | objects use the recommended versions   |
+|      |                             | of UUID (v4 for SCOs, v5 for the rest) |
 | 111  | open-vocab-format           | values of open vocabularies follow the |
 |      |                             | correct format                         |
 | 121  | kill-chain-names            | kill-chain-phase name and phase follow |
@@ -44,10 +46,14 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | correct format                         |
 | 142  | observable-dictionary-keys  | dictionaries in cyber observable       |
 |      |                             | objects follow the correct format      |
+| 143  | malware-analysis-product    | malware analysis product names follow  |
+|      |                             | the correct format                     |
 | 149  | windows-process-priority-   | windows-process-ext's 'priority'       |
 |      |     format                  | follows the correct format             |
 | 150  | hash-length                 | keys in 'hashes'-type properties are   |
 |      |                             | not too long                           |
+| 151  | os-execution-envs           | os_execution_envs entries are CPE      |
+|      |                             | 2.3 compliant                          |
 |      |                             |                                        |
 |  2   | approved-values             | all 2xx checks are run                 |
 | 201  | marking-definition-type     | marking definitions use a valid        |
@@ -82,24 +88,24 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | tool_types vocabulary                  |
 | 223  | region                      | certain property values are from the   |
 |      |                             | region vocabulary                      |
-| 224  | course-of-action-type       | certain property values are from the   |
-|      |                             | course-of-action-type vocabulary       |
+| 224  | course-of-action-tyoe       | certain property values are from the   |
+|      |                             | course-of-action vocabulary            |
 | 225  | grouping-context            | certain property values are from the   |
 |      |                             | grouping-context vocabulary            |
 | 226  | implementation-languages    | certain property values are from the   |
 |      |                             | implementation-languages vocabulary    |
 | 227  | infrastructure-types        | certain property values are from the   |
-|      |                             | infrastructure-types vocabulary        |
-| 228  | malware-av-result           | certain property values are from the   |
-|      |                             | malware-av-result vocabulary           |
+|      |                             | infrastructure vocabulary              |
 | 228  | malware-capabilities        | certain property values are from the   |
 |      |                             | malware-capabilities vocabulary        |
-| 230  | opinion                     | certain property values are from the   |
+| 229  | opinion                     | certain property values are from the   |
 |      |                             | opinion vocabulary                     |
-| 231  | processor-architecture      | certain property values are from the   |
-|      |                             | processor-architectures vocabulary     |
+| 230  | processor-architecture      | certain property values are from the   |
+|      |                             | processor-architecture vocabulary      |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
+| 242  | encryption-algo             | certain property values are from the   |
+|      |                             | encryption-algo vocabulary             |
 | 243  | windows-pebinary-type       | certain property values are from the   |
 |      |                             | windows-pebinary-type vocabulary       |
 | 244  | account-type                | certain property values are from the   |
@@ -125,6 +131,10 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | src_port and dst_port                  |
 | 302  | extref-hashes               | external references SHOULD have hashes |
 |      |                             | if they have a url                     |
+| 303  | indicator-properties        | Indicator objects have both name and   |
+|      |                             | description properties                 |
+| 304  | deprecated-properties       | certain properties which have been     |
+|      |                             | deprecated are not being used          |
 +------+-----------------------------+----------------------------------------+
 """.format(DEFAULT_VER)
 
