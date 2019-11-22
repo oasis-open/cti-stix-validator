@@ -7,8 +7,9 @@ from itertools import chain
 import os
 import sys
 
-from jsonschema import Draft4Validator, RefResolver
+from jsonschema import Draft7Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
+from jsonschema.validators import extend
 import simplejson as json
 from six import iteritems, string_types, text_type
 
@@ -486,6 +487,38 @@ def validate_string(string, options=None):
     return validate(stream, options)
 
 
+SCHEMA_STORE = {}
+
+
+def ref_store(validator, ref, instance, schema):
+    """When validating '$ref' properties, add to global store.
+    """
+    remote_path = validator.resolver._urljoin_cache(validator.resolver.base_uri, ref)
+
+    if remote_path not in validator.resolver.store:
+        # Add local schema to Resolver store if present, so validator will use local
+        # schemas and only download remote refs in local is not present.
+        local_base_uri = validator.resolver._scopes_stack[0]
+
+        # Take out the the 'file:' prefix
+        if os.name == 'nt':
+            local_base_uri = local_base_uri[8:]
+        else:
+            local_base_uri = local_base_uri[5:]
+
+        try:
+            local_filepath = os.path.abspath(os.path.join(local_base_uri, '../'+ref))
+            local_schema = load_schema(local_filepath)
+            validator.resolver.store[local_schema['$id']] = local_schema
+        except FileNotFoundError:
+            pass
+
+    return Draft7Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
+
+
+STIXValidator = extend(Draft7Validator, {'$ref': ref_store})
+
+
 def load_validator(schema_path, schema):
     """Create a JSON schema validator for the given schema.
 
@@ -494,17 +527,21 @@ def load_validator(schema_path, schema):
         schema: A Python object representation of the same schema.
 
     Returns:
-        An instance of Draft4Validator.
+        An instance of Draft7Validator.
 
     """
+    global SCHEMA_STORE
+
     # Get correct prefix based on OS
     if os.name == 'nt':
         file_prefix = 'file:///'
     else:
         file_prefix = 'file:'
 
-    resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema)
-    validator = Draft4Validator(schema, resolver=resolver)
+    resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema, store=SCHEMA_STORE)
+    # RefResolver creates a new store internally; persist it so we can use the same mappings every time
+    SCHEMA_STORE = resolver.store
+    validator = STIXValidator(schema, resolver=resolver)
 
     return validator
 
