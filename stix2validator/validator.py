@@ -23,6 +23,12 @@ from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
 from .v21 import shoulds as shoulds21
 
+try:
+    FileNotFoundError
+except NameError:
+    # Python 2
+    FileNotFoundError = IOError
+
 
 def _is_iterable_non_string(val):
     return hasattr(val, "__iter__") and not isinstance(val, string_types)
