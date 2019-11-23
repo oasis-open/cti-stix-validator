@@ -13,6 +13,7 @@ import requests_cache
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
 from .v21.enums import CHECK_CODES as CHECK_CODES21
+from .v21.enums import OBSERVABLE_TYPES as OBSERVABLE_TYPES21
 
 DEFAULT_VER = "2.1"
 
@@ -35,6 +36,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | the correct format                     |
 | 102  | custom-prefix-lax           | same as 101 but more lenient; no       |
 |      |                             | source identifier needed in prefix     |
+| 103  | uuid-check                  | objects use the recommended versions   |
+|      |                             | of UUID (v4 for SCOs, v5 for the rest) |
 | 111  | open-vocab-format           | values of open vocabularies follow the |
 |      |                             | correct format                         |
 | 121  | kill-chain-names            | kill-chain-phase name and phase follow |
@@ -43,10 +46,14 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | correct format                         |
 | 142  | observable-dictionary-keys  | dictionaries in cyber observable       |
 |      |                             | objects follow the correct format      |
+| 143  | malware-analysis-product    | malware analysis product names follow  |
+|      |                             | the correct format                     |
 | 149  | windows-process-priority-   | windows-process-ext's 'priority'       |
 |      |     format                  | follows the correct format             |
 | 150  | hash-length                 | keys in 'hashes'-type properties are   |
 |      |                             | not too long                           |
+| 151  | os-execution-envs           | os_execution_envs entries are CPE      |
+|      |                             | 2.3 compliant                          |
 |      |                             |                                        |
 |  2   | approved-values             | all 2xx checks are run                 |
 | 201  | marking-definition-type     | marking definitions use a valid        |
@@ -79,10 +86,26 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | threat_actor_sophistication vocabulary |
 | 222  | tool-types                  | certain property values are from the   |
 |      |                             | tool_types vocabulary                  |
-| 222  | region                      | certain property values are from the   |
+| 223  | region                      | certain property values are from the   |
 |      |                             | region vocabulary                      |
+| 224  | course-of-action-tyoe       | certain property values are from the   |
+|      |                             | course-of-action vocabulary            |
+| 225  | grouping-context            | certain property values are from the   |
+|      |                             | grouping-context vocabulary            |
+| 226  | implementation-languages    | certain property values are from the   |
+|      |                             | implementation-languages vocabulary    |
+| 227  | infrastructure-types        | certain property values are from the   |
+|      |                             | infrastructure vocabulary              |
+| 228  | malware-capabilities        | certain property values are from the   |
+|      |                             | malware-capabilities vocabulary        |
+| 229  | opinion                     | certain property values are from the   |
+|      |                             | opinion vocabulary                     |
+| 230  | processor-architecture      | certain property values are from the   |
+|      |                             | processor-architecture vocabulary      |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
+| 242  | encryption-algo             | certain property values are from the   |
+|      |                             | encryption-algo vocabulary             |
 | 243  | windows-pebinary-type       | certain property values are from the   |
 |      |                             | windows-pebinary-type vocabulary       |
 | 244  | account-type                | certain property values are from the   |
@@ -108,6 +131,10 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | src_port and dst_port                  |
 | 302  | extref-hashes               | external references SHOULD have hashes |
 |      |                             | if they have a url                     |
+| 303  | indicator-properties        | Indicator objects have both name and   |
+|      |                             | description properties                 |
+| 304  | deprecated-properties       | certain properties which have been     |
+|      |                             | deprecated are not being used          |
 +------+-----------------------------+----------------------------------------+
 """.format(DEFAULT_VER)
 
@@ -401,7 +428,7 @@ class ValidationOptions(object):
                             for x in self.enabled]
 
 
-def has_cyber_observable_data(instance):
+def has_cyber_observable_data(instance, version="2.0"):
     """Return True only if the given instance is an observed-data object
     containing STIX Cyber Observable objects.
     """
@@ -409,7 +436,50 @@ def has_cyber_observable_data(instance):
             'objects' in instance and
             type(instance['objects']) is dict):
         return True
+    if version == "2.1" and instance['type'] in OBSERVABLE_TYPES21:
+        return True
     return False
+
+
+def cyber_observable_check(version, requires_objects=False):
+    def inner_cyber_observable_check(original_function):
+        """Decorator for functions that require cyber observable data.
+
+        Args:
+            version (str): the cyber observable data's STIX specification version
+            requires_objects (bool): True if the function requires the 'objects'
+                property, deprecated in 2.1
+        """
+        def new_function(*args, **kwargs):
+            """ Checks to see if instance provided (arg[0]) contains observable
+            data as a top level object or within the observed-data sdo and loops
+            through objects in the latter case to keep checks consistent.
+            """
+            if version == "2.1" and not requires_objects:
+                if not has_cyber_observable_data(args[0], version="2.1"):
+                    return
+                if 'objects' in args[0]:
+                    for obj in args[0]['objects']:
+                        func = original_function(args[0], **kwargs)
+                        if isinstance(func, Iterable):
+                            for x in original_function(args[0], **kwargs):
+                                yield x
+                else:
+                    func = original_function(*args, **kwargs)
+                    if isinstance(func, Iterable):
+                        for x in original_function(args[0], **kwargs):
+                            yield x
+            else:
+                if not has_cyber_observable_data(args[0]):
+                    return
+                func = original_function(*args, **kwargs)
+                if isinstance(func, Iterable):
+                    for x in original_function(*args, **kwargs):
+                        yield x
+
+        new_function.__name__ = original_function.__name__
+        return new_function
+    return inner_cyber_observable_check
 
 
 def check_spec(instance, options):
@@ -434,20 +504,6 @@ def check_spec(instance, options):
             pass
 
     return warnings
-
-
-def cyber_observable_check(original_function):
-    """Decorator for functions that require cyber observable data.
-    """
-    def new_function(*args, **kwargs):
-        if not has_cyber_observable_data(args[0]):
-            return
-        func = original_function(*args, **kwargs)
-        if isinstance(func, Iterable):
-            for x in original_function(*args, **kwargs):
-                yield x
-    new_function.__name__ = original_function.__name__
-    return new_function
 
 
 def init_requests_cache(refresh_cache=False):

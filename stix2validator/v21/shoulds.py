@@ -7,18 +7,18 @@ To add a new check:
     - add the function to list_shoulds()
 - in utils.py:
     - add the check code and name to CHECK_CODES
-- in scripts/stix2_validator:
-    - add the check code and name to table
-- in README.rst:
+- in docs/best-practices:
     - add the check code and name to table
 """
 
 from collections import Iterable
 from itertools import chain
 import re
+import uuid
 
+from cpe import CPE
 from six import string_types
-from stix2patterns.pattern import Pattern
+from stix2patterns.v21.pattern import Pattern
 
 from . import enums
 from ..errors import PatternError
@@ -60,6 +60,7 @@ def custom_object_prefix_strict(instance):
     """
     if (instance['type'] not in enums.TYPES and
             instance['type'] not in enums.RESERVED_OBJECTS and
+            instance['type'] not in enums.OBSERVABLE_TYPES and
             not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
         yield JSONError("Custom object type '%s' should start with 'x-' "
                         "followed by a source unique identifier (like a "
@@ -74,7 +75,8 @@ def custom_object_prefix_lax(instance):
     """
     if (instance['type'] not in enums.TYPES and
             instance['type'] not in enums.RESERVED_OBJECTS and
-            not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])):
+            not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])
+            and instance['type'] not in enums.OBSERVABLE_TYPES):
         yield JSONError("Custom object type '%s' should start with 'x-' in "
                         "order to be compatible with future versions of the "
                         "STIX 2 specification." % instance['type'],
@@ -111,12 +113,69 @@ def custom_property_prefix_lax(instance):
                 prop_name not in enums.PROPERTIES[instance['type']] and
                 prop_name not in enums.RESERVED_PROPERTIES and
                 not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop_name)):
-
             yield JSONError("Custom property '%s' should have a type that "
                             "starts with 'x_' in order to be compatible with "
                             "future versions of the STIX 2 specification." %
                             prop_name, instance['id'],
                             'custom-prefix-lax')
+
+
+def deprecated_property_check(instance):
+    """Check to see if any included properties are deprecated within the spec
+    """
+    if instance['type'] not in enums.DEPRECATED_PROPERTIES:
+        return
+
+    properties = enums.DEPRECATED_PROPERTIES[instance['type']]
+    for property_type in properties:
+        if property_type in instance:
+            yield JSONError("Included property '%s' is deprecated within the indicated"
+                            " spec version." % property_type, instance['id'],
+                            'deprecated-properties')
+
+
+def indicator_property_check(instance):
+    """Check to see if name and decription properties are present
+    """
+    if instance['type'] != "indicator":
+        return
+    if "name" not in instance or "description" not in instance:
+        yield JSONError("Both the name and description properties SHOULD be"
+                        " present.", instance['id'],
+                        'indicator-properties')
+
+
+def uuid_check(instance):
+    """Ensure Domain Objects, Relationship Objects, Meta Objects, and Bundles
+    use UUIDv4 for their IDs, and Cyber Observables use UUIDv5.
+
+    Process objects are an exception; they are recommended to use UUIDv4.
+    """
+    if 'id' not in instance:
+        return
+
+    object_id = uuid.UUID(instance['id'].split("--")[-1])
+    if has_cyber_observable_data(instance, "2.1") and instance['type'] != 'process':
+        if object_id.version != 5:
+            yield JSONError("Cyber Observable ID value %s is not a valid UUIDv5 ID."
+                            % instance['id'], instance['id'], 'uuid-check')
+    elif object_id.version != 4:
+        yield JSONError("Given ID value %s is not a valid UUIDv4 ID."
+                        % instance['id'], instance['id'], 'uuid-check')
+
+
+def os_execution_envs_check(instance):
+    """Checks to see if provided os execution env is a valid CPE v2.3 entry
+    """
+    if 'os_execution_envs' not in instance:
+        return
+    for os_env in instance['os_execution_envs']:
+        try:
+            CPE(os_env, CPE.VERSION_2_3)
+        except NotImplementedError:
+            yield JSONError("Provided os execution environment %s is not"
+                            " CPE v2.3 compliant." % os_env, instance['id'],
+                            'os-execution-envs')
 
 
 def open_vocab_values(instance):
@@ -130,9 +189,10 @@ def open_vocab_values(instance):
     properties = enums.VOCAB_PROPERTIES[instance['type']]
     for prop in properties:
         if prop in instance:
-
             if type(instance[prop]) is list:
                 values = instance[prop]
+            elif type(instance[prop]) is dict:
+                return
             else:
                 values = [instance[prop]]
 
@@ -208,14 +268,39 @@ def vocab_attack_resource_level(instance):
                        'attack-resource-level')
 
 
+def vocab_course_of_action_type(instance):
+    return check_vocab(instance, "COURSE_OF_ACTION_TYPE",
+                       'course-of-action-type')
+
+
+def vocab_encryption_algo(instance):
+    return check_vocab(instance, "ENCRYPTION_ALGO",
+                       'encryption-algo')
+
+
+def vocab_grouping_context(instance):
+    return check_vocab(instance, "GROUPING_CONTEXT",
+                       'grouping-context')
+
+
 def vocab_identity_class(instance):
     return check_vocab(instance, "IDENTITY_CLASS",
                        'identity-class')
 
 
+def vocab_implementation_languages(instance):
+    return check_vocab(instance, "IMPLEMENTATION_LANGUAGES",
+                       'implementation-languages')
+
+
 def vocab_indicator_types(instance):
     return check_vocab(instance, "INDICATOR_TYPE",
                        'indicator-types')
+
+
+def vocab_infrastructure_types(instance):
+    return check_vocab(instance, "INFRASTRUCTURE_TYPE",
+                       'infrastructure-types')
 
 
 def vocab_industry_sector(instance):
@@ -226,6 +311,21 @@ def vocab_industry_sector(instance):
 def vocab_malware_types(instance):
     return check_vocab(instance, "MALWARE_TYPE",
                        'malware-types')
+
+
+def vocab_malware_capabilities(instance):
+    return check_vocab(instance, "MALWARE_CAPABILITIES",
+                       'malware-capabilities')
+
+
+def vocab_opinion(instance):
+    return check_vocab(instance, "OPINION",
+                       'opinion')
+
+
+def vocab_processor_architecture(instance):
+    return check_vocab(instance, "PROCESSOR_ARCHITECTURE",
+                       'processor-architecture')
 
 
 def vocab_report_types(instance):
@@ -329,154 +429,155 @@ def valid_hash_value(hashname):
         return False
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def vocab_hash_algo(instance):
     """Ensure objects with 'hashes' properties only use values from the
-    hash-algo-ov vocabulary.
+    hash-algorithm-ov vocabulary.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' not in obj:
-            continue
+    key = instance['id']
+    if 'type' not in instance:
+        return
 
-        if obj['type'] == 'file':
-            try:
-                hashes = obj['hashes']
-            except KeyError:
-                pass
-            else:
-                for h in hashes:
+    if instance['type'] == 'file':
+        try:
+            hashes = instance['hashes']
+        except KeyError:
+            pass
+        else:
+            for h in hashes:
+                if not (valid_hash_value(h)):
+                    yield JSONError("Object '%s' has a 'hashes' dictionary"
+                                    " with a hash of type '%s', which is not a "
+                                    "value in the hash-algorithm-ov vocabulary nor a "
+                                    "custom value prepended with 'x_'."
+                                    % (key, h), instance['id'], 'hash-algo')
+
+        try:
+            ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
+        except KeyError:
+            pass
+        else:
+            for datastream in ads:
+                if 'hashes' not in datastream:
+                    continue
+                for h in datastream['hashes']:
                     if not (valid_hash_value(h)):
-                        yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                        " with a hash of type '%s', which is not a "
-                                        "value in the hash-algo-ov vocabulary nor a "
-                                        "custom value prepended with 'x_'."
-                                        % (key, h), instance['id'], 'hash-algo')
-
-            try:
-                ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
-            except KeyError:
-                pass
-            else:
-                for datastream in ads:
-                    if 'hashes' not in datastream:
-                        continue
-                    for h in datastream['hashes']:
-                        if not (valid_hash_value(h)):
-                            yield JSONError("Object '%s' has an NTFS extension"
-                                            " with an alternate data stream that has a"
-                                            " 'hashes' dictionary with a hash of type "
-                                            "'%s', which is not a value in the "
-                                            "hash-algo-ov vocabulary nor a custom "
-                                            "value prepended with 'x_'."
-                                            % (key, h), instance['id'], 'hash-algo')
-
-            try:
-                head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
-            except KeyError:
-                pass
-            else:
-                for h in head_hashes:
-                    if not (valid_hash_value(h)):
-                        yield JSONError("Object '%s' has a Windows PE Binary "
-                                        "File extension with a file header hash of "
+                        yield JSONError("Object '%s' has an NTFS extension"
+                                        " with an alternate data stream that has a"
+                                        " 'hashes' dictionary with a hash of type "
                                         "'%s', which is not a value in the "
-                                        "hash-algo-ov vocabulary nor a custom value "
-                                        "prepended with 'x_'."
-                                        % (key, h), instance['id'], 'hash-algo')
-
-            try:
-                hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-            except KeyError:
-                pass
-            else:
-                for h in hashes:
-                    if not (valid_hash_value(h)):
-                        yield JSONError("Object '%s' has a Windows PE Binary "
-                                        "File extension with an optional header that "
-                                        "has a hash of '%s', which is not a value in "
-                                        "the hash-algo-ov vocabulary nor a custom "
+                                        "hash-algorithm-ov vocabulary nor a custom "
                                         "value prepended with 'x_'."
                                         % (key, h), instance['id'], 'hash-algo')
 
-            try:
-                sections = obj['extensions']['windows-pebinary-ext']['sections']
-            except KeyError:
-                pass
-            else:
-                for s in sections:
-                    if 'hashes' not in s:
-                        continue
-                    for h in s['hashes']:
-                        if not (valid_hash_value(h)):
-                            yield JSONError("Object '%s' has a Windows PE "
-                                            "Binary File extension with a section that"
-                                            " has a hash of '%s', which is not a value"
-                                            " in the hash-algo-ov vocabulary nor a "
-                                            "custom value prepended with 'x_'."
-                                            % (key, h), instance['id'], 'hash-algo')
+        try:
+            head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
+        except KeyError:
+            pass
+        else:
+            for h in head_hashes:
+                if not (valid_hash_value(h)):
+                    yield JSONError("Object '%s' has a Windows PE Binary "
+                                    "File extension with a file header hash of "
+                                    "'%s', which is not a value in the "
+                                    "hash-algorithm-ov vocabulary nor a custom value "
+                                    "prepended with 'x_'."
+                                    % (key, h), instance['id'], 'hash-algo')
 
-        elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
-            try:
-                hashes = obj['hashes']
-            except KeyError:
-                pass
-            else:
-                for h in hashes:
+        try:
+            hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
+        except KeyError:
+            pass
+        else:
+            for h in hashes:
+                if not (valid_hash_value(h)):
+                    yield JSONError("Object '%s' has a Windows PE Binary "
+                                    "File extension with an optional header that "
+                                    "has a hash of '%s', which is not a value in "
+                                    "the hash-algorithm-ov vocabulary nor a custom "
+                                    "value prepended with 'x_'."
+                                    % (key, h), instance['id'], 'hash-algo')
+
+        try:
+            sections = instance['extensions']['windows-pebinary-ext']['sections']
+        except KeyError:
+            pass
+        else:
+            for s in sections:
+                if 'hashes' not in s:
+                    continue
+                for h in s['hashes']:
                     if not (valid_hash_value(h)):
-                        yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                        " with a hash of type '%s', which is not a "
-                                        "value in the hash-algo-ov vocabulary nor a "
+                        yield JSONError("Object '%s' has a Windows PE "
+                                        "Binary File extension with a section that"
+                                        " has a hash of '%s', which is not a value"
+                                        " in the hash-algorithm-ov vocabulary nor a "
                                         "custom value prepended with 'x_'."
                                         % (key, h), instance['id'], 'hash-algo')
 
+    elif instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
+        try:
+            hashes = instance['hashes']
+        except KeyError:
+            pass
+        else:
+            for h in hashes:
+                if not (valid_hash_value(h)):
+                    yield JSONError("Object '%s' has a 'hashes' dictionary"
+                                    " with a hash of type '%s', which is not a "
+                                    "value in the hash-algorithm-ov vocabulary nor a "
+                                    "custom value prepended with 'x_'."
+                                    % (key, h), instance['id'], 'hash-algo')
 
-@cyber_observable_check
+
+@cyber_observable_check("2.1")
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a
     'pe-type' property that is from the windows-pebinary-type-ov vocabulary.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' in obj and obj['type'] == 'file':
-            try:
-                pe_type = obj['extensions']['windows-pebinary-ext']['pe_type']
-            except KeyError:
-                continue
-            if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
-                yield JSONError("Object '%s' has a Windows PE Binary File "
-                                "extension with a 'pe_type' of '%s', which is not a "
-                                "value in the windows-pebinary-type-ov vocabulary."
-                                % (key, pe_type), instance['id'],
-                                'windows-pebinary-type')
+    key = instance['id']
+    if 'type' in instance and instance['type'] == 'file':
+        try:
+            pe_type = instance['extensions']['windows-pebinary-ext']['pe_type']
+        except KeyError:
+            return
+        if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
+            yield JSONError("Object '%s' has a Windows PE Binary File "
+                            "extension with a 'pe_type' of '%s', which is not a "
+                            "value in the windows-pebinary-type-ov vocabulary."
+                            % (key, pe_type), instance['id'],
+                            'windows-pebinary-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def vocab_account_type(instance):
     """Ensure a user-account objects' 'account-type' property is from the
     account-type-ov vocabulary.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' in obj and obj['type'] == 'user-account':
-            try:
-                acct_type = obj['account_type']
-            except KeyError:
-                continue
-            if acct_type not in enums.ACCOUNT_TYPE_OV:
-                yield JSONError("Object '%s' is a User Account Object "
-                                "with an 'account_type' of '%s', which is not a "
-                                "value in the account-type-ov vocabulary."
-                                % (key, acct_type), instance['id'], 'account-type')
+    key = instance['id']
+    if 'type' in instance and instance['type'] == 'user-account':
+        try:
+            acct_type = instance['account_type']
+        except KeyError:
+            return
+        if acct_type not in enums.ACCOUNT_TYPE_OV:
+            yield JSONError("Object '%s' is a User Account Object "
+                            "with an 'account_type' of '%s', which is not a "
+                            "value in the account-type-ov vocabulary."
+                            % (key, acct_type), instance['id'], 'account-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1", True)
 def observable_object_keys(instance):
     """Ensure observable-objects keys are non-negative integers.
     """
     digits_re = re.compile(r"^\d+$")
-    for key in instance['objects']:
-        if not digits_re.match(key):
-            yield JSONError("'%s' is not a good key value. Observable Objects "
-                            "should use non-negative integers for their keys."
-                            % key, instance['id'], 'observable-object-keys')
+    if instance['type'] == 'observed-data':
+        for key in instance['objects']:
+            if not digits_re.match(key):
+                yield JSONError("'%s' is not a good key value. Observable Objects "
+                                "should use non-negative integers for their keys."
+                                % key, instance['id'], 'observable-object-keys')
 
 
 def test_dict_keys(item, inst_id):
@@ -494,341 +595,331 @@ def test_dict_keys(item, inst_id):
                 yield error
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def observable_dictionary_keys(instance):
     """Ensure dictionaries in the cyber observable layer have lowercase keys
     no longer than 30 characters.
     """
-    for error in test_dict_keys(instance['objects'], instance['id']):
+    for error in test_dict_keys(instance, instance['id']):
         yield error
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_object_prefix_strict(instance):
     """Ensure custom observable objects follow strict naming style conventions.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
-                obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
-                not CUSTOM_TYPE_PREFIX_RE.match(obj['type'])):
-            yield JSONError("Custom Observable Object type '%s' should start "
-                            "with 'x-' followed by a source unique identifier "
-                            "(like a domain name with dots replaced by "
-                            "hyphens), a hyphen and then the name."
-                            % obj['type'], instance['id'],
-                            'custom-prefix')
+    if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
+            instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+            not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom Observable Object type '%s' should start "
+                        "with 'x-' followed by a source unique identifier "
+                        "(like a domain name with dots replaced by "
+                        "hyphens), a hyphen and then the name."
+                        % instance['type'], instance['id'],
+                        'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_object_prefix_lax(instance):
     """Ensure custom observable objects follow naming style conventions.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES and
-                obj['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
-                not CUSTOM_TYPE_LAX_PREFIX_RE.match(obj['type'])):
-            yield JSONError("Custom Observable Object type '%s' should start "
-                            "with 'x-'."
-                            % obj['type'], instance['id'],
-                            'custom-prefix-lax')
+    if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
+            instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+            not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom Observable Object type '%s' should start "
+                        "with 'x-'."
+                        % instance['type'], instance['id'],
+                        'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_object_extension_prefix_strict(instance):
     """Ensure custom observable object extensions follow strict naming style
     conventions.
     """
-    for key, obj in instance['objects'].items():
-        if not ('extensions' in obj and 'type' in obj and
-                obj['type'] in enums.OBSERVABLE_EXTENSIONS):
-            continue
-        for ext_key in obj['extensions']:
-            if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
-                    not CUSTOM_TYPE_PREFIX_RE.match(ext_key)):
-                yield JSONError("Custom Cyber Observable Object extension type"
-                                " '%s' should start with 'x-' followed by a source "
-                                "unique identifier (like a domain name with dots "
-                                "replaced by hyphens), a hyphen and then the name."
-                                % ext_key, instance['id'],
-                                'custom-prefix')
+    if not ('extensions' in instance and 'type' in instance and
+            instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
+                not CUSTOM_TYPE_PREFIX_RE.match(ext_key)):
+            yield JSONError("Custom Cyber Observable Object extension type"
+                            " '%s' should start with 'x-' followed by a source "
+                            "unique identifier (like a domain name with dots "
+                            "replaced by hyphens), a hyphen and then the name."
+                            % ext_key, instance['id'],
+                            'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_object_extension_prefix_lax(instance):
     """Ensure custom observable object extensions follow naming style
     conventions.
     """
-    for key, obj in instance['objects'].items():
-        if not ('extensions' in obj and 'type' in obj and
-                obj['type'] in enums.OBSERVABLE_EXTENSIONS):
-            continue
-        for ext_key in obj['extensions']:
-            if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
-                    not CUSTOM_TYPE_LAX_PREFIX_RE.match(ext_key)):
-                yield JSONError("Custom Cyber Observable Object extension type"
-                                " '%s' should start with 'x-'."
-                                % ext_key, instance['id'],
-                                'custom-prefix-lax')
+    if not ('extensions' in instance and 'type' in instance and
+            instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
+                not CUSTOM_TYPE_LAX_PREFIX_RE.match(ext_key)):
+            yield JSONError("Custom Cyber Observable Object extension type"
+                            " '%s' should start with 'x-'."
+                            % ext_key, instance['id'],
+                            'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_properties_prefix_strict(instance):
     """Ensure observable object custom properties follow strict naming style
     conventions.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' not in obj:
-            continue
-        type_ = obj['type']
+    if 'type' not in instance:
+        return
+    type_ = instance['type']
 
-        for prop in obj:
-            # Check objects' properties
-            if (type_ in enums.OBSERVABLE_PROPERTIES and
-                prop not in enums.OBSERVABLE_PROPERTIES[type_] and
-                    not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
-                yield JSONError("Cyber Observable Object custom property '%s' "
-                                "should start with 'x_' followed by a source "
-                                "unique identifier (like a domain name with "
-                                "dots replaced by hyphens), a hyphen and then the"
-                                " name."
-                                % prop, instance['id'],
-                                'custom-prefix')
-            # Check properties of embedded cyber observable types
-            if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
-                    prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
-                for embed_prop in obj[prop]:
-                    if isinstance(embed_prop, dict):
-                        for embedded in embed_prop:
-                            if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
-                                    not CUSTOM_PROPERTY_PREFIX_RE.match(embedded)):
-                                yield JSONError("Cyber Observable Object custom "
-                                                "property '%s' in the %s property of "
-                                                "%s object should start with 'x_' "
-                                                "followed by a source unique "
-                                                "identifier (like a domain name with "
-                                                "dots replaced by hyphens), a hyphen and "
-                                                "then the name."
-                                                % (embedded, prop, type_), instance['id'],
-                                                'custom-prefix')
-                    elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
-                            not CUSTOM_PROPERTY_PREFIX_RE.match(embed_prop)):
+    for prop in instance:
+        # Check objects' properties
+        if (type_ in enums.OBSERVABLE_PROPERTIES and
+            prop not in enums.OBSERVABLE_PROPERTIES[type_] and
+                not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
+            yield JSONError("Cyber Observable Object custom property '%s' "
+                            "should start with 'x_' followed by a source "
+                            "unique identifier (like a domain name with "
+                            "dots replaced by hyphens), a hyphen and then the"
+                            " name."
+                            % prop, instance['id'],
+                            'custom-prefix')
+        # Check properties of embedded cyber observable types
+        if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
+            for embed_prop in instance[prop]:
+                if isinstance(embed_prop, dict):
+                    for embedded in embed_prop:
+                        if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                                not CUSTOM_PROPERTY_PREFIX_RE.match(embedded)):
+                            yield JSONError("Cyber Observable Object custom "
+                                            "property '%s' in the %s property of "
+                                            "%s object should start with 'x_' "
+                                            "followed by a source unique "
+                                            "identifier (like a domain name with "
+                                            "dots replaced by hyphens), a hyphen and "
+                                            "then the name."
+                                            % (embedded, prop, type_), instance['id'],
+                                            'custom-prefix')
+                elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                        not CUSTOM_PROPERTY_PREFIX_RE.match(embed_prop)):
+                    yield JSONError("Cyber Observable Object custom "
+                                    "property '%s' in the %s property of "
+                                    "%s object should start with 'x_' "
+                                    "followed by a source unique "
+                                    "identifier (like a domain name with "
+                                    "dots replaced by hyphens), a hyphen and "
+                                    "then the name."
+                                    % (embed_prop, prop, type_), instance['id'],
+                                    'custom-prefix')
+
+    # Check object extensions' properties
+    if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance):
+        for ext_key in instance['extensions']:
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
+                            not CUSTOM_PROPERTY_PREFIX_RE.match(ext_prop)):
                         yield JSONError("Cyber Observable Object custom "
-                                        "property '%s' in the %s property of "
-                                        "%s object should start with 'x_' "
-                                        "followed by a source unique "
-                                        "identifier (like a domain name with "
-                                        "dots replaced by hyphens), a hyphen and "
-                                        "then the name."
-                                        % (embed_prop, prop, type_), instance['id'],
+                                        "property '%s' in the %s extension "
+                                        "should start with 'x_' followed by a "
+                                        "source unique identifier (like a "
+                                        "domain name with dots replaced by "
+                                        "hyphens), a hyphen and then the name."
+                                        % (ext_prop, ext_key), instance['id'],
                                         'custom-prefix')
 
-        # Check object extensions' properties
-        if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
-            for ext_key in obj['extensions']:
-
-                if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
-                    for ext_prop in obj['extensions'][ext_key]:
-                        if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
-                                not CUSTOM_PROPERTY_PREFIX_RE.match(ext_prop)):
-                            yield JSONError("Cyber Observable Object custom "
-                                            "property '%s' in the %s extension "
-                                            "should start with 'x_' followed by a "
-                                            "source unique identifier (like a "
-                                            "domain name with dots replaced by "
-                                            "hyphens), a hyphen and then the name."
-                                            % (ext_prop, ext_key), instance['id'],
-                                            'custom-prefix')
-
-                if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
-                    for ext_prop in obj['extensions'][ext_key]:
-                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
-                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
-                            for embed_prop in obj['extensions'][ext_key][ext_prop]:
-                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
-                                    embed_prop = [embed_prop]
-                                for p in embed_prop:
-                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
-                                            not CUSTOM_PROPERTY_PREFIX_RE.match(p)):
-                                        yield JSONError("Cyber Observable Object "
-                                                        "custom property '%s' in the %s "
-                                                        "property of the %s extension should "
-                                                        "start with 'x_' followed by a source "
-                                                        "unique identifier (like a domain name"
-                                                        " with dots replaced by hyphens), a "
-                                                        "hyphen and then the name."
-                                                        % (p, ext_prop, ext_key), instance['id'],
-                                                        'custom-prefix')
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                            ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
+                        for embed_prop in instance['extensions'][ext_key][ext_prop]:
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                                embed_prop = [embed_prop]
+                            for p in embed_prop:
+                                if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
+                                        not CUSTOM_PROPERTY_PREFIX_RE.match(p)):
+                                    yield JSONError("Cyber Observable Object "
+                                                    "custom property '%s' in the %s "
+                                                    "property of the %s extension should "
+                                                    "start with 'x_' followed by a source "
+                                                    "unique identifier (like a domain name"
+                                                    " with dots replaced by hyphens), a "
+                                                    "hyphen and then the name."
+                                                    % (p, ext_prop, ext_key), instance['id'],
+                                                    'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def custom_observable_properties_prefix_lax(instance):
     """Ensure observable object custom properties follow naming style
     conventions.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' not in obj:
-            continue
-        type_ = obj['type']
+    if 'type' not in instance:
+        return
+    type_ = instance['type']
 
-        for prop in obj:
-            # Check objects' properties
-            if (type_ in enums.OBSERVABLE_PROPERTIES and
-                prop not in enums.OBSERVABLE_PROPERTIES[type_] and
-                    not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop)):
-                yield JSONError("Cyber Observable Object custom property '%s' "
-                                "should start with 'x_'."
-                                % prop, instance['id'],
-                                'custom-prefix-lax')
-            # Check properties of embedded cyber observable types
-            if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
-                    prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
-                for embed_prop in obj[prop]:
-                    if isinstance(embed_prop, dict):
-                        for embedded in embed_prop:
-                            if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
-                                    not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embedded)):
-                                yield JSONError("Cyber Observable Object custom "
-                                                "property '%s' in the %s property of "
-                                                "%s object should start with 'x_'."
-                                                % (embedded, prop, type_), instance['id'],
-                                                'custom-prefix-lax')
-                    elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
-                            not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embed_prop)):
+    for prop in instance:
+        # Check objects' properties
+        if (type_ in enums.OBSERVABLE_PROPERTIES and
+            prop not in enums.OBSERVABLE_PROPERTIES[type_] and
+                not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop)):
+            yield JSONError("Cyber Observable Object custom property '%s' "
+                            "should start with 'x_'."
+                            % prop, instance['id'],
+                            'custom-prefix-lax')
+        # Check properties of embedded cyber observable types
+        if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
+            for embed_prop in instance[prop]:
+                if isinstance(embed_prop, dict):
+                    for embedded in embed_prop:
+                        if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                                not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embedded)):
+                            yield JSONError("Cyber Observable Object custom "
+                                            "property '%s' in the %s property of "
+                                            "%s object should start with 'x_'."
+                                            % (embedded, prop, type_), instance['id'],
+                                            'custom-prefix-lax')
+                elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                        not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embed_prop)):
+                    yield JSONError("Cyber Observable Object custom "
+                                    "property '%s' in the %s property of "
+                                    "%s object should start with 'x_'."
+                                    % (embed_prop, prop, type_), instance['id'],
+                                    'custom-prefix-lax')
+
+    # Check object extensions' properties
+    if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance):
+        for ext_key in instance['extensions']:
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
+                            not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(ext_prop)):
                         yield JSONError("Cyber Observable Object custom "
-                                        "property '%s' in the %s property of "
-                                        "%s object should start with 'x_'."
-                                        % (embed_prop, prop, type_), instance['id'],
+                                        "property '%s' in the %s extension "
+                                        "should start with 'x_'."
+                                        % (ext_prop, ext_key), instance['id'],
                                         'custom-prefix-lax')
 
-        # Check object extensions' properties
-        if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
-            for ext_key in obj['extensions']:
-
-                if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
-                    for ext_prop in obj['extensions'][ext_key]:
-                        if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
-                                not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(ext_prop)):
-                            yield JSONError("Cyber Observable Object custom "
-                                            "property '%s' in the %s extension "
-                                            "should start with 'x_'."
-                                            % (ext_prop, ext_key), instance['id'],
-                                            'custom-prefix-lax')
-
-                if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
-                    for ext_prop in obj['extensions'][ext_key]:
-                        if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
-                                ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
-                            for embed_prop in obj['extensions'][ext_key][ext_prop]:
-                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
-                                    embed_prop = [embed_prop]
-                                for p in embed_prop:
-                                    if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
-                                            not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(p)):
-                                        yield JSONError("Cyber Observable Object "
-                                                        "custom property '%s' in the %s "
-                                                        "property of the %s extension should "
-                                                        "start with 'x_'."
-                                                        % (p, ext_prop, ext_key), instance['id'],
-                                                        'custom-prefix-lax')
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                            ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
+                        for embed_prop in instance['extensions'][ext_key][ext_prop]:
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                                embed_prop = [embed_prop]
+                            for p in embed_prop:
+                                if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
+                                        not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(p)):
+                                    yield JSONError("Cyber Observable Object "
+                                                    "custom property '%s' in the %s "
+                                                    "property of the %s extension should "
+                                                    "start with 'x_'."
+                                                    % (p, ext_prop, ext_key), instance['id'],
+                                                    'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def network_traffic_ports(instance):
     """Ensure network-traffic objects contain both src_port and dst_port.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic' and
-                ('src_port' not in obj or 'dst_port' not in obj)):
-            yield JSONError("The Network Traffic object '%s' should contain "
-                            "both the 'src_port' and 'dst_port' properties."
-                            % key, instance['id'], 'network-traffic-ports')
+    if ('type' in instance and instance['type'] == 'network-traffic' and
+            ('src_port' not in instance or 'dst_port' not in instance)):
+        yield JSONError("The Network Traffic object '%s' should contain "
+                        "both the 'src_port' and 'dst_port' properties."
+                        % instance['id'], instance['id'], 'network-traffic-ports')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def mime_type(instance):
     """Ensure the 'mime_type' property of file objects comes from the Template
     column in the IANA media type registry.
     """
     mime_pattern = re.compile(r'^(application|audio|font|image|message|model'
                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'file' and 'mime_type' in obj):
-            if enums.media_types():
-                if obj['mime_type'] not in enums.media_types():
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA registered MIME "
-                                    "Type of the form 'type/subtype'."
-                                    % (key, obj['mime_type']), instance['id'],
-                                    'mime-type')
-            else:
-                info("Can't reach IANA website; using regex for mime types.")
-                if not mime_pattern.match(obj['mime_type']):
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA MIME Type of the"
-                                    " form 'type/subtype'."
-                                    % (key, obj['mime_type']), instance['id'],
-                                    'mime-type')
+    if ('type' in instance and instance['type'] == 'file' and 'mime_type' in instance):
+        if enums.media_types():
+            if instance['mime_type'] not in enums.media_types():
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') should be an IANA registered MIME "
+                                "Type of the form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'],
+                                'mime-type')
+        else:
+            info("Can't reach IANA website; using regex for mime types.")
+            if not mime_pattern.match(instance['mime_type']):
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') should be an IANA MIME Type of the"
+                                " form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'],
+                                'mime-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def protocols(instance):
     """Ensure the 'protocols' property of network-traffic objects contains only
     values from the IANA Service Name and Transport Protocol Port Number
     Registry.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic' and
-                'protocols' in obj):
-            for prot in obj['protocols']:
-                if enums.protocols():
-                    if prot not in enums.protocols():
-                        yield JSONError("The 'protocols' property of object "
-                                        "'%s' contains a value ('%s') not in "
-                                        "IANA Service Name and Transport "
-                                        "Protocol Port Number Registry."
-                                        % (key, prot), instance['id'],
-                                        'protocols')
-                else:
-                    info("Can't reach IANA website; using regex for protocols.")
-                    if not PROTOCOL_RE.match(prot):
-                        yield JSONError("The 'protocols' property of object "
-                                        "'%s' contains a value ('%s') not in "
-                                        "IANA Service Name and Transport "
-                                        "Protocol Port Number Registry."
-                                        % (key, prot), instance['id'],
-                                        'protocols')
+    if ('type' in instance and instance['type'] == 'network-traffic' and
+            'protocols' in instance):
+        for prot in instance['protocols']:
+            if enums.protocols():
+                if prot not in enums.protocols():
+                    yield JSONError("The 'protocols' property of object "
+                                    "'%s' contains a value ('%s') not in "
+                                    "IANA Service Name and Transport "
+                                    "Protocol Port Number Registry."
+                                    % (instance['id'], prot), instance['id'],
+                                    'protocols')
+            else:
+                info("Can't reach IANA website; using regex for protocols.")
+                if not PROTOCOL_RE.match(prot):
+                    yield JSONError("The 'protocols' property of object "
+                                    "'%s' contains a value ('%s') not in "
+                                    "IANA Service Name and Transport "
+                                    "Protocol Port Number Registry."
+                                    % (instance['id'], prot), instance['id'],
+                                    'protocols')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def ipfix(instance):
     """Ensure the 'ipfix' property of network-traffic objects contains only
     values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
     """
     ipf_pattern = re.compile(r'^[a-z][a-zA-Z0-9]+')
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic' and
-                'ipfix' in obj):
-            for ipf in obj['ipfix']:
-                if enums.ipfix():
-                    if ipf not in enums.ipfix():
-                        yield JSONError("The 'ipfix' property of object "
-                                        "'%s' contains a key ('%s') not in "
-                                        "IANA IP Flow Information Export "
-                                        "(IPFIX) Entities Registry."
-                                        % (key, ipf), instance['id'],
-                                        'ipfix')
-                else:
-                    info("Can't reach IANA website; using regex for ipfix.")
-                    if not ipf_pattern.match(ipf):
-                        yield JSONError("The 'ipfix' property of object "
-                                        "'%s' contains a key ('%s') not in "
-                                        "IANA IP Flow Information Export "
-                                        "(IPFIX) Entities Registry."
-                                        % (key, ipf), instance['id'],
-                                        'ipfix')
+    if ('type' in instance and instance['type'] == 'network-traffic' and
+            'ipfix' in instance):
+        for ipf in instance['ipfix']:
+            if enums.ipfix():
+                if ipf not in enums.ipfix():
+                    yield JSONError("The 'ipfix' property of object "
+                                    "'%s' contains a key ('%s') not in "
+                                    "IANA IP Flow Information Export "
+                                    "(IPFIX) Entities Registry."
+                                    % (instance['id'], ipf), instance['id'],
+                                    'ipfix')
+            else:
+                info("Can't reach IANA website; using regex for ipfix.")
+                if not ipf_pattern.match(ipf):
+                    yield JSONError("The 'ipfix' property of object "
+                                    "'%s' contains a key ('%s') not in "
+                                    "IANA IP Flow Information Export "
+                                    "(IPFIX) Entities Registry."
+                                    % (instance['id'], ipf), instance['id'],
+                                    'ipfix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def http_request_headers(instance):
     """Ensure the keys of the 'request_headers' property of the http-request-
     ext extension of network-traffic objects conform to the format for HTTP
@@ -837,63 +928,60 @@ def http_request_headers(instance):
     not differentiate between request and response headers, and leaves out
     several common non-standard request fields listed elsewhere.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic'):
-            try:
-                headers = obj['extensions']['http-request-ext']['request_header']
-            except KeyError:
-                continue
+    if ('type' in instance and instance['type'] == 'network-traffic'):
+        try:
+            headers = instance['extensions']['http-request-ext']['request_header']
+        except KeyError:
+            return
 
-            for hdr in headers:
-                if hdr not in enums.HTTP_REQUEST_HEADERS:
-                    yield JSONError("The 'request_header' property of object "
-                                    "'%s' contains an invalid HTTP request "
-                                    "header ('%s')."
-                                    % (key, hdr), instance['id'],
-                                    'http-request-headers')
+        for hdr in headers:
+            if hdr not in enums.HTTP_REQUEST_HEADERS:
+                yield JSONError("The 'request_header' property of object "
+                                "'%s' contains an invalid HTTP request "
+                                "header ('%s')."
+                                % (instance['id'], hdr), instance['id'],
+                                'http-request-headers')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def socket_options(instance):
     """Ensure the keys of the 'options' property of the socket-ext extension of
     network-traffic objects are only valid socket options (SO_*).
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic'):
-            try:
-                options = obj['extensions']['socket-ext']['options']
-            except KeyError:
-                continue
+    if ('type' in instance and instance['type'] == 'network-traffic'):
+        try:
+            options = instance['extensions']['socket-ext']['options']
+        except KeyError:
+            return
 
-            for opt in options:
-                if opt not in enums.SOCKET_OPTIONS:
-                    yield JSONError("The 'options' property of object '%s' "
-                                    "contains a key ('%s') that is not a valid"
-                                    " socket option (SO_*)."
-                                    % (key, opt), instance['id'], 'socket-options')
+        for opt in options:
+            if opt not in enums.SOCKET_OPTIONS:
+                yield JSONError("The 'options' property of object '%s' "
+                                "contains a key ('%s') that is not a valid"
+                                " socket option (SO_*)."
+                                % (instance['id'], opt), instance['id'], 'socket-options')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def pdf_doc_info(instance):
     """Ensure the keys of the 'document_info_dict' property of the pdf-ext
     extension of file objects are only valid PDF Document Information
     Dictionary Keys.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'file'):
-            try:
-                did = obj['extensions']['pdf-ext']['document_info_dict']
-            except KeyError:
-                continue
+    if ('type' in instance and instance['type'] == 'file'):
+        try:
+            did = instance['extensions']['pdf-ext']['document_info_dict']
+        except KeyError:
+            return
 
-            for elem in did:
-                if elem not in enums.PDF_DID:
-                    yield JSONError("The 'document_info_dict' property of "
-                                    "object '%s' contains a key ('%s') that is"
-                                    " not a valid PDF Document Information "
-                                    "Dictionary key."
-                                    % (key, elem), instance['id'],
-                                    'pdf-doc-info')
+        for elem in did:
+            if elem not in enums.PDF_DID:
+                yield JSONError("The 'document_info_dict' property of "
+                                "object '%s' contains a key ('%s') that is"
+                                " not a valid PDF Document Information "
+                                "Dictionary key."
+                                % (instance['id'], elem), instance['id'],
+                                'pdf-doc-info')
 
 
 def countries(instance):
@@ -908,115 +996,126 @@ def countries(instance):
                          instance['id'], 'marking-definition-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
     """
     class_suffix_re = re.compile(r'.+_CLASS$')
-    for key, obj in instance['objects'].items():
-        if 'type' in obj and obj['type'] == 'process':
-            try:
-                priority = obj['extensions']['windows-process-ext']['priority']
-            except KeyError:
-                continue
-            if not class_suffix_re.match(priority):
-                yield JSONError("The 'priority' property of object '%s' should"
-                                " end in '_CLASS'." % key, instance['id'],
-                                'windows-process-priority-format')
+    if 'type' in instance and instance['type'] == 'process':
+        try:
+            priority = instance['extensions']['windows-process-ext']['priority']
+        except KeyError:
+            return
+        if not class_suffix_re.match(priority):
+            yield JSONError("The 'priority' property of object '%s' should"
+                            " end in '_CLASS'." % instance['id'], instance['id'],
+                            'windows-process-priority-format')
 
 
-@cyber_observable_check
+def malware_analysis_product(instance):
+    """Ensure product name is all lowercase with words seperated by a dash
+    """
+    name_re = re.compile(r'^[a-z0-9-]+$')
+    if 'product' in instance and instance['type'] == 'malware-analysis':
+        p_name = instance['product']
+        if not name_re.match(p_name):
+            yield JSONError("The 'product' property of object '%s' should"
+                            " be all lowercase with words seperated by dash." % instance['id'], instance['id'],
+                            'malware-analysis-product')
+
+
+@cyber_observable_check("2.1")
 def hash_length(instance):
     """Ensure keys in 'hashes'-type properties are no more than 30 characters long.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' not in obj:
-            continue
+    key = instance['id']
+    if 'type' not in instance:
+        return
 
-        if obj['type'] == 'file':
-            try:
-                hashes = obj['hashes']
-            except KeyError:
-                pass
-            else:
-                for h in hashes:
+    if instance['type'] == 'file':
+        try:
+            hashes = instance['hashes']
+        except KeyError:
+            return
+        else:
+            for h in hashes:
+                if (len(h) > 30):
+                    return JSONError("Object '%s' has a 'hashes' dictionary"
+                                     " with a hash of type '%s', which is "
+                                     "longer than 30 characters."
+                                     % (key, h), instance['id'], 'hash-length')
+
+        try:
+            ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
+        except KeyError:
+            return
+        else:
+            for datastream in ads:
+                if 'hashes' not in datastream:
+                    return
+                for h in datastream['hashes']:
                     if (len(h) > 30):
-                        yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                        " with a hash of type '%s', which is "
-                                        "longer than 30 characters."
-                                        % (key, h), instance['id'], 'hash-algo')
+                        return JSONError("Object '%s' has an NTFS extension"
+                                         " with an alternate data stream that has a"
+                                         " 'hashes' dictionary with a hash of type "
+                                         "'%s', which is longer than 30 "
+                                         "characters."
+                                         % (key, h), instance['id'], 'hash-length')
 
-            try:
-                ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
-            except KeyError:
-                pass
-            else:
-                for datastream in ads:
-                    if 'hashes' not in datastream:
-                        continue
-                    for h in datastream['hashes']:
-                        if (len(h) > 30):
-                            yield JSONError("Object '%s' has an NTFS extension"
-                                            " with an alternate data stream that has a"
-                                            " 'hashes' dictionary with a hash of type "
-                                            "'%s', which is longer than 30 "
-                                            "characters."
-                                            % (key, h), instance['id'], 'hash-algo')
+        try:
+            head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
+        except KeyError:
+            return
+        else:
+            for h in head_hashes:
+                if (len(h) > 30):
+                    return JSONError("Object '%s' has a Windows PE Binary "
+                                     "File extension with a file header hash of "
+                                     "'%s', which is longer than 30 "
+                                     "characters."
+                                     % (key, h), instance['id'], 'hash-length')
 
-            try:
-                head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
-            except KeyError:
-                pass
-            else:
-                for h in head_hashes:
+        try:
+            hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
+        except KeyError:
+            return
+        else:
+            for h in hashes:
+                if (len(h) > 30):
+                    return JSONError("Object '%s' has a Windows PE Binary "
+                                     "File extension with an optional header that "
+                                     "has a hash of '%s', which is longer "
+                                     "than 30 characters."
+                                     % (key, h), instance['id'], 'hash-length')
+
+        try:
+            sections = instance['extensions']['windows-pebinary-ext']['sections']
+        except KeyError:
+            return
+        else:
+            for s in sections:
+                if 'hashes' not in s:
+                    return
+                for h in s['hashes']:
                     if (len(h) > 30):
-                        yield JSONError("Object '%s' has a Windows PE Binary "
-                                        "File extension with a file header hash of "
-                                        "'%s', which is longer than 30 "
-                                        "characters."
-                                        % (key, h), instance['id'], 'hash-algo')
+                        return JSONError("Object '%s' has a Windows PE "
+                                         "Binary File extension with a section that"
+                                         " has a hash of '%s', which is "
+                                         "longer than 30 characters."
+                                         % (key, h), instance['id'], 'hash-length')
 
-            try:
-                hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-            except KeyError:
-                pass
-            else:
-                for h in hashes:
-                    if (len(h) > 30):
-                        yield JSONError("Object '%s' has a Windows PE Binary "
-                                        "File extension with an optional header that "
-                                        "has a hash of '%s', which is longer "
-                                        "than 30 characters."
-                                        % (key, h), instance['id'], 'hash-algo')
-
-            try:
-                sections = obj['extensions']['windows-pebinary-ext']['sections']
-            except KeyError:
-                pass
-            else:
-                for s in sections:
-                    if 'hashes' not in s:
-                        continue
-                    for h in s['hashes']:
-                        if (len(h) > 30):
-                            yield JSONError("Object '%s' has a Windows PE "
-                                            "Binary File extension with a section that"
-                                            " has a hash of '%s', which is "
-                                            "longer than 30 characters."
-                                            % (key, h), instance['id'], 'hash-algo')
-
-        elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
-            try:
-                hashes = obj['hashes']
-            except KeyError:
-                pass
-            else:
-                for h in hashes:
-                    if (len(h) > 30):
-                        yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                        " with a hash of type '%s', which is "
-                                        "longer than 30 characters."
-                                        % (key, h), instance['id'], 'hash-algo')
+    elif instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
+        try:
+            hashes = instance['hashes']
+        except KeyError:
+            return
+        else:
+            for h in hashes:
+                if (len(h) > 30):
+                    return JSONError("Object '%s' has a 'hashes' dictionary"
+                                     " with a hash of type '%s', which is "
+                                     "longer than 30 characters."
+                                     % (key, h), instance['id'], 'hash-length')
 
 
 def extref_hashes(instance):
@@ -1055,7 +1154,7 @@ def types_strict(instance):
         yield JSONError("Object type '%s' is not one of those defined in the"
                         " specification." % instance['type'], instance['id'])
 
-    if has_cyber_observable_data(instance):
+    if has_cyber_observable_data(instance, "2.1") and instance['type'] == 'observable-data':
         for key, obj in instance['objects'].items():
             if 'type' in obj and obj['type'] not in enums.OBSERVABLE_TYPES:
                 yield JSONError("Observable object %s is type '%s' which is "
@@ -1078,7 +1177,7 @@ def properties_strict(instance):
     """Ensure that no custom properties are used, but only the official ones
     from the specification.
     """
-    if instance['type'] not in enums.TYPES:
+    if instance['type'] not in enums.TYPES and instance['type'] not in enums.OBSERVABLE_TYPES:
         return  # only check properties for official objects
 
     defined_props = enums.PROPERTIES.get(instance['type'], [])
@@ -1087,51 +1186,14 @@ def properties_strict(instance):
             yield JSONError("Property '%s' is not one of those defined in the"
                             " specification." % prop, instance['id'])
 
-    if has_cyber_observable_data(instance):
-        for key, obj in instance['objects'].items():
-            type_ = obj.get('type', '')
-            if type_ not in enums.OBSERVABLE_PROPERTIES:
-                continue  # custom observable types handled outside this function
-            observable_props = enums.OBSERVABLE_PROPERTIES.get(type_, [])
-            embedded_props = enums.OBSERVABLE_EMBEDDED_PROPERTIES.get(type_, {})
-            extensions = enums.OBSERVABLE_EXTENSIONS.get(type_, [])
-            for prop in obj.keys():
-                if prop not in observable_props:
-                    yield JSONError("Property '%s' is not one of those defined in the"
-                                    " specification for %s objects."
-                                    % (prop, type_), instance['id'])
-                # Check properties of embedded cyber observable types
-                elif prop in embedded_props:
-                    embedded_prop_keys = embedded_props.get(prop, [])
-                    for embedded_key in obj[prop]:
-                        if isinstance(embedded_key, dict):
-                            for embedded in embedded_key:
-                                if embedded not in embedded_prop_keys:
-                                    yield JSONError("Property '%s' is not one of those defined in the"
-                                                    " specification for the %s property in %s objects."
-                                                    % (embedded, prop, type_), instance['id'])
-                        elif embedded_key not in embedded_prop_keys:
-                            yield JSONError("Property '%s' is not one of those defined in the"
-                                            " specification for the %s property in %s objects."
-                                            % (embedded_key, prop, type_), instance['id'])
-
-            # Check properties of embedded cyber observable types
-            for ext_key in obj.get('extensions', {}):
-                if ext_key not in extensions:
-                    continue  # don't check custom extensions
-                extension_props = enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key]
-                for ext_prop in obj['extensions'][ext_key]:
-                    if ext_prop not in extension_props:
-                        yield JSONError("Property '%s' is not one of those defined in the"
-                                        " specification for the %s extension in %s objects."
-                                        % (ext_prop, ext_key, type_), instance['id'])
-                    embedded_ext_props = enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES.get(ext_key, {}).get(ext_prop, [])
-                    if embedded_ext_props:
-                        for embed_ext_prop in obj['extensions'][ext_key].get(ext_prop, []):
-                            if embed_ext_prop not in embedded_ext_props:
-                                yield JSONError("Property '%s' in the %s property of the %s extension "
-                                                "is not one of those defined in the specification."
-                                                % (embed_ext_prop, ext_prop, ext_key), instance['id'])
+    if has_cyber_observable_data(instance, "2.1"):
+        if instance['type'] == 'observable_data':
+            for key, obj in instance['objects'].items():
+                for error in properties_strict_helper(obj, instance['id']):
+                    yield error
+        else:
+            for error in properties_strict_helper(instance, instance['id']):
+                yield error
 
     if instance['type'] == 'indicator' and 'pattern' in instance:
         pattern = instance['pattern']
@@ -1148,11 +1210,58 @@ def properties_strict(instance):
                                            % (prop, objtype), instance['id'])
 
 
+def properties_strict_helper(obj, obj_id):
+    type_ = obj.get('type', '')
+    if type_ not in enums.OBSERVABLE_PROPERTIES:
+        return  # custom observable types handled outside this function
+    observable_props = enums.OBSERVABLE_PROPERTIES.get(type_, [])
+    embedded_props = enums.OBSERVABLE_EMBEDDED_PROPERTIES.get(type_, {})
+    extensions = enums.OBSERVABLE_EXTENSIONS.get(type_, [])
+    for prop in obj.keys():
+        if prop not in observable_props:
+            yield JSONError("Property '%s' is not one of those defined in the"
+                            " specification for %s objects."
+                            % (prop, type_), obj_id)
+        # Check properties of embedded cyber observable types
+        elif prop in embedded_props:
+            embedded_prop_keys = embedded_props.get(prop, [])
+            for embedded_key in obj[prop]:
+                if isinstance(embedded_key, dict):
+                    for embedded in embedded_key:
+                        if embedded not in embedded_prop_keys:
+                            yield JSONError("Property '%s' is not one of those defined in the"
+                                            " specification for the %s property in %s objects."
+                                            % (embedded, prop, type_), obj_id)
+                elif embedded_key not in embedded_prop_keys:
+                    yield JSONError("Property '%s' is not one of those defined in the"
+                                    " specification for the %s property in %s objects."
+                                    % (embedded_key, prop, type_), obj_id)
+
+    # Check properties of embedded cyber observable types
+    for ext_key in obj.get('extensions', {}):
+        if ext_key not in extensions:
+            continue  # don't check custom extensions
+        extension_props = enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key]
+        for ext_prop in obj['extensions'][ext_key]:
+            if ext_prop not in extension_props:
+                yield JSONError("Property '%s' is not one of those defined in the"
+                                " specification for the %s extension in %s objects."
+                                % (ext_prop, ext_key, type_), obj_id)
+            embedded_ext_props = enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES.get(ext_key, {}).get(ext_prop, [])
+            if embedded_ext_props:
+                for embed_ext_prop in obj['extensions'][ext_key].get(ext_prop, []):
+                    if embed_ext_prop not in embedded_ext_props:
+                        yield JSONError("Property '%s' in the %s property of the %s extension "
+                                        "is not one of those defined in the specification."
+                                        % (embed_ext_prop, ext_prop, ext_key), obj_id)
+
+
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
         custom_object_prefix_strict,
         custom_property_prefix_strict,
+        uuid_check,
         open_vocab_values,
         kill_chain_phase_names,
         observable_object_keys,
@@ -1160,12 +1269,22 @@ CHECKS = {
         custom_observable_object_prefix_strict,
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
+        malware_analysis_product,
         windows_process_priority_format,
         hash_length,
+        os_execution_envs_check,
         vocab_marking_definition,
         relationships_strict,
+        duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
+        vocab_course_of_action_type,
+        vocab_grouping_context,
+        vocab_implementation_languages,
+        vocab_infrastructure_types,
+        vocab_malware_capabilities,
+        vocab_opinion,
+        vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
         vocab_industry_sector,
@@ -1188,11 +1307,13 @@ CHECKS = {
         countries,
         network_traffic_ports,
         extref_hashes,
-        duplicate_ids,
+        indicator_property_check,
+        deprecated_property_check,
     ],
     'format-checks': [
         custom_object_prefix_strict,
         custom_property_prefix_strict,
+        uuid_check,
         open_vocab_values,
         kill_chain_phase_names,
         observable_object_keys,
@@ -1200,23 +1321,35 @@ CHECKS = {
         custom_observable_object_prefix_strict,
         custom_object_extension_prefix_strict,
         custom_observable_properties_prefix_strict,
+        malware_analysis_product,
         windows_process_priority_format,
         hash_length,
+        os_execution_envs_check,
     ],
     'custom-prefix': custom_prefix_strict,
     'custom-prefix-lax': custom_prefix_lax,
+    'uuid-check': uuid_check,
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
     'observable-object-keys': observable_object_keys,
     'observable-dictionary-keys': observable_dictionary_keys,
+    'malware-analysis-product': malware_analysis_product,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
+    "os-execution-envs": os_execution_envs_check,
     'approved-values': [
         vocab_marking_definition,
         relationships_strict,
         duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
+        vocab_course_of_action_type,
+        vocab_grouping_context,
+        vocab_implementation_languages,
+        vocab_infrastructure_types,
+        vocab_malware_capabilities,
+        vocab_opinion,
+        vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
         vocab_industry_sector,
@@ -1245,6 +1378,13 @@ CHECKS = {
     'all-vocabs': [
         vocab_attack_motivation,
         vocab_attack_resource_level,
+        vocab_course_of_action_type,
+        vocab_grouping_context,
+        vocab_implementation_languages,
+        vocab_infrastructure_types,
+        vocab_malware_capabilities,
+        vocab_opinion,
+        vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
         vocab_industry_sector,
@@ -1261,6 +1401,14 @@ CHECKS = {
     ],
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
+    'course-of-action-type': vocab_course_of_action_type,
+    'encryption-algo': vocab_encryption_algo,
+    'grouping-context': vocab_grouping_context,
+    'implementation-languages': vocab_implementation_languages,
+    'infrastructure-types': vocab_infrastructure_types,
+    'malware-capabilities': vocab_malware_capabilities,
+    'opinion': vocab_opinion,
+    'processor-architecture': vocab_processor_architecture,
     'identity-class': vocab_identity_class,
     'indicator-types': vocab_indicator_types,
     'industry-sector': vocab_industry_sector,
@@ -1292,6 +1440,8 @@ CHECKS = {
     'countries': countries,
     'network-traffic-ports': network_traffic_ports,
     'extref-hashes': extref_hashes,
+    'indicator-properties': indicator_property_check,
+    'deprecated-properties': deprecated_property_check,
 }
 
 
@@ -1334,10 +1484,14 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['observable-object-keys'])
                 if 'observable-dictionary-keys' not in options.disabled:
                     validator_list.append(CHECKS['observable-dictionary-keys'])
+                if 'malware-analysis-product' not in options.disabled:
+                    validator_list.append(CHECKS['malware-analysis-product'])
                 if 'windows-process-priority-format' not in options.disabled:
                     validator_list.append(CHECKS['windows-process-priority-format'])
                 if 'hash-length' not in options.disabled:
                     validator_list.append(CHECKS['hash-length'])
+                if 'os-execution-envs' not in options.disabled:
+                    validator_list.append(CHECKS['os-execution-envs'])
 
             if 'approved-values' not in options.disabled:
                 if 'marking-definition-type' not in options.disabled:
@@ -1397,6 +1551,10 @@ def list_shoulds(options):
                 validator_list.append(CHECKS['network-traffic-ports'])
             if 'extref-hashes' not in options.disabled:
                 validator_list.append(CHECKS['extref-hashes'])
+            if 'indicator-properties' not in options.disabled:
+                validator_list.append(CHECKS['indicator-properties'])
+            if 'deprecated-properties' not in options.disabled:
+                validator_list.append(CHECKS['deprecated-properties'])
 
     # --enable
     if options.enabled:

@@ -15,6 +15,7 @@ VALID_INDICATOR = u"""
     "indicator_types": ["malicious-activity"],
     "name": "Poison Ivy Malware",
     "description": "This file is part of Poison Ivy",
+    "pattern_type": "stix",
     "pattern": "[file:hashes.'SHA-256' = 'aec070645fe53ee3b3763059376134f058cc337247c978add178b6ccdfb0019f']",
     "valid_from": "2016-04-06T20:03:48Z"
 }
@@ -217,3 +218,25 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(objects, options)
         assert results[0].is_valid
         assert not results[1].is_valid
+
+    def test_indicator_missing_name(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator['name']
+        self.assertFalseWithOptions(indicator)
+
+        self.check_ignore(indicator, 'indicator-properties')
+
+    def test_indicator_missing_description(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator['description']
+        self.assertFalseWithOptions(indicator)
+
+        self.check_ignore(indicator, 'indicator-properties')
+
+    def test_indicator_missing_name_description(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator['name']
+        del indicator['description']
+        self.assertFalseWithOptions(indicator)
+
+        self.check_ignore(indicator, 'indicator-properties')

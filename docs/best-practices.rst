@@ -50,6 +50,9 @@ Check Codes - STIX 2.1
 |  102   | custom-prefix-lax           | same as 101 but more lenient; no       |
 |        |                             | source identifier needed in prefix     |
 +--------+-----------------------------+----------------------------------------+
+|  103   | uuid-check                  | objects use the recommended versions   |
+|        |                             | of UUID (v4 for SCOs, v5 for the rest) |
++--------+-----------------------------+----------------------------------------+
 |  111   | open-vocab-format           | values of open vocabularies follow the |
 |        |                             | correct format                         |
 +--------+-----------------------------+----------------------------------------+
@@ -62,11 +65,17 @@ Check Codes - STIX 2.1
 |  142   | observable-dictionary-keys  | dictionaries in cyber observable       |
 |        |                             | objects follow the correct format      |
 +--------+-----------------------------+----------------------------------------+
+|  143   | malware-analysis-product    | malware analysis product names follow  |
+|        |                             | the correct format                     |
++--------+-----------------------------+----------------------------------------+
 |  149   | windows-process-priority-\  | windows-process-ext's 'priority'       |
 |        | format                      | follows the correct format             |
 +--------+-----------------------------+----------------------------------------+
 |  150   | hash-length                 | keys in 'hashes'-type properties are   |
 |        |                             | not too long                           |
++--------+-----------------------------+----------------------------------------+
+|  151   | os-execution-envs           | os_execution_envs entries are CPE      |
+|        |                             | 2.3 compliant                          |
 +--------+-----------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run                 |
 +--------+-----------------------------+----------------------------------------+
@@ -118,8 +127,32 @@ Check Codes - STIX 2.1
 |  223   | region                      | certain property values are from the   |
 |        |                             | region vocabulary                      |
 +--------+-----------------------------+----------------------------------------+
+|  224   | course-of-action-tyoe       | certain property values are from the   |
+|        |                             | course-of-action vocabulary            |
++--------+-----------------------------+----------------------------------------+
+|  225   | grouping-context            | certain property values are from the   |
+|        |                             | grouping-context vocabulary            |
++--------+-----------------------------+----------------------------------------+
+|  226   | implementation-languages    | certain property values are from the   |
+|        |                             | implementation-languages vocabulary    |
++--------+-----------------------------+----------------------------------------+
+|  227   | infrastructure-types        | certain property values are from the   |
+|        |                             | infrastructure vocabulary              |
++--------+-----------------------------+----------------------------------------+
+|  228   | malware-capabilities        | certain property values are from the   |
+|        |                             | malware-capabilities vocabulary        |
++--------+-----------------------------+----------------------------------------+
+|  229   | opinion                     | certain property values are from the   |
+|        |                             | opinion vocabulary                     |
++--------+-----------------------------+----------------------------------------+
+|  230   | processor-architecture      | certain property values are from the   |
+|        |                             | processor-architecture vocabulary      |
++--------+-----------------------------+----------------------------------------+
 |  241   | hash-algo                   | certain property values are from the   |
 |        |                             | hash-algo vocabulary                   |
++--------+-----------------------------+----------------------------------------+
+|  242   | encryption-algo             | certain property values are from the   |
+|        |                             | encryption-algo vocabulary             |
 +--------+-----------------------------+----------------------------------------+
 |  243   | windows-pebinary-type       | certain property values are from the   |
 |        |                             | windows-pebinary-type vocabulary       |
@@ -157,6 +190,12 @@ Check Codes - STIX 2.1
 +--------+-----------------------------+----------------------------------------+
 |  302   | extref-hashes               | external references SHOULD have hashes |
 |        |                             | if they have a url                     |
++--------+-----------------------------+----------------------------------------+
+|  303   | indicator-properties        | Indicator objects have both name and   |
+|        |                             | description properties                 |
++--------+-----------------------------+----------------------------------------+
+|  304   | deprecated-properties       | certain properties which have been     |
+|        |                             | deprecated are not being used          |
 +--------+-----------------------------+----------------------------------------+
 
 Check Codes - STIX 2.0

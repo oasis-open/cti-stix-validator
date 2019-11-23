@@ -33,6 +33,7 @@ INVALID_TIMESTAMP = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 def test_run_validation(caplog):
     options = ValidationOptions(files=[EXAMPLE])
     results = run_validation(options)
+
     assert results[0].is_valid
 
     print_results(results)

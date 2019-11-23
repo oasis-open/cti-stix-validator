@@ -18,7 +18,7 @@ from itertools import chain
 import re
 
 from six import string_types
-from stix2patterns.pattern import Pattern
+from stix2patterns.v20.pattern import Pattern
 
 from . import enums
 from ..errors import PatternError
@@ -323,7 +323,7 @@ def valid_hash_value(hashname):
         return False
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def vocab_hash_algo(instance):
     """Ensure objects with 'hashes' properties only use values from the
     hash-algo-ov vocabulary.
@@ -424,7 +424,7 @@ def vocab_hash_algo(instance):
                                         % (key, h), instance['id'], 'hash-algo')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def vocab_encryption_algo(instance):
     """Ensure file objects' 'encryption_algorithm' property is from the
     encryption-algo-ov vocabulary.
@@ -443,7 +443,7 @@ def vocab_encryption_algo(instance):
                                 'encryption-algo')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def vocab_windows_pebinary_type(instance):
     """Ensure file objects with the windows-pebinary-ext extension have a
     'pe-type' property that is from the windows-pebinary-type-ov vocabulary.
@@ -462,7 +462,7 @@ def vocab_windows_pebinary_type(instance):
                                 'windows-pebinary-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def vocab_account_type(instance):
     """Ensure a user-account objects' 'account-type' property is from the
     account-type-ov vocabulary.
@@ -480,7 +480,7 @@ def vocab_account_type(instance):
                                 % (key, acct_type), instance['id'], 'account-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def observable_object_keys(instance):
     """Ensure observable-objects keys are non-negative integers.
     """
@@ -513,7 +513,7 @@ def test_dict_keys(item, inst_id):
                 yield error
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def observable_dictionary_keys(instance):
     """Ensure dictionaries in the cyber observable layer have lowercase keys
     no longer than 30 characters.
@@ -522,7 +522,7 @@ def observable_dictionary_keys(instance):
         yield error
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def custom_observable_object_prefix_strict(instance):
     """Ensure custom observable objects follow strict naming style conventions.
     """
@@ -538,7 +538,7 @@ def custom_observable_object_prefix_strict(instance):
                             'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def custom_observable_object_prefix_lax(instance):
     """Ensure custom observable objects follow naming style conventions.
     """
@@ -552,7 +552,7 @@ def custom_observable_object_prefix_lax(instance):
                             'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def custom_object_extension_prefix_strict(instance):
     """Ensure custom observable object extensions follow strict naming style
     conventions.
@@ -572,7 +572,7 @@ def custom_object_extension_prefix_strict(instance):
                                 'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def custom_object_extension_prefix_lax(instance):
     """Ensure custom observable object extensions follow naming style
     conventions.
@@ -590,7 +590,7 @@ def custom_object_extension_prefix_lax(instance):
                                 'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def custom_observable_properties_prefix_strict(instance):
     """Ensure observable object custom properties follow strict naming style
     conventions.
@@ -679,7 +679,7 @@ def custom_observable_properties_prefix_strict(instance):
                                                         'custom-prefix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def custom_observable_properties_prefix_lax(instance):
     """Ensure observable object custom properties follow naming style
     conventions.
@@ -751,7 +751,7 @@ def custom_observable_properties_prefix_lax(instance):
                                                         'custom-prefix-lax')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def network_traffic_ports(instance):
     """Ensure network-traffic objects contain both src_port and dst_port.
     """
@@ -763,7 +763,7 @@ def network_traffic_ports(instance):
                             % key, instance['id'], 'network-traffic-ports')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def mime_type(instance):
     """Ensure the 'mime_type' property of file objects comes from the Template
     column in the IANA media type registry.
@@ -789,7 +789,7 @@ def mime_type(instance):
                                     'mime-type')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def protocols(instance):
     """Ensure the 'protocols' property of network-traffic objects contains only
     values from the IANA Service Name and Transport Protocol Port Number
@@ -818,7 +818,7 @@ def protocols(instance):
                                         'protocols')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def ipfix(instance):
     """Ensure the 'ipfix' property of network-traffic objects contains only
     values from the IANA IP Flow Information Export (IPFIX) Entities Registry.
@@ -847,7 +847,7 @@ def ipfix(instance):
                                         'ipfix')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def http_request_headers(instance):
     """Ensure the keys of the 'request_headers' property of the http-request-
     ext extension of network-traffic objects conform to the format for HTTP
@@ -872,7 +872,7 @@ def http_request_headers(instance):
                                     'http-request-headers')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def socket_options(instance):
     """Ensure the keys of the 'options' property of the socket-ext extension of
     network-traffic objects are only valid socket options (SO_*).
@@ -892,7 +892,7 @@ def socket_options(instance):
                                     % (key, opt), instance['id'], 'socket-options')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def pdf_doc_info(instance):
     """Ensure the keys of the 'document_info_dict' property of the pdf-ext
     extension of file objects are only valid PDF Document Information
@@ -915,7 +915,7 @@ def pdf_doc_info(instance):
                                     'pdf-doc-info')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def windows_process_priority_format(instance):
     """Ensure the 'priority' property of windows-process-ext ends in '_CLASS'.
     """
@@ -932,7 +932,7 @@ def windows_process_priority_format(instance):
                                 'windows-process-priority-format')
 
 
-@cyber_observable_check
+@cyber_observable_check("2.0")
 def hash_length(instance):
     """Ensure keys in 'hashes'-type properties are no more than 30 characters long.
     """

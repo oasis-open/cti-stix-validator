@@ -1,12 +1,11 @@
 """Mandatory (MUST) requirement checking functions
 """
-
 import operator
 import re
 
 from dateutil import parser
 from six import string_types
-from stix2patterns.pattern import Pattern
+from stix2patterns.v21.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
 
 from . import enums
@@ -40,37 +39,68 @@ def timestamp(instance):
                 yield JSONError("'%s': '%s' is not a valid timestamp: %s"
                                 % (tprop, instance[tprop], str(e)), instance['id'])
 
-    if has_cyber_observable_data(instance):
-        for key, obj in instance['objects'].items():
-            if 'type' not in obj:
-                continue
-            if obj['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
-                for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[obj['type']]:
-                    if tprop in obj and ts_re.match(obj[tprop]):
+    if has_cyber_observable_data(instance, "2.1"):
+        if instance['type'] == 'observable-data':
+            for key, obj in instance['objects'].items():
+                if 'type' not in obj:
+                    continue
+                if obj['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
+                    for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[obj['type']]:
+                        if tprop in obj and ts_re.match(obj[tprop]):
+                            # Don't raise an error if schemas will catch it
+                            try:
+                                parser.parse(obj[tprop])
+                            except ValueError as e:
+                                yield JSONError("'%s': '%s': '%s' is not a valid timestamp: %s"
+                                                % (obj['type'], tprop, obj[tprop], str(e)), instance['id'])
+                if obj['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
+                    for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']]:
+                        if embed in obj:
+                            for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
+                                if embed == 'extensions':
+                                    for ext in obj[embed]:
+                                        if tprop in obj[embed][ext] and ts_re.match(obj[embed][ext][tprop]):
+                                            try:
+                                                parser.parse(obj[embed][ext][tprop])
+                                            except ValueError as e:
+                                                yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
+                                                                % (obj['type'], ext, tprop, obj[embed][ext][tprop], str(e)), instance['id'])
+                                elif tprop in obj[embed] and ts_re.match(obj[embed][tprop]):
+                                    try:
+                                        parser.parse(obj[embed][tprop])
+                                    except ValueError as e:
+                                        yield JSONError("'%s': '%s': '%s' is not a valid timestamp: %s"
+                                                        % (obj['type'], tprop, obj[embed][tprop], str(e)), instance['id'])
+        else:
+            if 'type' not in instance:
+                return
+            if instance['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
+                for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[instance['type']]:
+                    if tprop in instance and ts_re.match(instance[tprop]):
                         # Don't raise an error if schemas will catch it
                         try:
-                            parser.parse(obj[tprop])
+                            parser.parse(instance[tprop])
                         except ValueError as e:
                             yield JSONError("'%s': '%s': '%s' is not a valid timestamp: %s"
-                                            % (obj['type'], tprop, obj[tprop], str(e)), instance['id'])
-            if obj['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
-                for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']]:
-                    if embed in obj:
-                        for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
+                                            % (instance['type'], tprop, instance[tprop], str(e)), instance['id'])
+            if instance['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
+                for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']]:
+                    if embed in instance:
+                        for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']][embed]:
                             if embed == 'extensions':
-                                for ext in obj[embed]:
-                                    if tprop in obj[embed][ext] and ts_re.match(obj[embed][ext][tprop]):
+                                for ext in instance[embed]:
+                                    if tprop in instance[embed][ext] and ts_re.match(instance[embed][ext][tprop]):
                                         try:
-                                            parser.parse(obj[embed][ext][tprop])
+                                            parser.parse(instance[embed][ext][tprop])
                                         except ValueError as e:
                                             yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
-                                                            % (obj['type'], ext, tprop, obj[embed][ext][tprop], str(e)), instance['id'])
-                            elif tprop in obj[embed] and ts_re.match(obj[embed][tprop]):
+                                                            % (instance['type'], ext, tprop, instance[embed][ext][tprop], str(e)), instance['id'])
+                            elif tprop in instance[embed] and ts_re.match(instance[embed][tprop]):
                                 try:
-                                    parser.parse(obj[embed][tprop])
+                                    parser.parse(instance[embed][tprop])
                                 except ValueError as e:
                                     yield JSONError("'%s': '%s': '%s' is not a valid timestamp: %s"
-                                                    % (obj['type'], tprop, obj[embed][tprop], str(e)), instance['id'])
+                                                    % (instance['type'], tprop, instance[embed][tprop], str(e)), instance['id'])
 
 
 def get_comparison_string(op):
@@ -104,22 +134,21 @@ def timestamp_compare(instance):
                             instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def observable_timestamp_compare(instance):
     """Ensure cyber observable timestamp properties with a comparison
     requirement are valid.
     """
-    for key, obj in instance['objects'].items():
-        compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(obj.get('type', ''), [])
-        for first, op, second in compares:
-            comp = getattr(operator, op)
-            comp_str = get_comparison_string(op)
+    compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(instance.get('type', ''), [])
+    for first, op, second in compares:
+        comp = getattr(operator, op)
+        comp_str = get_comparison_string(op)
 
-            if first in obj and second in obj and \
-                    not comp(obj[first], obj[second]):
-                msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
-                yield JSONError(msg % (key, first, obj[first], comp_str, second, obj[second]),
-                                instance['id'])
+        if first in instance and second in instance and \
+                not comp(instance[first], instance[second]):
+            msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
+            yield JSONError(msg % (instance['id'], first, instance[first], comp_str, second, instance[second]),
+                            instance['id'])
 
 
 def object_marking_circular_refs(instance):
@@ -229,120 +258,124 @@ def check_observable_refs(refs, obj_prop, enum_prop, embed_obj_prop, enum_vals,
                             % (obj_prop, key, valids), instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1", True)
 def observable_object_references(instance):
     """Ensure certain observable object properties reference the correct type
     of object.
     """
-    for key, obj in instance['objects'].items():
-        if 'type' not in obj:
-            continue
-        elif obj['type'] not in enums.OBSERVABLE_PROP_REFS:
-            continue
+    if instance['type'] == 'observed-data':
+        for key, obj in instance['objects'].items():
+            for error in observable_object_references_helper(obj, key, instance):
+                yield error
 
-        obj_type = obj['type']
-        for obj_prop in enums.OBSERVABLE_PROP_REFS[obj_type]:
-            if obj_prop not in obj:
-                continue
-            enum_prop = enums.OBSERVABLE_PROP_REFS[obj_type][obj_prop]
-            if isinstance(enum_prop, list):
-                refs = obj[obj_prop]
-                enum_vals = enum_prop
-                for x in check_observable_refs(refs, obj_prop, enum_prop, '',
-                                               enum_vals, key, instance):
-                    yield x
 
-            elif isinstance(enum_prop, dict):
-                for embedded_prop in enum_prop:
-                    if isinstance(obj[obj_prop], dict):
-                        if embedded_prop not in obj[obj_prop]:
+def observable_object_references_helper(obj, key, instance):
+    if 'type' not in obj:
+        return
+    elif obj['type'] not in enums.OBSERVABLE_PROP_REFS:
+        return
+
+    obj_type = obj['type']
+    for obj_prop in enums.OBSERVABLE_PROP_REFS[obj_type]:
+        if obj_prop not in obj:
+            continue
+        enum_prop = enums.OBSERVABLE_PROP_REFS[obj_type][obj_prop]
+        if isinstance(enum_prop, list):
+            refs = obj[obj_prop]
+            enum_vals = enum_prop
+            for x in check_observable_refs(refs, obj_prop, enum_prop, '',
+                                           enum_vals, key, instance):
+                yield x
+
+        elif isinstance(enum_prop, dict):
+            for embedded_prop in enum_prop:
+                if isinstance(obj[obj_prop], dict):
+                    if embedded_prop not in obj[obj_prop]:
+                        continue
+                    embedded_obj = obj[obj_prop][embedded_prop]
+                    for embed_obj_prop in embedded_obj:
+                        if embed_obj_prop not in enum_prop[embedded_prop]:
                             continue
-                        embedded_obj = obj[obj_prop][embedded_prop]
-                        for embed_obj_prop in embedded_obj:
-                            if embed_obj_prop not in enum_prop[embedded_prop]:
-                                continue
-                            refs = embedded_obj[embed_obj_prop]
-                            enum_vals = enum_prop[embedded_prop][embed_obj_prop]
-                            for x in check_observable_refs(refs, obj_prop, enum_prop,
-                                                           embed_obj_prop, enum_vals,
-                                                           key, instance):
-                                yield x
+                        refs = embedded_obj[embed_obj_prop]
+                        enum_vals = enum_prop[embedded_prop][embed_obj_prop]
+                        for x in check_observable_refs(refs, obj_prop, enum_prop,
+                                                       embed_obj_prop, enum_vals,
+                                                       key, instance):
+                            yield x
 
-                    elif isinstance(obj[obj_prop], list):
-                        for embedded_list_obj in obj[obj_prop]:
+                elif isinstance(obj[obj_prop], list):
+                    for embedded_list_obj in obj[obj_prop]:
 
-                            if embedded_prop not in embedded_list_obj:
-                                continue
-                            embedded_obj = embedded_list_obj[embedded_prop]
-                            refs = embedded_obj
-                            enum_vals = enum_prop[embedded_prop]
-                            for x in check_observable_refs(refs, obj_prop, enum_prop,
-                                                           embedded_prop, enum_vals,
-                                                           key, instance):
-                                yield x
+                        if embedded_prop not in embedded_list_obj:
+                            continue
+                        embedded_obj = embedded_list_obj[embedded_prop]
+                        refs = embedded_obj
+                        enum_vals = enum_prop[embedded_prop]
+                        for x in check_observable_refs(refs, obj_prop, enum_prop,
+                                                       embedded_prop, enum_vals,
+                                                       key, instance):
+                            yield x
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def artifact_mime_type(instance):
     """Ensure the 'mime_type' property of artifact objects comes from the
     Template column in the IANA media type registry.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'artifact' and 'mime_type' in obj):
-            if enums.media_types():
-                if obj['mime_type'] not in enums.media_types():
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') must be an IANA registered MIME "
-                                    "Type of the form 'type/subtype'."
-                                    % (key, obj['mime_type']), instance['id'])
+    if ('type' in instance and instance['type'] == 'artifact' and 'mime_type' in instance):
+        if enums.media_types():
+            if instance['mime_type'] not in enums.media_types():
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') must be an IANA registered MIME "
+                                "Type of the form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'])
 
-            else:
-                info("Can't reach IANA website; using regex for mime types.")
-                mime_re = re.compile(r'^(application|audio|font|image|message|model'
-                                     '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-                if not mime_re.match(obj['mime_type']):
-                    yield JSONError("The 'mime_type' property of object '%s' "
-                                    "('%s') should be an IANA MIME Type of the"
-                                    " form 'type/subtype'."
-                                    % (key, obj['mime_type']), instance['id'])
+        else:
+            info("Can't reach IANA website; using regex for mime types.")
+            mime_re = re.compile(r'^(application|audio|font|image|message|model'
+                                 '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
+            if not mime_re.match(instance['mime_type']):
+                yield JSONError("The 'mime_type' property of object '%s' "
+                                "('%s') should be an IANA MIME Type of the"
+                                " form 'type/subtype'."
+                                % (instance['id'], instance['mime_type']), instance['id'])
 
 
-@cyber_observable_check
-def character_set(instance):
+@cyber_observable_check("2.1")
+def character_set(obj):
     """Ensure certain properties of cyber observable objects come from the IANA
     Character Set list.
     """
+    key = obj['id']
     char_re = re.compile(r'^[a-zA-Z0-9_\(\)-]+$')
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'directory' and 'path_enc' in obj):
-            if enums.char_sets():
-                if obj['path_enc'] not in enums.char_sets():
-                    yield JSONError("The 'path_enc' property of object '%s' "
-                                    "('%s') must be an IANA registered "
-                                    "character set."
-                                    % (key, obj['path_enc']), instance['id'])
-            else:
-                info("Can't reach IANA website; using regex for character_set.")
-                if not char_re.match(obj['path_enc']):
-                    yield JSONError("The 'path_enc' property of object '%s' "
-                                    "('%s') must be an IANA registered "
-                                    "character set."
-                                    % (key, obj['path_enc']), instance['id'])
+    if ('type' in obj and obj['type'] == 'directory' and 'path_enc' in obj):
+        if enums.char_sets():
+            if obj['path_enc'] not in enums.char_sets():
+                yield JSONError("The 'path_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set."
+                                % (key, obj['path_enc']), obj['id'])
+        else:
+            info("Can't reach IANA website; using regex for character_set.")
+            if not char_re.match(obj['path_enc']):
+                yield JSONError("The 'path_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set."
+                                % (key, obj['path_enc']), obj['id'])
 
-        if ('type' in obj and obj['type'] == 'file' and 'name_enc' in obj):
-            if enums.char_sets():
-                if obj['name_enc'] not in enums.char_sets():
-                    yield JSONError("The 'name_enc' property of object '%s' "
-                                    "('%s') must be an IANA registered "
-                                    "character set."
-                                    % (key, obj['name_enc']), instance['id'])
-            else:
-                info("Can't reach IANA website; using regex for character_set.")
-                if not char_re.match(obj['name_enc']):
-                    yield JSONError("The 'name_enc' property of object '%s' "
-                                    "('%s') must be an IANA registered "
-                                    "character set."
-                                    % (key, obj['name_enc']), instance['id'])
+    if ('type' in obj and obj['type'] == 'file' and 'name_enc' in obj):
+        if enums.char_sets():
+            if obj['name_enc'] not in enums.char_sets():
+                yield JSONError("The 'name_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set."
+                                % (key, obj['name_enc']), obj['id'])
+        else:
+            info("Can't reach IANA website; using regex for character_set.")
+            if not char_re.match(obj['name_enc']):
+                yield JSONError("The 'name_enc' property of object '%s' "
+                                "('%s') must be an IANA registered "
+                                "character set." % (key, obj['name_enc']), obj['id'])
 
 
 def language(instance):
@@ -353,20 +386,19 @@ def language(instance):
                         % instance['lang'], instance['id'])
 
 
-@cyber_observable_check
+@cyber_observable_check("2.1")
 def software_language(instance):
     """Ensure the 'language' property of software objects is a valid ISO 639-2
     language code.
     """
-    for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'software' and
-                'languages' in obj):
-            for lang in obj['languages']:
-                if lang not in enums.SOFTWARE_LANG_CODES:
-                    yield JSONError("The 'languages' property of object '%s' "
-                                    "contains an invalid ISO 639-2 language "
-                                    " code ('%s')."
-                                    % (key, lang), instance['id'])
+    if ('type' in instance and instance['type'] == 'software' and
+            'languages' in instance):
+        for lang in instance['languages']:
+            if lang not in enums.SOFTWARE_LANG_CODES:
+                yield JSONError("The 'languages' property of object '%s' "
+                                "contains an invalid ISO 639-2 language "
+                                " code ('%s')."
+                                % (instance['id'], lang), instance['id'])
 
 
 def patterns(instance, options):
@@ -379,7 +411,7 @@ def patterns(instance, options):
     pattern = instance['pattern']
     if not isinstance(pattern, string_types):
         return  # This error already caught by schemas
-    errors = pattern_validator(pattern)
+    errors = pattern_validator(pattern, stix_version='2.1')
 
     # Check pattern syntax
     if errors:

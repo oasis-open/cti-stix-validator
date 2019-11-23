@@ -108,7 +108,7 @@ def pretty_error(error, verbose=False):
                          'two hyphens in a row)', msg)
         elif error.schema['title'] == 'identifier':
             msg = re.sub(r"match '.+'$", 'match the id format '
-                         '([object-type]--[UUIDv4])', msg)
+                         '([object-type]--[UUID])', msg)
         elif error.schema['title'] == 'id':
             msg = re.sub(r"match '.+'$", 'start with \'' +
                          error.validator_value[1:-2] + '--\'', msg)
