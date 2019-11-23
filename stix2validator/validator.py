@@ -509,7 +509,9 @@ def ref_store(validator, ref, instance, schema):
         try:
             local_filepath = os.path.abspath(os.path.join(local_base_uri, '../'+ref))
             local_schema = load_schema(local_filepath)
-            validator.resolver.store[local_schema['$id']] = local_schema
+            schema_id = local_schema.get('$id', '')
+            if schema_id:
+                validator.resolver.store[schema_id] = local_schema
         except FileNotFoundError:
             pass
 
@@ -539,10 +541,12 @@ def load_validator(schema_path, schema):
         file_prefix = 'file:'
 
     resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema, store=SCHEMA_STORE)
+    schema_id = schema.get('$id', '')
+    if schema_id:
+        resolver.store[schema_id] = schema
     # RefResolver creates a new store internally; persist it so we can use the same mappings every time
     SCHEMA_STORE = resolver.store
     validator = STIXValidator(schema, resolver=resolver)
-
     return validator
 
 
