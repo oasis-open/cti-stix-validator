@@ -142,17 +142,11 @@ Check Codes - STIX 2.1
 |  228   | malware-capabilities        | certain property values are from the   |
 |        |                             | malware-capabilities vocabulary        |
 +--------+-----------------------------+----------------------------------------+
-|  229   | opinion                     | certain property values are from the   |
-|        |                             | opinion vocabulary                     |
-+--------+-----------------------------+----------------------------------------+
 |  230   | processor-architecture      | certain property values are from the   |
 |        |                             | processor-architecture vocabulary      |
 +--------+-----------------------------+----------------------------------------+
 |  241   | hash-algo                   | certain property values are from the   |
 |        |                             | hash-algo vocabulary                   |
-+--------+-----------------------------+----------------------------------------+
-|  242   | encryption-algo             | certain property values are from the   |
-|        |                             | encryption-algo vocabulary             |
 +--------+-----------------------------+----------------------------------------+
 |  243   | windows-pebinary-type       | certain property values are from the   |
 |        |                             | windows-pebinary-type vocabulary       |

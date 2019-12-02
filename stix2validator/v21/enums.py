@@ -188,13 +188,6 @@ MALWARE_CAPABILITIES_OV = [
     "steals-authentication-credentials",
     "violates-system-operational-integrity",
 ]
-OPINION_OV = [
-    "strongly-disagree",
-    "disagree",
-    "neutral",
-    "agree",
-    "strongly-agree",
-]
 PROCESSOR_ARCHITECTURE_OV = [
     "alpha",
     "arm",
@@ -307,30 +300,6 @@ HASH_ALGO_OV = [
     "ssdeep",
     "WHIRLPOOL",
 ]
-ENCRYPTION_ALGO_OV = [
-    "AES128-ECB",
-    "AES128-CBC",
-    "AES128-CFB",
-    "AES128-COFB",
-    "AES128-CTR",
-    "AES128-XTS",
-    "AES128-GCM",
-    "AES-256-GCM",
-    "Salsa20",
-    "Salsa12",
-    "Salsa8",
-    "ChaCha20-Poly1305",
-    "ChaCha20",
-    "DES-CBC",
-    "3DES-CBC",
-    "DES-EBC",
-    "3DES-EBC",
-    "CAST128-CBC",
-    "CAST256-CBC",
-    "RSA",
-    "DSA",
-    "mime-type-indicated",
-]
 WINDOWS_PEBINARY_TYPE_OV = [
     "exe",
     "dll",
@@ -376,9 +345,6 @@ ATTACK_RESOURCE_LEVEL_USES = {
 COURSE_OF_ACTION_TYPE_USES = {
     "course-of-action": ["action_type"],
 }
-ENCRYPTION_ALGO_USES = {
-    "artifact": ["encryption_algorithm"],
-}
 GROUPING_CONTEXT_USES = {
     "grouping": ["context"],
 }
@@ -413,9 +379,6 @@ REGION_USES = {
 }
 MALWARE_TYPE_USES = {
     "malware": ["malware_types"],
-}
-OPINION_USES = {
-    "opinion": ["opinion"],
 }
 PROCESSOR_ARCHITECTURE_USES = {
     "malware": ["architecture_execution_envs"],
@@ -2030,7 +1993,6 @@ TIMESTAMP_COMPARE_OBSERVABLE = {
 # Mapping of official STIX objects to their open-vocab properties
 VOCAB_PROPERTIES = {
     "artifact": [
-        'encryption_algorithm',
         'hashes'
     ],
     "course-of-action": [
@@ -2068,9 +2030,6 @@ VOCAB_PROPERTIES = {
     ],
     "ntfs-ext": [
         'hashes',
-    ],
-    "opinion": [
-        'opinion',
     ],
     "report": [
         'report_types',
@@ -2149,10 +2108,8 @@ CHECK_CODES = {
     '226': 'implementation-languages',
     '227': 'infrastructure-types',
     '228': 'malware-capabilities',
-    '229': 'opinion',
     '230': 'processor-architecture',
     '241': 'hash-algo',
-    '242': 'encryption-algo',
     '243': 'windows-pebinary-type',
     '244': 'account-type',
     '270': 'all-external-sources',
