@@ -273,11 +273,6 @@ def vocab_course_of_action_type(instance):
                        'course-of-action-type')
 
 
-def vocab_encryption_algo(instance):
-    return check_vocab(instance, "ENCRYPTION_ALGO",
-                       'encryption-algo')
-
-
 def vocab_grouping_context(instance):
     return check_vocab(instance, "GROUPING_CONTEXT",
                        'grouping-context')
@@ -316,11 +311,6 @@ def vocab_malware_types(instance):
 def vocab_malware_capabilities(instance):
     return check_vocab(instance, "MALWARE_CAPABILITIES",
                        'malware-capabilities')
-
-
-def vocab_opinion(instance):
-    return check_vocab(instance, "OPINION",
-                       'opinion')
 
 
 def vocab_processor_architecture(instance):
@@ -1283,7 +1273,6 @@ CHECKS = {
         vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_capabilities,
-        vocab_opinion,
         vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
@@ -1348,7 +1337,6 @@ CHECKS = {
         vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_capabilities,
-        vocab_opinion,
         vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
@@ -1383,7 +1371,6 @@ CHECKS = {
         vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_capabilities,
-        vocab_opinion,
         vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
@@ -1402,12 +1389,10 @@ CHECKS = {
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
     'course-of-action-type': vocab_course_of_action_type,
-    'encryption-algo': vocab_encryption_algo,
     'grouping-context': vocab_grouping_context,
     'implementation-languages': vocab_implementation_languages,
     'infrastructure-types': vocab_infrastructure_types,
     'malware-capabilities': vocab_malware_capabilities,
-    'opinion': vocab_opinion,
     'processor-architecture': vocab_processor_architecture,
     'identity-class': vocab_identity_class,
     'indicator-types': vocab_indicator_types,
