@@ -18,7 +18,7 @@ def get_version():
 
 install_requires = [
     'appdirs',
-    'colorama',
+    'colorama<0.4.2',
     'cpe',
     'jsonschema>=3.0.0',
     'python-dateutil',
@@ -32,7 +32,7 @@ install_requires = [
 setup(
     name='stix2-validator',
     version=get_version(),
-    description='APIs and scripts for validating STIX 2.0 documents.',
+    description='APIs and scripts for validating STIX 2.x documents.',
     long_description=readme,
     long_description_content_type='text/x-rst',
     url="https://github.com/oasis-open/cti-stix-validator",
