@@ -188,6 +188,21 @@ MALWARE_CAPABILITIES_OV = [
     "steals-authentication-credentials",
     "violates-system-operational-integrity",
 ]
+OPINION_ENUM = [
+    "strongly-disagree",
+    "disagree",
+    "neutral",
+    "agree",
+    "strongly-agree",
+]
+PATTERN_TYPE_OV = [
+    "stix",
+    "pcre",
+    "sigma",
+    "snort",
+    "suricata",
+    "yara",
+]
 PROCESSOR_ARCHITECTURE_OV = [
     "alpha",
     "arm",
