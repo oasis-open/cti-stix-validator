@@ -240,3 +240,15 @@ class IndicatorTestCases(ValidatorTest):
         self.assertFalseWithOptions(indicator)
 
         self.check_ignore(indicator, 'indicator-properties')
+
+    def test_indicator_different_pattern_type_does_not_get_validated(self):
+        pattern = ("alert tcp any any <> any 80 (msg:\"SHA256 Alert\";"
+                   " protected_content:\"56D6F32151AD8474F40D7B939C2161EE2BBF10023F4AF1DBB3E13260EBDC6342\";"
+                   " hash:sha256; offset:0; length:4;)")
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator["pattern"] = pattern
+        indicator["pattern_type"] = "snort"
+        indicator["pattern_version"] = "2.9.15"
+
+        results = validate_parsed_json(indicator, self.options)
+        self.assertEqual(results.is_valid, True)
