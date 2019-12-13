@@ -512,7 +512,7 @@ def uuid_version_check(instance):
         x = ['hashes', 'serial_number']
 
     if all(k not in instance for k in x) and object_id.version != 4:
-            yield JSONError("If no Contributing Properties are present, a UUIDv4 must be used", 'uuid_version_check')
+        yield JSONError("If no Contributing Properties are present, a UUIDv4 must be used", 'uuid_version_check')
 
 
 def process(instance):
@@ -524,8 +524,9 @@ def process(instance):
     if object_id.version != 4:
         yield JSONError("A process object must use UUIDv4 in its id", 'process')
 
+
 def check_hash_value(h, v):
-    """Uses Regex to check hash value against expected pattern of hash 
+    """Uses Regex to check hash value against expected pattern of hash
     function"""
     if h == "MD5":
         return True if re.match(r"(^[a-fA-F0-9]{32}$)", v) else False
@@ -556,9 +557,9 @@ def hash_value(instance):
         if 'hashes' in instance:
             hashes = instance['hashes']
             for h in hashes:
-                if not (check_hash_value(h, hashes[h])): 
+                if not (check_hash_value(h, hashes[h])):
                     yield JSONError("Hash value '%s' is not an acceptable "
-                    "value for hash function '%s'" % (hashes[h], h), 'hash_value')
+                                    "value for hash function '%s'" % (hashes[h], h), 'hash_value')
 
         if instance['type'] == 'file' and 'extensions' in instance:
             if 'ntfs-ext' in instance['extensions'] and 'alternate_data_streams' in instance['extensions']['ntfs-ext']:
@@ -569,22 +570,22 @@ def hash_value(instance):
                     for h in datastream['hashes']:
                         if not (check_hash_value(h, datastream['hashes'][h])):
                             yield JSONError("Hash value '%s' is not an acceptable "
-                            "value for hash function '%s'" % (datastream['hashes'][h], h), 'hash_value')
-            
+                                            "value for hash function '%s'" % (datastream['hashes'][h], h), 'hash_value')
+
             if 'windows-pebinary-ext' in instance['extensions'] and 'file_header_hashes' in instance['extensions']['windows-pebinary-ext']:
                 if 'file_header_hashes' in instance['extensions']['windows-pebinary-ext']:
                     head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
                     for h in head_hashes:
                         if not (check_hash_value(h, head_hashes[h])):
                             yield JSONError("Hash value '%s' is not an acceptable "
-                            "value for hash function '%s'" % (head_hashes[h], h), 'hash_value')
+                                            "value for hash function '%s'" % (head_hashes[h], h), 'hash_value')
 
             if 'windows-pebinary-ext' in instance['extensions'] and 'optional_header' in instance['extensions']['windows-pebinary-ext']:
                 hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
                 for h in hashes:
                     if not (check_hash_value(h, hashes[h])):
                         yield JSONError("Hash value '%s' is not an acceptable "
-                        "value for hash function '%s'" % (hashes[h], h), 'hash_value')
+                                        "value for hash function '%s'" % (hashes[h], h), 'hash_value')
 
             if 'windows-pebinary-ext' in instance['extensions'] and 'sections' in instance['extensions']['windows-pebinary-ext']:
                 sections = instance['extensions']['windows-pebinary-ext']['sections']
@@ -594,7 +595,7 @@ def hash_value(instance):
                     for h in s['hashes']:
                         if not (check_hash_value(h, s['hashes'][h])):
                             yield JSONError("Hash value '%s' is not an acceptable "
-                            "value for hash function '%s'" % (s['hashes'][h], h), 'hash_value')
+                                            "value for hash function '%s'" % (s['hashes'][h], h), 'hash_value')
 
 
 def list_musts(options):

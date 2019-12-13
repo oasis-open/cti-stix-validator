@@ -507,7 +507,7 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['id']= "process--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4"
+        observed_data['id'] = "process--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4"
         self.assertTrueWithOptions(observed_data)
 
     def test_uuidv4(self):
