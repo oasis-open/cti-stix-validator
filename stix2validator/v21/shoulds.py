@@ -428,12 +428,9 @@ def vocab_hash_algo(instance):
     if 'type' not in instance:
         return
 
-    if instance['type'] == 'file':
-        try:
+    if instance['type'] == 'file' or instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
+        if 'hashes' in instance:
             hashes = instance['hashes']
-        except KeyError:
-            pass
-        else:
             for h in hashes:
                 if not (valid_hash_value(h)):
                     yield JSONError("Object '%s' has a 'hashes' dictionary"
@@ -442,82 +439,57 @@ def vocab_hash_algo(instance):
                                     "custom value prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
-        try:
-            ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
-        except KeyError:
-            pass
-        else:
-            for datastream in ads:
-                if 'hashes' not in datastream:
-                    continue
-                for h in datastream['hashes']:
+        if instance['type'] == 'file' and 'extensions' in instance:
+            if 'ntfs-ext' in instance['extensions'] and 'alternate_data_streams' in instance['extensions']['ntfs-ext']:
+                ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
+                for datastream in ads:
+                    if 'hashes' not in datastream:
+                        continue
+                    for h in datastream['hashes']:
+                        if not (valid_hash_value(h)):
+                            yield JSONError("Object '%s' has an NTFS extension"
+                                            " with an alternate data stream that has a"
+                                            " 'hashes' dictionary with a hash of type "
+                                            "'%s', which is not a value in the "
+                                            "hash-algorithm-ov vocabulary nor a custom "
+                                            "value prepended with 'x_'."
+                                            % (key, h), instance['id'], 'hash-algo')
+
+            if 'windows-pebinary-ext' in instance['extensions'] and 'file_header_hashes' in instance['extensions']['windows-pebinary-ext']:
+                head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
+                for h in head_hashes:
                     if not (valid_hash_value(h)):
-                        yield JSONError("Object '%s' has an NTFS extension"
-                                        " with an alternate data stream that has a"
-                                        " 'hashes' dictionary with a hash of type "
+                        yield JSONError("Object '%s' has a Windows PE Binary "
+                                        "File extension with a file header hash of "
                                         "'%s', which is not a value in the "
-                                        "hash-algorithm-ov vocabulary nor a custom "
+                                        "hash-algorithm-ov vocabulary nor a custom value "
+                                        "prepended with 'x_'."
+                                        % (key, h), instance['id'], 'hash-algo')
+
+            if 'windows-pebinary-ext' in instance['extensions'] and 'optional_header' in instance['extensions']['windows-pebinary-ext']:
+                hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
+                for h in hashes:
+                    if not (valid_hash_value(h)):
+                        yield JSONError("Object '%s' has a Windows PE Binary "
+                                        "File extension with an optional header that "
+                                        "has a hash of '%s', which is not a value in "
+                                        "the hash-algorithm-ov vocabulary nor a custom "
                                         "value prepended with 'x_'."
                                         % (key, h), instance['id'], 'hash-algo')
 
-        try:
-            head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
-        except KeyError:
-            pass
-        else:
-            for h in head_hashes:
-                if not (valid_hash_value(h)):
-                    yield JSONError("Object '%s' has a Windows PE Binary "
-                                    "File extension with a file header hash of "
-                                    "'%s', which is not a value in the "
-                                    "hash-algorithm-ov vocabulary nor a custom value "
-                                    "prepended with 'x_'."
-                                    % (key, h), instance['id'], 'hash-algo')
-
-        try:
-            hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-        except KeyError:
-            pass
-        else:
-            for h in hashes:
-                if not (valid_hash_value(h)):
-                    yield JSONError("Object '%s' has a Windows PE Binary "
-                                    "File extension with an optional header that "
-                                    "has a hash of '%s', which is not a value in "
-                                    "the hash-algorithm-ov vocabulary nor a custom "
-                                    "value prepended with 'x_'."
-                                    % (key, h), instance['id'], 'hash-algo')
-
-        try:
-            sections = instance['extensions']['windows-pebinary-ext']['sections']
-        except KeyError:
-            pass
-        else:
-            for s in sections:
-                if 'hashes' not in s:
-                    continue
-                for h in s['hashes']:
-                    if not (valid_hash_value(h)):
-                        yield JSONError("Object '%s' has a Windows PE "
-                                        "Binary File extension with a section that"
-                                        " has a hash of '%s', which is not a value"
-                                        " in the hash-algorithm-ov vocabulary nor a "
-                                        "custom value prepended with 'x_'."
-                                        % (key, h), instance['id'], 'hash-algo')
-
-    elif instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
-        try:
-            hashes = instance['hashes']
-        except KeyError:
-            pass
-        else:
-            for h in hashes:
-                if not (valid_hash_value(h)):
-                    yield JSONError("Object '%s' has a 'hashes' dictionary"
-                                    " with a hash of type '%s', which is not a "
-                                    "value in the hash-algorithm-ov vocabulary nor a "
-                                    "custom value prepended with 'x_'."
-                                    % (key, h), instance['id'], 'hash-algo')
+            if 'windows-pebinary-ext' in instance['extensions'] and 'sections' in instance['extensions']['windows-pebinary-ext']:
+                sections = instance['extensions']['windows-pebinary-ext']['sections']
+                for s in sections:
+                    if 'hashes' not in s:
+                        continue
+                    for h in s['hashes']:
+                        if not (valid_hash_value(h)):
+                            yield JSONError("Object '%s' has a Windows PE "
+                                            "Binary File extension with a section that"
+                                            " has a hash of '%s', which is not a value"
+                                            " in the hash-algorithm-ov vocabulary nor a "
+                                            "custom value prepended with 'x_'."
+                                            % (key, h), instance['id'], 'hash-algo')
 
 
 @cyber_observable_check("2.1")

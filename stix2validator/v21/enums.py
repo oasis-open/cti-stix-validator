@@ -297,7 +297,7 @@ HASH_ALGO_OV = [
     "SHA3-256",
     "SHA3-384",
     "SHA3-512",
-    "ssdeep",
+    "SSDEEP",
     "WHIRLPOOL",
 ]
 WINDOWS_PEBINARY_TYPE_OV = [
