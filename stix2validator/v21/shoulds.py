@@ -948,7 +948,7 @@ def socket_options(instance):
             if opt not in enums.SOCKET_OPTIONS:
                 yield JSONError("The 'options' property of object '%s' "
                                 "contains a key ('%s') that is not a valid"
-                                " socket option (SO_*)."
+                                " socket option (SO|ICMP|ICMP6|IP|IPV6|MCAST|TCP|IRLMP)_*."
                                 % (instance['id'], opt), instance['id'], 'socket-options')
 
 
