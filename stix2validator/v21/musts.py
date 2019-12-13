@@ -1,6 +1,5 @@
 """Mandatory (MUST) requirement checking functions
 """
-import dictsearch.search as dsearch
 import operator
 import re
 import uuid

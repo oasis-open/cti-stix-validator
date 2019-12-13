@@ -309,7 +309,7 @@ def list_json_files(directory, recursive=False):
 
         if not recursive:
             break
-    
+
     return json_files
 
 
