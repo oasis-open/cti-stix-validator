@@ -1246,6 +1246,17 @@ def properties_strict_helper(obj, obj_id):
                                         % (embed_ext_prop, ext_prop, ext_key), obj_id)
 
 
+def vocab_pattern_type(instance):
+    """Checks the pattern_type property in indicators for values defined in the spec"""
+    if instance['type'] != 'indicator' or 'pattern_type' not in instance:
+        return
+
+    pattern_types = enums.PATTERN_TYPE_OV
+    if instance['pattern_type'] not in pattern_types:
+        yield JSONError("Property 'pattern_type' with value %s"
+                        " not defined in the specification.", instance["id"])
+
+
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
@@ -1278,6 +1289,7 @@ CHECKS = {
         vocab_indicator_types,
         vocab_industry_sector,
         vocab_malware_types,
+        vocab_pattern_type,
         vocab_report_types,
         vocab_threat_actor_types,
         vocab_threat_actor_role,
@@ -1342,6 +1354,7 @@ CHECKS = {
         vocab_indicator_types,
         vocab_industry_sector,
         vocab_malware_types,
+        vocab_pattern_type,
         vocab_report_types,
         vocab_threat_actor_types,
         vocab_threat_actor_role,
@@ -1376,6 +1389,7 @@ CHECKS = {
         vocab_indicator_types,
         vocab_industry_sector,
         vocab_malware_types,
+        vocab_pattern_type,
         vocab_report_types,
         vocab_threat_actor_types,
         vocab_threat_actor_role,
@@ -1395,6 +1409,7 @@ CHECKS = {
     'malware-capabilities': vocab_malware_capabilities,
     'processor-architecture': vocab_processor_architecture,
     'identity-class': vocab_identity_class,
+    'indicator-pattern-types': vocab_pattern_type,
     'indicator-types': vocab_indicator_types,
     'industry-sector': vocab_industry_sector,
     'malware-types': vocab_malware_types,
@@ -1492,6 +1507,8 @@ def list_shoulds(options):
                         validator_list.append(CHECKS['attack-resource-level'])
                     if 'identity-class' not in options.disabled:
                         validator_list.append(CHECKS['identity-class'])
+                    if 'indicator-pattern-types' not in options.disabled:
+                        validator_list.append(CHECKS['indicator-pattern-types'])
                     if 'indicator-types' not in options.disabled:
                         validator_list.append(CHECKS['indicator-types'])
                     if 'industry-sector' not in options.disabled:
