@@ -106,6 +106,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | windows-pebinary-type vocabulary       |
 | 244  | account-type                | certain property values are from the   |
 |      |                             | account-type vocabulary                |
+| 245  | indicator-pattern-types     | certain property values are from the   |
+|      |                             | pattern-type vocabulary                |
 | 270  | all-external-sources        | all of the following external source   |
 |      |                             | checks are run                         |
 | 271  | mime-type                   | file.mime_type is a valid IANA MIME    |
@@ -123,8 +125,6 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | Document Information Dictionary keys   |
 | 277  | countries                   | certain property values are valid ISO  |
 |      |                             | 3166-1 ALPHA-2 codes                   |
-| 278  | indicator-pattern-types     | certain property values are from the   |
-|      |                             | pattern-type vocabulary                |
 | 301  | network-traffic-ports       | network-traffic objects contain both   |
 |      |                             | src_port and dst_port                  |
 | 302  | extref-hashes               | external references SHOULD have hashes |
