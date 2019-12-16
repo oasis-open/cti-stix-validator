@@ -188,13 +188,6 @@ MALWARE_CAPABILITIES_OV = [
     "steals-authentication-credentials",
     "violates-system-operational-integrity",
 ]
-OPINION_ENUM = [
-    "strongly-disagree",
-    "disagree",
-    "neutral",
-    "agree",
-    "strongly-agree",
-]
 INDICATOR_PATTERN_OV = [
     "stix",
     "pcre",
