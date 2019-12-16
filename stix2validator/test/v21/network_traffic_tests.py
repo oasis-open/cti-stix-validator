@@ -98,7 +98,9 @@ class ObservedDataTestCases(ValidatorTest):
                 "address_family": "AF_INET",
                 "socket_type": "SOCK_STREAM",
                 "options": {
-                    "foo": "bar"
+                    "SO_TEST": 1000,
+                    "IP_TEST": 100,
+                    "MCAST_TEST": 10
                 }
             }
         }
