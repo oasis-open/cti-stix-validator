@@ -154,6 +154,9 @@ Check Codes - STIX 2.1
 |  244   | account-type                | certain property values are from the   |
 |        |                             | account-type vocabulary                |
 +--------+-----------------------------+----------------------------------------+
+|  245   | indicator-pattern-types     | certain property values are from the   |
+|        |                             | pattern-type vocabulary                |
++--------+-----------------------------+----------------------------------------+
 |  270   | all-external-sources        | all of the following external source   |
 |        |                             | checks are run                         |
 +--------+-----------------------------+----------------------------------------+

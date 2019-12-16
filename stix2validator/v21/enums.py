@@ -188,6 +188,14 @@ MALWARE_CAPABILITIES_OV = [
     "steals-authentication-credentials",
     "violates-system-operational-integrity",
 ]
+INDICATOR_PATTERN_OV = [
+    "stix",
+    "pcre",
+    "sigma",
+    "snort",
+    "suricata",
+    "yara",
+]
 PROCESSOR_ARCHITECTURE_OV = [
     "alpha",
     "arm",
@@ -286,19 +294,13 @@ TOOL_TYPE_OV = [
 ]
 HASH_ALGO_OV = [
     "MD5",
-    "MD6",
-    "RIPEMD-160",
     "SHA-1",
-    "SHA-224",
     "SHA-256",
-    "SHA-384",
     "SHA-512",
-    "SHA3-224",
     "SHA3-256",
-    "SHA3-384",
     "SHA3-512",
-    "ssdeep",
-    "WHIRLPOOL",
+    "SSDEEP",
+    "TLSH",
 ]
 WINDOWS_PEBINARY_TYPE_OV = [
     "exe",
@@ -364,6 +366,9 @@ IMPLEMENTATION_LANGUAGES_USES = {
 }
 INDICATOR_TYPE_USES = {
     "indicator": ["indicator_types"],
+}
+INDICATOR_PATTERN_USES = {
+    "indicator": ["pattern_type"],
 }
 INFRASTRUCTURE_TYPE_USES = {
     "infrastructure": ["infrastructure_types"],
@@ -2112,6 +2117,7 @@ CHECK_CODES = {
     '241': 'hash-algo',
     '243': 'windows-pebinary-type',
     '244': 'account-type',
+    '245': 'indicator-pattern-types',
     '270': 'all-external-sources',
     '271': 'mime-type',
     '272': 'protocols',

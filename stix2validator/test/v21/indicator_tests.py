@@ -252,3 +252,17 @@ class IndicatorTestCases(ValidatorTest):
 
         results = validate_parsed_json(indicator, self.options)
         self.assertEqual(results.is_valid, True)
+
+    def test_indicator_different_pattern_type_not_in_enum(self):
+        pattern = ("signature example-signature {"
+                   "ip-proto == tcp"
+                   "dst-port == 80"
+                   "payload /^Some expression/"
+                   "}")
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator["pattern"] = pattern
+        indicator["pattern_type"] = "zeek"
+        indicator["pattern_version"] = "3.0.1"
+
+        self.assertFalseWithOptions(indicator)
+        self.check_ignore(indicator, 'indicator-pattern-types')

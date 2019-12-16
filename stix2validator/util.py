@@ -106,6 +106,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | windows-pebinary-type vocabulary       |
 | 244  | account-type                | certain property values are from the   |
 |      |                             | account-type vocabulary                |
+| 245  | indicator-pattern-types     | certain property values are from the   |
+|      |                             | pattern-type vocabulary                |
 | 270  | all-external-sources        | all of the following external source   |
 |      |                             | checks are run                         |
 | 271  | mime-type                   | file.mime_type is a valid IANA MIME    |
