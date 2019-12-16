@@ -2124,6 +2124,7 @@ CHECK_CODES = {
     '241': 'hash-algo',
     '243': 'windows-pebinary-type',
     '244': 'account-type',
+    '245': 'indicator-pattern-types',
     '270': 'all-external-sources',
     '271': 'mime-type',
     '272': 'protocols',
