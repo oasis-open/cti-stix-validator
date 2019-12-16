@@ -348,6 +348,11 @@ def vocab_region(instance):
                        'region')
 
 
+def vocab_pattern_type(instance):
+    return check_vocab(instance, "INDICATOR_PATTERN",
+                       'indicator-pattern-types')
+
+
 def vocab_marking_definition(instance):
     """Ensure that the `definition_type` property of `marking-definition`
     objects is one of the values in the STIX 2.0 specification.
@@ -1244,17 +1249,6 @@ def properties_strict_helper(obj, obj_id):
                         yield JSONError("Property '%s' in the %s property of the %s extension "
                                         "is not one of those defined in the specification."
                                         % (embed_ext_prop, ext_prop, ext_key), obj_id)
-
-
-def vocab_pattern_type(instance):
-    """Checks the pattern_type property in indicators for values defined in the spec"""
-    if instance['type'] != 'indicator' or 'pattern_type' not in instance:
-        return
-
-    pattern_types = enums.PATTERN_TYPE_OV
-    if instance['pattern_type'] not in pattern_types:
-        yield JSONError("Property 'pattern_type' with value %s"
-                        " not defined in the specification.", instance["id"])
 
 
 # Mapping of check names to the functions which perform the checks

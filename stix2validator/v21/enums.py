@@ -195,7 +195,7 @@ OPINION_ENUM = [
     "agree",
     "strongly-agree",
 ]
-PATTERN_TYPE_OV = [
+INDICATOR_PATTERN_OV = [
     "stix",
     "pcre",
     "sigma",
@@ -373,6 +373,9 @@ IMPLEMENTATION_LANGUAGES_USES = {
 }
 INDICATOR_TYPE_USES = {
     "indicator": ["indicator_types"],
+}
+INDICATOR_PATTERN_USES = {
+    "indicator": ["pattern_type"],
 }
 INFRASTRUCTURE_TYPE_USES = {
     "infrastructure": ["infrastructure_types"],
