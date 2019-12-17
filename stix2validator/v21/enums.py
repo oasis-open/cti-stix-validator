@@ -2252,7 +2252,10 @@ def ipfix():
         ipfix.ipflist = ilist
     return ipfix.ipflist
 
-
+# If you have a Socket Option not present in this list
+# for SO|ICMP|ICMP6|IP|IPV6|MCAST|TCP|IRLMP please open an issue/PR
+# in https://github.com/oasis-open/cti-stix-validator/ to include it.
+# Include a reference (link) to where its defined.
 SOCKET_OPTIONS = [
     'ICMP6_FILTER',
     'IP_ADD_MEMBERSHIP',
