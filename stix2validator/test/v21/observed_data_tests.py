@@ -355,7 +355,7 @@ class ObservedDataTestCases(ValidatorTest):
     def test_observable_object_embedded_custom_properties_lax(self):
         observed_data = {
             "type": "x509-certificate",
-            "id": "x509-certificate--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
+            "id": "x509-certificate--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4",
             "x509_v3_extensions": {
               "issuer_alternative_name": "Example Corp",
               "foo": "bar"
@@ -499,7 +499,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.check_ignore(observed_data, 'windows-process-priority-format')
 
     def test_process_uuidv5(self):
-        # Process is the only SCO not recommended to use UUIDv4
+        # Process requires a uuidv4
         observed_data = {
             "type": "process",
             "id": "process--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
@@ -507,7 +507,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        self.check_ignore(observed_data, 'uuid-check')
+        observed_data['id'] = "process--ff1e0780-358c-4808-a8c7-d0fca4ef6ef4"
+        self.assertTrueWithOptions(observed_data)
 
     def test_uuidv4(self):
         observed_data = copy.deepcopy(self.valid_object)

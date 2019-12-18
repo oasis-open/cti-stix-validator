@@ -2,6 +2,7 @@
 """
 import operator
 import re
+import uuid
 
 from dateutil import parser
 from six import string_types
@@ -414,7 +415,13 @@ def patterns(instance, options):
     pattern = instance['pattern']
     if not isinstance(pattern, string_types):
         return  # This error already caught by schemas
-    errors = pattern_validator(pattern, stix_version='2.1')
+    if 'pattern_version' in instance:
+        pattern_version = instance['pattern_version']
+    elif 'spec_version' in instance:
+        pattern_version = instance['spec_version']
+    else:
+        pattern_version = '2.1'
+    errors = pattern_validator(pattern, pattern_version)
 
     # Check pattern syntax
     if errors:
@@ -488,6 +495,39 @@ def language_contents(instance):
                                 % (subkey, key), instance['id'], 'observable-dictionary-keys')
 
 
+def uuid_version_check(instance):
+    """Ensure that an SCO with only optional ID Contributing Properties use a
+    UUIDv4"""
+    x = ['artifact', 'email-message', 'user-account', 'windows-registry-key', 'x509-certificate']
+    if instance['type'] not in x or 'id' not in instance:
+        return
+
+    object_id = uuid.UUID(instance['id'].split("--")[-1])
+    if instance['type'] == 'artifact':
+        x = ['hashes', 'payload_bin']
+    elif instance['type'] == 'email-message':
+        x = ['from_ref', 'subject', 'body']
+    elif instance['type'] == 'user-account':
+        x = ['account_type', 'user_id', 'account_login']
+    elif instance['type'] == 'windows-registry-key':
+        x = ['key', 'values']
+    elif instance['type'] == 'x509-certificate':
+        x = ['hashes', 'serial_number']
+
+    if all(k not in instance for k in x) and object_id.version != 4:
+        yield JSONError("If no Contributing Properties are present, a UUIDv4 must be used", 'uuid_version_check')
+
+
+def process(instance):
+    """Ensure that process objects use UUIDv4"""
+    if instance['type'] != 'process':
+        return
+
+    object_id = uuid.UUID(instance['id'].split("--")[-1])
+    if object_id.version != 4:
+        yield JSONError("A process object must use UUIDv4 in its id", 'process')
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -505,6 +545,8 @@ def list_musts(options):
         software_language,
         patterns,
         language_contents,
+        uuid_version_check,
+        process
     ]
 
     return validator_list
