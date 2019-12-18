@@ -428,7 +428,7 @@ def vocab_hash_algo(instance):
     if 'type' not in instance:
         return
 
-    if (instance['type'] == 'file' or instance['type'] == 'artifact' or instance['type'] == 'x509-certificate') and 'hashes' in instance:
+    if instance['type'] in ['file', 'artifact', 'x509-certificate'] and 'hashes' in instance:
         hashes = instance['hashes']
         for h in hashes:
             if not (valid_hash_value(h)):
