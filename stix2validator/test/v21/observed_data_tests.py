@@ -16,8 +16,8 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
   "last_observed": "2015-12-21T19:00:00Z",
   "number_observed": 50,
   "object_refs": [
-    "ipv4-address--efcd5e80-570d-4131-b213-62cb18eaa6a8",
-    "domain-name--ecb120bf-2694-4902-a737-62b74539a41b"
+        "ipv4-address--efcd5e80-570d-4131-b213-62cb18eaa6a8",
+        "domain-name--ecb120bf-2694-4902-a737-62b74539a41b"
     ]
 }
 """
