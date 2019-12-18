@@ -414,7 +414,7 @@ def patterns(instance, options):
         return  # This error already caught by schemas
     if 'pattern_version' in instance:
         pattern_version = instance['pattern_version']
-    elif 'spec_version' in instance and instance['pattern_type'] == 'stix':
+    elif 'spec_version' in instance:
         pattern_version = instance['spec_version']
     else:
         pattern_version = '2.1'
@@ -525,79 +525,6 @@ def process(instance):
         yield JSONError("A process object must use UUIDv4 in its id", 'process')
 
 
-def check_hash_value(h, v):
-    """Uses Regex to check hash value against expected pattern of hash
-    function"""
-    if h == "MD5":
-        return True if re.match(r"(^[a-fA-F0-9]{32}$)", v) else False
-    if h == "SHA-1":
-        return True if re.match(r"(^[a-fA-F0-9]{40}$)", v) else False
-    if h == "SHA-256":
-        return True if re.match(r"(^[a-fA-F0-9]{64}$)", v) else False
-    if h == "SHA-512":
-        return True if re.match(r"(^[a-fA-F09]{128}$)", v) else False
-    if h == "SHA3-256":
-        return True if re.match(r"(^[a-fA-F09]{64}$)", v) else False
-    if h == "SHA3-512":
-        return True if re.match(r"(^[a-fA-F09]{128}$)", v) else False
-    if h == "SSDEEP":
-        return True if re.match(r"(^[a-zA-Z0-9+.:/]{1,128}$)", v) else False
-    if h == "TLSH":
-        return True if re.match(r"(^[a-fA-F0-9]{70}$)", v) else False
-    return True
-
-
-def hash_value(instance):
-    """Ensure that any hash dictionary has a correct hash function to hash
-    relationship"""
-    if 'type' not in instance:
-        return
-
-    if instance['type'] == 'file' or instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
-        if 'hashes' in instance:
-            hashes = instance['hashes']
-            for h in hashes:
-                if not (check_hash_value(h, hashes[h])):
-                    yield JSONError("Hash value '%s' is not an acceptable "
-                                    "value for hash function '%s'" % (hashes[h], h), 'hash_value')
-
-        if instance['type'] == 'file' and 'extensions' in instance:
-            if 'ntfs-ext' in instance['extensions'] and 'alternate_data_streams' in instance['extensions']['ntfs-ext']:
-                ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
-                for datastream in ads:
-                    if 'hashes' not in datastream:
-                        continue
-                    for h in datastream['hashes']:
-                        if not (check_hash_value(h, datastream['hashes'][h])):
-                            yield JSONError("Hash value '%s' is not an acceptable "
-                                            "value for hash function '%s'" % (datastream['hashes'][h], h), 'hash_value')
-
-            if 'windows-pebinary-ext' in instance['extensions'] and 'file_header_hashes' in instance['extensions']['windows-pebinary-ext']:
-                if 'file_header_hashes' in instance['extensions']['windows-pebinary-ext']:
-                    head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
-                    for h in head_hashes:
-                        if not (check_hash_value(h, head_hashes[h])):
-                            yield JSONError("Hash value '%s' is not an acceptable "
-                                            "value for hash function '%s'" % (head_hashes[h], h), 'hash_value')
-
-            if 'windows-pebinary-ext' in instance['extensions'] and 'optional_header' in instance['extensions']['windows-pebinary-ext']:
-                hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-                for h in hashes:
-                    if not (check_hash_value(h, hashes[h])):
-                        yield JSONError("Hash value '%s' is not an acceptable "
-                                        "value for hash function '%s'" % (hashes[h], h), 'hash_value')
-
-            if 'windows-pebinary-ext' in instance['extensions'] and 'sections' in instance['extensions']['windows-pebinary-ext']:
-                sections = instance['extensions']['windows-pebinary-ext']['sections']
-                for s in sections:
-                    if 'hashes' not in s:
-                        continue
-                    for h in s['hashes']:
-                        if not (check_hash_value(h, s['hashes'][h])):
-                            yield JSONError("Hash value '%s' is not an acceptable "
-                                            "value for hash function '%s'" % (s['hashes'][h], h), 'hash_value')
-
-
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -616,8 +543,7 @@ def list_musts(options):
         patterns,
         language_contents,
         uuid_version_check,
-        process,
-        hash_value
+        process
     ]
 
     return validator_list
