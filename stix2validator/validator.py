@@ -611,7 +611,7 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
     if schema_dir is None:
         schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
                                      + version + '/')
-
+            
     try:
         schema_path = find_schema(schema_dir, type)
         schema = load_schema(schema_path)
@@ -622,7 +622,7 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
             # Only raise an error when checking against default schemas, not custom
-            if schema_dir is not None:
+            if schema_path is not None:
                 return None
             raise SchemaInvalidError("Cannot locate a schema for the object's "
                                      "type, nor the base schema ({}.json).".format(default))
