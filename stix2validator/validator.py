@@ -624,11 +624,11 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
             # Only raise an error when checking against default schemas, not custom
-            if default_path == False:
+            if default_path is False:
                 return None
             if schema_path is None:
                 raise SchemaInvalidError("Cannot locate a schema for the object's "
-                                     "type, nor the base schema ({}.json).".format(default))
+                                         "type, nor the base schema ({}.json).".format(default))
 
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
