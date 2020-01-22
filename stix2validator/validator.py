@@ -608,7 +608,9 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
     """
     # If no schema directory given, use default for the given STIX version,
     # which comes bundled with this package
+    default_path = False
     if schema_dir is None:
+        default_path = True
         schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
                                      + version + '/')
 
@@ -622,10 +624,11 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
             # Only raise an error when checking against default schemas, not custom
-            if schema_dir is not None:
+            if default_path is False:
                 return None
-            raise SchemaInvalidError("Cannot locate a schema for the object's "
-                                     "type, nor the base schema ({}.json).".format(default))
+            if schema_path is None:
+                raise SchemaInvalidError("Cannot locate a schema for the object's "
+                                         "type, nor the base schema ({}.json).".format(default))
 
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
@@ -738,14 +741,15 @@ def _schema_validate(sdo, options):
                                    error_prefix + 'object \'' + key + '\': '))
 
             # Get validator for any user-supplied schema
-            custom_obs_errors = _get_error_generator(obj['type'],
-                                                     obj,
-                                                     options.schema_dir,
-                                                     version,
-                                                     'cyber-observable-core')
-            if custom_obs_errors:
-                error_gens.append((custom_obs_errors,
-                                   error_prefix + 'object \'' + key + '\': '))
+            if options.schema_dir:
+                custom_obs_errors = _get_error_generator(obj['type'],
+                                                         obj,
+                                                         options.schema_dir,
+                                                         version,
+                                                         'cyber-observable-core')
+                if custom_obs_errors:
+                    error_gens.append((custom_obs_errors,
+                                       error_prefix + 'object \'' + key + '\': '))
 
     return error_gens
 
