@@ -741,14 +741,15 @@ def _schema_validate(sdo, options):
                                    error_prefix + 'object \'' + key + '\': '))
 
             # Get validator for any user-supplied schema
-            custom_obs_errors = _get_error_generator(obj['type'],
-                                                     obj,
-                                                     options.schema_dir,
-                                                     version,
-                                                     'cyber-observable-core')
-            if custom_obs_errors:
-                error_gens.append((custom_obs_errors,
-                                   error_prefix + 'object \'' + key + '\': '))
+            if options.schema_dir:
+                custom_obs_errors = _get_error_generator(obj['type'],
+                                                         obj,
+                                                         options.schema_dir,
+                                                         version,
+                                                         'cyber-observable-core')
+                if custom_obs_errors:
+                    error_gens.append((custom_obs_errors,
+                                       error_prefix + 'object \'' + key + '\': '))
 
     return error_gens
 
