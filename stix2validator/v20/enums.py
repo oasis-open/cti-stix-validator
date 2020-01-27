@@ -333,6 +333,7 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
+        'last_seen',
         'objective'
     ],
     "course-of-action": [
@@ -400,6 +401,7 @@ PROPERTIES = {
         'description',
         'aliases',
         'first_seen',
+        'last_seen',
         'goals',
         'resource_level',
         'primary_motivation',
