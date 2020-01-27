@@ -444,8 +444,12 @@ def vocab_hash_algo(instance):
                                 % (key, h), instance['id'], 'hash-algo')
 
     if instance['type'] == 'file' and 'extensions' in instance:
-        if 'ntfs-ext' in instance['extensions'] and 'alternate_data_streams' in instance['extensions']['ntfs-ext']:
+        # if 'ntfs-ext' in instance['extensions'] and 'alternate_data_streams' in instance['extensions']['ntfs-ext']:
+        try:
             ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
+        except KeyError:
+            pass
+        else:
             for datastream in ads:
                 if 'hashes' not in datastream:
                     continue
@@ -459,8 +463,11 @@ def vocab_hash_algo(instance):
                                         "value prepended with 'x_'."
                                         % (key, h), instance['id'], 'hash-algo')
 
-        if 'windows-pebinary-ext' in instance['extensions'] and 'file_header_hashes' in instance['extensions']['windows-pebinary-ext']:
+        try:
             head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
+        except KeyError:
+            pass
+        else:
             for h in head_hashes:
                 if not (valid_hash_value(h)):
                     yield JSONError("Object '%s' has a Windows PE Binary "
@@ -470,8 +477,11 @@ def vocab_hash_algo(instance):
                                     "prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
-        if 'windows-pebinary-ext' in instance['extensions'] and 'optional_header' in instance['extensions']['windows-pebinary-ext']:
+        try:
             hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
+        except KeyError:
+            pass
+        else:
             for h in hashes:
                 if not (valid_hash_value(h)):
                     yield JSONError("Object '%s' has a Windows PE Binary "
@@ -481,8 +491,11 @@ def vocab_hash_algo(instance):
                                     "value prepended with 'x_'."
                                     % (key, h), instance['id'], 'hash-algo')
 
-        if 'windows-pebinary-ext' in instance['extensions'] and 'sections' in instance['extensions']['windows-pebinary-ext']:
+        try:
             sections = instance['extensions']['windows-pebinary-ext']['sections']
+        except KeyError:
+            pass
+        else:
             for s in sections:
                 if 'hashes' not in s:
                     continue
