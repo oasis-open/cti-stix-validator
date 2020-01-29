@@ -492,7 +492,7 @@ def language_contents(instance):
             if not PROPERTY_FORMAT_RE.match(subkey):
                 yield JSONError("'%s' in '%s' of the 'contents' property is "
                                 "invalid and must match a valid property name"
-                                % (subkey, key), instance['id'], 'observable-dictionary-keys')
+                                % (subkey, key), instance['id'])
 
 
 def uuid_version_check(instance):
@@ -515,7 +515,8 @@ def uuid_version_check(instance):
         x = ['hashes', 'serial_number']
 
     if all(k not in instance for k in x) and object_id.version != 4:
-        yield JSONError("If no Contributing Properties are present, a UUIDv4 must be used", 'uuid_version_check')
+        yield JSONError("If no Contributing Properties are present, a UUIDv4 "
+                        "must be used", instance['id'])
 
 
 def process(instance):
@@ -525,7 +526,7 @@ def process(instance):
 
     object_id = uuid.UUID(instance['id'].split("--")[-1])
     if object_id.version != 4:
-        yield JSONError("A process object must use UUIDv4 in its id", 'process')
+        yield JSONError("A process object must use UUIDv4 for its id", instance['id'])
 
 
 def list_musts(options):
