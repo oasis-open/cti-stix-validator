@@ -95,7 +95,10 @@ To do this use the ``--schema-dir`` argument:
   
 or in Python:
 
-  from stix2validator import ValidationOptions
-  options = ValidationOptions(strict=True, version="2.0",       
-                              schema_dir="/path/to/schemas")
+.. code:: python
 
+  from stix2validator import ValidationOptions
+  
+  options = ValidationOptions(strict=True, version="2.0", schema_dir="/path/to/custom/schemas")
+  results = validate_file("stix_file.json")
+  print_results(results)
