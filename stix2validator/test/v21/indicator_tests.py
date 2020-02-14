@@ -266,3 +266,9 @@ class IndicatorTestCases(ValidatorTest):
 
         self.assertFalseWithOptions(indicator)
         self.check_ignore(indicator, 'indicator-pattern-types')
+
+    def test_indicator_no_pattern_type(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        del indicator["pattern_type"]
+
+        self.assertFalseWithOptions(indicator)

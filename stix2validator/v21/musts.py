@@ -409,7 +409,7 @@ def patterns(instance, options):
     if instance['type'] != 'indicator' or 'pattern' not in instance:
         return
 
-    if instance['pattern_type'] != 'stix':
+    if instance.get('pattern_type', '') != 'stix':
         return
 
     pattern = instance['pattern']
