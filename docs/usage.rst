@@ -92,3 +92,15 @@ To do this use the ``--schema-dir`` argument:
 ::
 
   $ stix2_validator --schema-dir /path/to/my/schemas <stix_file.json>
+
+or in Python:
+
+.. code:: python
+
+  from stix2validator import ValidationOptions
+
+  options = ValidationOptions(strict=True, version="2.0", schema_dir="/path/to/custom/schemas")
+  results = validate_file("stix_file.json")
+  print_results(results)
+
+You can see some examples of custom schemas `here <https://github.com/oasis-open/cti-stix-validator/tree/master/stix2validator/test/v20/test_schemas>`_. Note that if you want to add a custom property to an existing object type, your custom schema only needs to contain that property; the validator's built-in schemas are still checked against and will handle the rest.
