@@ -7,7 +7,7 @@ from itertools import chain
 import os
 import sys
 
-from jsonschema import Draft7Validator, RefResolver
+from jsonschema import Draft7Validator, RefResolver, draft7_format_checker
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
 import simplejson as json
@@ -552,7 +552,7 @@ def load_validator(schema_path, schema):
         resolver.store[schema_id] = schema
     # RefResolver creates a new store internally; persist it so we can use the same mappings every time
     SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver)
+    validator = STIXValidator(schema, resolver=resolver, format_checker=draft7_format_checker)
     return validator
 
 
