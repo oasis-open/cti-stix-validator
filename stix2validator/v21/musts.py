@@ -21,6 +21,8 @@ CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
 CUSTOM_TYPE_LAX_PREFIX_RE = re.compile(r"^x\-.+$")
 CUSTOM_PROPERTY_PREFIX_RE = re.compile(r"^x_.+_.+$")
 CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile(r"^x_.+$")
+CUSTOM_EXT_PREFIX_RE = re.compile(r"^x\-.+\-.+\-ext$")
+CUSTOM_EXT_LAX_PREFIX_RE = re.compile(r"^x\-.+\-ext$")
 
 
 def timestamp(instance):
