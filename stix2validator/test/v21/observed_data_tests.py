@@ -261,7 +261,7 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_observable_object_extensions(self):
         observed_data = copy.deepcopy(self.valid_object)
-        observed_data['extensions']['foobar'] = {
+        observed_data['extensions']['foobar-ext'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data)
@@ -273,14 +273,21 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_observable_object_extensions_prefix_lax(self):
         observed_data = copy.deepcopy(self.valid_object)
-        observed_data['extensions']['foobar'] = {
+        observed_data['extensions']['foobar-ext'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data,
                                     disabled='custom-prefix')
 
-        del observed_data['extensions']['foobar']
+        del observed_data['extensions']['foobar-ext']
         observed_data['extensions']['x-foobar'] = {
+            "foo": "bar"
+        }
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix')
+
+        del observed_data['extensions']['x-foobar']
+        observed_data['extensions']['x-foobar-ext'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data)

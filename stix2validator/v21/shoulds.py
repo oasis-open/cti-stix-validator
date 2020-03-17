@@ -26,7 +26,8 @@ from ..output import info
 from ..util import cyber_observable_check, has_cyber_observable_data
 from ..v20.shoulds import enforce_relationship_refs
 from .errors import JSONError
-from .musts import (CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
+from .musts import (CUSTOM_EXT_LAX_PREFIX_RE, CUSTOM_EXT_PREFIX_RE,
+                    CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
                     CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
 
 PROTOCOL_RE = re.compile(r'^[a-zA-Z0-9-]{1,15}$')
@@ -621,7 +622,7 @@ def custom_object_extension_prefix_strict(instance):
         return
     for ext_key in instance['extensions']:
         if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
-                not CUSTOM_TYPE_PREFIX_RE.match(ext_key)):
+                not CUSTOM_EXT_PREFIX_RE.match(ext_key)):
             yield JSONError("Custom Cyber Observable Object extension type"
                             " '%s' should start with 'x-' followed by a source "
                             "unique identifier (like a domain name with dots "
@@ -640,7 +641,7 @@ def custom_object_extension_prefix_lax(instance):
         return
     for ext_key in instance['extensions']:
         if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
-                not CUSTOM_TYPE_LAX_PREFIX_RE.match(ext_key)):
+                not CUSTOM_EXT_LAX_PREFIX_RE.match(ext_key)):
             yield JSONError("Custom Cyber Observable Object extension type"
                             " '%s' should start with 'x-'."
                             % ext_key, instance['id'],
