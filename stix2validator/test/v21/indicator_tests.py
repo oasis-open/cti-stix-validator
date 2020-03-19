@@ -250,8 +250,9 @@ class IndicatorTestCases(ValidatorTest):
         indicator["pattern_type"] = "snort"
         indicator["pattern_version"] = "2.9.15"
 
-        results = validate_parsed_json(indicator, self.options)
-        self.assertEqual(results.is_valid, True)
+        self.assertTrueWithOptions(indicator)
+        self.assertTrueWithOptions(indicator, strict_types=True)
+        self.assertTrueWithOptions(indicator, strict_properties=True)
 
     def test_indicator_different_pattern_type_not_in_enum(self):
         pattern = ("signature example-signature {"
