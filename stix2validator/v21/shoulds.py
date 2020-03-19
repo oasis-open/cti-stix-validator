@@ -1142,15 +1142,15 @@ def types_strict(instance):
                                 "specification."
                                 % (key, obj['type']), instance['id'])
 
-    if instance['type'] == 'indicator' and 'pattern' in instance:
+    if (instance['type'] == 'indicator' and instance.get('pattern_type', '') == 'stix' and
+            isinstance(instance.get('pattern', ''), string_types)):
         pattern = instance['pattern']
-        if isinstance(pattern, string_types):
-            p = Pattern(pattern)
-            inspection = p.inspect().comparisons
-            for objtype in inspection:
-                if objtype not in enums.OBSERVABLE_TYPES:
-                    yield PatternError("'%s' is not a valid stix observable type"
-                                       % objtype, instance['id'])
+        p = Pattern(pattern)
+        inspection = p.inspect().comparisons
+        for objtype in inspection:
+            if objtype not in enums.OBSERVABLE_TYPES:
+                yield PatternError("'%s' is not a valid stix observable type"
+                                   % objtype, instance['id'])
 
 
 def properties_strict(instance):
@@ -1175,19 +1175,19 @@ def properties_strict(instance):
             for error in properties_strict_helper(instance, instance['id']):
                 yield error
 
-    if instance['type'] == 'indicator' and 'pattern' in instance:
+    if (instance['type'] == 'indicator' and instance.get('pattern_type', '') == 'stix' and
+            isinstance(instance.get('pattern', ''), string_types)):
         pattern = instance['pattern']
-        if isinstance(pattern, string_types):
-            p = Pattern(pattern)
-            inspection = p.inspect().comparisons
-            for objtype, expression_list in inspection.items():
-                for exp in expression_list:
-                    path = exp[0]
-                    # Get the property name without list index, dictionary key, or referenced object property
-                    prop = path[0]
-                    if objtype in enums.OBSERVABLE_PROPERTIES and prop not in enums.OBSERVABLE_PROPERTIES[objtype]:
-                        yield PatternError("'%s' is not a valid property for '%s' objects"
-                                           % (prop, objtype), instance['id'])
+        p = Pattern(pattern)
+        inspection = p.inspect().comparisons
+        for objtype, expression_list in inspection.items():
+            for exp in expression_list:
+                path = exp[0]
+                # Get the property name without list index, dictionary key, or referenced object property
+                prop = path[0]
+                if objtype in enums.OBSERVABLE_PROPERTIES and prop not in enums.OBSERVABLE_PROPERTIES[objtype]:
+                    yield PatternError("'%s' is not a valid property for '%s' objects"
+                                       % (prop, objtype), instance['id'])
 
 
 def properties_strict_helper(obj, obj_id):
