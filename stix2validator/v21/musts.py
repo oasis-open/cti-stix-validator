@@ -4,6 +4,7 @@ import operator
 import re
 import uuid
 
+from cpe import CPE
 from dateutil import parser
 from six import string_types
 from stix2patterns.v21.pattern import Pattern
@@ -531,6 +532,29 @@ def process(instance):
         yield JSONError("A process object must use UUIDv4 for its id", instance['id'])
 
 
+def cpe_check(instance):
+    """Checks to see if provided cpe is a valid CPE v2.3 entry
+    """
+    if 'cpe' not in instance:
+        return
+    try:
+        CPE(instance['cpe'], CPE.VERSION_2_3)
+    except NotImplementedError:
+        yield JSONError("Provided os execution environment %s is not"
+                        " CPE v2.3 compliant." % instance['cpe'], instance['id'],
+                        'cpe-check')
+
+
+def action_check(instance):
+    """Checks to see action is not set in a course-of-action. This property is reserved
+    """
+    if 'action' not in instance or instance['type'] != 'course-of-action':
+        return
+    else:
+        yield JSONError("'action' is a reserved property in 'course-of-action'.",
+                        instance['id'], 'action-check')
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -549,6 +573,8 @@ def list_musts(options):
         patterns,
         language_contents,
         uuid_version_check,
+        cpe_check,
+        action_check,
         process
     ]
 

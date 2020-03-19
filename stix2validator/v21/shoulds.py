@@ -16,7 +16,6 @@ from itertools import chain
 import re
 import uuid
 
-from cpe import CPE
 from six import string_types
 from stix2patterns.v21.pattern import Pattern
 
@@ -165,20 +164,6 @@ def uuid_check(instance):
                         % instance['id'], instance['id'], 'uuid-check')
 
 
-def os_execution_envs_check(instance):
-    """Checks to see if provided os execution env is a valid CPE v2.3 entry
-    """
-    if 'os_execution_envs' not in instance:
-        return
-    for os_env in instance['os_execution_envs']:
-        try:
-            CPE(os_env, CPE.VERSION_2_3)
-        except NotImplementedError:
-            yield JSONError("Provided os execution environment %s is not"
-                            " CPE v2.3 compliant." % os_env, instance['id'],
-                            'os-execution-envs')
-
-
 def open_vocab_values(instance):
     """Ensure that the values of all properties which use open vocabularies are
     in lowercase and use hyphens instead of spaces or underscores as word
@@ -267,11 +252,6 @@ def vocab_attack_motivation(instance):
 def vocab_attack_resource_level(instance):
     return check_vocab(instance, "ATTACK_RESOURCE_LEVEL",
                        'attack-resource-level')
-
-
-def vocab_course_of_action_type(instance):
-    return check_vocab(instance, "COURSE_OF_ACTION_TYPE",
-                       'course-of-action-type')
 
 
 def vocab_grouping_context(instance):
@@ -383,8 +363,8 @@ def relationships_strict(instance):
 
     r_type = instance['relationship_type']
     try:
-        r_source = re.search(r"(.+)\-\-", instance['source_ref']).group(1)
-        r_target = re.search(r"(.+)\-\-", instance['target_ref']).group(1)
+        r_source = re.search(r"(.+)--", instance['source_ref']).group(1)
+        r_target = re.search(r"(.+)--", instance['target_ref']).group(1)
     except (AttributeError, TypeError):
         # Schemas already catch errors of these properties not being strings or
         # not containing the string '--'.
@@ -699,7 +679,7 @@ def custom_observable_properties_prefix_strict(instance):
                                     'custom-prefix')
 
     # Check object extensions' properties
-    if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance):
+    if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance:
         for ext_key in instance['extensions']:
 
             if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
@@ -776,7 +756,7 @@ def custom_observable_properties_prefix_lax(instance):
                                     'custom-prefix-lax')
 
     # Check object extensions' properties
-    if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance):
+    if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance:
         for ext_key in instance['extensions']:
 
             if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
@@ -825,7 +805,7 @@ def mime_type(instance):
     """
     mime_pattern = re.compile(r'^(application|audio|font|image|message|model'
                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
-    if ('type' in instance and instance['type'] == 'file' and 'mime_type' in instance):
+    if 'type' in instance and instance['type'] == 'file' and 'mime_type' in instance:
         if enums.media_types():
             if instance['mime_type'] not in enums.media_types():
                 yield JSONError("The 'mime_type' property of object '%s' "
@@ -908,7 +888,7 @@ def http_request_headers(instance):
     not differentiate between request and response headers, and leaves out
     several common non-standard request fields listed elsewhere.
     """
-    if ('type' in instance and instance['type'] == 'network-traffic'):
+    if 'type' in instance and instance['type'] == 'network-traffic':
         try:
             headers = instance['extensions']['http-request-ext']['request_header']
         except KeyError:
@@ -928,7 +908,7 @@ def socket_options(instance):
     """Ensure the keys of the 'options' property of the socket-ext extension of
     network-traffic objects are only valid socket options (SO_*).
     """
-    if ('type' in instance and instance['type'] == 'network-traffic'):
+    if 'type' in instance and instance['type'] == 'network-traffic':
         try:
             options = instance['extensions']['socket-ext']['options']
         except KeyError:
@@ -948,7 +928,7 @@ def pdf_doc_info(instance):
     extension of file objects are only valid PDF Document Information
     Dictionary Keys.
     """
-    if ('type' in instance and instance['type'] == 'file'):
+    if 'type' in instance and instance['type'] == 'file':
         try:
             did = instance['extensions']['pdf-ext']['document_info_dict']
         except KeyError:
@@ -1019,7 +999,7 @@ def hash_length(instance):
             return
         else:
             for h in hashes:
-                if (len(h) > 30):
+                if len(h) > 30:
                     return JSONError("Object '%s' has a 'hashes' dictionary"
                                      " with a hash of type '%s', which is "
                                      "longer than 30 characters."
@@ -1034,7 +1014,7 @@ def hash_length(instance):
                 if 'hashes' not in datastream:
                     return
                 for h in datastream['hashes']:
-                    if (len(h) > 30):
+                    if len(h) > 30:
                         return JSONError("Object '%s' has an NTFS extension"
                                          " with an alternate data stream that has a"
                                          " 'hashes' dictionary with a hash of type "
@@ -1048,7 +1028,7 @@ def hash_length(instance):
             return
         else:
             for h in head_hashes:
-                if (len(h) > 30):
+                if len(h) > 30:
                     return JSONError("Object '%s' has a Windows PE Binary "
                                      "File extension with a file header hash of "
                                      "'%s', which is longer than 30 "
@@ -1061,7 +1041,7 @@ def hash_length(instance):
             return
         else:
             for h in hashes:
-                if (len(h) > 30):
+                if len(h) > 30:
                     return JSONError("Object '%s' has a Windows PE Binary "
                                      "File extension with an optional header that "
                                      "has a hash of '%s', which is longer "
@@ -1077,7 +1057,7 @@ def hash_length(instance):
                 if 'hashes' not in s:
                     return
                 for h in s['hashes']:
-                    if (len(h) > 30):
+                    if len(h) > 30:
                         return JSONError("Object '%s' has a Windows PE "
                                          "Binary File extension with a section that"
                                          " has a hash of '%s', which is "
@@ -1091,7 +1071,7 @@ def hash_length(instance):
             return
         else:
             for h in hashes:
-                if (len(h) > 30):
+                if len(h) > 30:
                     return JSONError("Object '%s' has a 'hashes' dictionary"
                                      " with a hash of type '%s', which is "
                                      "longer than 30 characters."
@@ -1104,7 +1084,7 @@ def extref_hashes(instance):
             if 'url' in extref and 'hashes' not in extref:
                 src = extref['source_name'] if 'source_name' in extref else ''
                 return JSONError("External reference '%s' has a URL but no hash."
-                                 % (src), instance['id'], 'extref-hashes')
+                                 % src, instance['id'], 'extref-hashes')
 
 
 def duplicate_ids(instance):
@@ -1252,13 +1232,11 @@ CHECKS = {
         malware_analysis_product,
         windows_process_priority_format,
         hash_length,
-        os_execution_envs_check,
         vocab_marking_definition,
         relationships_strict,
         duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
-        vocab_course_of_action_type,
         vocab_grouping_context,
         vocab_implementation_languages,
         vocab_infrastructure_types,
@@ -1304,7 +1282,6 @@ CHECKS = {
         malware_analysis_product,
         windows_process_priority_format,
         hash_length,
-        os_execution_envs_check,
     ],
     'custom-prefix': custom_prefix_strict,
     'custom-prefix-lax': custom_prefix_lax,
@@ -1316,14 +1293,12 @@ CHECKS = {
     'malware-analysis-product': malware_analysis_product,
     'windows-process-priority-format': windows_process_priority_format,
     'hash-length': hash_length,
-    "os-execution-envs": os_execution_envs_check,
     'approved-values': [
         vocab_marking_definition,
         relationships_strict,
         duplicate_ids,
         vocab_attack_motivation,
         vocab_attack_resource_level,
-        vocab_course_of_action_type,
         vocab_grouping_context,
         vocab_implementation_languages,
         vocab_infrastructure_types,
@@ -1358,7 +1333,6 @@ CHECKS = {
     'all-vocabs': [
         vocab_attack_motivation,
         vocab_attack_resource_level,
-        vocab_course_of_action_type,
         vocab_grouping_context,
         vocab_implementation_languages,
         vocab_infrastructure_types,
@@ -1381,7 +1355,6 @@ CHECKS = {
     ],
     'attack-motivation': vocab_attack_motivation,
     'attack-resource-level': vocab_attack_resource_level,
-    'course-of-action-type': vocab_course_of_action_type,
     'grouping-context': vocab_grouping_context,
     'implementation-languages': vocab_implementation_languages,
     'infrastructure-types': vocab_infrastructure_types,
@@ -1469,8 +1442,6 @@ def list_shoulds(options):
                     validator_list.append(CHECKS['windows-process-priority-format'])
                 if 'hash-length' not in options.disabled:
                     validator_list.append(CHECKS['hash-length'])
-                if 'os-execution-envs' not in options.disabled:
-                    validator_list.append(CHECKS['os-execution-envs'])
 
             if 'approved-values' not in options.disabled:
                 if 'marking-definition-type' not in options.disabled:
