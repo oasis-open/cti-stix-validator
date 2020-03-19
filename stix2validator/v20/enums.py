@@ -186,8 +186,8 @@ WINDOWS_PEBINARY_TYPE_OV = [
 ]
 ACCOUNT_TYPE_OV = [
     "unix",
-    "windows local",
-    "windows domain",
+    "windows-local",
+    "windows-domain",
     "ldap",
     "tacacs",
     "radius",
@@ -195,8 +195,7 @@ ACCOUNT_TYPE_OV = [
     "openid",
     "facebook",
     "skype",
-    "twitter",
-    "kavi"
+    "twitter"
 ]
 
 
@@ -1366,6 +1365,7 @@ CHECK_CODES = {
     '142': 'observable-dictionary-keys',
     '149': 'windows-process-priority-format',
     '150': 'hash-length',
+    '152': 'action-check',
     '2': 'approved-values',
     '201': 'marking-definition-type',
     '202': 'relationship-types',
