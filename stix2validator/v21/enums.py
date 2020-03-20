@@ -708,7 +708,7 @@ PROPERTIES = {
         'operating_system_ref',
         'installed_software_ref',
         'configuration_version',
-        'module',
+        'modules',
         'analysis_engine_version',
         'analysis_definition_version',
         'submitted',
