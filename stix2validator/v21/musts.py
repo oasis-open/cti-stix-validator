@@ -23,6 +23,7 @@ CUSTOM_PROPERTY_PREFIX_RE = re.compile(r"^x_.+_.+$")
 CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile(r"^x_.+$")
 CUSTOM_EXT_PREFIX_RE = re.compile(r"^x\-.+\-.+\-ext$")
 CUSTOM_EXT_LAX_PREFIX_RE = re.compile(r"^x\-.+\-ext$")
+LETTER_CHECK = re.compile(r'^[a-z]$')
 
 
 def timestamp(instance):
@@ -531,6 +532,17 @@ def process(instance):
         yield JSONError("A process object must use UUIDv4 for its id", instance['id'])
 
 
+def type_and_property_name_check(instance):
+    """Ensure type names and property names start with a character"""
+
+    if not LETTER_CHECK.findall(instance['type'][0]):
+        yield JSONError('Object type name has non-alphabetical starting character', instance['id'])
+
+    for property_name in instance.keys():
+        if not LETTER_CHECK.findall(property_name[0]):
+            yield JSONError('Object property name has non-alphabetical starting character', instance['id'])
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -549,6 +561,7 @@ def list_musts(options):
         patterns,
         language_contents,
         uuid_version_check,
+        type_and_property_name_check,
         process
     ]
 
