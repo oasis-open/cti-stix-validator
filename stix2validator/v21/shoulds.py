@@ -1143,6 +1143,8 @@ def types_strict(instance):
                                 % (key, obj['type']), instance['id'])
 
     if instance['type'] == 'indicator' and 'pattern' in instance:
+        if instance.get('pattern_type', '') != 'stix':
+            return
         pattern = instance['pattern']
         if isinstance(pattern, string_types):
             p = Pattern(pattern)
@@ -1176,6 +1178,8 @@ def properties_strict(instance):
                 yield error
 
     if instance['type'] == 'indicator' and 'pattern' in instance:
+        if instance.get('pattern_type', '') != 'stix':
+            return
         pattern = instance['pattern']
         if isinstance(pattern, string_types):
             p = Pattern(pattern)
