@@ -2091,6 +2091,7 @@ CHECK_CODES = {
     '149': 'windows-process-priority-format',
     '150': 'hash-length',
     '151': 'os-execution-envs',
+    '153': 'type-and-prop-name-check',
     '2': 'approved-values',
     '201': 'marking-definition-type',
     '202': 'relationship-types',

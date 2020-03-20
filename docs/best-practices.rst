@@ -324,6 +324,10 @@ Optional Checks - STIX 2.1
 |        |                             | 2.3 compliant                          | <os_env> is not CPE v2.3 compliant.    |
 |        |                             |                                        |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  153   | type-and-prop-name-check    | type name and property name first      | Property type names or property        |
+|        |                             | character starts with a letter         | name contains illegal first character  |
+|        |                             |                                        |                                        |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run. Specifically:  |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  201   | marking-definition-type     | marking definitions use a valid        | Marking definition 'definition_type'   |
