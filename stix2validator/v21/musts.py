@@ -541,16 +541,6 @@ def cpe_check(instance):
                         'cpe-check')
 
 
-def action_check(instance):
-    """Checks to see action is not set in a course-of-action. This property is reserved
-    """
-    if 'action' not in instance or instance['type'] != 'course-of-action':
-        return
-    else:
-        yield JSONError("'action' is a reserved property in 'course-of-action'.",
-                        instance['id'], 'action-check')
-
-
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -570,7 +560,6 @@ def list_musts(options):
         language_contents,
         uuid_version_check,
         cpe_check,
-        action_check,
         process
     ]
 

@@ -387,16 +387,6 @@ def patterns(instance, options):
                                    "should start with 'x_'" % prop, instance['id'])
 
 
-def action_check(instance):
-    """Checks to see action is not set in a course-of-action. This property is reserved
-    """
-    if 'action' not in instance or instance['type'] != 'course-of-action':
-        return
-    else:
-        yield JSONError("'action' is a reserved property in 'course-of-action'.",
-                        instance['id'], 'action-check')
-
-
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -410,7 +400,6 @@ def list_musts(options):
         artifact_mime_type,
         character_set,
         software_language,
-        action_check,
         patterns
     ]
 
