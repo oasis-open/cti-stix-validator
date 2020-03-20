@@ -408,15 +408,11 @@ def patterns(instance, options):
     """Ensure that the syntax of the pattern of an indicator is valid, and that
     objects and properties referenced by the pattern are valid.
     """
-    if instance['type'] != 'indicator' or 'pattern' not in instance:
-        return
-
-    if instance.get('pattern_type', '') != 'stix':
+    if (instance['type'] != 'indicator' or instance.get('pattern_type', '') != 'stix' or
+            isinstance(instance.get('pattern', ''), string_types) is False):
         return
 
     pattern = instance['pattern']
-    if not isinstance(pattern, string_types):
-        return  # This error already caught by schemas
     if 'pattern_version' in instance:
         pattern_version = instance['pattern_version']
     elif 'spec_version' in instance:
