@@ -1163,6 +1163,7 @@ OBSERVABLE_PROPERTIES = {
         'extensions',
         'name',
         'cpe',
+        'swid',
         'languages',
         'vendor',
         'version',
