@@ -24,9 +24,3 @@ class MalwareTestCases(ValidatorTest):
     def test_wellformed_coa(self):
         results = validate_string(VALID_COURSE_OF_ACTION, self.options)
         self.assertTrue(results.is_valid)
-
-    def test_action_presence(self):
-        coa = copy.deepcopy(self.valid_course_of_action)
-        coa['action'] = 'foobar'
-        results = validate_parsed_json(coa, self.options)
-        self.assertEqual(results.is_valid, False)

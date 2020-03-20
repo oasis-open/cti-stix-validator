@@ -324,10 +324,6 @@ Optional Checks - STIX 2.1
 |        |                             | in a software                          | compliant.                             |
 |        |                             |                                        |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  152   | action-check                | action property is not set in a        | course-of-action has 'action' present  |
-|        |                             | course-of-action                       | as a property in this object.          |
-|        |                             |                                        |                                        |
-+--------+-----------------------------+----------------------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run. Specifically:  |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  201   | marking-definition-type     | marking definitions use a valid        | Marking definition 'definition_type'   |
