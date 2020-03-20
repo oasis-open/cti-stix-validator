@@ -2066,13 +2066,6 @@ VOCAB_PROPERTIES = {
 }
 
 DEPRECATED_PROPERTIES = {
-    'domain-name': ['resolves_to_refs'],
-    'ipv4-addr': [
-        'resolves_to_refs',
-        'belongs_to_refs'],
-    'ipv6-addr': [
-        'resolves_to_refs'
-        'belongs_to_refs'],
     'observed-data': ['objects'],
 }
 
