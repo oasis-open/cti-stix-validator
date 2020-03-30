@@ -43,7 +43,7 @@ IDENTITY_CLASS_OV = [
     "system",
     "organization",
     "class",
-    "unspecified",
+    "unknown",
 ]
 IMPLEMENTATION_LANGUAGES_OV = [
     "applescript",
