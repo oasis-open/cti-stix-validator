@@ -2075,7 +2075,6 @@ CHECK_CODES = {
     '143': 'malware-analysis-product',
     '149': 'windows-process-priority-format',
     '150': 'hash-length',
-    '151': 'cpe-check',
     '2': 'approved-values',
     '201': 'marking-definition-type',
     '202': 'relationship-types',

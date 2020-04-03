@@ -5,11 +5,11 @@ To add a new check:
     - define a new function
     - add the function to CHECKS
     - add the function to list_shoulds()
-- in utils.py:
+- in enums.py:
     - add the check code and name to CHECK_CODES
-- in scripts/stix2_validator:
+- in util.py:
     - add the check code and name to table
-- in README.rst:
+- in docs/best-practices:
     - add the check code and name to table
 """
 

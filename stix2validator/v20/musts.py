@@ -3,6 +3,7 @@
 
 import re
 
+from cpe import CPE
 from dateutil import parser
 from six import string_types
 from stix2patterns.v20.pattern import Pattern
@@ -387,6 +388,23 @@ def patterns(instance, options):
                                    "should start with 'x_'" % prop, instance['id'])
 
 
+@cyber_observable_check("2.0")
+def cpe_check(instance):
+    """Checks to see if provided cpe is a valid CPE v2.3 entry
+    """
+    for key, obj in instance['objects'].items():
+        if 'cpe' not in obj:
+            continue
+        try:
+            CPE(obj['cpe'], CPE.VERSION_2_3)
+        except NotImplementedError:
+            yield JSONError(
+                    "Provided CPE value of object '%s' ('%s') is not CPE v2.3"
+                    "compliant."
+                    % (key, obj['cpe']), instance['id'],
+            )
+
+
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -400,7 +418,8 @@ def list_musts(options):
         artifact_mime_type,
         character_set,
         software_language,
-        patterns
+        patterns,
+        cpe_check,
     ]
 
     return validator_list

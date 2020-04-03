@@ -475,6 +475,20 @@ def patterns(instance, options):
                                    "should start with 'x_'" % prop, instance['id'])
 
 
+def cpe_check(instance):
+    """Checks to see if provided cpe is a valid CPE v2.3 entry
+    """
+    if 'cpe' not in instance:
+        return
+    try:
+        CPE(instance['cpe'], CPE.VERSION_2_3)
+    except NotImplementedError:
+        yield JSONError(
+                "Provided CPE value '%s' is not CPE v2.3 compliant." %
+                instance['cpe'], instance['id'],
+        )
+
+
 def language_contents(instance):
     """Ensure keys in Language Content's 'contents' dictionary are valid
     language codes, and that the keys in the sub-dictionaries match the rules
@@ -528,19 +542,6 @@ def process(instance):
         yield JSONError("A process object must use UUIDv4 for its id", instance['id'])
 
 
-def cpe_check(instance):
-    """Checks to see if provided cpe is a valid CPE v2.3 entry
-    """
-    if 'cpe' not in instance:
-        return
-    try:
-        CPE(instance['cpe'], CPE.VERSION_2_3)
-    except NotImplementedError:
-        yield JSONError("Provided os execution environment %s is not"
-                        " CPE v2.3 compliant." % instance['cpe'], instance['id'],
-                        'cpe-check')
-
-
 def list_musts(options):
     """Construct the list of 'MUST' validators to be run by the validator.
     """
@@ -557,10 +558,10 @@ def list_musts(options):
         language,
         software_language,
         patterns,
+        cpe_check,
         language_contents,
         uuid_version_check,
-        cpe_check,
-        process
+        process,
     ]
 
     return validator_list
