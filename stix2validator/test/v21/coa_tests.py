@@ -1,8 +1,7 @@
-import copy
 import json
 
 from . import ValidatorTest
-from ... import validate_parsed_json, validate_string
+from ... import validate_string
 
 VALID_COURSE_OF_ACTION = u"""
 {
@@ -18,7 +17,7 @@ VALID_COURSE_OF_ACTION = u"""
 """
 
 
-class MalwareTestCases(ValidatorTest):
+class CoATestCases(ValidatorTest):
     valid_course_of_action = json.loads(VALID_COURSE_OF_ACTION)
 
     def test_wellformed_coa(self):
