@@ -13,12 +13,7 @@ VALID_COURSE_OF_ACTION = u"""
     "created": "2016-04-06T20:03:48.000Z",
     "modified": "2016-04-06T20:03:48.000Z",
     "name": "mitigation-poison-ivy-firewall",
-    "description": "Recommended steps to respond to the Poison Ivy malware",
-    "action_type": "textual:text/plain",
-    "action_reference":
-    { "source_name": "internet",
-    "url": "hxxps://www.stopthebad.com/poisonivyresponse.asa"
-    }
+    "description": "Recommended steps to respond to the Poison Ivy malware"
 }
 """
 
@@ -29,28 +24,3 @@ class MalwareTestCases(ValidatorTest):
     def test_wellformed_coa(self):
         results = validate_string(VALID_COURSE_OF_ACTION, self.options)
         self.assertTrue(results.is_valid)
-
-    def test_invalid_action_type(self):
-        coa = copy.deepcopy(self.valid_course_of_action)
-        coa['action_type'] = "invalid"
-        self.assertFalseWithOptions(coa)
-
-        self.check_ignore(coa, 'course-of-action-type')
-
-    def test_missing_action(self):
-        coa = copy.deepcopy(self.valid_course_of_action)
-        del coa['action_reference']
-        results = validate_parsed_json(coa, self.options)
-        self.assertTrue(results.is_valid)
-
-    def test_invalid_action_bin_and_reference(self):
-        coa = copy.deepcopy(self.valid_course_of_action)
-        coa['action_bin'] = "SGVsbG8gV29ybGQ="
-        self.assertFalseWithOptions(coa)
-
-    def test_invalid_os_execution_envs(self):
-        coa = copy.deepcopy(self.valid_course_of_action)
-        coa['os_execution_envs'] = ["f==00"]
-        self.assertFalseWithOptions(coa)
-
-        self.check_ignore(coa, 'os-execution-envs')

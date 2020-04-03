@@ -186,8 +186,8 @@ WINDOWS_PEBINARY_TYPE_OV = [
 ]
 ACCOUNT_TYPE_OV = [
     "unix",
-    "windows local",
-    "windows domain",
+    "windows-local",
+    "windows-domain",
     "ldap",
     "tacacs",
     "radius",
@@ -195,8 +195,7 @@ ACCOUNT_TYPE_OV = [
     "openid",
     "facebook",
     "skype",
-    "twitter",
-    "kavi"
+    "twitter"
 ]
 
 

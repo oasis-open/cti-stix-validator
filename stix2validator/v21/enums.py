@@ -26,12 +26,6 @@ ATTACK_RESOURCE_LEVEL_OV = [
     "organization",
     "government",
 ]
-COURSE_OF_ACTION_TYPE_OV = [
-    "textual:text/plain",
-    "textual:text/html",
-    "textual:text/md",
-    "textual:pdf",
-]
 GROUPING_CONTEXT_OV = [
     "suspicious-activity",
     "malware-analysis",
@@ -316,9 +310,7 @@ WINDOWS_PEBINARY_TYPE_OV = [
 ]
 ACCOUNT_TYPE_OV = [
     "unix",
-    "windows local",
     "windows-local",
-    "windows domain",
     "windows-domain",
     "ldap",
     "tacacs",
@@ -350,9 +342,6 @@ ATTACK_MOTIVATION_USES = {
 ATTACK_RESOURCE_LEVEL_USES = {
     "intrusion-set": ["resource_level"],
     "threat-actor": ["resource_level"],
-}
-COURSE_OF_ACTION_TYPE_USES = {
-    "course-of-action": ["action_type"],
 }
 GROUPING_CONTEXT_USES = {
     "grouping": ["context"],
@@ -534,11 +523,7 @@ PROPERTIES = {
         'granular_markings',
         'name',
         'description',
-        'action_type',
-        'os_execution_envs',
-        'action_bin',
-        'action_type',
-        'action_reference',
+        'action'
     ],
     "grouping": [
         'type',
@@ -698,7 +683,7 @@ PROPERTIES = {
         'kill_chain_phases',
         'first_seen',
         'last_seen',
-        'os_execution_envs',
+        'operating_system_refs',
         'architecture_execution_envs',
         'implementation_languages',
         'capabilities',
@@ -720,6 +705,9 @@ PROPERTIES = {
         'granular_markings',
         'product',
         'version',
+        'host_vm_ref',
+        'operating_system_ref',
+        'installed_software_ref',
         'configuration_version',
         'modules',
         'analysis_engine_version',
@@ -727,11 +715,10 @@ PROPERTIES = {
         'submitted',
         'analysis_started',
         'analysis_ended',
-        'av_result',
-        'host_vm_ref',
-        'operating_system_ref',
-        'installed_software_refs',
+        'result_name',
+        'result',
         'analysis_sco_refs',
+        'sample_ref',
     ],
     "note": [
         'type',
@@ -1811,7 +1798,7 @@ RELATIONSHIPS = {
     },
     'malware-analysis': {
         'characterizes': 'malware',
-        'av-analysis-of': 'malware',
+        'analysis-of': 'malware',
         'static-analysis-of': 'malware',
         'dynamic-analysis-of': 'malware',
     },
@@ -2008,9 +1995,6 @@ VOCAB_PROPERTIES = {
     "artifact": [
         'hashes'
     ],
-    "course-of-action": [
-        'action_type',
-    ],
     "file": [
         "hashes",
     ],
@@ -2091,7 +2075,7 @@ CHECK_CODES = {
     '143': 'malware-analysis-product',
     '149': 'windows-process-priority-format',
     '150': 'hash-length',
-    '151': 'os-execution-envs',
+    '151': 'cpe-check',
     '2': 'approved-values',
     '201': 'marking-definition-type',
     '202': 'relationship-types',
@@ -2109,7 +2093,6 @@ CHECK_CODES = {
     '221': 'threat-actor-sophistication',
     '222': 'tool-types',
     '223': 'region',
-    '224': 'course-of-action-type',
     '225': 'grouping-context',
     '226': 'implementation-languages',
     '227': 'infrastructure-types',

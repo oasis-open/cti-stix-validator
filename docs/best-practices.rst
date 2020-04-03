@@ -320,8 +320,8 @@ Optional Checks - STIX 2.1
 |        |                             |                                        | '<hash_type>', which is longer than 30 |
 |        |                             |                                        | characters.                            |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  151   | os-execution-envs           | os_execution_envs entries are CPE      | Provided os execution environment      |
-|        |                             | 2.3 compliant                          | <os_env> is not CPE v2.3 compliant.    |
+|  151   | cpe-check                   | cpe entry is CPE v2.3 compliant        | Provided 'cpe' is not CPE v2.3         |
+|        |                             | in a software                          | compliant.                             |
 |        |                             |                                        |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run. Specifically:  |                                        |
@@ -390,10 +390,6 @@ Optional Checks - STIX 2.1
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  223   | region                      | certain property values are from the   | '<property>' contains a value not in   |
 |        |                             | region vocabulary                      | the region-ov vocabulary               |
-+--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  224   | course-of-action-type       | certain property values are from the   | '<property>' contains a value          |
-|        |                             | course-of-action-type vocabulary       | not in the course-of-action-type-ov    |
-|        |                             |                                        | vocabulary.                            |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  225   | grouping-context            | certain property values are from the   | '<property>' contains a value not      |
 |        |                             | grouping-context vocabulary            | in the grouping-context-ov vocabulary  |

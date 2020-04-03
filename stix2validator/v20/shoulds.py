@@ -281,8 +281,8 @@ def relationships_strict(instance):
 
     r_type = instance['relationship_type']
     try:
-        r_source = re.search(r"(.+)\-\-", instance['source_ref']).group(1)
-        r_target = re.search(r"(.+)\-\-", instance['target_ref']).group(1)
+        r_source = re.search(r"(.+)--", instance['source_ref']).group(1)
+        r_target = re.search(r"(.+)--", instance['target_ref']).group(1)
     except (AttributeError, TypeError):
         # Schemas already catch errors of these properties not being strings or
         # not containing the string '--'.
@@ -642,7 +642,7 @@ def custom_observable_properties_prefix_strict(instance):
                                         'custom-prefix')
 
         # Check object extensions' properties
-        if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
+        if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj:
             for ext_key in obj['extensions']:
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
@@ -720,7 +720,7 @@ def custom_observable_properties_prefix_lax(instance):
                                         'custom-prefix-lax')
 
         # Check object extensions' properties
-        if (type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj):
+        if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in obj:
             for ext_key in obj['extensions']:
 
                 if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
@@ -771,7 +771,7 @@ def mime_type(instance):
     mime_pattern = re.compile(r'^(application|audio|font|image|message|model'
                               '|multipart|text|video)/[a-zA-Z0-9.+_-]+')
     for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'file' and 'mime_type' in obj):
+        if 'type' in obj and obj['type'] == 'file' and 'mime_type' in obj:
             if enums.media_types():
                 if obj['mime_type'] not in enums.media_types():
                     yield JSONError("The 'mime_type' property of object '%s' "
@@ -857,7 +857,7 @@ def http_request_headers(instance):
     several common non-standard request fields listed elsewhere.
     """
     for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic'):
+        if 'type' in obj and obj['type'] == 'network-traffic':
             try:
                 headers = obj['extensions']['http-request-ext']['request_header']
             except KeyError:
@@ -878,7 +878,7 @@ def socket_options(instance):
     network-traffic objects are only valid socket options (SO_*).
     """
     for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'network-traffic'):
+        if 'type' in obj and obj['type'] == 'network-traffic':
             try:
                 options = obj['extensions']['socket-ext']['options']
             except KeyError:
@@ -899,7 +899,7 @@ def pdf_doc_info(instance):
     Dictionary Keys.
     """
     for key, obj in instance['objects'].items():
-        if ('type' in obj and obj['type'] == 'file'):
+        if 'type' in obj and obj['type'] == 'file':
             try:
                 did = obj['extensions']['pdf-ext']['document_info_dict']
             except KeyError:
@@ -947,7 +947,7 @@ def hash_length(instance):
                 pass
             else:
                 for h in hashes:
-                    if (len(h) > 30):
+                    if len(h) > 30:
                         yield JSONError("Object '%s' has a 'hashes' dictionary"
                                         " with a hash of type '%s', which is "
                                         "longer than 30 characters."
@@ -962,7 +962,7 @@ def hash_length(instance):
                     if 'hashes' not in datastream:
                         continue
                     for h in datastream['hashes']:
-                        if (len(h) > 30):
+                        if len(h) > 30:
                             yield JSONError("Object '%s' has an NTFS extension"
                                             " with an alternate data stream that has a"
                                             " 'hashes' dictionary with a hash of type "
@@ -976,7 +976,7 @@ def hash_length(instance):
                 pass
             else:
                 for h in head_hashes:
-                    if (len(h) > 30):
+                    if len(h) > 30:
                         yield JSONError("Object '%s' has a Windows PE Binary "
                                         "File extension with a file header hash of "
                                         "'%s', which is longer than 30 "
@@ -989,7 +989,7 @@ def hash_length(instance):
                 pass
             else:
                 for h in hashes:
-                    if (len(h) > 30):
+                    if len(h) > 30:
                         yield JSONError("Object '%s' has a Windows PE Binary "
                                         "File extension with an optional header that "
                                         "has a hash of '%s', which is longer "
@@ -1005,7 +1005,7 @@ def hash_length(instance):
                     if 'hashes' not in s:
                         continue
                     for h in s['hashes']:
-                        if (len(h) > 30):
+                        if len(h) > 30:
                             yield JSONError("Object '%s' has a Windows PE "
                                             "Binary File extension with a section that"
                                             " has a hash of '%s', which is "
@@ -1019,7 +1019,7 @@ def hash_length(instance):
                 pass
             else:
                 for h in hashes:
-                    if (len(h) > 30):
+                    if len(h) > 30:
                         yield JSONError("Object '%s' has a 'hashes' dictionary"
                                         " with a hash of type '%s', which is "
                                         "longer than 30 characters."
@@ -1032,7 +1032,7 @@ def extref_hashes(instance):
             if 'url' in extref and 'hashes' not in extref:
                 src = extref['source_name'] if 'source_name' in extref else ''
                 return JSONError("External reference '%s' has a URL but no hash."
-                                 % (src), instance['id'], 'extref-hashes')
+                                 % src, instance['id'], 'extref-hashes')
 
 
 def enforce_relationship_refs(instance):

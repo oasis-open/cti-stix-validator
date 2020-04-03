@@ -592,11 +592,13 @@ class ObservedDataTestCases(ValidatorTest):
             "type": "software",
             "id": "software--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
             "name": "word",
+            "cpe": "invalid",
             "languages": ["bbb"]
         }
         self.assertFalseWithOptions(observed_data)
 
         observed_data['languages'][0] = 'eng'
+        observed_data['cpe'] = 'cpe:2.3:a:microsoft:word:2000:*:*:*:*:*:*:*'
         self.assertTrueWithOptions(observed_data)
 
     def test_email_address_invalid_value(self):
