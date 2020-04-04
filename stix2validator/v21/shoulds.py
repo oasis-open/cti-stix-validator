@@ -291,6 +291,11 @@ def vocab_malware_types(instance):
                        'malware-types')
 
 
+def vocab_malware_result(instance):
+    return check_vocab(instance, "MALWARE_RESULT",
+                       'malware-result')
+
+
 def vocab_malware_capabilities(instance):
     return check_vocab(instance, "MALWARE_CAPABILITIES",
                        'malware-capabilities')
@@ -1243,6 +1248,7 @@ CHECKS = {
         vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_capabilities,
+        vocab_malware_result,
         vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
@@ -1305,6 +1311,7 @@ CHECKS = {
         vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_capabilities,
+        vocab_malware_result,
         vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
@@ -1339,6 +1346,7 @@ CHECKS = {
         vocab_implementation_languages,
         vocab_infrastructure_types,
         vocab_malware_capabilities,
+        vocab_malware_result,
         vocab_processor_architecture,
         vocab_identity_class,
         vocab_indicator_types,
@@ -1360,6 +1368,7 @@ CHECKS = {
     'grouping-context': vocab_grouping_context,
     'implementation-languages': vocab_implementation_languages,
     'infrastructure-types': vocab_infrastructure_types,
+    'malware-result': vocab_malware_result,
     'malware-capabilities': vocab_malware_capabilities,
     'processor-architecture': vocab_processor_architecture,
     'identity-class': vocab_identity_class,

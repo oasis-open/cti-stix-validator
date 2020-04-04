@@ -120,7 +120,7 @@ INFRASTRUCTURE_TYPE_OV = [
     "staging",
     "unknown",
 ]
-MALWARE_AV_RESULT_OV = [
+MALWARE_RESULT_OV = [
     "malicious",
     "suspicious",
     "benign",
@@ -374,6 +374,9 @@ INDUSTRY_SECTOR_USES = {
 }
 MALWARE_CAPABILITIES_USES = {
     "malware": ["capabilities"],
+}
+MALWARE_RESULT_USES = {
+    "malware-analysis": ["result"],
 }
 REGION_USES = {
     "location": ["region"],
@@ -2025,6 +2028,9 @@ VOCAB_PROPERTIES = {
         'implementation_languages',
         'capabilities',
     ],
+    "malware-analysis": [
+        'result',
+    ],
     "ntfs-ext": [
         'hashes',
     ],
@@ -2097,6 +2103,7 @@ CHECK_CODES = {
     '227': 'infrastructure-types',
     '228': 'malware-capabilities',
     '230': 'processor-architecture',
+    '231': 'malware-result',
     '241': 'hash-algo',
     '243': 'windows-pebinary-type',
     '244': 'account-type',
