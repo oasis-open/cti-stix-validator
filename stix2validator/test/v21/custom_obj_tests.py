@@ -80,3 +80,16 @@ class CustomObjectTestCases(ValidatorTest):
 
     def test_strict_types(self):
         self.assertFalseWithOptions(self.valid_custom_object, strict_types=True)
+
+    def test_invalid_type_starting_character_in_instance(self):
+        new_object = copy.deepcopy(self.valid_custom_object)
+        new_object['type'] = 'X-example-com-customobject'
+        new_object['id'] = new_object['type'] + '--' + new_object['id'].split('--')[1]
+
+        self.assertFalseWithOptions(new_object)
+
+    def test_invalid_property_name_starting_character_in_instance(self):
+        new_object = copy.deepcopy(self.valid_custom_object)
+        new_object['9ome_custom_stuff'] = new_object.pop('some_custom_stuff')
+
+        self.assertFalseWithOptions(new_object)
