@@ -320,10 +320,6 @@ Optional Checks - STIX 2.1
 |        |                             |                                        | '<hash_type>', which is longer than 30 |
 |        |                             |                                        | characters.                            |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  151   | cpe-check                   | cpe entry is CPE v2.3 compliant        | Provided 'cpe' is not CPE v2.3         |
-|        |                             | in a software                          | compliant.                             |
-|        |                             |                                        |                                        |
-+--------+-----------------------------+----------------------------------------+----------------------------------------+
 |   2    | approved-values             | all 2xx checks are run. Specifically:  |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  201   | marking-definition-type     | marking definitions use a valid        | Marking definition 'definition_type'   |
@@ -409,6 +405,9 @@ Optional Checks - STIX 2.1
 |  230   | processor-architecture      | certain property values are from the   | '<property>' contains a value not in   |
 |        |                             | processor-architecture vocabulary      | the                                    |
 |        |                             |                                        | processor-architecture-ov vocabulary   |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  231   | malware-result              | certain property values are from the   | '<property>' contains a value not in   |
+|        |                             | malware-result vocabulary              | the malware-result-ov vocabulary       |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  241   | hash-algo                   | certain property values are from the   | Object '<identifier>' has a 'hashes'   |
 |        |                             | hash-algo vocabulary                   | dictionary with a hash of type         |

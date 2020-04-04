@@ -52,8 +52,6 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |     format                  | follows the correct format             |
 | 150  | hash-length                 | keys in 'hashes'-type properties are   |
 |      |                             | not too long                           |
-| 151  | os-execution-envs           | os_execution_envs entries are CPE      |
-|      |                             | 2.3 compliant                          |
 |      |                             |                                        |
 |  2   | approved-values             | all 2xx checks are run                 |
 | 201  | marking-definition-type     | marking definitions use a valid        |
@@ -88,8 +86,6 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | tool_types vocabulary                  |
 | 223  | region                      | certain property values are from the   |
 |      |                             | region vocabulary                      |
-| 224  | course-of-action-tyoe       | certain property values are from the   |
-|      |                             | course-of-action vocabulary            |
 | 225  | grouping-context            | certain property values are from the   |
 |      |                             | grouping-context vocabulary            |
 | 226  | implementation-languages    | certain property values are from the   |
@@ -100,6 +96,8 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | malware-capabilities vocabulary        |
 | 230  | processor-architecture      | certain property values are from the   |
 |      |                             | processor-architecture vocabulary      |
+| 231  | malware-result              | certain property values are from the   |
+|      |                             | malware-result vocabulary              |
 | 241  | hash-algo                   | certain property values are from the   |
 |      |                             | hash-algo vocabulary                   |
 | 243  | windows-pebinary-type       | certain property values are from the   |
