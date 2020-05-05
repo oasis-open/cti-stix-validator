@@ -1,6 +1,18 @@
 CHANGELOG
 =========
 
+2.0.0 - 2020-05-05
+
+* Added support for STIX 2.1; 2.1 is now the default, but the '--version' option
+  can be used to validate against the 2.0 specification instead (@clenk,
+  @JohannKT, @ejratl, @emmanvg, @zrush-mitre, @chisholm)
+* Added support for Python 3.8 (@rooterkyberian) and 3.9
+* Dropped support for Python versions older than 3.5
+* Updated '--strict-types' and '--strict-properties' to issue warnings instead of errors
+* Fixed a bug with exiting when validator is used as a library
+* Fixed a bug of failing silently if the local schema directory is empty
+  (@zrush-mitre)
+
 1.1.2 - 2018-12-18
 
 * Fixed packaging issue (#83)
