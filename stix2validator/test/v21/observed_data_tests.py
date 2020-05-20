@@ -464,6 +464,11 @@ class ObservedDataTestCases(ValidatorTest):
                                     disabled='custom-prefix',
                                     strict_properties=True)
 
+    def test_observable_object_extensions_string(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions'] = 'example:Object-f39f745f-d36b-4dca-9a3e-16bb1c5516f0'
+        self.assertFalseWithOptions(observed_data)
+
     def test_observable_object_reserved_property(self):
         observed_data = copy.deepcopy(self.valid_object)
         observed_data['type'] = 'action'
