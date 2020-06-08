@@ -273,3 +273,10 @@ class IndicatorTestCases(ValidatorTest):
         del indicator["pattern_type"]
 
         self.assertFalseWithOptions(indicator)
+
+    def test_pattern_custom_sco(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator["pattern"] = "[x-foo-bar:bizz MATCHES 'buzz']"
+
+        self.assertTrueWithOptions(indicator)
+        self.assertTrueWithOptions(indicator, strict_properties=True)
