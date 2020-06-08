@@ -220,3 +220,10 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_parsed_json(objects, options)
         assert results[0].is_valid
         assert not results[1].is_valid
+
+    def test_pattern_custom_sco(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator["pattern"] = "[x-foo-bar:bizz MATCHES 'buzz']"
+
+        self.assertTrueWithOptions(indicator)
+        self.assertTrueWithOptions(indicator, strict_properties=True)
