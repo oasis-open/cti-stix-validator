@@ -1,6 +1,7 @@
 """Mandatory (MUST) requirement checking functions
 """
 
+import collections
 import re
 
 from cpe import CPE
@@ -53,7 +54,7 @@ def timestamp(instance):
                                             % (obj['type'], tprop, obj[tprop], str(e)), instance['id'])
             if obj['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
                 for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']]:
-                    if embed in obj:
+                    if embed in obj and isinstance(obj[embed], collections.Mapping):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                             if embed == 'extensions':
                                 for ext in obj[embed]:

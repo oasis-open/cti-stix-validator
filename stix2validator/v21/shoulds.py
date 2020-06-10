@@ -13,7 +13,7 @@ To add a new check:
     - add the check code and name to table
 """
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from itertools import chain
 import re
 import uuid
@@ -435,7 +435,7 @@ def vocab_hash_algo(instance):
         # if 'ntfs-ext' in instance['extensions'] and 'alternate_data_streams' in instance['extensions']['ntfs-ext']:
         try:
             ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
-        except KeyError:
+        except (KeyError, TypeError):
             pass
         else:
             for datastream in ads:
@@ -453,7 +453,7 @@ def vocab_hash_algo(instance):
 
         try:
             head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
-        except KeyError:
+        except (KeyError, TypeError):
             pass
         else:
             for h in head_hashes:
@@ -467,7 +467,7 @@ def vocab_hash_algo(instance):
 
         try:
             hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-        except KeyError:
+        except (KeyError, TypeError):
             pass
         else:
             for h in hashes:
@@ -481,7 +481,7 @@ def vocab_hash_algo(instance):
 
         try:
             sections = instance['extensions']['windows-pebinary-ext']['sections']
-        except KeyError:
+        except (KeyError, TypeError):
             pass
         else:
             for s in sections:
@@ -506,7 +506,7 @@ def vocab_windows_pebinary_type(instance):
     if 'type' in instance and instance['type'] == 'file':
         try:
             pe_type = instance['extensions']['windows-pebinary-ext']['pe_type']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
             yield JSONError("Object '%s' has a Windows PE Binary File "
@@ -604,8 +604,8 @@ def custom_object_extension_prefix_strict(instance):
     """Ensure custom observable object extensions follow strict naming style
     conventions.
     """
-    if not ('extensions' in instance and 'type' in instance and
-            instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+    if not ('extensions' in instance and isinstance(instance['extensions'], Mapping)
+            and 'type' in instance and instance['type'] in enums.OBSERVABLE_EXTENSIONS):
         return
     for ext_key in instance['extensions']:
         if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
@@ -898,7 +898,7 @@ def http_request_headers(instance):
     if 'type' in instance and instance['type'] == 'network-traffic':
         try:
             headers = instance['extensions']['http-request-ext']['request_header']
-        except KeyError:
+        except (KeyError, TypeError):
             return
 
         for hdr in headers:
@@ -918,7 +918,7 @@ def socket_options(instance):
     if 'type' in instance and instance['type'] == 'network-traffic':
         try:
             options = instance['extensions']['socket-ext']['options']
-        except KeyError:
+        except (KeyError, TypeError):
             return
 
         for opt in options:
@@ -938,7 +938,7 @@ def pdf_doc_info(instance):
     if 'type' in instance and instance['type'] == 'file':
         try:
             did = instance['extensions']['pdf-ext']['document_info_dict']
-        except KeyError:
+        except (KeyError, TypeError):
             return
 
         for elem in did:
@@ -971,7 +971,7 @@ def windows_process_priority_format(instance):
     if 'type' in instance and instance['type'] == 'process':
         try:
             priority = instance['extensions']['windows-process-ext']['priority']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         if not class_suffix_re.match(priority):
             yield JSONError("The 'priority' property of object '%s' should"
@@ -1014,7 +1014,7 @@ def hash_length(instance):
 
         try:
             ads = instance['extensions']['ntfs-ext']['alternate_data_streams']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         else:
             for datastream in ads:
@@ -1031,7 +1031,7 @@ def hash_length(instance):
 
         try:
             head_hashes = instance['extensions']['windows-pebinary-ext']['file_header_hashes']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         else:
             for h in head_hashes:
@@ -1044,7 +1044,7 @@ def hash_length(instance):
 
         try:
             hashes = instance['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         else:
             for h in hashes:
@@ -1057,7 +1057,7 @@ def hash_length(instance):
 
         try:
             sections = instance['extensions']['windows-pebinary-ext']['sections']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         else:
             for s in sections:
@@ -1074,7 +1074,7 @@ def hash_length(instance):
     elif instance['type'] == 'artifact' or instance['type'] == 'x509-certificate':
         try:
             hashes = instance['hashes']
-        except KeyError:
+        except (KeyError, TypeError):
             return
         else:
             for h in hashes:
