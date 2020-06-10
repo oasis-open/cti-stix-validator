@@ -76,3 +76,11 @@ class MarkingDefinitionTestCases(ValidatorTest):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         marking_definition['definition']['tlp'] = 21
         self.assertFalseWithOptions(marking_definition)
+
+    def test_granular_marking_id_selector(self):
+        marking_definition = copy.deepcopy(self.valid_marking_definition)
+        marking_definition['granular_markings'] = [{
+            "marking_ref": "marking-definition--4478bf48-9af2-4afa-9fc5-7075f6af04af",
+            "selectors": ["id"]
+        }]
+        self.assertTrueWithOptions(marking_definition)
