@@ -1,7 +1,7 @@
 """Custom jsonschema.IValidator class and validator functions.
 """
 
-from collections import Iterable
+from collections.abc import Iterable
 import io
 from itertools import chain
 import os
@@ -17,8 +17,8 @@ from six import iteritems, string_types, text_type
 from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
-from .util import (DEFAULT_VER, ValidationOptions, check_spec,
-                   clear_requests_cache, init_requests_cache)
+from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
+                   init_requests_cache)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
@@ -651,6 +651,14 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
                 "minProperties": 1
             }
         }
+    elif type == 'bundle':
+        # Validate against schemas for specific objects later
+        schema['properties']['objects'] = {
+            "objects": {
+                "type": "array",
+                "minItems": 1
+            }
+        }
 
     # Don't use custom validator; only check schemas, no additional checks
     validator = load_validator(schema_path, schema)
@@ -688,7 +696,7 @@ def _get_shoulds(options):
         return shoulds21.list_shoulds(options)
 
 
-def _schema_validate(sdo, options):
+def _schema_validate(sdo, options, bundle_version=None):
     """Set up validation of a single STIX object against its type's schema.
     This does no actual validation; it just returns generators which must be
     iterated to trigger the actual generation.
@@ -698,6 +706,14 @@ def _schema_validate(sdo, options):
 
     Do not call this function directly; use validate_instance() instead, as it
     calls this one. This function does not perform any custom checks.
+
+    Args:
+        sdo: STIX object to validate.
+        options: ValidationOptions instance with validation options for this
+            validation run, including the STIX spec version.
+        bundle_version: STIX version of the bundle containing this object, or
+            None if the object is not inside a bundle or the bundle has no
+            spec_version property.
     """
     error_gens = []
 
@@ -716,16 +732,34 @@ def _schema_validate(sdo, options):
     else:
         version = DEFAULT_VER
 
+    if bundle_version == '2.0':
+        version = bundle_version
+
+    # Allow 2.0 objects in 2.1+ bundles (2.1 SCOs don't have 'created')
+    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in sdo and
+                        'created' in sdo)
+    if _20_in_21_bundle:
+        version = '2.0'
+        output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
+                    % error_prefix)
+
     options.set_check_codes(version)
 
+    core_schema = 'core'
+    # Check for custom 2.1+ SCO
+    if (version > '2.0' and all(p in sdo for p in ['type', 'id']) and
+            all(p not in sdo for p in ['created', 'modified']) and
+            not sdo['type'] == 'marking-definition'):
+        core_schema = 'cyber-observable-core'
+
     # Get validator for built-in schema
-    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=version)
+    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=version, default=core_schema)
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
     # Get validator for any user-supplied schema
     if options.schema_dir:
-        custom_sdo_errors = _get_error_generator(sdo['type'], sdo, options.schema_dir)
+        custom_sdo_errors = _get_error_generator(sdo['type'], sdo, options.schema_dir, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
 
@@ -766,6 +800,35 @@ def _schema_validate(sdo, options):
     return error_gens
 
 
+def _schema_validate_bundle(instance, options):
+    errors = []
+    version = options.version
+    if version is None and 'spec_version' in instance:
+        version = instance['spec_version']
+
+    warnings = []
+    if version:
+        if 'spec_version' in instance:
+            if instance['spec_version'] != version:
+                warnings.append(instance['id'] + ": spec_version mismatch with supplied"
+                                " option. Treating as {} content.".format(version))
+        if 'objects' in instance:
+            for obj in instance['objects']:
+                if 'spec_version' in obj:
+                    if obj['spec_version'] != version:
+                        warnings.append(obj['id'] + ": spec_version mismatch with supplied"
+                                        " option. Treating as {} content.".format(version))
+
+    bundle_version = instance.get('spec_version', '2.1')
+    # Validate each object in a bundle separately
+    for sdo in instance.get('objects', []):
+        if 'type' not in sdo:
+            raise ValidationError("Each object in bundle must have a 'type' property.")
+        errors += _schema_validate(sdo, options, bundle_version)
+
+    return errors, warnings
+
+
 def validate_instance(instance, options=None):
     """Perform STIX JSON Schema validation against STIX input.
 
@@ -789,19 +852,13 @@ def validate_instance(instance, options=None):
         options = ValidationOptions()
 
     error_gens = []
+    spec_warnings = []
 
     # Schema validation
     error_gens += _schema_validate(instance, options)
     if instance['type'] == 'bundle' and 'objects' in instance:
-        if options.version is None and 'spec_version' in instance:
-            options.version = instance['spec_version']
-        # Validate each object in a bundle separately
-        for sdo in instance['objects']:
-            if 'type' not in sdo:
-                raise ValidationError("Each object in bundle must have a 'type' property.")
-            error_gens += _schema_validate(sdo, options)
-
-    spec_warnings = check_spec(instance, options)
+        schema_errors, spec_warnings = _schema_validate_bundle(instance, options)
+        error_gens += schema_errors
 
     # Custom validation
     must_checks = _get_musts(options)

@@ -28,24 +28,27 @@ class SpecVersionTestCases(ValidatorTest):
     valid_data = json.loads(VALID_BUNDLE)
     internal_options = ValidationOptions()
 
-    def test_empty(self):
+    def test_none(self):
         # Test spec_version not specified anywhere
-        # Fail: defaults to a version that requires spec_version on SDO
+        # Pass: treated as a 2.1 bundle with a 2.0 SDO
         bundle = copy.deepcopy(self.valid_data)
         results = validate_parsed_json(bundle, self.internal_options)
-        self.assertFalse(results.is_valid)
+        self.assertTrue(results.is_valid)
 
     def test_cmd(self):
         # Test spec_version specified only in cmdline option
         # Fail in 2.0: spec_version is required on Bundle
-        # Fail in 2.1: spec_version is required on SDO
+        # Pass in 2.1: spec_version is required on SDO but it's treated as a 2.0 SDO
         for version in VERSION_NUMBERS:
             bundle = copy.deepcopy(self.valid_data)
             self.internal_options.version = version
             results = validate_parsed_json(
                 bundle,
                 self.internal_options)
-            self.assertFalse(results.is_valid)
+            if version == "2.0":
+                self.assertFalse(results.is_valid)
+            elif version == "2.1":
+                self.assertTrue(results.is_valid)
 
     def test_bundle(self):
         # Test spec_version specified only on bundle
@@ -57,9 +60,9 @@ class SpecVersionTestCases(ValidatorTest):
                 self.assertTrue(results.is_valid)
             elif version == "2.1":
                 # Warn: spec_version is custom on bundle,
-                # Error: spec_version is required on SDO
-                self.assertFalse(results.is_valid)
-                self.assertTrue(len(results.errors) > 0)
+                # Pass: spec_version is missing from SDO so treated as a 2.0 SDO
+                self.assertTrue(results.is_valid)
+                self.assertTrue(len(results.errors) == 0)
                 self.assertTrue(len(results.warnings) == 1)
 
     def test_object(self):
@@ -117,14 +120,16 @@ class SpecVersionTestCases(ValidatorTest):
                     self.assertTrue(len(results.warnings) == 1)
 
                 elif cmd_version == "2.1" and bundle_version == "2.0":
-                    self.assertFalse(results.is_valid)
-                    self.assertTrue(len(results.errors) == 2)
+                    # Pass: Treat as 2.1 bundle with 2.0 SDO
+                    self.assertTrue(results.is_valid)
+                    self.assertTrue(len(results.errors) == 0)
                     self.assertTrue(len(results.warnings) == 2)
 
                 elif cmd_version == "2.1" and bundle_version == "2.1":
-                    self.assertFalse(results.is_valid)
+                    # Pass: identity obj has no spec version so treated as 2.0
+                    self.assertTrue(results.is_valid)
                     self.assertTrue(len(results.warnings) == 1)
-                    self.assertTrue(len(results.errors) == 2)
+                    self.assertTrue(len(results.errors) == 0)
 
     def test_cmd_and_obj(self):
         # Test spec_version specified in cmdline option and on SDO
