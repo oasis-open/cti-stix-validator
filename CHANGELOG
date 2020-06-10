@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+2.0.1 - 2020-06-10
+
+* Fixed bug so 2.1 bundles can contain 2.0 objects now
+* Fixed bug to allow custom SCOs in patterns to not have the x_ prefix
+* Fixed crashes when SCO extensions weren't a dictionary
+* Incorporated some fixes from the schemas
+
 2.0.0 - 2020-05-05
 
 * Added support for STIX 2.1; 2.1 is now the default, but the '--version' option
