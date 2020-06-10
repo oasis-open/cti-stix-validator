@@ -696,7 +696,7 @@ def _get_shoulds(options):
         return shoulds21.list_shoulds(options)
 
 
-def _schema_validate(sdo, options, bundle_version=None):
+def _schema_validate(obj, options, bundle_version=None):
     """Set up validation of a single STIX object against its type's schema.
     This does no actual validation; it just returns generators which must be
     iterated to trigger the actual generation.
@@ -708,7 +708,7 @@ def _schema_validate(sdo, options, bundle_version=None):
     calls this one. This function does not perform any custom checks.
 
     Args:
-        sdo: STIX object to validate.
+        obj: STIX object to validate.
         options: ValidationOptions instance with validation options for this
             validation run, including the STIX spec version.
         bundle_version: STIX version of the bundle containing this object, or
@@ -717,9 +717,9 @@ def _schema_validate(sdo, options, bundle_version=None):
     """
     error_gens = []
 
-    if 'id' in sdo:
+    if 'id' in obj:
         try:
-            error_prefix = sdo['id'] + ": "
+            error_prefix = obj['id'] + ": "
         except TypeError:
             error_prefix = 'unidentifiable object: '
     else:
@@ -727,8 +727,8 @@ def _schema_validate(sdo, options, bundle_version=None):
 
     if options.version:
         version = options.version
-    elif options.version is None and 'spec_version' in sdo:
-        version = sdo['spec_version']
+    elif options.version is None and 'spec_version' in obj:
+        version = obj['spec_version']
     else:
         version = DEFAULT_VER
 
@@ -736,8 +736,8 @@ def _schema_validate(sdo, options, bundle_version=None):
         version = bundle_version
 
     # Allow 2.0 objects in 2.1+ bundles (2.1 SCOs don't have 'created')
-    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in sdo and
-                        'created' in sdo)
+    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in obj and
+                        'created' in obj)
     if _20_in_21_bundle:
         version = '2.0'
         output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
@@ -747,38 +747,38 @@ def _schema_validate(sdo, options, bundle_version=None):
 
     core_schema = 'core'
     # Check for custom 2.1+ SCO
-    if (version > '2.0' and all(p in sdo for p in ['type', 'id']) and
-            all(p not in sdo for p in ['created', 'modified']) and
-            not sdo['type'] == 'marking-definition'):
+    if (version > '2.0' and all(p in obj for p in ['type', 'id']) and
+            all(p not in obj for p in ['created', 'modified']) and
+            not obj['type'] == 'marking-definition'):
         core_schema = 'cyber-observable-core'
 
     # Get validator for built-in schema
-    base_sdo_errors = _get_error_generator(sdo['type'], sdo, version=version, default=core_schema)
+    base_sdo_errors = _get_error_generator(obj['type'], obj, version=version, default=core_schema)
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
     # Get validator for any user-supplied schema
     if options.schema_dir:
-        custom_sdo_errors = _get_error_generator(sdo['type'], sdo, options.schema_dir, default=core_schema)
+        custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
 
     # Validate each cyber observable object separately
-    if sdo['type'] == 'observed-data' and 'objects' in sdo:
+    if obj['type'] == 'observed-data' and 'objects' in obj:
         # Check if observed data property is in dictionary format
-        if not isinstance(sdo['objects'], dict):
+        if not isinstance(obj['objects'], dict):
             error_gens.append(([schema_exceptions.ValidationError("Observed Data objects must be in dict format.", error_prefix)],
                               error_prefix))
             return error_gens
 
-        for key, obj in iteritems(sdo['objects']):
-            if 'type' not in obj:
+        for key, val in iteritems(obj['objects']):
+            if 'type' not in val:
                 error_gens.append(([schema_exceptions.ValidationError("Observable object must contain a 'type' property.", error_prefix)],
                                    error_prefix + 'object \'' + key + '\': '))
                 continue
             # Get validator for built-in schemas
-            base_obs_errors = _get_error_generator(obj['type'],
-                                                   obj,
+            base_obs_errors = _get_error_generator(val['type'],
+                                                   val,
                                                    None,
                                                    version,
                                                    'cyber-observable-core')
@@ -788,8 +788,8 @@ def _schema_validate(sdo, options, bundle_version=None):
 
             # Get validator for any user-supplied schema
             if options.schema_dir:
-                custom_obs_errors = _get_error_generator(obj['type'],
-                                                         obj,
+                custom_obs_errors = _get_error_generator(val['type'],
+                                                         val,
                                                          options.schema_dir,
                                                          version,
                                                          'cyber-observable-core')
