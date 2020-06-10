@@ -13,7 +13,7 @@ To add a new check:
     - add the check code and name to table
 """
 
-from collections import Iterable
+from collections.abc import Iterable
 from itertools import chain
 import re
 
