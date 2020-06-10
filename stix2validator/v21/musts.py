@@ -462,6 +462,8 @@ def patterns(instance, options):
             elif not PROPERTY_FORMAT_RE.match(prop):
                 yield PatternError("'%s' is not a valid observable property name"
                                    % prop, instance['id'])
+            elif objtype not in enums.OBSERVABLE_TYPES:
+                continue  # custom SCOs aren't required to use x_ prefix on properties
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
                   not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
                 yield PatternError("Cyber Observable Object custom property '%s' "
