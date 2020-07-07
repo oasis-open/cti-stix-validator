@@ -18,7 +18,7 @@ def get_version():
 
 install_requires = [
     'appdirs',
-    'colorama<0.4.2',
+    'colorama',
     'cpe',
     'jsonschema[format_nongpl]>=3.2.0',
     'python-dateutil',
