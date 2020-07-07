@@ -1,6 +1,6 @@
 """Mandatory (MUST) requirement checking functions
 """
-import collections
+from collections.abc import Mapping
 import operator
 import re
 import uuid
@@ -60,7 +60,7 @@ def timestamp(instance):
                                                 % (obj['type'], tprop, obj[tprop], str(e)), instance['id'])
                 if obj['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
                     for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']]:
-                        if embed in obj and isinstance(obj[embed], collections.Mapping):
+                        if embed in obj and isinstance(obj[embed], Mapping):
                             for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                                 if embed == 'extensions':
                                     for ext in obj[embed]:
@@ -90,7 +90,7 @@ def timestamp(instance):
                                             % (instance['type'], tprop, instance[tprop], str(e)), instance['id'])
             if instance['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
                 for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']]:
-                    if embed in instance and isinstance(instance[embed], collections.Mapping):
+                    if embed in instance and isinstance(instance[embed], Mapping):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']][embed]:
                             if embed == 'extensions':
                                 for ext in instance[embed]:
