@@ -8,15 +8,15 @@ open.org/resources/open-repositories/>`__. See the `Governance`_
 section for more information.
 
 The STIX Validator checks that STIX JSON content conforms to the
-requirements specified in the STIX 2.0 specification. In addition to
+requirements specified in the STIX 2.1 specification. In addition to
 checking conformance with the `JSON schemas <https://github.com/oasis-
 open/cti-stix2-json-schemas>`_, the validator checks conformance with
 requirements that cannot be specified in JSON schema, as well as with
 established "best practices." This validator is non-normative; in
-cases of conflict with the STIX 2.0 specification, the specification
+cases of conflict with the STIX 2.1 specification, the specification
 takes precedence.
 
-The STIX 2.0 specification contains two types of requirements:
+The STIX 2.1 specification contains two types of requirements:
 mandatory "MUST" requirements, and recommended "SHOULD" best practice
 requirements. The validator checks documents against the "MUST"
 requirements using JSON schemas. Some of these mandatory requirements
