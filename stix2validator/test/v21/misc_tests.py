@@ -31,6 +31,7 @@ INVALID_TIMESTAMP = os.path.join(os.path.dirname(os.path.realpath(__file__)),
 
 
 def test_run_validation(caplog):
+    caplog.set_level('INFO')
     options = ValidationOptions(files=[EXAMPLE])
     results = run_validation(options)
 
@@ -54,6 +55,7 @@ def test_run_validation_silent(caplog):
 
 
 def test_validate_file(caplog):
+    caplog.set_level('INFO')
     results = validate_file(EXAMPLE)
     assert results.is_valid
 
@@ -94,6 +96,7 @@ def test_validate_file_invalid_missing_modified(caplog):
 
 
 def test_validate_string(caplog):
+    caplog.set_level('INFO')
     with open(IDENTITY, encoding='utf-8') as f:
         results = validate_string(f.read())
     assert results.is_valid
