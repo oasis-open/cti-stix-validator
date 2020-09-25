@@ -12,7 +12,6 @@ from jsonschema import Draft7Validator, RefResolver, draft7_format_checker
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
 import simplejson as json
-from six import iteritems, string_types, text_type
 
 from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
@@ -35,7 +34,7 @@ EMAIL_RE = re.compile(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)')
 
 
 def _is_iterable_non_string(val):
-    return hasattr(val, "__iter__") and not isinstance(val, string_types)
+    return hasattr(val, "__iter__") and not isinstance(val, str)
 
 
 def _is_stix_obj(obj):
@@ -273,7 +272,7 @@ class ValidationErrorResults(BaseResults):
     """
     def __init__(self, error):
         self._is_valid = False
-        self.error = text_type(error)
+        self.error = str(error)
         self.exception = error
 
     def as_dict(self):
@@ -534,7 +533,7 @@ STIXValidator = extend(Draft7Validator, {'$ref': ref_store})
 # Built-in checker only ensures emails contain an '@'; we want a more robust check
 @draft7_format_checker.checks('email')
 def is_email(instance):
-    if not isinstance(instance, string_types):
+    if not isinstance(instance, str):
         return True
     return EMAIL_RE.match(instance)
 
@@ -771,7 +770,7 @@ def _schema_validate(obj, options, bundle_version=None):
                               error_prefix))
             return error_gens
 
-        for key, val in iteritems(obj['objects']):
+        for key, val in obj['objects'].items():
             if 'type' not in val:
                 error_gens.append(([schema_exceptions.ValidationError("Observable object must contain a 'type' property.", error_prefix)],
                                    error_prefix + 'object \'' + key + '\': '))

@@ -18,7 +18,6 @@ from itertools import chain
 import re
 import uuid
 
-from six import string_types
 from stix2patterns.v21.pattern import Pattern
 
 from . import enums
@@ -707,7 +706,7 @@ def custom_observable_properties_prefix_strict(instance):
                     if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
                             ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
                         for embed_prop in instance['extensions'][ext_key][ext_prop]:
-                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
                                 embed_prop = [embed_prop]
                             for p in embed_prop:
                                 if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
@@ -781,7 +780,7 @@ def custom_observable_properties_prefix_lax(instance):
                     if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
                             ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
                         for embed_prop in instance['extensions'][ext_key][ext_prop]:
-                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
                                 embed_prop = [embed_prop]
                             for p in embed_prop:
                                 if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
@@ -1130,7 +1129,7 @@ def types_strict(instance):
                                 % (key, obj['type']), instance['id'])
 
     if (instance['type'] == 'indicator' and instance.get('pattern_type', '') == 'stix' and
-            isinstance(instance.get('pattern', ''), string_types)):
+            isinstance(instance.get('pattern', ''), str)):
         pattern = instance['pattern']
         p = Pattern(pattern)
         inspection = p.inspect().comparisons
@@ -1163,7 +1162,7 @@ def properties_strict(instance):
                 yield error
 
     if (instance['type'] == 'indicator' and instance.get('pattern_type', '') == 'stix' and
-            isinstance(instance.get('pattern', ''), string_types)):
+            isinstance(instance.get('pattern', ''), str)):
         pattern = instance['pattern']
         p = Pattern(pattern)
         inspection = p.inspect().comparisons

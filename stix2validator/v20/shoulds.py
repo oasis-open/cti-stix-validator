@@ -17,7 +17,6 @@ from collections.abc import Iterable, Mapping
 from itertools import chain
 import re
 
-from six import string_types
 from stix2patterns.v20.pattern import Pattern
 
 from . import enums
@@ -663,7 +662,7 @@ def custom_observable_properties_prefix_strict(instance):
                         if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
                                 ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
                             for embed_prop in obj['extensions'][ext_key][ext_prop]:
-                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
                                     embed_prop = [embed_prop]
                                 for p in embed_prop:
                                     if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
@@ -738,7 +737,7 @@ def custom_observable_properties_prefix_lax(instance):
                         if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
                                 ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
                             for embed_prop in obj['extensions'][ext_key][ext_prop]:
-                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, string_types)):
+                                if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
                                     embed_prop = [embed_prop]
                                 for p in embed_prop:
                                     if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
@@ -1099,7 +1098,7 @@ def types_strict(instance):
 
     if instance['type'] == 'indicator' and 'pattern' in instance:
         pattern = instance['pattern']
-        if isinstance(pattern, string_types):
+        if isinstance(pattern, str):
             p = Pattern(pattern)
             inspection = p.inspect().comparisons
             for objtype in inspection:
@@ -1169,7 +1168,7 @@ def properties_strict(instance):
 
     if instance['type'] == 'indicator' and 'pattern' in instance:
         pattern = instance['pattern']
-        if isinstance(pattern, string_types):
+        if isinstance(pattern, str):
             p = Pattern(pattern)
             inspection = p.inspect().comparisons
             for objtype, expression_list in inspection.items():

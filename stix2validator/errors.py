@@ -2,7 +2,6 @@ from collections import deque
 import re
 
 from jsonschema import exceptions as schema_exceptions
-from six import python_2_unicode_compatible, text_type
 
 
 class PatternError(schema_exceptions.ValidationError):
@@ -34,7 +33,6 @@ class SchemaInvalidError(ValidationError):
     pass
 
 
-@python_2_unicode_compatible
 class SchemaError(ValidationError):
     """Represent a JSON Schema validation error.
 
@@ -49,7 +47,7 @@ class SchemaError(ValidationError):
         super(SchemaError, self).__init__()
 
         if error:
-            self.message = text_type(error)
+            self.message = str(error)
         else:
             self.message = None
 
@@ -59,7 +57,7 @@ class SchemaError(ValidationError):
         return {'message': self.message}
 
     def __str__(self):
-        return text_type(self.message)
+        return str(self.message)
 
 
 def remove_u(input):
@@ -83,12 +81,12 @@ def pretty_error(error, verbose=False):
                 error_loc += path_elem
             # elif len(error.path) > 0:
             else:
-                error_loc += '[' + text_type(path_elem) + ']'
+                error_loc += '[' + str(path_elem) + ']'
         error_loc += ': '
 
     # Get error message and remove ugly u'' prefixes
     if verbose:
-        msg = remove_u(text_type(error))
+        msg = remove_u(str(error))
     else:
         msg = remove_u(error.message)
 
@@ -213,7 +211,7 @@ def pretty_error(error, verbose=False):
             else:
                 raise TypeError
         except TypeError:
-            msg = msg + ':\n' + remove_u(text_type(error.schema))
+            msg = msg + ':\n' + remove_u(str(error.schema))
 
     # Reword forbidden property or value errors
     elif error.validator == 'not':
@@ -244,7 +242,7 @@ def pretty_error(error, verbose=False):
             elif 'type' in error.instance and error.instance['type'] in ['process', 'x509-certificate']:
                 if error.instance.keys() == ['type']:
                     msg = "must contain at least one property (other than `type`) from this object."
-            elif "'not': {'enum':" in text_type(error.validator_value):
+            elif "'not': {'enum':" in str(error.validator_value):
                 try:
                     defined_objs = error.validator_value[1]['allOf'][1]['properties']['type']['not']['enum']
                     if error.instance['type'] in defined_objs:
@@ -257,6 +255,6 @@ def pretty_error(error, verbose=False):
             else:
                 raise TypeError
         except TypeError:
-            msg = msg + ':\n' + remove_u(text_type(error.schema))
+            msg = msg + ':\n' + remove_u(str(error.schema))
 
     return error_loc + msg
