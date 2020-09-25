@@ -1,5 +1,6 @@
 """Mandatory (MUST) requirement checking functions
 """
+from collections.abc import Mapping
 import operator
 import re
 import uuid
@@ -59,7 +60,7 @@ def timestamp(instance):
                                                 % (obj['type'], tprop, obj[tprop], str(e)), instance['id'])
                 if obj['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
                     for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']]:
-                        if embed in obj:
+                        if embed in obj and isinstance(obj[embed], Mapping):
                             for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                                 if embed == 'extensions':
                                     for ext in obj[embed]:
@@ -89,7 +90,7 @@ def timestamp(instance):
                                             % (instance['type'], tprop, instance[tprop], str(e)), instance['id'])
             if instance['type'] in enums.TIMESTAMP_EMBEDDED_PROPERTIES:
                 for embed in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']]:
-                    if embed in instance:
+                    if embed in instance and isinstance(instance[embed], Mapping):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']][embed]:
                             if embed == 'extensions':
                                 for ext in instance[embed]:
@@ -461,6 +462,8 @@ def patterns(instance, options):
             elif not PROPERTY_FORMAT_RE.match(prop):
                 yield PatternError("'%s' is not a valid observable property name"
                                    % prop, instance['id'])
+            elif objtype not in enums.OBSERVABLE_TYPES:
+                continue  # custom SCOs aren't required to use x_ prefix on properties
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
                   not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
                 yield PatternError("Cyber Observable Object custom property '%s' "

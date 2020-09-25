@@ -13,7 +13,7 @@ To add a new check:
     - add the check code and name to table
 """
 
-from collections import Iterable
+from collections.abc import Iterable, Mapping
 from itertools import chain
 import re
 
@@ -348,7 +348,7 @@ def vocab_hash_algo(instance):
 
             try:
                 ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for datastream in ads:
@@ -366,7 +366,7 @@ def vocab_hash_algo(instance):
 
             try:
                 head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for h in head_hashes:
@@ -380,7 +380,7 @@ def vocab_hash_algo(instance):
 
             try:
                 hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for h in hashes:
@@ -394,7 +394,7 @@ def vocab_hash_algo(instance):
 
             try:
                 sections = obj['extensions']['windows-pebinary-ext']['sections']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for s in sections:
@@ -433,7 +433,7 @@ def vocab_encryption_algo(instance):
         if 'type' in obj and obj['type'] == 'file':
             try:
                 enc_algo = obj['encryption_algorithm']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
             if enc_algo not in enums.ENCRYPTION_ALGO_OV:
                 yield JSONError("Object '%s' has an 'encryption_algorithm' of "
@@ -452,7 +452,7 @@ def vocab_windows_pebinary_type(instance):
         if 'type' in obj and obj['type'] == 'file':
             try:
                 pe_type = obj['extensions']['windows-pebinary-ext']['pe_type']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
             if pe_type not in enums.WINDOWS_PEBINARY_TYPE_OV:
                 yield JSONError("Object '%s' has a Windows PE Binary File "
@@ -471,7 +471,7 @@ def vocab_account_type(instance):
         if 'type' in obj and obj['type'] == 'user-account':
             try:
                 acct_type = obj['account_type']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
             if acct_type not in enums.ACCOUNT_TYPE_OV:
                 yield JSONError("Object '%s' is a User Account Object "
@@ -558,8 +558,8 @@ def custom_object_extension_prefix_strict(instance):
     conventions.
     """
     for key, obj in instance['objects'].items():
-        if not ('extensions' in obj and 'type' in obj and
-                obj['type'] in enums.OBSERVABLE_EXTENSIONS):
+        if not ('extensions' in obj and isinstance(obj['extensions'], Mapping)
+                and 'type' in obj and obj['type'] in enums.OBSERVABLE_EXTENSIONS):
             continue
         for ext_key in obj['extensions']:
             if (ext_key not in enums.OBSERVABLE_EXTENSIONS[obj['type']] and
@@ -860,7 +860,7 @@ def http_request_headers(instance):
         if 'type' in obj and obj['type'] == 'network-traffic':
             try:
                 headers = obj['extensions']['http-request-ext']['request_header']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
 
             for hdr in headers:
@@ -881,7 +881,7 @@ def socket_options(instance):
         if 'type' in obj and obj['type'] == 'network-traffic':
             try:
                 options = obj['extensions']['socket-ext']['options']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
 
             for opt in options:
@@ -902,7 +902,7 @@ def pdf_doc_info(instance):
         if 'type' in obj and obj['type'] == 'file':
             try:
                 did = obj['extensions']['pdf-ext']['document_info_dict']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
 
             for elem in did:
@@ -924,7 +924,7 @@ def windows_process_priority_format(instance):
         if 'type' in obj and obj['type'] == 'process':
             try:
                 priority = obj['extensions']['windows-process-ext']['priority']
-            except KeyError:
+            except (KeyError, TypeError):
                 continue
             if not class_suffix_re.match(priority):
                 yield JSONError("The 'priority' property of object '%s' should"
@@ -955,7 +955,7 @@ def hash_length(instance):
 
             try:
                 ads = obj['extensions']['ntfs-ext']['alternate_data_streams']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for datastream in ads:
@@ -972,7 +972,7 @@ def hash_length(instance):
 
             try:
                 head_hashes = obj['extensions']['windows-pebinary-ext']['file_header_hashes']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for h in head_hashes:
@@ -985,7 +985,7 @@ def hash_length(instance):
 
             try:
                 hashes = obj['extensions']['windows-pebinary-ext']['optional_header']['hashes']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for h in hashes:
@@ -998,7 +998,7 @@ def hash_length(instance):
 
             try:
                 sections = obj['extensions']['windows-pebinary-ext']['sections']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for s in sections:
@@ -1015,7 +1015,7 @@ def hash_length(instance):
         elif obj['type'] == 'artifact' or obj['type'] == 'x509-certificate':
             try:
                 hashes = obj['hashes']
-            except KeyError:
+            except (KeyError, TypeError):
                 pass
             else:
                 for h in hashes:

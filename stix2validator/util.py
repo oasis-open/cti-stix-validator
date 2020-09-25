@@ -1,6 +1,6 @@
 import argparse
 from argparse import RawDescriptionHelpFormatter
-from collections import Iterable
+from collections.abc import Iterable
 import datetime
 import errno
 import os
@@ -476,30 +476,6 @@ def cyber_observable_check(version, requires_objects=False):
         new_function.__name__ = original_function.__name__
         return new_function
     return inner_cyber_observable_check
-
-
-def check_spec(instance, options):
-    """ Checks to see if there are differences in command-line option
-    provided spec_version and the spec_version found with bundles
-    and/or objects.
-    """
-    warnings = []
-    if options.version:
-        try:
-            if instance['type'] == 'bundle' and 'spec_version' in instance:
-                if instance['spec_version'] != options.version:
-                    warnings.append(instance['id'] + ": spec_version mismatch with supplied"
-                                    " option. Treating as {} content.".format(options.version))
-            if instance['type'] == 'bundle' and 'objects' in instance:
-                for obj in instance['objects']:
-                    if 'spec_version' in obj:
-                        if obj['spec_version'] != options.version:
-                            warnings.append(obj['id'] + ": spec_version mismatch with supplied"
-                                            " option. Treating as {} content.".format(options.version))
-        except Exception:
-            pass
-
-    return warnings
 
 
 def init_requests_cache(refresh_cache=False):
