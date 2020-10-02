@@ -7,7 +7,6 @@ import uuid
 
 from cpe import CPE
 from dateutil import parser
-from six import string_types
 from stix2patterns.v21.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
 
@@ -411,7 +410,7 @@ def patterns(instance, options):
     objects and properties referenced by the pattern are valid.
     """
     if (instance['type'] != 'indicator' or instance.get('pattern_type', '') != 'stix' or
-            isinstance(instance.get('pattern', ''), string_types) is False):
+            isinstance(instance.get('pattern', ''), str) is False):
         return
 
     pattern = instance['pattern']
