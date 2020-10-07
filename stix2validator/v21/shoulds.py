@@ -156,7 +156,8 @@ def uuid_check(instance):
         return
 
     object_id = uuid.UUID(instance['id'].split("--")[-1])
-    if has_cyber_observable_data(instance, "2.1") and instance['type'] != 'process':
+    if (has_cyber_observable_data(instance, "2.1") and
+            instance['type'] not in ['observed-data', 'process']):
         if object_id.version != 5:
             yield JSONError("Cyber Observable ID value %s is not a valid UUIDv5 ID."
                             % instance['id'], instance['id'], 'uuid-check')
