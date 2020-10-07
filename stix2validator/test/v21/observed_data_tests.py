@@ -732,8 +732,21 @@ class ObservedDataTestCases(ValidatorTest):
         observed_data['extensions']['x-example-com-foobar-ext']['foo_value'] = 'something else'
         self.assertTrueWithOptions(observed_data, schema_dir=self.custom_schemas)
 
+    def test_deprecated_objects_property(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        del observed_data['object_refs']
+        observed_data['objects'] = {
+            "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4": {
+                "type": "windows-registry-key",
+                "id": "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
+                "key": "HKEY_LOCAL_MACHINE\\SYSTEM\\ControlSet001\\Services\\WSALG2"
+            }
+        }
+        self.assertTrueWithOptions(observed_data, disabled="141,304")
+
     def test_invalid_objects_property(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
+        del observed_data['object_refs']
         observed_data['objects'] = [
             {
                 "type": "windows-registry-key",
