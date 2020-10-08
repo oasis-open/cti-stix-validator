@@ -1140,7 +1140,7 @@ OBSERVABLE_PROPERTIES = {
         'extensions',
         'is_hidden',
         'pid',
-        'created',
+        'created_time',
         'cwd',
         'command_line',
         'environment_variables',
@@ -1919,7 +1919,7 @@ TIMESTAMP_OBSERVABLE_PROPERTIES = {
         'end',
     ],
     'process': [
-        'created',
+        'created_time',
     ],
     'user-account': [
         'account_created',
