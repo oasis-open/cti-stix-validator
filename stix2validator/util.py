@@ -425,8 +425,8 @@ class ValidationOptions(object):
 
 
 def has_cyber_observable_data(instance, version="2.0"):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
+    """Return True if the given instance is an observed-data object
+    containing cyber observables or is a cyber observable itself.
     """
     if (instance['type'] == 'observed-data' and
             'objects' in instance and
@@ -467,7 +467,7 @@ def cyber_observable_check(version, requires_objects=False):
                         for x in original_function(instance, **kwargs):
                             yield x
             else:
-                if not has_cyber_observable_data(args[0]):
+                if not has_cyber_observable_data(instance):
                     return
                 func = original_function(*args, **kwargs)
                 if isinstance(func, Iterable):
