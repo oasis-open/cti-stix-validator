@@ -425,8 +425,8 @@ class ValidationOptions(object):
 
 
 def has_cyber_observable_data(instance, version="2.0"):
-    """Return True only if the given instance is an observed-data object
-    containing STIX Cyber Observable objects.
+    """Return True if the given instance is an observed-data object
+    containing cyber observables or is a cyber observable itself.
     """
     if (instance['type'] == 'observed-data' and
             'objects' in instance and
@@ -451,22 +451,23 @@ def cyber_observable_check(version, requires_objects=False):
             data as a top level object or within the observed-data sdo and loops
             through objects in the latter case to keep checks consistent.
             """
+            instance = args[0]
             if version == "2.1" and not requires_objects:
-                if not has_cyber_observable_data(args[0], version="2.1"):
+                if not has_cyber_observable_data(instance, version="2.1"):
                     return
-                if 'objects' in args[0]:
-                    for obj in args[0]['objects']:
-                        func = original_function(args[0], **kwargs)
+                if 'objects' in instance:
+                    for key, obj in instance['objects'].items():
+                        func = original_function(obj, **kwargs)
                         if isinstance(func, Iterable):
-                            for x in original_function(args[0], **kwargs):
+                            for x in original_function(obj, **kwargs):
                                 yield x
                 else:
                     func = original_function(*args, **kwargs)
                     if isinstance(func, Iterable):
-                        for x in original_function(args[0], **kwargs):
+                        for x in original_function(instance, **kwargs):
                             yield x
             else:
-                if not has_cyber_observable_data(args[0]):
+                if not has_cyber_observable_data(instance):
                     return
                 func = original_function(*args, **kwargs)
                 if isinstance(func, Iterable):
