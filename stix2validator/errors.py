@@ -208,6 +208,10 @@ def pretty_error(error, verbose=False):
                         'end' in error.instance):
                     msg = "If the 'is_active' property is true, then the "\
                           "'end' property must not be included."
+            elif 'type' in error.instance and error.instance['type'] == 'malware':
+                if ('is_family' in error.instance and
+                        not isinstance(error.instance['is_family'], bool)):
+                    msg = "is_family: 'true' is not of type 'boolean'"
             else:
                 raise TypeError
         except TypeError:
