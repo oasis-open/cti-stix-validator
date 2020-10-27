@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+2.0.2 - 2020-10-27
+
+* Removed `six` dependency (@zrush-mitre)
+* Fixed bug with SCO warnings being attributed to the Observed Data object instead of the SCO when the `objects` property is used
+* Fixed bug renaming process.created to process.created_time
+* Improved error message when malware.is_family isn't boolean
+
 2.0.1 - 2020-06-10
 
 * Fixed bug so 2.1 bundles can contain 2.0 objects now
