@@ -27,6 +27,14 @@ class LocationTestCases(ValidatorTest):
         results = validate_string(VALID_LOCATION, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_location_lat_long(self):
+        location = copy.deepcopy(self.valid_location)
+        location['latitude'] = 48.8566
+        location['longitude'] = 2.3522
+        self.assertTrueWithOptions(location)
+
+        self.check_ignore(location, 'region')
+
     def test_vocab_region(self):
         location = copy.deepcopy(self.valid_location)
         location['region'] = 'global'
