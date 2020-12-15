@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+2.0.4 - 2020-12-15
+
+* Fixed issue with Location objects using latitude (#160)
+
 2.0.2 - 2020-10-27
 
 * Removed `six` dependency (@zrush-mitre)
