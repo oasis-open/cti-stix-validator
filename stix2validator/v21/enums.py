@@ -654,7 +654,7 @@ PROPERTIES = {
         'object_marking_refs',
         'granular_markings',
         'description',
-        'latittude',
+        'latitude',
         'longitude',
         'precision',
         'region',
