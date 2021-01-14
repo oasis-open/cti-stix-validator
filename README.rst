@@ -1,4 +1,4 @@
-|Build Status|  |Coverage|  |Version|
+|Build_Status|  |Coverage|  |Version|
 
 ====================
 `cti-stix-validator`
@@ -170,8 +170,8 @@ CLA-related questions to `repository-cla@oasis-open.org
 
 
 
-.. |Build Status| image:: https://travis-ci.org/oasis-open/cti-stix-validator.svg?branch=master
-   :target: https://travis-ci.org/oasis-open/cti-stix-validator
+.. |Build_Status| image:: https://github.com/oasis-open/cti-stix-validator/workflows/cti-stix-validator%20test%20harness/badge.svg
+   :target: https://github.com/oasis-open/cti-stix-validator/actions?query=workflow%3A%22cti-stix-validator+test+harness%22
 .. |Coverage| image:: https://codecov.io/gh/oasis-open/cti-stix-validator/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/oasis-open/cti-stix-validator
 .. |Version| image:: https://img.shields.io/pypi/v/stix2-validator.svg?maxAge=3600
