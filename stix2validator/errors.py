@@ -212,6 +212,9 @@ def pretty_error(error, verbose=False):
                 if ('is_family' in error.instance and
                         not isinstance(error.instance['is_family'], bool)):
                     msg = "is_family: 'true' is not of type 'boolean'"
+                elif ('is_family' in error.instance and
+                        'name' not in error.instance):
+                    msg = "'name' is required when 'is_family' is true"
             else:
                 raise TypeError
         except TypeError:
