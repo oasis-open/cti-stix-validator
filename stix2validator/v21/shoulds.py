@@ -155,7 +155,12 @@ def uuid_check(instance):
     if 'id' not in instance:
         return
 
-    object_id = uuid.UUID(instance['id'].split("--")[-1])
+    uuid_segment = instance['id'].split("--")[-1]
+    try:
+        object_id = uuid.UUID(uuid_segment)
+    except ValueError:
+        return  # invalid UUID handled by schemas
+
     if (has_cyber_observable_data(instance, "2.1") and
             instance['type'] not in ['observed-data', 'process']):
         if object_id.version != 5:
