@@ -47,7 +47,7 @@ Mandatory Checks - STIX 2.1
 |                                 |                                        |                                        |
 |                                 |                                        | '<object>': '<extension>':             |
 |                                 |                                        | '<property>': '<timestamp>' is not a   |
-|                                 |                                        | a valid timestamp: <message>           |
+|                                 |                                        | valid timestamp: <message>             |
 |                                 |                                        |                                        |
 |                                 |                                        | '<object>': '<property>':              |
 |                                 |                                        | '<embedded-property>' is not a valid   |
@@ -161,96 +161,6 @@ Optional Checks - STIX 2.1
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |   1    | format-checks               | all 1xx checks are run. Specifically:  |                                        |
 |        |                             |                                        |                                        |
-+--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  101   | custom-prefix               | names of custom object types,          | custom object type '<object>' should   |
-|        |                             | properties, observable objects,        | start with 'x-' followed by a source   |
-|        |                             | observable object properties, and      | unique identifier (like a domain name  |
-|        |                             | observable object extensions follow    | with dots replaced by hyphens), a      |
-|        |                             | the correct format                     | hyphen and then the name.              |
-|        |                             |                                        |                                        |
-|        |                             |                                        | custom property '<property>' should    |
-|        |                             |                                        | have a type that starts with 'x\_'     |
-|        |                             |                                        | followed by a source unique identifier |
-|        |                             |                                        | (like a domain name with dots replaced |
-|        |                             |                                        | by a hyphen), a hyphen and then the    |
-|        |                             |                                        | name.                                  |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Custom Observable Object type          |
-|        |                             |                                        | '<observable_object>' should start     |
-|        |                             |                                        | with 'x-' followed by a source unique  |
-|        |                             |                                        | identifier (like a domain name with    |
-|        |                             |                                        | dots replaced by hyphens), a hyphen    |
-|        |                             |                                        | and then the name.                     |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Custom Cyber Observable Object         |
-|        |                             |                                        | extension type                         |
-|        |                             |                                        | '<observable-object-extension>'        |
-|        |                             |                                        | should start with 'x-'                 |
-|        |                             |                                        | followed by a source unique identifier |
-|        |                             |                                        | (like a domain with dots replaced by   |
-|        |                             |                                        | hyphens), a hyphen and then the name.  |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<observable_object_property>'|
-|        |                             |                                        | should start with 'x\_' followed by a  |
-|        |                             |                                        | source unique identifier (like a domain|
-|        |                             |                                        | name with dots replaced by hyphens), a |
-|        |                             |                                        | hyphen and then the name.              |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<property>' in the           |
-|        |                             |                                        | <extension> extension should start     |
-|        |                             |                                        | with 'x\_' followed by a source unique |
-|        |                             |                                        | (like a domain name with dots replaced |
-|        |                             |                                        | by hyphens), a hyphen and then the     |
-|        |                             |                                        | name.                                  |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<property>' in the           |
-|        |                             |                                        | <extension_property> of the            |
-|        |                             |                                        | <extension> extension should start     |
-|        |                             |                                        | with 'x\_' followed by a source        |
-|        |                             |                                        | unique identifier (like a domain name  |
-|        |                             |                                        | with dots replaced by hyphens), a      |
-|        |                             |                                        | hyphen and then the name.              |
-+--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  102   | custom-prefix-lax           | same as 101 but more lenient; no       | custom object type '<object>' should   |
-|        |                             | source identifier needed in prefix     | start with 'x-' in order to be         |
-|        |                             |                                        | compatible with future versions of the |
-|        |                             |                                        | STIX 2 specification.                  |
-|        |                             |                                        |                                        |
-|        |                             |                                        | custom property '<property>' should    |
-|        |                             |                                        | have a type that starts with 'x\_' in  |
-|        |                             |                                        | order to be compatible with future     |
-|        |                             |                                        | versions of the STIX 2 specification.  |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Custom Observable Object type          |
-|        |                             |                                        | '<observable_object>' should start     |
-|        |                             |                                        | with 'x-'.                             |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Custom Observable Object extension     |
-|        |                             |                                        | type '<observable-object_extension>'   |
-|        |                             |                                        | should start with 'x-'.                |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<property>' should start     |
-|        |                             |                                        | with 'x\_'.                            |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<embedded_property>' in the  |
-|        |                             |                                        | <property> of the <object> object      |
-|        |                             |                                        | should start with 'x\_'.               |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<property>' in the           |
-|        |                             |                                        | <extension> extension should start     |
-|        |                             |                                        | with 'x\_'.                            |
-|        |                             |                                        |                                        |
-|        |                             |                                        | Cyber Observable Object custom         |
-|        |                             |                                        | property '<property>' in the           |
-|        |                             |                                        | <extension_property> property of the   |
-|        |                             |                                        | <extension> extension should start     |
-|        |                             |                                        | with 'x\_'.                            |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
 |  103   | uuid-check                  | objects use the recommended versions   | Cyber Observable ID value <identifier> |
 |        |                             | of UUID (v5 for SCOs, v4 for the rest) | is not a valid UUIDv5 ID.              |
@@ -511,4 +421,27 @@ Optional Checks - STIX 2.1
 |  304   | deprecated-properties       | certain properties which have been     | Included property '<property>' is      |
 |        |                             | deprecated are not being used          | deprecated within the indicated        |
 |        |                             |                                        | spec version.                          |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  305   | extension-description       | Extension Definitions have a           | The 'description' property SHOULD be   |
+|        |                             | description property                   | populated.                             |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  306   | extension-properties        | Ensure toplevel-property-extensions    | For extensions of the 'toplevel-       |
+|        |                             | include the extension_properties       | property-extension' type, the          |
+|        |                             | property                               | 'extension_properties' property SHOULD |
+|        |                             |                                        | include one or more property names.    |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  401   | custom-content              | custom objects, properties, and        | Custom object type '<object>' should be|
+|        |                             | observable extensions have been        | implemented using an extension with an |
+|        |                             | implemented with Extension Definitions | 'extension_type' of 'new-sdo'.         |
+|        |                             |                                        |                                        |
+|        |                             |                                        | Custom property '<property>' should be |
+|        |                             |                                        | 'implemented using an extension with an|
+|        |                             |                                        | 'extension_type' of 'property-         |
+|        |                             |                                        | extension' or 'toplevel-property-      |
+|        |                             |                                        | extension'.                            |
+|        |                             |                                        |                                        |
+|        |                             |                                        | Custom Cyber Observable Object         |
+|        |                             |                                        | extension type '<extension>' should be |
+|        |                             |                                        | implemented using an 'extension_type'  |
+|        |                             |                                        | of 'property-extension'.               |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+

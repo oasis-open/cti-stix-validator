@@ -68,7 +68,7 @@ def test_validate_file_warning(caplog):
     assert results.is_valid
 
     print_results(results)
-    assert re.search("Custom property .+ should have a type that starts with 'x_'", caplog.text)
+    assert re.search("Custom property .+ should ", caplog.text)
 
 
 def test_validate_file_invalid_brace(caplog):
@@ -111,7 +111,7 @@ def test_validate_string_warning(caplog):
     assert results.is_valid
 
     print_results(results)
-    assert re.search("Custom property .+ should have a type that starts with 'x_'", caplog.text)
+    assert re.search("Custom property .+ should ", caplog.text)
 
 
 def test_validate_string_invalid_timestamp(caplog):

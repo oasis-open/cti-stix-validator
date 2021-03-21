@@ -140,25 +140,32 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = """[ab:yz = 'something']"""
         self.assertFalseWithOptions(indicator)
 
-    def test_pattern_custom_object_noprefix(self):
+    def test_pattern_custom_object_type_too_short(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern'] = """[foo:name = 'something']"""
+        indicator['pattern'] = """[f:name = 'something']"""
         self.assertFalseWithOptions(indicator)
 
-        self.check_ignore(indicator, 'custom-prefix,custom-prefix-lax')
-        self.assertFalseWithOptions(indicator, disabled='custom-prefix')
+    def test_pattern_custom_object_type_valid(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[foo:name = 'something']"""
+        self.assertTrueWithOptions(indicator)
 
-    def test_pattern_custom_object_prefix_strict(self):
+    def test_pattern_custom_object_type_strict(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[x-x-foo:x_x_name = 'something']"""
         self.assertTrueWithOptions(indicator)
 
         self.assertFalseWithOptions(indicator, strict_types=True)
 
-    def test_pattern_custom_object_prefix_lax(self):
+    def test_pattern_custom_property_too_short(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern'] = """[x-foo:x_name = 'something']"""
-        self.check_ignore(indicator, 'custom-prefix')
+        indicator['pattern'] = """[file:n = 'something']"""
+        self.assertFalseWithOptions(indicator)
+
+    def test_pattern_custom_property_valid(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[file:foo = 'something']"""
+        self.assertTrueWithOptions(indicator)
 
     def test_pattern_custom_property_prefix_strict(self):
         indicator = copy.deepcopy(self.valid_indicator)
@@ -193,9 +200,15 @@ class IndicatorTestCases(ValidatorTest):
             "created": "2016-04-06T20:03:48.000Z",
             "modified": "2016-04-06T20:03:48.000Z",
             "property1": 10,
-            "property2": "fizzbuzz"
+            "property2": "fizzbuzz",
+            "extensions": {
+                "extension-definition--04b2d3ef-d061-4912-ab77-6bbe807a5bd5": {
+                    "extension_type": "new-sdo"
+                }
+            }
         }
-        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
+        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas, strict_types=True)
+        self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
 
         # properties are wrong types (str vs int)
         new_obj['type'] = 'x-new-type'

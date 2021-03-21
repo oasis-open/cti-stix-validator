@@ -29,13 +29,6 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 | Code | Name                        | Ensures...                             |
 +------+-----------------------------+----------------------------------------+
 |  1   | format-checks               | all 1xx checks are run                 |
-| 101  | custom-prefix               | names of custom object types,          |
-|      |                             | properties, observable objects,        |
-|      |                             | observable object properties, and      |
-|      |                             | observable object extensions follow    |
-|      |                             | the correct format                     |
-| 102  | custom-prefix-lax           | same as 101 but more lenient; no       |
-|      |                             | source identifier needed in prefix     |
 | 103  | uuid-check                  | objects use the recommended versions   |
 |      |                             | of UUID (v4 for SCOs, v5 for the rest) |
 | 111  | open-vocab-format           | values of open vocabularies follow the |
@@ -131,6 +124,14 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | description properties                 |
 | 304  | deprecated-properties       | certain properties which have been     |
 |      |                             | deprecated are not being used          |
+| 305  | extension-description       | Extension Definitions have a           |
+|      |                             | description property                   |
+| 306  | extension-properties        | Ensure toplevel-property-extensions    |
+|      |                             | include the extension_properties       |
+|      |                             | property                               |
+| 401  | custom-content              | custom objects, properties, and        |
+|      |                             | observable extensions have been        |
+|      |                             | implemented with Extension Definitions |
 +------+-----------------------------+----------------------------------------+
 """.format(DEFAULT_VER)
 

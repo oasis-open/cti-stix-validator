@@ -429,6 +429,7 @@ TYPES = [
     "sighting",
     "language-content",
     "marking-definition",
+    "extension-definition",
 ]
 
 OBSERVABLE_TYPES = [
@@ -484,6 +485,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'kill_chain_phases',
@@ -503,6 +505,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'aliases',
@@ -524,6 +527,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'action'
@@ -542,6 +546,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'context',
@@ -561,6 +566,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'roles',
@@ -584,6 +590,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'indicator_types',
@@ -607,6 +614,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'infrastructure_types',
@@ -628,6 +636,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'aliases',
@@ -653,6 +662,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'description',
         'latitude',
         'longitude',
@@ -678,6 +688,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'malware_types',
@@ -706,6 +717,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'product',
         'version',
         'host_vm_ref',
@@ -737,6 +749,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'abstract',
         'content',
         'authors',
@@ -756,6 +769,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'first_observed',
         'last_observed',
         'number_observed',
@@ -776,6 +790,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'explanation',
         'authors',
         'object_refs',
@@ -795,6 +810,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'report_types',
@@ -817,6 +833,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'threat_actor_types',
@@ -843,6 +860,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
         'tool_types',
@@ -864,6 +882,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'description',
     ],
@@ -886,6 +905,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'relationship_type',
         'description',
         'source_ref',
@@ -908,6 +928,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'first_seen',
         'last_seen',
         'count',
@@ -929,6 +950,7 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'object_ref',
         'object_modified',
         'contents',
@@ -943,10 +965,30 @@ PROPERTIES = {
         'external_references',
         'object_marking_refs',
         'granular_markings',
+        'extensions',
         'name',
         'definition_type',
         'definition',
-    ]
+    ],
+    "extension-definition": {
+        'type',
+        'spec_version',
+        'id',
+        'created_by_ref',
+        'created',
+        'modified',
+        'revoked',
+        'labels',
+        'external_references',
+        'object_marking_refs',
+        'granular_markings',
+        'name',
+        'description',
+        'schema',
+        'version',
+        'extension_types',
+        'extension_properties',
+    }
 }
 # Mappings of official Cyber Observable Objects to their official properties
 OBSERVABLE_PROPERTIES = {
@@ -1595,8 +1637,9 @@ OBSERVABLE_DICT_KEY_EXCEPTIONS = [
 # Reserved properties and objects
 RESERVED_PROPERTIES = [
     'severity',
-    'usernames',
+    'username',
     'phone_numbers',
+    'action',
 ]
 RESERVED_OBJECTS = [
     'incident',
@@ -1613,6 +1656,7 @@ NON_SDOS = [
     'marking-definition',
     'sighting',
     'relationship',
+    'extension-definition',
 ]
 
 # List of relationship types common to all object types
@@ -2071,8 +2115,6 @@ DEPRECATED_PROPERTIES = {
 # Mapping of check code numbers to names
 CHECK_CODES = {
     '1': 'format-checks',
-    '101': 'custom-prefix',
-    '102': 'custom-prefix-lax',
     '103': 'uuid-check',
     '111': 'open-vocab-format',
     '121': 'kill-chain-names',
@@ -2120,6 +2162,9 @@ CHECK_CODES = {
     '302': 'extref-hashes',
     '303': 'indicator-properties',
     '304': 'deprecated-properties',
+    '305': 'extension-description',
+    '306': 'extension-properties',
+    '401': 'custom-content',
 }
 
 
