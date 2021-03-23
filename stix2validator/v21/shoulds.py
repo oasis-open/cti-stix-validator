@@ -49,7 +49,8 @@ def custom_content(instance):
                        custom_property(instance),
                        custom_observable_embedded_property(instance),
                        custom_observable_extension_property(instance),
-                       custom_observable_extension(instance)):
+                       custom_observable_extension(instance),
+                       custom_marking_definition(instance)):
         yield error
 
 
@@ -161,6 +162,15 @@ def custom_observable_extension(instance):
                             "'%s' should be implemented using an "
                             "'extension_type' of 'property-extension'."
                             % ext_key, instance['id'], 'custom-content')
+
+
+def custom_marking_definition(instance):
+    if (instance['type'] == 'marking-definition' and
+            'extensions' not in instance and
+            instance.get('definition_type') not in ['statement', 'tlp']):
+        yield JSONError("Custom marking definitions should be specified using "
+                        "the 'extensions' property.",
+                        instance['id'], 'custom-content')
 
 
 def deprecated_property_check(instance):
