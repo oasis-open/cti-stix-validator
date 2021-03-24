@@ -64,8 +64,8 @@ class CustomObjectTestCases(ValidatorTest):
         results = validate_parsed_json(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)
 
-        self.assertFalseWithOptions(custom_obj, enabled='custom-content')
-        self.assertFalseWithOptions(custom_obj, disabled='custom-content')
+        self.assertFalseWithOptions(custom_obj, enabled='extensions-use')
+        self.assertFalseWithOptions(custom_obj, disabled='extensions-use')
 
     def test_valid_type_name(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)

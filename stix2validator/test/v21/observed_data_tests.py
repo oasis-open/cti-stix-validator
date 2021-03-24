@@ -70,9 +70,9 @@ class ObservedDataTestCases(ValidatorTest):
                 }
             }
         }
-        self.assertFalseWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
 
-        self.check_ignore(observed_data, 'observable-dictionary-keys,custom-content')
+        self.check_ignore(observed_data, 'observable-dictionary-keys,extensions-use')
 
     def test_dict_key_length(self):
         observed_data = {
@@ -86,7 +86,7 @@ class ObservedDataTestCases(ValidatorTest):
             },
         }
         # STIX 2.1 removed dictionary key minimum length
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_vocab_account_type(self):
         observed_data = {
@@ -267,7 +267,7 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data, strict_properties=True)
 
         self.check_ignore(observed_data,
-                          'custom-content')
+                          'extensions-use')
 
     def test_observable_object_custom_property_without_extension(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -275,8 +275,8 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_custom_property_with_extension(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -291,7 +291,7 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
 
         del observed_data['x_foo_something']
         self.assertTrueWithOptions(observed_data, strict_properties=True)
@@ -309,21 +309,21 @@ class ObservedDataTestCases(ValidatorTest):
 
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
 
         del observed_data['x_foo_something']
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_extension_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_object)
         observed_data['extensions']["ntfs-ext"]['foo'] = "bar"
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_embedded_custom_properties(self):
         observed_data = {
@@ -336,8 +336,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_embedded_dict_custom_properties(self):
         observed_data = {
@@ -355,8 +355,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_extension_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -371,8 +371,8 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
-        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(observed_data, disabled='custom-content')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_extensions_string(self):
         observed_data = copy.deepcopy(self.valid_object)

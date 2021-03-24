@@ -41,7 +41,7 @@ def _uses_extension(instance, extension_types):
     return False
 
 
-def custom_content(instance):
+def extensions_use(instance):
     """Ensure custom objects, properties, and observable extensions have been
     implemented with Extension Definitions.
     """
@@ -65,7 +65,7 @@ def custom_object(instance):
         yield JSONError("Custom object type '%s' should be implemented using "
                         "an extension with an 'extension_type' of 'new-sdo', "
                         "'new-sco', or 'new-sro'."
-                        % type_, instance['id'], 'custom-content')
+                        % type_, instance['id'], 'extensions-use')
 
 
 def custom_property(instance):
@@ -85,7 +85,7 @@ def custom_property(instance):
                             "an extension with an 'extension_type' of "
                             "'property-extension' or 'toplevel-property-"
                             "extension'." % prop_name, instance['id'],
-                            'custom-content')
+                            'extensions-use')
 
 
 @cyber_observable_check("2.1")
@@ -107,10 +107,10 @@ def custom_observable_embedded_property(instance):
                     for embedded in embed_prop:
                         if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop]):
                             yield JSONError(message % (embedded, prop, type_),
-                                            instance['id'], 'custom-content')
+                                            instance['id'], 'extensions-use')
                 elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop]):
                     yield JSONError(message % (embed_prop, prop, type_),
-                                    instance['id'], 'custom-content')
+                                    instance['id'], 'extensions-use')
 
 
 @cyber_observable_check("2.1")
@@ -129,7 +129,7 @@ def custom_observable_extension_property(instance):
                                         "should be implemented using an extension with an 'extension_type' of "
                                         "'property-extension' or 'toplevel-property-extension'."
                                         % (ext_prop, ext_key), instance['id'],
-                                        'custom-content')
+                                        'extensions-use')
 
                     if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
                             ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
@@ -143,7 +143,7 @@ def custom_observable_extension_property(instance):
                                                     "an extension with an 'extension_type' of "
                                                     "'property-extension' or 'toplevel-property-extension'."
                                                     % (p, ext_prop, ext_key), instance['id'],
-                                                    'custom-content')
+                                                    'extensions-use')
 
 
 @cyber_observable_check("2.1")
@@ -161,7 +161,7 @@ def custom_observable_extension(instance):
             yield JSONError("Custom Cyber Observable Object extension type "
                             "'%s' should be implemented using an "
                             "'extension_type' of 'property-extension'."
-                            % ext_key, instance['id'], 'custom-content')
+                            % ext_key, instance['id'], 'extensions-use')
 
 
 def custom_marking_definition(instance):
@@ -170,7 +170,7 @@ def custom_marking_definition(instance):
             instance.get('definition_type') not in ['statement', 'tlp']):
         yield JSONError("Custom marking definitions should be specified using "
                         "the 'extensions' property.",
-                        instance['id'], 'custom-content')
+                        instance['id'], 'extensions-use')
 
 
 def deprecated_property_check(instance):
@@ -1126,7 +1126,7 @@ CHECKS = {
         deprecated_property_check,
         extension_description,
         extension_properties,
-        custom_content,
+        extensions_use,
     ],
     'format-checks': [
         uuid_check,
@@ -1252,7 +1252,7 @@ CHECKS = {
     'deprecated-properties': deprecated_property_check,
     'extension-description': extension_description,
     'extension-properties': extension_properties,
-    'custom-content': custom_content,
+    'extensions-use': extensions_use,
 }
 
 
@@ -1362,8 +1362,8 @@ def list_shoulds(options):
                 validator_list.append(CHECKS['indicator-properties'])
             if 'deprecated-properties' not in options.disabled:
                 validator_list.append(CHECKS['deprecated-properties'])
-            if 'custom-content' not in options.disabled:
-                validator_list.append(CHECKS['custom-content'])
+            if 'extensions-use' not in options.disabled:
+                validator_list.append(CHECKS['extensions-use'])
 
     # --enable
     if options.enabled:

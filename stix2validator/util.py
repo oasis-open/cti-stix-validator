@@ -129,7 +129,7 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 | 306  | extension-properties        | Ensure toplevel-property-extensions    |
 |      |                             | include the extension_properties       |
 |      |                             | property                               |
-| 401  | custom-content              | custom objects, properties, and        |
+| 401  | extensions-use              | custom objects, properties, and        |
 |      |                             | observable extensions have been        |
 |      |                             | implemented with Extension Definitions |
 +------+-----------------------------+----------------------------------------+

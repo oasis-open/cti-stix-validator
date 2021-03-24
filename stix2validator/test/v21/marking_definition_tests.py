@@ -29,9 +29,9 @@ class MarkingDefinitionTestCases(ValidatorTest):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         marking_definition['definition_type'] = "something"
         self.assertFalseWithOptions(marking_definition)
-        self.assertFalseWithOptions(marking_definition, disabled='custom-content')
+        self.assertFalseWithOptions(marking_definition, disabled='extensions-use')
 
-        self.check_ignore(marking_definition, 'marking-definition-type,custom-content')
+        self.check_ignore(marking_definition, 'marking-definition-type,extensions-use')
 
     def test_lax_option(self):
         marking_definition = copy.deepcopy(self.valid_marking_definition)

@@ -430,7 +430,7 @@ Optional Checks - STIX 2.1
 |        |                             | property                               | 'extension_properties' property SHOULD |
 |        |                             |                                        | include one or more property names.    |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  401   | custom-content              | custom objects, properties, and        | Custom object type '<object>' should be|
+|  401   | extensions-use              | custom objects, properties, and        | Custom object type '<object>' should be|
 |        |                             | observable extensions have been        | implemented using an extension with an |
 |        |                             | implemented with Extension Definitions | 'extension_type' of 'new-sdo'.         |
 |        |                             |                                        |                                        |

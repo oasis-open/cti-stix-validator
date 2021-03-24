@@ -49,7 +49,7 @@ class AttackPatternTestCases(ValidatorTest):
         attack_pattern['something'] = "some value"
 
         self.assertFalseWithOptions(attack_pattern)
-        self.assertTrueWithOptions(attack_pattern, disabled='custom-content')
+        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use')
 
     def test_custom_property_with_extension(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
@@ -64,7 +64,7 @@ class AttackPatternTestCases(ValidatorTest):
 
         self.assertFalseWithOptions(attack_pattern)
         self.assertFalseWithOptions(attack_pattern, strict_properties=True)
-        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='custom-content')
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use')
 
         del attack_pattern['something']
         self.assertTrueWithOptions(attack_pattern, strict_properties=True)
@@ -82,12 +82,12 @@ class AttackPatternTestCases(ValidatorTest):
 
         self.assertTrueWithOptions(attack_pattern)
         self.assertFalseWithOptions(attack_pattern, strict_properties=True)
-        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='custom-content')
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use')
 
         del attack_pattern['something']
         self.assertFalseWithOptions(attack_pattern, strict_properties=True)
-        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='custom-content')
-        self.assertTrueWithOptions(attack_pattern, disabled='custom-content')
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use')
 
     def test_invalid_timestamp(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)

@@ -2182,7 +2182,7 @@ CHECK_CODES = {
     '304': 'deprecated-properties',
     '305': 'extension-description',
     '306': 'extension-properties',
-    '401': 'custom-content',
+    '401': 'extensions-use',
 }
 
 
