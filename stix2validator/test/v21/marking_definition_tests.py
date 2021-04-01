@@ -99,6 +99,8 @@ class MarkingDefinitionTestCases(ValidatorTest):
         marking_definition = copy.deepcopy(self.valid_marking_definition)
         del marking_definition['definition']
         del marking_definition['definition_type']
+        self.assertFalseWithOptions(marking_definition)
+
         marking_definition['extensions'] = {
             "extension-definition--9ef47f81-1443-4632-8497-8b2878f8ac21": {
                 "extension_type": "property-extension",
