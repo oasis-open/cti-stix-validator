@@ -202,7 +202,7 @@ class IndicatorTestCases(ValidatorTest):
             "property1": 10,
             "property2": "fizzbuzz",
             "extensions": {
-                "extension-definition--04b2d3ef-d061-4912-ab77-6bbe807a5bd5": {
+                "extension-definition--ba73205e-96bb-40d3-8168-0056d862b229": {
                     "extension_type": "new-sdo"
                 }
             }

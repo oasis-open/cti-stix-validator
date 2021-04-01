@@ -13,7 +13,7 @@
                     "type": "object",
                     "properties": {
                         "extension_type": {
-                            "enum": ["new_sdo"]
+                            "enum": ["new-sdo"]
                         }
                     }
                 }
