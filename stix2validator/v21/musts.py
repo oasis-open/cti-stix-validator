@@ -439,14 +439,14 @@ def patterns(instance, options):
             yield PatternError("'%s' is not a valid observable type name"
                                % objtype, instance['id'])
         elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
-              not CUSTOM_TYPE_PREFIX_RE.match(objtype)):
+              'extensions-use' in options.disabled and not CUSTOM_TYPE_PREFIX_RE.match(objtype)):
             yield PatternError("Custom Observable Object type '%s' should start "
                                "with 'x-' followed by a source unique identifier "
                                "(like a domain name with dots replaced by "
                                "hyphens), a hyphen and then the name"
                                % objtype, instance['id'])
         elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix-lax']) and
-              not CUSTOM_TYPE_LAX_PREFIX_RE.match(objtype)):
+              'extensions-use' in options.disabled and not CUSTOM_TYPE_LAX_PREFIX_RE.match(objtype)):
             yield PatternError("Custom Observable Object type '%s' should start "
                                "with 'x-'" % objtype, instance['id'])
 
@@ -464,7 +464,7 @@ def patterns(instance, options):
             elif objtype not in enums.OBSERVABLE_TYPES:
                 continue  # custom SCOs aren't required to use x_ prefix on properties
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix']) and
-                  not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
+                  'extensions-use' in options.disabled and not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
                 yield PatternError("Cyber Observable Object custom property '%s' "
                                    "should start with 'x_' followed by a source "
                                    "unique identifier (like a domain name with "
@@ -472,7 +472,7 @@ def patterns(instance, options):
                                    "underscore and then the name"
                                    % prop, instance['id'])
             elif (all(x not in options.disabled for x in ['all', 'format-checks', 'custom-prefix-lax']) and
-                  not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop)):
+                  'extensions-use' in options.disabled and not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop)):
                 yield PatternError("Cyber Observable Object custom property '%s' "
                                    "should start with 'x_'" % prop, instance['id'])
 

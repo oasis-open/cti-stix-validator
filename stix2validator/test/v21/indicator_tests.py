@@ -140,32 +140,59 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = """[ab:yz = 'something']"""
         self.assertFalseWithOptions(indicator)
 
-    def test_pattern_custom_object_noprefix(self):
+    def test_pattern_custom_object_type_too_short(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['pattern'] = """[foo:name = 'something']"""
+        indicator['pattern'] = """[f:name = 'something']"""
         self.assertFalseWithOptions(indicator)
 
-        self.check_ignore(indicator, 'custom-prefix,custom-prefix-lax')
-        self.assertFalseWithOptions(indicator, disabled='custom-prefix')
+    def test_pattern_custom_object_type_valid(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[foo:name = 'something']"""
+        self.assertTrueWithOptions(indicator)
 
-    def test_pattern_custom_object_prefix_strict(self):
+    def test_pattern_custom_object_type_strict(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[x-x-foo:x_x_name = 'something']"""
         self.assertTrueWithOptions(indicator)
 
         self.assertFalseWithOptions(indicator, strict_types=True)
 
+    def test_pattern_custom_property_too_short(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[file:n = 'something']"""
+        self.assertFalseWithOptions(indicator)
+
+    def test_pattern_custom_property_valid(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[file:foo = 'something']"""
+        self.assertTrueWithOptions(indicator)
+
+    def test_pattern_custom_object_noprefix(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[foo:name = 'something']"""
+        self.assertFalseWithOptions(indicator, disabled='extensions-use')
+
+        self.check_ignore(indicator, 'custom-prefix,custom-prefix-lax,extensions-use')
+        self.assertFalseWithOptions(indicator, disabled='custom-prefix,extensions-use')
+
+    def test_pattern_custom_object_prefix_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[x-x-foo:x_x_name = 'something']"""
+        self.assertTrueWithOptions(indicator, disabled='extensions-use')
+
+        self.assertFalseWithOptions(indicator, strict_types=True)
+
     def test_pattern_custom_object_prefix_lax(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[x-foo:x_name = 'something']"""
-        self.check_ignore(indicator, 'custom-prefix')
+        self.check_ignore(indicator, 'custom-prefix,extensions-use')
 
     def test_pattern_custom_property_prefix_strict(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[file:x_x_name = 'something']"""
-        self.assertTrueWithOptions(indicator)
+        self.assertTrueWithOptions(indicator, disabled='extensions-use')
 
-        self.assertFalseWithOptions(indicator, strict_properties=True)
+        self.assertFalseWithOptions(indicator, strict_properties=True, disabled='extensions-use')
 
     def test_pattern_list_object_property(self):
         indicator = copy.deepcopy(self.valid_indicator)
@@ -193,9 +220,15 @@ class IndicatorTestCases(ValidatorTest):
             "created": "2016-04-06T20:03:48.000Z",
             "modified": "2016-04-06T20:03:48.000Z",
             "property1": 10,
-            "property2": "fizzbuzz"
+            "property2": "fizzbuzz",
+            "extensions": {
+                "extension-definition--ba73205e-96bb-40d3-8168-0056d862b229": {
+                    "extension_type": "new-sdo"
+                }
+            }
         }
-        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas)
+        self.assertFalseWithOptions(new_obj, schema_dir=self.custom_schemas, strict_types=True)
+        self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
 
         # properties are wrong types (str vs int)
         new_obj['type'] = 'x-new-type'

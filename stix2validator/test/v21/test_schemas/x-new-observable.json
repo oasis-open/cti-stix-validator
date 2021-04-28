@@ -2,6 +2,19 @@
     "properties": {
         "foo": {
             "type": "string"
+        },
+        "extensions": {
+            "type": "object",
+            "properties": {
+                "extension-definition--3518f3da-8f95-4558-a1a7-706f759c34a1": {
+                    "type": "object",
+                    "properties": {
+                        "extension_type": {
+                            "enum": ["new-sco"]
+                        }
+                    }
+                }
+            }
         }
     }
 }

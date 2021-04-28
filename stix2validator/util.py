@@ -131,6 +131,14 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 |      |                             | description properties                 |
 | 304  | deprecated-properties       | certain properties which have been     |
 |      |                             | deprecated are not being used          |
+| 305  | extension-description       | Extension Definitions have a           |
+|      |                             | description property                   |
+| 306  | extension-properties        | Ensure toplevel-property-extensions    |
+|      |                             | include the extension_properties       |
+|      |                             | property                               |
+| 401  | extensions-use              | custom objects, properties, and        |
+|      |                             | observable extensions have been        |
+|      |                             | implemented with Extension Definitions |
 +------+-----------------------------+----------------------------------------+
 """.format(DEFAULT_VER)
 

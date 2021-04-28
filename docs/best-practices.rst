@@ -47,7 +47,7 @@ Mandatory Checks - STIX 2.1
 |                                 |                                        |                                        |
 |                                 |                                        | '<object>': '<extension>':             |
 |                                 |                                        | '<property>': '<timestamp>' is not a   |
-|                                 |                                        | a valid timestamp: <message>           |
+|                                 |                                        | valid timestamp: <message>             |
 |                                 |                                        |                                        |
 |                                 |                                        | '<object>': '<property>':              |
 |                                 |                                        | '<embedded-property>' is not a valid   |
@@ -162,11 +162,16 @@ Optional Checks - STIX 2.1
 |   1    | format-checks               | all 1xx checks are run. Specifically:  |                                        |
 |        |                             |                                        |                                        |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  101   | custom-prefix               | names of custom object types,          | custom object type '<object>' should   |
-|        |                             | properties, observable objects,        | start with 'x-' followed by a source   |
-|        |                             | observable object properties, and      | unique identifier (like a domain name  |
-|        |                             | observable object extensions follow    | with dots replaced by hyphens), a      |
-|        |                             | the correct format                     | hyphen and then the name.              |
+|  101   | custom-prefix               | names of custom object types,          | Note: This checks functionality that   |
+|        |                             | properties, observable objects,        | has been deprecated and replaced by    |
+|        |                             | observable object properties, and      | extensions. Thus, this check only runs |
+|        |                             | observable object extensions follow    | if extensions-use (401) is disabled.   |
+|        |                             | the correct format                     |                                        |
+|        |                             |                                        | custom object type '<object>' should   |
+|        |                             |                                        | start with 'x-' followed by a source   |
+|        |                             |                                        | unique identifier (like a domain name  |
+|        |                             |                                        | with dots replaced by hyphens), a      |
+|        |                             |                                        | hyphen and then the name.              |
 |        |                             |                                        |                                        |
 |        |                             |                                        | custom property '<property>' should    |
 |        |                             |                                        | have a type that starts with 'x\_'     |
@@ -214,8 +219,13 @@ Optional Checks - STIX 2.1
 |        |                             |                                        | with dots replaced by hyphens), a      |
 |        |                             |                                        | hyphen and then the name.              |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+
-|  102   | custom-prefix-lax           | same as 101 but more lenient; no       | custom object type '<object>' should   |
-|        |                             | source identifier needed in prefix     | start with 'x-' in order to be         |
+|  102   | custom-prefix-lax           | same as 101 but more lenient; no       | Note: This checks functionality that   |
+|        |                             | source identifier needed in prefix     | has been deprecated and replaced by    |
+|        |                             |                                        | extensions. Thus, this check only runs |
+|        |                             |                                        | if extensions-use (401) is disabled.   |
+|        |                             |                                        |                                        |
+|        |                             |                                        | custom object type '<object>' should   |
+|        |                             |                                        | start with 'x-' in order to be         |
 |        |                             |                                        | compatible with future versions of the |
 |        |                             |                                        | STIX 2 specification.                  |
 |        |                             |                                        |                                        |
@@ -511,4 +521,27 @@ Optional Checks - STIX 2.1
 |  304   | deprecated-properties       | certain properties which have been     | Included property '<property>' is      |
 |        |                             | deprecated are not being used          | deprecated within the indicated        |
 |        |                             |                                        | spec version.                          |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  305   | extension-description       | Extension Definitions have a           | The 'description' property SHOULD be   |
+|        |                             | description property                   | populated.                             |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  306   | extension-properties        | Ensure toplevel-property-extensions    | For extensions of the 'toplevel-       |
+|        |                             | include the extension_properties       | property-extension' type, the          |
+|        |                             | property                               | 'extension_properties' property SHOULD |
+|        |                             |                                        | include one or more property names.    |
++--------+-----------------------------+----------------------------------------+----------------------------------------+
+|  401   | extensions-use              | custom objects, properties, and        | Custom object type '<object>' should be|
+|        |                             | observable extensions have been        | implemented using an extension with an |
+|        |                             | implemented with Extension Definitions | 'extension_type' of 'new-sdo'.         |
+|        |                             |                                        |                                        |
+|        |                             |                                        | Custom property '<property>' should be |
+|        |                             |                                        | 'implemented using an extension with an|
+|        |                             |                                        | 'extension_type' of 'property-         |
+|        |                             |                                        | extension' or 'toplevel-property-      |
+|        |                             |                                        | extension'.                            |
+|        |                             |                                        |                                        |
+|        |                             |                                        | Custom Cyber Observable Object         |
+|        |                             |                                        | extension type '<extension>' should be |
+|        |                             |                                        | implemented using an 'extension_type'  |
+|        |                             |                                        | of 'property-extension'.               |
 +--------+-----------------------------+----------------------------------------+----------------------------------------+

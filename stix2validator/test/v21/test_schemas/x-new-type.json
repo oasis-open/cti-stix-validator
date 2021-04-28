@@ -5,6 +5,19 @@
         },
         "property2": {
             "type": "integer"
+        },
+        "extensions": {
+            "type": "object",
+            "properties": {
+                "extension-definition--ba73205e-96bb-40d3-8168-0056d862b229": {
+                    "type": "object",
+                    "properties": {
+                        "extension_type": {
+                            "enum": ["new-sdo"]
+                        }
+                    }
+                }
+            }
         }
     }
 }

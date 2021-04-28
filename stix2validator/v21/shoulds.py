@@ -86,7 +86,6 @@ def custom_object_prefix_lax(instance):
 
 def custom_property_prefix_strict(instance):
     """Ensure custom properties follow strict naming style conventions.
-
     Does not check property names in custom objects.
     """
     for prop_name in instance.keys():
@@ -106,7 +105,6 @@ def custom_property_prefix_strict(instance):
 def custom_property_prefix_lax(instance):
     """Ensure custom properties follow lenient naming style conventions
     for forward-compatibility.
-
     Does not check property names in custom objects.
     """
     for prop_name in instance.keys():
@@ -119,6 +117,149 @@ def custom_property_prefix_lax(instance):
                             "future versions of the STIX 2 specification." %
                             prop_name, instance['id'],
                             'custom-prefix-lax')
+
+
+def _uses_extension(instance, extension_types):
+    """Return true if instance contains an extension using any of the given
+    extension_types.
+    """
+    for identifier, ext in instance.get('extensions', {}).items():
+        if ext.get('extension_type', '') in extension_types:
+            return True
+
+    return False
+
+
+def extensions_use(instance):
+    """Ensure custom objects, properties, and observable extensions have been
+    implemented with Extension Definitions.
+    """
+    for error in chain(custom_object(instance),
+                       custom_property(instance),
+                       custom_observable_embedded_property(instance),
+                       custom_observable_extension_property(instance),
+                       custom_observable_extension(instance),
+                       custom_marking_definition(instance)):
+        yield error
+
+
+def custom_object(instance):
+    """Ensure custom objects use the extension mechanism.
+    """
+    type_ = instance['type']
+    if (type_ not in enums.TYPES and
+            type_ not in enums.RESERVED_OBJECTS and
+            type_ not in enums.OBSERVABLE_TYPES and
+            not _uses_extension(instance, ['new-sdo', 'new-sco', 'new-sro'])):
+        yield JSONError("Custom object type '%s' should be implemented using "
+                        "an extension with an 'extension_type' of 'new-sdo', "
+                        "'new-sco', or 'new-sro'."
+                        % type_, instance['id'], 'extensions-use')
+
+
+def custom_property(instance):
+    """Ensure custom properties are implemented using the 2.1 extension
+    mechanism.
+    """
+    type_ = instance['type']
+    for prop_name in instance.keys():
+        if (((type_ in enums.PROPERTIES and
+                prop_name not in enums.PROPERTIES[type_]) or
+                ((type_ in enums.OBSERVABLE_PROPERTIES and
+                  prop_name not in enums.OBSERVABLE_PROPERTIES[type_]))) and
+                prop_name not in enums.RESERVED_PROPERTIES and
+                not _uses_extension(instance, ['toplevel-property-extension'])):
+
+            yield JSONError("Custom property '%s' should be implemented using "
+                            "an extension with an 'extension_type' of "
+                            "'property-extension' or 'toplevel-property-"
+                            "extension'." % prop_name, instance['id'],
+                            'extensions-use')
+
+
+@cyber_observable_check("2.1")
+def custom_observable_embedded_property(instance):
+    """Ensure custom properties in observable object embedded properties are
+    implemented using the 2.1 extension mechanism.
+    """
+    type_ = instance['type']
+    message = ("Cyber Observable Object custom property '%s' in the %s property"
+               " of %s object should be implemented using an extension with an "
+               "'extension_type' of 'property-extension' or 'toplevel-property-"
+               "extension'.")
+
+    for prop in instance.keys():
+        if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
+            for embed_prop in instance[prop]:
+                if isinstance(embed_prop, dict):
+                    for embedded in embed_prop:
+                        if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop]):
+                            yield JSONError(message % (embedded, prop, type_),
+                                            instance['id'], 'extensions-use')
+                elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop]):
+                    yield JSONError(message % (embed_prop, prop, type_),
+                                    instance['id'], 'extensions-use')
+
+
+@cyber_observable_check("2.1")
+def custom_observable_extension_property(instance):
+    """Ensure custom properties in predefined observable object extensions are
+    implemented using the 2.1 extension mechanism.
+    """
+    type_ = instance['type']
+    if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance:
+        for ext_key in instance['extensions']:
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key]):
+                        yield JSONError("Cyber Observable Object custom property '%s' in the %s extension "
+                                        "should be implemented using an extension with an 'extension_type' of "
+                                        "'property-extension' or 'toplevel-property-extension'."
+                                        % (ext_prop, ext_key), instance['id'],
+                                        'extensions-use')
+
+                    if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                            ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
+                        for embed_prop in instance['extensions'][ext_key][ext_prop]:
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
+                                embed_prop = [embed_prop]
+                            for p in embed_prop:
+                                if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop]):
+                                    yield JSONError("Cyber Observable Object custom property '%s' in the %s "
+                                                    "property of the %s extension should be implemented using "
+                                                    "an extension with an 'extension_type' of "
+                                                    "'property-extension' or 'toplevel-property-extension'."
+                                                    % (p, ext_prop, ext_key), instance['id'],
+                                                    'extensions-use')
+
+
+@cyber_observable_check("2.1")
+def custom_observable_extension(instance):
+    """Ensure custom observable object extensions are implemented using the 2.1
+    extension mechanism.
+    """
+    type_ = instance['type']
+    if not ('extensions' in instance and isinstance(instance['extensions'], Mapping)
+            and type_ in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[type_] and
+                not _uses_extension(instance, ['property-extension'])):
+            yield JSONError("Custom Cyber Observable Object extension type "
+                            "'%s' should be implemented using an "
+                            "'extension_type' of 'property-extension'."
+                            % ext_key, instance['id'], 'extensions-use')
+
+
+def custom_marking_definition(instance):
+    if (instance['type'] == 'marking-definition' and
+            'extensions' not in instance and
+            instance.get('definition_type') not in ['statement', 'tlp']):
+        yield JSONError("Custom marking definitions should be specified using "
+                        "the 'extensions' property.",
+                        instance['id'], 'extensions-use')
 
 
 def deprecated_property_check(instance):
@@ -1147,12 +1288,6 @@ def properties_strict(instance):
     if instance['type'] not in enums.TYPES and instance['type'] not in enums.OBSERVABLE_TYPES:
         return  # only check properties for official objects
 
-    defined_props = enums.PROPERTIES.get(instance['type'], [])
-    for prop in instance.keys():
-        if prop not in defined_props:
-            yield JSONError("Property '%s' is not one of those defined in the"
-                            " specification." % prop, instance['id'])
-
     if has_cyber_observable_data(instance, "2.1"):
         if instance['type'] == 'observable_data':
             for key, obj in instance['objects'].items():
@@ -1161,6 +1296,12 @@ def properties_strict(instance):
         else:
             for error in properties_strict_helper(instance, instance['id']):
                 yield error
+    else:
+        defined_props = enums.PROPERTIES.get(instance['type'], [])
+        for prop in instance.keys():
+            if prop not in defined_props:
+                yield JSONError("Property '%s' is not one of those defined in the"
+                                " specification." % prop, instance['id'])
 
     if (instance['type'] == 'indicator' and instance.get('pattern_type', '') == 'stix' and
             isinstance(instance.get('pattern', ''), str)):
@@ -1217,25 +1358,45 @@ def properties_strict_helper(obj, obj_id):
             embedded_ext_props = enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES.get(ext_key, {}).get(ext_prop, [])
             if embedded_ext_props:
                 for embed_ext_prop in obj['extensions'][ext_key].get(ext_prop, []):
-                    if embed_ext_prop not in embedded_ext_props:
-                        yield JSONError("Property '%s' in the %s property of the %s extension "
-                                        "is not one of those defined in the specification."
-                                        % (embed_ext_prop, ext_prop, ext_key), obj_id)
+                    if not (isinstance(embed_ext_prop, Iterable) and not isinstance(embed_ext_prop, str)):
+                        embed_ext_prop = [embed_ext_prop]
+                    for p in embed_ext_prop:
+                        if p not in embedded_ext_props:
+                            yield JSONError("Property '%s' in the %s property of the %s extension "
+                                            "is not one of those defined in the specification."
+                                            % (p, ext_prop, ext_key), obj_id)
+
+
+def extension_description(instance):
+    """Ensure Extension Definitions have a description.
+    """
+    if instance['type'] == 'extension-definition':
+        if 'description' not in instance:
+            yield JSONError("The 'description' property SHOULD be populated.",
+                            instance['id'], 'extension-description')
+
+
+def extension_properties(instance):
+    """Ensure toplevel-property-extensions include at least one extension
+    property.
+    """
+    if instance['type'] == 'extension-definition':
+        if ('toplevel-property-extension' in instance.get('extension_types', [])
+                and 'extension_properties' not in instance):
+            yield JSONError("For extensions of the 'toplevel-property-extension'"
+                            " type, the 'extension_properties' property SHOULD include "
+                            "one or more property names.",
+                            instance['id'], 'extension-properties')
 
 
 # Mapping of check names to the functions which perform the checks
 CHECKS = {
     'all': [
-        custom_object_prefix_strict,
-        custom_property_prefix_strict,
         uuid_check,
         open_vocab_values,
         kill_chain_phase_names,
         observable_object_keys,
         observable_dictionary_keys,
-        custom_observable_object_prefix_strict,
-        custom_object_extension_prefix_strict,
-        custom_observable_properties_prefix_strict,
         malware_analysis_product,
         windows_process_priority_format,
         hash_length,
@@ -1275,18 +1436,16 @@ CHECKS = {
         extref_hashes,
         indicator_property_check,
         deprecated_property_check,
+        extension_description,
+        extension_properties,
+        extensions_use,
     ],
     'format-checks': [
-        custom_object_prefix_strict,
-        custom_property_prefix_strict,
         uuid_check,
         open_vocab_values,
         kill_chain_phase_names,
         observable_object_keys,
         observable_dictionary_keys,
-        custom_observable_object_prefix_strict,
-        custom_object_extension_prefix_strict,
-        custom_observable_properties_prefix_strict,
         malware_analysis_product,
         windows_process_priority_format,
         hash_length,
@@ -1405,6 +1564,9 @@ CHECKS = {
     'extref-hashes': extref_hashes,
     'indicator-properties': indicator_property_check,
     'deprecated-properties': deprecated_property_check,
+    'extension-description': extension_description,
+    'extension-properties': extension_properties,
+    'extensions-use': extensions_use,
 }
 
 
@@ -1435,10 +1597,6 @@ def list_shoulds(options):
     if options.disabled:
         if 'all' not in options.disabled:
             if 'format-checks' not in options.disabled:
-                if 'custom-prefix' not in options.disabled:
-                    validator_list.append(CHECKS['custom-prefix'])
-                elif 'custom-prefix-lax' not in options.disabled:
-                    validator_list.append(CHECKS['custom-prefix-lax'])
                 if 'open-vocab-format' not in options.disabled:
                     validator_list.append(CHECKS['open-vocab-format'])
                 if 'kill-chain-names' not in options.disabled:
@@ -1519,18 +1677,29 @@ def list_shoulds(options):
             if 'deprecated-properties' not in options.disabled:
                 validator_list.append(CHECKS['deprecated-properties'])
 
+            if 'extensions-use' not in options.disabled:
+                validator_list.append(CHECKS['extensions-use'])
+            elif 'format-checks' not in options.disabled:
+                # extensions-use is disabled but format-checks is not
+                if 'custom-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-prefix'])
+                elif 'custom-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-prefix-lax'])
+
     # --enable
     if options.enabled:
         for check in options.enabled:
             try:
-                if CHECKS[check] in validator_list:
-                    continue
-
-                if type(CHECKS[check]) is list:
-                    validator_list.extend(CHECKS[check])
-                else:
-                    validator_list.append(CHECKS[check])
+                check_function = CHECKS[check]
             except KeyError:
                 raise JSONError("%s is not a valid check!" % check)
+
+            if check_function in validator_list:
+                continue
+
+            if type(check_function) is list:
+                validator_list.extend(check_function)
+            else:
+                validator_list.append(check_function)
 
     return validator_list
