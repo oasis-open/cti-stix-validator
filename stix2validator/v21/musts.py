@@ -410,7 +410,7 @@ def patterns(instance, options):
     objects and properties referenced by the pattern are valid.
     """
     if (instance['type'] != 'indicator' or instance.get('pattern_type', '') != 'stix' or
-            isinstance(instance.get('pattern', ''), str) is False):
+            isinstance(instance.get('pattern', None), str) is False):
         return
 
     pattern = instance['pattern']
