@@ -79,3 +79,8 @@ class ToolTestCases(ValidatorTest):
         self.assertFalseWithOptions(tool, disabled='1')
         self.assertFalseWithOptions(tool, disabled='2')
         self.assertTrueWithOptions(tool, disabled='1,2')
+
+    def test_invalid_uuid(self):
+        tool = copy.deepcopy(self.valid_tool)
+        tool['id'] = "tool--blablabla"
+        self.assertFalseWithOptions(tool)
