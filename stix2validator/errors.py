@@ -193,8 +193,12 @@ def pretty_error(error, verbose=False):
                     msg = "'artifact' object must contain either 'payload_bin' "\
                           "or 'url'"
             elif 'type' in error.instance and error.instance['type'] == 'marking-definition':
-                msg = "'definition' must contain a valid statement, TLP, or "\
-                      "custom marking definition"
+                if error.instance.get('definition_type', '') == 'tlp':
+                    msg = "TLP marking definitions must match one of those "\
+                          "defined in the STIX specification."
+                else:
+                    msg = "'definition' must contain a valid statement, TLP, or "\
+                          "custom marking definition"
             elif 'type' in error.instance and error.instance['type'] == 'file':
                 if (('is_encrypted' not in error.instance or
                         error.instance['is_encrypted'] is False) and
