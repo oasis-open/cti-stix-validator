@@ -29,6 +29,13 @@ https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
 | Code | Name                        | Ensures...                             |
 +------+-----------------------------+----------------------------------------+
 |  1   | format-checks               | all 1xx checks are run                 |
+| 101  | custom-prefix               | names of custom object types,          |
+|      |                             | properties, observable objects,        |
+|      |                             | observable object properties, and      |
+|      |                             | observable object extensions follow    |
+|      |                             | the correct format                     |
+| 102  | custom-prefix-lax           | same as 101 but more lenient; no       |
+|      |                             | source identifier needed in prefix     |
 | 103  | uuid-check                  | objects use the recommended versions   |
 |      |                             | of UUID (v4 for SCOs, v5 for the rest) |
 | 111  | open-vocab-format           | values of open vocabularies follow the |

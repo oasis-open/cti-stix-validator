@@ -44,12 +44,42 @@ class AttackPatternTestCases(ValidatorTest):
         results = validate_parsed_json(attack_pattern, self.options)
         self.assertEqual(results.is_valid, False)
 
+    def test_invalid_property_prefix(self):
+        attack_pattern = copy.deepcopy(self.valid_attack_pattern)
+        attack_pattern['x-something'] = "some value"
+        self.assertFalseWithOptions(attack_pattern)
+
+        self.assertFalseWithOptions(attack_pattern, enabled='custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, disabled='extensions-use,custom-prefix')
+
+    def test_invalid_property_prefix_lax(self):
+        attack_pattern = copy.deepcopy(self.valid_attack_pattern)
+        attack_pattern['x_something'] = "some value"
+        self.assertFalseWithOptions(attack_pattern)
+
+        self.assertTrueWithOptions(attack_pattern, enabled='custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, disabled='custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, disabled='custom-prefix')
+        self.assertFalseWithOptions(attack_pattern, disabled='extensions-use,custom-prefix-lax')
+        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use,custom-prefix')
+
+    def test_valid_property_prefix(self):
+        attack_pattern = copy.deepcopy(self.valid_attack_pattern)
+        attack_pattern['x_source_something'] = "some value"
+
+        self.assertTrueWithOptions(attack_pattern, enabled='custom-prefix')
+        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use')
+
     def test_custom_property_without_extension(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
         attack_pattern['something'] = "some value"
 
         self.assertFalseWithOptions(attack_pattern)
-        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use')
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True)
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use')
+        self.assertFalseWithOptions(attack_pattern, disabled='extensions-use')
+        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use,custom-prefix,custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use,custom-prefix,custom-prefix-lax')
 
     def test_custom_property_with_extension(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)
@@ -83,11 +113,9 @@ class AttackPatternTestCases(ValidatorTest):
         self.assertTrueWithOptions(attack_pattern)
         self.assertFalseWithOptions(attack_pattern, strict_properties=True)
         self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use')
-
-        del attack_pattern['something']
-        self.assertFalseWithOptions(attack_pattern, strict_properties=True)
-        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use')
-        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use')
+        self.assertFalseWithOptions(attack_pattern, disabled='extensions-use')
+        self.assertTrueWithOptions(attack_pattern, disabled='extensions-use,custom-prefix,custom-prefix-lax')
+        self.assertFalseWithOptions(attack_pattern, strict_properties=True, disabled='extensions-use,custom-prefix,custom-prefix-lax')
 
     def test_invalid_timestamp(self):
         attack_pattern = copy.deepcopy(self.valid_attack_pattern)

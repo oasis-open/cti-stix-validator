@@ -260,14 +260,77 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_observable_object_extensions(self):
         observed_data = copy.deepcopy(self.valid_object)
-        observed_data['extensions']['x-foobar-ext'] = {
+        observed_data['extensions']['foobar-ext'] = {
+            "foo": "bar"
+        }
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+
+        self.check_ignore(observed_data,
+                          'custom-prefix,custom-prefix-lax,extensions-use')
+
+    def test_observable_object_extensions2(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['x-foo-bar-ext'] = {
             "foo": "bar"
         }
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
 
+        self.check_ignore(observed_data, 'extensions-use')
+
+    def test_observable_object_extensions_prefix_lax(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['foobar-ext'] = {
+            "foo": "bar"
+        }
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix,extensions-use')
+
+        del observed_data['extensions']['foobar-ext']
+        observed_data['extensions']['x-foobar'] = {
+            "foo": "bar"
+        }
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix,extensions-use')
+
+        del observed_data['extensions']['x-foobar']
+        observed_data['extensions']['x-foobar-ext'] = {
+            "foo": "bar"
+        }
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
         self.check_ignore(observed_data,
-                          'extensions-use')
+                          'custom-prefix,extensions-use')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix-lax,extensions-use')
+
+    def test_observable_object_custom_properties(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['foo'] = "bar"
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
+
+        self.check_ignore(observed_data,
+                          'custom-prefix,custom-prefix-lax,extensions-use')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix-lax,extensions-use')
+
+    def test_observable_object_custom_properties_lax(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['foo'] = "bar"
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix,extensions-use')
+
+        del observed_data['foo']
+        observed_data['x_foo'] = "bar"
+        self.check_ignore(observed_data,
+                          'custom-prefix,extensions-use')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='custom-prefix-lax,extensions-use')
+
+    def test_observable_object_custom_properties_strict(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['x_x_foo'] = "bar"
+        self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
 
     def test_observable_object_custom_property_without_extension(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -315,7 +378,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
         self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
-        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix,custom-prefix-lax')
 
     def test_observable_object_extension_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -323,6 +387,14 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
         self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix,custom-prefix-lax')
+
+        del observed_data['extensions']["ntfs-ext"]['foo']
+        observed_data['extensions']["ntfs-ext"]['x_foo'] = "bar"
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix')
+
+        del observed_data['extensions']["ntfs-ext"]['x_foo']
+        observed_data['extensions']["ntfs-ext"]['x_org_foo'] = "bar"
         self.assertTrueWithOptions(observed_data, disabled='extensions-use')
 
     def test_observable_object_embedded_custom_properties(self):
@@ -337,7 +409,8 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
         self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
-        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix,custom-prefix-lax')
 
     def test_observable_object_embedded_dict_custom_properties(self):
         observed_data = {
@@ -356,7 +429,34 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
         self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
-        self.assertTrueWithOptions(observed_data, disabled='extensions-use')
+        self.assertFalseWithOptions(observed_data, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix,custom-prefix-lax')
+
+    def test_observable_object_embedded_dict_custom_properties_lax(self):
+        observed_data = {
+            "type": "windows-registry-key",
+            "id": "windows-registry-key--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
+            "key": "hkey_local_machine\\system\\bar\\foo",
+            "values": [
+                {
+                    "name": "Foo",
+                    "data": "qwerty",
+                    "data_type": "REG_SZ",
+                    "foo": "buzz"
+                }
+            ]
+        }
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='extensions-use,custom-prefix')
+
+        del observed_data['values'][0]['foo']
+        observed_data['values'][0]['x_foo'] = "bar"
+        self.check_ignore(observed_data, 'extensions-use,custom-prefix')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='extensions-use,custom-prefix-lax')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='extensions-use,custom-prefix',
+                                    strict_properties=True)
 
     def test_observable_object_extension_embedded_custom_properties(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -372,7 +472,38 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
         self.assertFalseWithOptions(observed_data, strict_properties=True)
         self.assertFalseWithOptions(observed_data, strict_properties=True, disabled='extensions-use')
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix,custom-prefix-lax')
+
+        del observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['foo']
+        observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['x_foo'] = 'bar'
+        self.assertTrueWithOptions(observed_data, disabled='extensions-use,custom-prefix')
+
+        del observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['x_foo']
+        observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['x_org_foo'] = 'bar'
         self.assertTrueWithOptions(observed_data, disabled='extensions-use')
+
+    def test_observable_object_extension_embedded_custom_properties_lax(self):
+        observed_data = copy.deepcopy(self.valid_object)
+        observed_data['extensions']['ntfs-ext'] = {
+            "alternate_data_streams": [
+                  {
+                      "name": "second.stream",
+                      "size": 25536,
+                      "foo": "bar",
+                  }
+              ]
+        }
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='extensions-use,custom-prefix')
+        del observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['foo']
+        observed_data['extensions']['ntfs-ext']['alternate_data_streams'][0]['x_foo'] = "bar"
+        self.check_ignore(observed_data,
+                          'extensions-use,custom-prefix')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='extensions-use,custom-prefix-lax')
+        self.assertFalseWithOptions(observed_data,
+                                    disabled='extensions-use,custom-prefix',
+                                    strict_properties=True)
 
     def test_observable_object_extensions_string(self):
         observed_data = copy.deepcopy(self.valid_object)

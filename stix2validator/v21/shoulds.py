@@ -26,8 +26,97 @@ from ..output import info
 from ..util import cyber_observable_check, has_cyber_observable_data
 from ..v20.shoulds import enforce_relationship_refs
 from .errors import JSONError
+from .musts import (CUSTOM_EXT_LAX_PREFIX_RE, CUSTOM_EXT_PREFIX_RE,
+                    CUSTOM_PROPERTY_LAX_PREFIX_RE, CUSTOM_PROPERTY_PREFIX_RE,
+                    CUSTOM_TYPE_LAX_PREFIX_RE, CUSTOM_TYPE_PREFIX_RE)
 
 PROTOCOL_RE = re.compile(r'^[a-zA-Z0-9-]{1,15}$')
+
+
+def custom_prefix_strict(instance):
+    """Ensure custom content follows strict naming style conventions.
+    """
+    for error in chain(custom_object_prefix_strict(instance),
+                       custom_property_prefix_strict(instance),
+                       custom_observable_object_prefix_strict(instance),
+                       custom_object_extension_prefix_strict(instance),
+                       custom_observable_properties_prefix_strict(instance)):
+        yield error
+
+
+def custom_prefix_lax(instance):
+    """Ensure custom content follows lenient naming style conventions
+    for forward-compatibility.
+    """
+    for error in chain(custom_object_prefix_lax(instance),
+                       custom_property_prefix_lax(instance),
+                       custom_observable_object_prefix_lax(instance),
+                       custom_object_extension_prefix_lax(instance),
+                       custom_observable_properties_prefix_lax(instance)):
+        yield error
+
+
+def custom_object_prefix_strict(instance):
+    """Ensure custom objects follow strict naming style conventions.
+    """
+    if (instance['type'] not in enums.TYPES and
+            instance['type'] not in enums.RESERVED_OBJECTS and
+            instance['type'] not in enums.OBSERVABLE_TYPES and
+            not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom object type '%s' should start with 'x-' "
+                        "followed by a source unique identifier (like a "
+                        "domain name with dots replaced by hyphens), a hyphen "
+                        "and then the name." % instance['type'],
+                        instance['id'], 'custom-prefix')
+
+
+def custom_object_prefix_lax(instance):
+    """Ensure custom objects follow lenient naming style conventions
+    for forward-compatibility.
+    """
+    if (instance['type'] not in enums.TYPES and
+            instance['type'] not in enums.RESERVED_OBJECTS and
+            not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])
+            and instance['type'] not in enums.OBSERVABLE_TYPES):
+        yield JSONError("Custom object type '%s' should start with 'x-' in "
+                        "order to be compatible with future versions of the "
+                        "STIX 2 specification." % instance['type'],
+                        instance['id'], 'custom-prefix-lax')
+
+
+def custom_property_prefix_strict(instance):
+    """Ensure custom properties follow strict naming style conventions.
+    Does not check property names in custom objects.
+    """
+    for prop_name in instance.keys():
+        if (instance['type'] in enums.PROPERTIES and
+                prop_name not in enums.PROPERTIES[instance['type']] and
+                prop_name not in enums.RESERVED_PROPERTIES and
+                not CUSTOM_PROPERTY_PREFIX_RE.match(prop_name)):
+
+            yield JSONError("Custom property '%s' should have a type that "
+                            "starts with 'x_' followed by a source unique "
+                            "identifier (like a domain name with dots "
+                            "replaced by hyphen), a hyphen and then the name."
+                            % prop_name, instance['id'],
+                            'custom-prefix')
+
+
+def custom_property_prefix_lax(instance):
+    """Ensure custom properties follow lenient naming style conventions
+    for forward-compatibility.
+    Does not check property names in custom objects.
+    """
+    for prop_name in instance.keys():
+        if (instance['type'] in enums.PROPERTIES and
+                prop_name not in enums.PROPERTIES[instance['type']] and
+                prop_name not in enums.RESERVED_PROPERTIES and
+                not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop_name)):
+            yield JSONError("Custom property '%s' should have a type that "
+                            "starts with 'x_' in order to be compatible with "
+                            "future versions of the STIX 2 specification." %
+                            prop_name, instance['id'],
+                            'custom-prefix-lax')
 
 
 def _uses_extension(instance, extension_types):
@@ -624,6 +713,229 @@ def observable_dictionary_keys(instance):
 
 
 @cyber_observable_check("2.1")
+def custom_observable_object_prefix_strict(instance):
+    """Ensure custom observable objects follow strict naming style conventions.
+    """
+    if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
+            instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+            not CUSTOM_TYPE_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom Observable Object type '%s' should start "
+                        "with 'x-' followed by a source unique identifier "
+                        "(like a domain name with dots replaced by "
+                        "hyphens), a hyphen and then the name."
+                        % instance['type'], instance['id'],
+                        'custom-prefix')
+
+
+@cyber_observable_check("2.1")
+def custom_observable_object_prefix_lax(instance):
+    """Ensure custom observable objects follow naming style conventions.
+    """
+    if ('type' in instance and instance['type'] not in enums.OBSERVABLE_TYPES and
+            instance['type'] not in enums.OBSERVABLE_RESERVED_OBJECTS and
+            not CUSTOM_TYPE_LAX_PREFIX_RE.match(instance['type'])):
+        yield JSONError("Custom Observable Object type '%s' should start "
+                        "with 'x-'."
+                        % instance['type'], instance['id'],
+                        'custom-prefix-lax')
+
+
+@cyber_observable_check("2.1")
+def custom_object_extension_prefix_strict(instance):
+    """Ensure custom observable object extensions follow strict naming style
+    conventions.
+    """
+    if not ('extensions' in instance and isinstance(instance['extensions'], Mapping)
+            and 'type' in instance and instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
+                not CUSTOM_EXT_PREFIX_RE.match(ext_key)):
+            yield JSONError("Custom Cyber Observable Object extension type"
+                            " '%s' should start with 'x-' followed by a source "
+                            "unique identifier (like a domain name with dots "
+                            "replaced by hyphens), a hyphen and then the name."
+                            % ext_key, instance['id'],
+                            'custom-prefix')
+
+
+@cyber_observable_check("2.1")
+def custom_object_extension_prefix_lax(instance):
+    """Ensure custom observable object extensions follow naming style
+    conventions.
+    """
+    if not ('extensions' in instance and 'type' in instance and
+            instance['type'] in enums.OBSERVABLE_EXTENSIONS):
+        return
+    for ext_key in instance['extensions']:
+        if (ext_key not in enums.OBSERVABLE_EXTENSIONS[instance['type']] and
+                not CUSTOM_EXT_LAX_PREFIX_RE.match(ext_key)):
+            yield JSONError("Custom Cyber Observable Object extension type"
+                            " '%s' should start with 'x-'."
+                            % ext_key, instance['id'],
+                            'custom-prefix-lax')
+
+
+@cyber_observable_check("2.1")
+def custom_observable_properties_prefix_strict(instance):
+    """Ensure observable object custom properties follow strict naming style
+    conventions.
+    """
+    if 'type' not in instance:
+        return
+    type_ = instance['type']
+
+    for prop in instance:
+        # Check objects' properties
+        if (type_ in enums.OBSERVABLE_PROPERTIES and
+            prop not in enums.OBSERVABLE_PROPERTIES[type_] and
+                not CUSTOM_PROPERTY_PREFIX_RE.match(prop)):
+            yield JSONError("Cyber Observable Object custom property '%s' "
+                            "should start with 'x_' followed by a source "
+                            "unique identifier (like a domain name with "
+                            "dots replaced by hyphens), a hyphen and then the"
+                            " name."
+                            % prop, instance['id'],
+                            'custom-prefix')
+        # Check properties of embedded cyber observable types
+        if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
+            for embed_prop in instance[prop]:
+                if isinstance(embed_prop, dict):
+                    for embedded in embed_prop:
+                        if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                                not CUSTOM_PROPERTY_PREFIX_RE.match(embedded)):
+                            yield JSONError("Cyber Observable Object custom "
+                                            "property '%s' in the %s property of "
+                                            "%s object should start with 'x_' "
+                                            "followed by a source unique "
+                                            "identifier (like a domain name with "
+                                            "dots replaced by hyphens), a hyphen and "
+                                            "then the name."
+                                            % (embedded, prop, type_), instance['id'],
+                                            'custom-prefix')
+                elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                        not CUSTOM_PROPERTY_PREFIX_RE.match(embed_prop)):
+                    yield JSONError("Cyber Observable Object custom "
+                                    "property '%s' in the %s property of "
+                                    "%s object should start with 'x_' "
+                                    "followed by a source unique "
+                                    "identifier (like a domain name with "
+                                    "dots replaced by hyphens), a hyphen and "
+                                    "then the name."
+                                    % (embed_prop, prop, type_), instance['id'],
+                                    'custom-prefix')
+
+    # Check object extensions' properties
+    if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance:
+        for ext_key in instance['extensions']:
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
+                            not CUSTOM_PROPERTY_PREFIX_RE.match(ext_prop)):
+                        yield JSONError("Cyber Observable Object custom "
+                                        "property '%s' in the %s extension "
+                                        "should start with 'x_' followed by a "
+                                        "source unique identifier (like a "
+                                        "domain name with dots replaced by "
+                                        "hyphens), a hyphen and then the name."
+                                        % (ext_prop, ext_key), instance['id'],
+                                        'custom-prefix')
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                            ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
+                        for embed_prop in instance['extensions'][ext_key][ext_prop]:
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
+                                embed_prop = [embed_prop]
+                            for p in embed_prop:
+                                if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
+                                        not CUSTOM_PROPERTY_PREFIX_RE.match(p)):
+                                    yield JSONError("Cyber Observable Object "
+                                                    "custom property '%s' in the %s "
+                                                    "property of the %s extension should "
+                                                    "start with 'x_' followed by a source "
+                                                    "unique identifier (like a domain name"
+                                                    " with dots replaced by hyphens), a "
+                                                    "hyphen and then the name."
+                                                    % (p, ext_prop, ext_key), instance['id'],
+                                                    'custom-prefix')
+
+
+@cyber_observable_check("2.1")
+def custom_observable_properties_prefix_lax(instance):
+    """Ensure observable object custom properties follow naming style
+    conventions.
+    """
+    if 'type' not in instance:
+        return
+    type_ = instance['type']
+
+    for prop in instance:
+        # Check objects' properties
+        if (type_ in enums.OBSERVABLE_PROPERTIES and
+            prop not in enums.OBSERVABLE_PROPERTIES[type_] and
+                not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(prop)):
+            yield JSONError("Cyber Observable Object custom property '%s' "
+                            "should start with 'x_'."
+                            % prop, instance['id'],
+                            'custom-prefix-lax')
+        # Check properties of embedded cyber observable types
+        if (type_ in enums.OBSERVABLE_EMBEDDED_PROPERTIES and
+                prop in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_]):
+            for embed_prop in instance[prop]:
+                if isinstance(embed_prop, dict):
+                    for embedded in embed_prop:
+                        if (embedded not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                                not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embedded)):
+                            yield JSONError("Cyber Observable Object custom "
+                                            "property '%s' in the %s property of "
+                                            "%s object should start with 'x_'."
+                                            % (embedded, prop, type_), instance['id'],
+                                            'custom-prefix-lax')
+                elif (embed_prop not in enums.OBSERVABLE_EMBEDDED_PROPERTIES[type_][prop] and
+                        not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(embed_prop)):
+                    yield JSONError("Cyber Observable Object custom "
+                                    "property '%s' in the %s property of "
+                                    "%s object should start with 'x_'."
+                                    % (embed_prop, prop, type_), instance['id'],
+                                    'custom-prefix-lax')
+
+    # Check object extensions' properties
+    if type_ in enums.OBSERVABLE_EXTENSIONS and 'extensions' in instance:
+        for ext_key in instance['extensions']:
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_prop not in enums.OBSERVABLE_EXTENSION_PROPERTIES[ext_key] and
+                            not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(ext_prop)):
+                        yield JSONError("Cyber Observable Object custom "
+                                        "property '%s' in the %s extension "
+                                        "should start with 'x_'."
+                                        % (ext_prop, ext_key), instance['id'],
+                                        'custom-prefix-lax')
+
+            if ext_key in enums.OBSERVABLE_EXTENSIONS[type_]:
+                for ext_prop in instance['extensions'][ext_key]:
+                    if (ext_key in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES and
+                            ext_prop in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key]):
+                        for embed_prop in instance['extensions'][ext_key][ext_prop]:
+                            if not (isinstance(embed_prop, Iterable) and not isinstance(embed_prop, str)):
+                                embed_prop = [embed_prop]
+                            for p in embed_prop:
+                                if (p not in enums.OBSERVABLE_EXTENSION_EMBEDDED_PROPERTIES[ext_key][ext_prop] and
+                                        not CUSTOM_PROPERTY_LAX_PREFIX_RE.match(p)):
+                                    yield JSONError("Cyber Observable Object "
+                                                    "custom property '%s' in the %s "
+                                                    "property of the %s extension should "
+                                                    "start with 'x_'."
+                                                    % (p, ext_prop, ext_key), instance['id'],
+                                                    'custom-prefix-lax')
+
+
+@cyber_observable_check("2.1")
 def network_traffic_ports(instance):
     """Ensure network-traffic objects contain both src_port and dst_port.
     """
@@ -1138,6 +1450,8 @@ CHECKS = {
         windows_process_priority_format,
         hash_length,
     ],
+    'custom-prefix': custom_prefix_strict,
+    'custom-prefix-lax': custom_prefix_lax,
     'uuid-check': uuid_check,
     'open-vocab-format': open_vocab_values,
     'kill-chain-names': kill_chain_phase_names,
@@ -1362,21 +1676,30 @@ def list_shoulds(options):
                 validator_list.append(CHECKS['indicator-properties'])
             if 'deprecated-properties' not in options.disabled:
                 validator_list.append(CHECKS['deprecated-properties'])
+
             if 'extensions-use' not in options.disabled:
                 validator_list.append(CHECKS['extensions-use'])
+            elif 'format-checks' not in options.disabled:
+                # extensions-use is disabled but format-checks is not
+                if 'custom-prefix' not in options.disabled:
+                    validator_list.append(CHECKS['custom-prefix'])
+                elif 'custom-prefix-lax' not in options.disabled:
+                    validator_list.append(CHECKS['custom-prefix-lax'])
 
     # --enable
     if options.enabled:
         for check in options.enabled:
             try:
-                if CHECKS[check] in validator_list:
-                    continue
-
-                if type(CHECKS[check]) is list:
-                    validator_list.extend(CHECKS[check])
-                else:
-                    validator_list.append(CHECKS[check])
+                check_function = CHECKS[check]
             except KeyError:
                 raise JSONError("%s is not a valid check!" % check)
+
+            if check_function in validator_list:
+                continue
+
+            if type(check_function) is list:
+                validator_list.extend(check_function)
+            else:
+                validator_list.append(check_function)
 
     return validator_list

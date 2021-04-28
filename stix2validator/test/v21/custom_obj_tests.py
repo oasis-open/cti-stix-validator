@@ -56,16 +56,26 @@ class CustomObjectTestCases(ValidatorTest):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         custom_obj['type'] = "corpo_ration"
         custom_obj['id'] = "corpo_ration--4527e5de-8572-446a-a57a-706f15467461"
-        results = validate_parsed_json(custom_obj, self.options)
-        self.assertEqual(results.is_valid, False)
+        self.assertFalseWithOptions(custom_obj)
 
         custom_obj['type'] = "corpor@tion"
         custom_obj['id'] = "corpor@tion--4527e5de-8572-446a-a57a-706f15467461"
-        results = validate_parsed_json(custom_obj, self.options)
-        self.assertEqual(results.is_valid, False)
+        self.assertFalseWithOptions(custom_obj)
 
         self.assertFalseWithOptions(custom_obj, enabled='extensions-use')
         self.assertFalseWithOptions(custom_obj, disabled='extensions-use')
+
+        self.assertFalseWithOptions(custom_obj, enabled='custom-prefix-lax')
+        self.assertFalseWithOptions(custom_obj, disabled='extensions-use,custom-prefix')
+
+    def test_invalid_type_name_lax(self):
+        custom_obj = copy.deepcopy(self.valid_custom_object)
+        custom_obj['type'] = "x-corporation"
+        custom_obj['id'] = "x-corporation--4527e5de-8572-446a-a57a-706f15467461"
+
+        self.assertTrueWithOptions(custom_obj, enabled='custom-prefix-lax')
+        self.assertFalseWithOptions(custom_obj, disabled='extensions-use')
+        self.assertTrueWithOptions(custom_obj, disabled='extensions-use,custom-prefix')
 
     def test_valid_type_name(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)

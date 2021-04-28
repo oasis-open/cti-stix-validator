@@ -10,7 +10,7 @@
                     "type": "object",
                     "properties": {
                         "extension_type": {
-                            "enum": ["new_sco"]
+                            "enum": ["new-sco"]
                         }
                     }
                 }

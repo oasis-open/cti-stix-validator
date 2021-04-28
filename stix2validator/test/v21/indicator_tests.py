@@ -167,12 +167,32 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = """[file:foo = 'something']"""
         self.assertTrueWithOptions(indicator)
 
+    def test_pattern_custom_object_noprefix(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[foo:name = 'something']"""
+        self.assertFalseWithOptions(indicator, disabled='extensions-use')
+
+        self.check_ignore(indicator, 'custom-prefix,custom-prefix-lax,extensions-use')
+        self.assertFalseWithOptions(indicator, disabled='custom-prefix,extensions-use')
+
+    def test_pattern_custom_object_prefix_strict(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[x-x-foo:x_x_name = 'something']"""
+        self.assertTrueWithOptions(indicator, disabled='extensions-use')
+
+        self.assertFalseWithOptions(indicator, strict_types=True)
+
+    def test_pattern_custom_object_prefix_lax(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['pattern'] = """[x-foo:x_name = 'something']"""
+        self.check_ignore(indicator, 'custom-prefix,extensions-use')
+
     def test_pattern_custom_property_prefix_strict(self):
         indicator = copy.deepcopy(self.valid_indicator)
         indicator['pattern'] = """[file:x_x_name = 'something']"""
-        self.assertTrueWithOptions(indicator)
+        self.assertTrueWithOptions(indicator, disabled='extensions-use')
 
-        self.assertFalseWithOptions(indicator, strict_properties=True)
+        self.assertFalseWithOptions(indicator, strict_properties=True, disabled='extensions-use')
 
     def test_pattern_list_object_property(self):
         indicator = copy.deepcopy(self.valid_indicator)
