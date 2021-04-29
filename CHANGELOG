@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+3.0.0 - 2021-04-29
+
+* Updated 2.1 support to CS02, adding checks for the Incident object and the
+  new Extensions mechanism
+* Dropped support for Python 3.5
+* Fixed error message when 'is_family' is true but 'name' is not present
+* Fixed bug with invalid UUIDs
+* Fixed bug with Indicators with no pattern property
+* Fixed bug that allowed TLP marking definitions not predefined in the spec
+
 2.0.4 - 2020-12-15
 
 * Fixed issue with Location objects using latitude (#160)
