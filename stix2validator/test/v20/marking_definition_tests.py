@@ -78,9 +78,17 @@ class MarkingDefinitionTestCases(ValidatorTest):
         self.assertFalseWithOptions(marking_definition)
 
     def test_granular_marking_id_selector(self):
-        marking_definition = copy.deepcopy(self.valid_marking_definition)
-        marking_definition['granular_markings'] = [{
+        marking_definition = {
+          "type": "marking-definition",
+          "id": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
+          "created": "2016-08-01T00:00:00.000Z",
+          "definition_type": "statement",
+          "definition": {
+            "statement": "Copyright 2016, Example Corp"
+          },
+          "granular_markings": [{
             "marking_ref": "marking-definition--4478bf48-9af2-4afa-9fc5-7075f6af04af",
             "selectors": ["id"]
-        }]
+          }]
+        }
         self.assertTrueWithOptions(marking_definition)

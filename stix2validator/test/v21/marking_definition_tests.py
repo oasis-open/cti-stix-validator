@@ -11,6 +11,7 @@ VALID_MARKING_DEFINITION = u"""
   "id": "marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da",
   "created": "2017-01-20T00:00:00.000Z",
   "definition_type": "tlp",
+  "name": "TLP:GREEN",
   "definition": {
     "tlp": "green"
   }
@@ -79,11 +80,20 @@ class MarkingDefinitionTestCases(ValidatorTest):
         self.assertFalseWithOptions(marking_definition)
 
     def test_granular_marking_id_selector(self):
-        marking_definition = copy.deepcopy(self.valid_marking_definition)
-        marking_definition['granular_markings'] = [{
+        marking_definition = {
+          "type": "marking-definition",
+          "spec_version": "2.1",
+          "id": "marking-definition--4a0042fe-8b88-40fe-9600-dfa128ce6fbd",
+          "created": "2016-08-01T00:00:00.000Z",
+          "definition_type": "statement",
+          "definition": {
+            "statement": "Copyright 2019, Example Corp"
+          },
+          "granular_markings": [{
             "marking_ref": "marking-definition--4478bf48-9af2-4afa-9fc5-7075f6af04af",
             "selectors": ["id"]
-        }]
+          }]
+        }
         self.assertTrueWithOptions(marking_definition)
 
     def test_marking_definition_missing_properties(self):
