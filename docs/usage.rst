@@ -85,22 +85,31 @@ Additional Schemas
 The validator uses the `STIX 2 JSON schemas <https://github.com/oasis-open/cti-stix2-
 json-schemas>`_ as the basis for its validation, but you can also validate with
 your own additional schemas. This can help if you want to validate STIX content
-using custom objects, properties, or observables.
+using custom objects, properties, observables, or extensions.
 
-To do this use the ``--schema-dir`` argument:
+To do this use the ``--schemas`` argument:
 
 ::
 
-  $ stix2_validator --schema-dir /path/to/my/schemas <stix_file.json>
+  $ stix2_validator --schemas /path/to/my/schemas <stix_file.json>
 
-or in Python:
+or in Python, using ``schema_dir``:
 
 .. code:: python
 
   from stix2validator import ValidationOptions
 
-  options = ValidationOptions(strict=True, version="2.0", schema_dir="/path/to/custom/schemas")
+  options = ValidationOptions(strict=True, version="2.1", schema_dir="/path/to/custom/schemas")
   results = validate_file("stix_file.json")
   print_results(results)
 
-You can see some examples of custom schemas `here <https://github.com/oasis-open/cti-stix-validator/tree/master/stix2validator/test/v20/test_schemas>`_. Note that if you want to add a custom property to an existing object type, your custom schema only needs to contain that property; the validator's built-in schemas are still checked against and will handle the rest.
+You can see some examples of custom schemas `here <https://github.com/oasis-open/cti-stix-validator/tree/master/stix2validator/test/v21/test_schemas>`_.
+
+.. note::
+  The schema's filename must match the type name of the STIX object type so the
+  validator can parse it correctly. For example, a schema defining a new
+  extension on Indicators should be named `indicator.json`. A schema defining a
+  new object type, "my-cool-thing", would need to be named `my-cool-thing.json`.
+
+.. note::
+  If you want to add a custom property to an existing object type, your custom schema only needs to contain that property; the validator's built-in schemas are still checked against and will handle the rest.
