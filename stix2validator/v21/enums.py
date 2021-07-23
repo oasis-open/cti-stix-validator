@@ -112,12 +112,16 @@ INFRASTRUCTURE_TYPE_OV = [
     "anonymization",
     "botnet",
     "command-and-control",
+    "control-system",
     "exfiltration",
+    "firewall",
     "hosting-malware",
     "hosting-target-lists",
     "phishing",
     "reconnaissance",
+    "routers-switches",
     "staging",
+    "workstation",
     "unknown",
 ]
 MALWARE_RESULT_OV = [
