@@ -2041,7 +2041,7 @@ TIMESTAMP_COMPARE = {
         ('stop_time', 'gt', 'start_time'),
     ],
     "sighting": [
-        ('last_seen', 'gt', 'first_seen'),
+        ('last_seen', 'ge', 'first_seen'),
     ],
     'threat-actor': [
         ('last_seen', 'ge', 'first_seen')
@@ -2051,7 +2051,7 @@ TIMESTAMP_COMPARE = {
 # Mapping of STIX Object timestamp properties with a comparison requirement
 TIMESTAMP_COMPARE_OBSERVABLE = {
     "network-traffic": [
-        ('end', 'gt', 'start'),
+        ('end', 'ge', 'start'),
     ],
 }
 
