@@ -758,7 +758,7 @@ def _schema_validate(obj, options, bundle_version=None):
 
     # Get validator for any user-supplied schema
     if options.schema_dir:
-        custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, default=core_schema)
+        custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, version, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
 
