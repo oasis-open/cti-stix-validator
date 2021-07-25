@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+3.0.1 - 2021-07-25
+
+Some minor additions for the OASIS standard
+
+* Add new infrastructure-type-ov values for CS03
+* Fix timestamp comparisons for CS03
+* Add missing version parameter for custom schemas
+* Fix documented option for additional schemas
+
 3.0.0 - 2021-04-29
 
 * Updated 2.1 support to CS02, adding checks for the Incident object and the
