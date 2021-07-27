@@ -50,12 +50,33 @@ setup(
         'Programming Language :: Python :: 3.9',
     ],
     keywords="stix stix2 json validation validator stix-validator stix2-validator",
+    project_urls={
+        'Documentation': 'https://stix2-validator.readthedocs.io/',
+        'Source Code': 'https://github.com/oasis-open/cti-stix-validator/',
+        'Bug Tracker': 'https://github.com/oasis-open/cti-stix-validator/issues/',
+    },
     packages=find_packages(exclude=['*.test.*']),
     install_requires=install_requires,
     include_package_data=True,
     entry_points={
         'console_scripts': [
             'stix2_validator = stix2validator.scripts.stix2_validator:main',
+        ],
+    },
+    extras_require={
+        'dev': [
+            'bumpversion',
+            'pre-commit',
+        ],
+        'test': [
+            'coverage',
+            'pytest',
+            'pytest-cov',
+            'tox',
+        ],
+        'docs': [
+            'sphinx',
+            'sphinx-prompt',
         ],
     },
 )

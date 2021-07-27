@@ -1,4 +1,4 @@
-|Build_Status|  |Coverage|  |Version|
+|Build_Status|  |Coverage|  |Version| |Documentation_Status|
 
 ====================
 `cti-stix-validator`
