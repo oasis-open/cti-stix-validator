@@ -176,3 +176,7 @@ CLA-related questions to `repository-cla@oasis-open.org
    :target: https://codecov.io/gh/oasis-open/cti-stix-validator
 .. |Version| image:: https://img.shields.io/pypi/v/stix2-validator.svg?maxAge=3600
    :target: https://pypi.python.org/pypi/stix2-validator/
+.. |Documentation_Status| image:: https://readthedocs.org/projects/stix2-validator/badge/?version=latest
+   :target: https://stix2-validator.readthedocs.io/en/latest/
+   :alt: Documentation Status
+
