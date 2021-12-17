@@ -118,3 +118,21 @@ One of the pre-commit hooks we use in our develoment environment enforces a
 consistent ordering to imports. If you need to add a new library as a dependency
 please add it to the `known_third_party` section of `.isort.cfg` to make sure
 the import is sorted correctly.
+
+Updating the STIX JSON schemas
+------------------------------
+
+When updates have been made to the `STIX JSON schemas repository <https://github.com/oasis-open/cti-stix2-json-schemas>`_, the schemas included in this library
+must also be updated. To do so:
+
+.. prompt:: bash
+
+    cd stix2validator/schemas-2.1/
+    git pull
+    git checkout stix2.1
+
+    cd stix2validator/schemas-2.0/
+    git pull
+    git checkout stix2.0
+
+
