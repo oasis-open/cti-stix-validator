@@ -34,6 +34,7 @@ the repository on GitHub and clone your fork instead of the main repo:
     cd cti-stix-validator
     pip install -r requirements.txt
     git submodule update --init --recursive
+    git submodule foreach -q --recursive 'git switch $(git config -f $toplevel/.gitmodules submodule.$name.branch)'
 
 3. Install `pre-commit <http://pre-commit.com/#usage>`_ git hooks:
 
@@ -127,12 +128,5 @@ must also be updated. To do so:
 
 .. prompt:: bash
 
-    cd stix2validator/schemas-2.1/
-    git pull
-    git checkout stix2.1
-
-    cd stix2validator/schemas-2.0/
-    git pull
-    git checkout stix2.0
-
+    git submodule update --remote
 
