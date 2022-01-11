@@ -196,9 +196,14 @@ def pretty_error(error, verbose=False):
                 if error.instance.get('definition_type', '') == 'tlp':
                     msg = "TLP marking definitions must match one of those "\
                           "defined in the STIX specification."
-                else:
+                elif ('definition' in error.instance or
+                        'stix2.0' in error.schema.get('$id', '')):
                     msg = "'definition' must contain a valid statement, TLP, or "\
                           "custom marking definition"
+                else:
+                    msg = "marking definitions must use a valid extension, or "\
+                          "the 'definition_type' and 'definition' properties "\
+                          "with a valid marking definition"
             elif 'type' in error.instance and error.instance['type'] == 'file':
                 if (('is_encrypted' not in error.instance or
                         error.instance['is_encrypted'] is False) and
