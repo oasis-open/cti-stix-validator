@@ -865,6 +865,8 @@ def validate_instance(instance, options=None):
 
     # Custom validation
     must_checks = _get_musts(options)
+    if options.interop is True:
+        print(must_checks)
     should_checks = _get_shoulds(options)
     output.info("Running the following additional checks: %s."
                 % ", ".join(x.__name__ for x in chain(must_checks, should_checks)))
