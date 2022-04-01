@@ -23,6 +23,7 @@ from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import musts as musts21
 from .v21 import shoulds as shoulds21
+from .v21 import interop
 
 try:
     FileNotFoundError
@@ -866,7 +867,7 @@ def validate_instance(instance, options=None):
     # Custom validation
     must_checks = _get_musts(options)
     if options.interop is True:
-        print(must_checks)
+        must_checks.append(interop.interop_created_by_ref)
     should_checks = _get_shoulds(options)
     output.info("Running the following additional checks: %s."
                 % ", ".join(x.__name__ for x in chain(must_checks, should_checks)))
