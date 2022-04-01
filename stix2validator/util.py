@@ -21,10 +21,8 @@ CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
 the validator performs, along with the code to use with the --enable or
 --disable options. By default, the validator checks all of them.
-
 This table is for STIX version {}. For older versions, please refer to
 https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
-
 +------+-----------------------------+----------------------------------------+
 | Code | Name                        | Ensures...                             |
 +------+-----------------------------+----------------------------------------+
@@ -155,15 +153,12 @@ class NewlinesHelpFormatter(RawDescriptionHelpFormatter):
 
 def parse_args(cmd_args, is_script=False):
     """Parses a list of command line arguments into a ValidationOptions object.
-
     Args:
         cmd_args (list of str): The list of command line arguments to be parsed.
         is_script: Whether the arguments are intended for use in a stand-alone
             script or imported into another tool.
-
     Returns:
         Instance of ``ValidationOptions``
-
     """
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -299,6 +294,14 @@ def parse_args(cmd_args, is_script=False):
     )
 
     parser.add_argument(
+        "--interop",
+        dest="interop",
+        action="store_true",
+        default=False,
+        help="Run validator with interop validation settings"
+    )
+
+    parser.add_argument(
         "--enforce-refs",
         dest="enforce_refs",
         action="store_true",
@@ -320,11 +323,9 @@ def parse_args(cmd_args, is_script=False):
 class ValidationOptions(object):
     """Collection of validation options which can be set via command line or
     programmatically in a script.
-
     It can be initialized either by passing in the result of parse_args() from
     argparse to the cmd_args parameter, or by specifying individual options
     with the other parameters.
-
     Attributes:
         cmd_args: An instance of ``argparse.Namespace`` containing options
             supplied on the command line.
@@ -353,13 +354,12 @@ class ValidationOptions(object):
             should be cleared after validation.
         enforce_refs:Ensures that all SDOs being referenced by the SRO are
             contained within the same bundle
-
     """
     def __init__(self, cmd_args=None, version=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
-                 refresh_cache=False, clear_cache=False, enforce_refs=False):
+                 refresh_cache=False, clear_cache=False, enforce_refs=False, interop=False):
 
         if cmd_args is not None:
             self.version = cmd_args.version
@@ -377,6 +377,7 @@ class ValidationOptions(object):
             self.refresh_cache = cmd_args.refresh_cache
             self.clear_cache = cmd_args.clear_cache
             self.enforce_refs = cmd_args.enforce_refs
+            self.interop = cmd_args.interop
         else:
             # input options
             self.version = version
@@ -399,6 +400,7 @@ class ValidationOptions(object):
             self.refresh_cache = refresh_cache
             self.clear_cache = clear_cache
 
+            self.interop = interop
         # Set the output level (e.g., quiet vs. verbose)
         if self.silent and self.verbose:
             raise ValueError('Error: Output can either be silent or verbose, but not both.')
@@ -448,7 +450,6 @@ def has_cyber_observable_data(instance, version="2.0"):
 def cyber_observable_check(version, requires_objects=False):
     def inner_cyber_observable_check(original_function):
         """Decorator for functions that require cyber observable data.
-
         Args:
             version (str): the cyber observable data's STIX specification version
             requires_objects (bool): True if the function requires the 'objects'
@@ -491,7 +492,6 @@ def init_requests_cache(refresh_cache=False):
     """
     Initializes a cache which the ``requests`` library will consult for
     responses, before making network requests.
-
     :param refresh_cache: Whether the cache should be cleared out
     """
     # Cache data from external sources; used in some checks

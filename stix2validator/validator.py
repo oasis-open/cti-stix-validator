@@ -8,7 +8,8 @@ import os
 import re
 import sys
 
-from jsonschema import Draft7Validator, RefResolver, draft7_format_checker
+from jsonschema import (Draft202012Validator, RefResolver,
+                        draft202012_format_checker)
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
 import simplejson as json
@@ -524,14 +525,14 @@ def ref_store(validator, ref, instance, schema):
         except FileNotFoundError:
             pass
 
-    return Draft7Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
+    return Draft202012Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
 
 
-STIXValidator = extend(Draft7Validator, {'$ref': ref_store})
+STIXValidator = extend(Draft202012Validator, {'$ref': ref_store})
 
 
 # Built-in checker only ensures emails contain an '@'; we want a more robust check
-@draft7_format_checker.checks('email')
+@draft202012_format_checker.checks('email')
 def is_email(instance):
     if not isinstance(instance, str):
         return True
@@ -546,7 +547,7 @@ def load_validator(schema_path, schema):
         schema: A Python object representation of the same schema.
 
     Returns:
-        An instance of Draft7Validator.
+        An instance of Draft202012Validator.
 
     """
     global SCHEMA_STORE
@@ -563,7 +564,7 @@ def load_validator(schema_path, schema):
         resolver.store[schema_id] = schema
     # RefResolver creates a new store internally; persist it so we can use the same mappings every time
     SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver, format_checker=draft7_format_checker)
+    validator = STIXValidator(schema, resolver=resolver, format_checker=draft202012_format_checker)
     return validator
 
 
@@ -758,7 +759,10 @@ def _schema_validate(obj, options, bundle_version=None):
 
     # Get validator for any user-supplied schema
     if options.schema_dir:
-        custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, version, default=core_schema)
+        if options.interop:
+            custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir + '/interop/', version, default=core_schema)
+        else:
+            custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir + '/schemas/', version, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
 
