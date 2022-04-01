@@ -21,8 +21,10 @@ CODES_TABLE = """
 The following is a table of all the recommended "best practice" checks which
 the validator performs, along with the code to use with the --enable or
 --disable options. By default, the validator checks all of them.
+
 This table is for STIX version {}. For older versions, please refer to
 https://stix2-validator.readthedocs.io/en/latest/best-practices.html.
+
 +------+-----------------------------+----------------------------------------+
 | Code | Name                        | Ensures...                             |
 +------+-----------------------------+----------------------------------------+
@@ -153,13 +155,16 @@ class NewlinesHelpFormatter(RawDescriptionHelpFormatter):
 
 def parse_args(cmd_args, is_script=False):
     """Parses a list of command line arguments into a ValidationOptions object.
+    
     Args:
         cmd_args (list of str): The list of command line arguments to be parsed.
         is_script: Whether the arguments are intended for use in a stand-alone
             script or imported into another tool.
+            
     Returns:
         Instance of ``ValidationOptions``
     """
+    
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=NewlinesHelpFormatter,
@@ -323,9 +328,11 @@ def parse_args(cmd_args, is_script=False):
 class ValidationOptions(object):
     """Collection of validation options which can be set via command line or
     programmatically in a script.
+    
     It can be initialized either by passing in the result of parse_args() from
     argparse to the cmd_args parameter, or by specifying individual options
     with the other parameters.
+    
     Attributes:
         cmd_args: An instance of ``argparse.Namespace`` containing options
             supplied on the command line.
@@ -354,6 +361,7 @@ class ValidationOptions(object):
             should be cleared after validation.
         enforce_refs:Ensures that all SDOs being referenced by the SRO are
             contained within the same bundle
+            
     """
     def __init__(self, cmd_args=None, version=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
