@@ -1,6 +1,8 @@
 import copy
 import json
 
+import pytest
+
 from . import ValidatorTest
 from ... import ValidationError, validate_parsed_json, validate_string
 
@@ -31,8 +33,8 @@ class CustomObjectTestCases(ValidatorTest):
     def test_no_id(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['id']
-        results = validate_parsed_json(custom_obj, self.options)
-        self.assertEqual(results.is_valid, False)
+        with pytest.raises(ValidationError):
+            validate_parsed_json(custom_obj, self.options)
 
     def test_no_created(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)

@@ -3,6 +3,8 @@ import json
 
 import pytest
 
+from stix2validator import validate_instance
+
 from . import ValidatorTest
 from ... import ValidationError
 
@@ -73,3 +75,27 @@ class BundleTestCases(ValidatorTest):
         del bundle['objects'][0]['type']
         with pytest.raises(ValidationError):
             self.assertFalseWithOptions(bundle)
+
+    def test_bundle_sdo_missing_id(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        del bundle['objects'][0]['id']
+        self.assertFalseWithOptions(bundle)
+
+    def test_bundle_missing_id(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        del bundle['id']
+        with pytest.raises(ValidationError):
+            self.assertFalseWithOptions(bundle)
+
+    def test_bundle_sdo_missing_id_with_no_options(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        del bundle['objects'][0]['id']
+
+        results = validate_instance(bundle)
+        assert not results.is_valid
+
+    def test_bundle_missing_id_with_no_options(self):
+        bundle = copy.deepcopy(self.valid_bundle)
+        del bundle['id']
+        with pytest.raises(ValidationError):
+            validate_instance(bundle)
