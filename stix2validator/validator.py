@@ -758,12 +758,17 @@ def _schema_validate(obj, options, bundle_version=None):
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
+    # Get validator for interop schemas if needed
+    if options.interop and version > '2.0':
+        interop_schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
+                                             + version + '/interop/')
+        interop_errors = _get_error_generator(obj['type'], obj, interop_schema_dir, version, default=core_schema)
+        if interop_errors:
+            error_gens.append((interop_errors, error_prefix))
+
     # Get validator for any user-supplied schema
     if options.schema_dir:
-        if options.interop:
-            custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir + '/interop/', version, default=core_schema)
-        else:
-            custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir + '/schemas/', version, default=core_schema)
+        custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, version, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
 
