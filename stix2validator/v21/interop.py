@@ -22,13 +22,13 @@ def interop_created_by_ref(instance):
     for obj in instance['objects']:
         if obj['type'] != 'identity':
             if 'created_by_ref' not in obj:
-                yield JSONError("Created by ref is not present in Object", obj['id'])
+                yield JSONError("created_by_ref is not present in Object", obj['id'])
             else:
                 if obj['created_by_ref'] in bad_references:
                     yield JSONError("references %s as a producer "
                                     "but the identity is missing the property created_by_ref"
                                     % (obj['created_by_ref']), obj['id'])
                 elif obj['created_by_ref'] not in rel_references:
-                    yield JSONError("Created_by_ref has value %s "
+                    yield JSONError("created_by_ref has value %s "
                                     "which is not found in bundle"
                                     % (obj['created_by_ref']), obj['id'])
