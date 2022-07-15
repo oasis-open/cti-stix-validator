@@ -162,7 +162,7 @@ def parse_args(cmd_args, is_script=False):
     Returns:
         Instance of ``ValidationOptions``
     """
-    
+
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=NewlinesHelpFormatter,

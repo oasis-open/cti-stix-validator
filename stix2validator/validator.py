@@ -624,7 +624,7 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
     if schema_dir is None:
         default_path = True
         schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
-                                     + version + '/')
+                                     + version + '/schemas')
 
     try:
         schema_path = find_schema(schema_dir, type)
