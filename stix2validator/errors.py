@@ -97,7 +97,6 @@ def pretty_error(error, verbose=False):
             return error_loc + msg
         except UnicodeDecodeError:
             return error_loc + msg.decode('utf-8')
-
     # Reword error messages containing regexes
     if error.validator == 'pattern' and 'title' in error.schema:
         if error.schema['title'] == 'type':
@@ -129,7 +128,8 @@ def pretty_error(error, verbose=False):
         msg = "'observed_data_refs' must refer to Observed Data Objects"
     elif error.validator == 'pattern' and 'where_sighted_refs' in error.schema_path:
         msg = "'where_sighted_refs' must refer to Identity Objects"
-
+    elif error.validator == 'maxContains' and 'marking-definition' in error.schema['description']:
+        msg = "More than one tlp marking found in marking-definitions. Only one tlp marking is allowed."
     # Reword empty array errors
     elif type(error.instance) is list and len(error.instance) == 0:
         msg = re.sub(r"\[\] is not valid .+$", 'empty arrays are not allowed',

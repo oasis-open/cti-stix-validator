@@ -1,6 +1,5 @@
 """Custom jsonschema.IValidator class and validator functions.
 """
-
 from collections.abc import Iterable
 import io
 from itertools import chain
@@ -21,9 +20,9 @@ from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
                    init_requests_cache)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
+from .v21 import interop
 from .v21 import musts as musts21
 from .v21 import shoulds as shoulds21
-from .v21 import interop
 
 try:
     FileNotFoundError
@@ -697,6 +696,27 @@ def _get_shoulds(options):
         return shoulds21.list_shoulds(options)
 
 
+def find_version(obj, options, bundle_version=None, error_prefix=''):
+    if options.version:
+        version = options.version
+    elif options.version is None and 'spec_version' in obj:
+        version = obj['spec_version']
+    else:
+        version = DEFAULT_VER
+
+    if bundle_version == '2.0':
+        version = bundle_version
+
+    # Allow 2.0 objects in 2.1+ bundles (2.1 SCOs don't have 'created')
+    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in obj and
+                        'created' in obj)
+    if _20_in_21_bundle:
+        version = '2.0'
+        output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
+                    % error_prefix)
+    return version
+
+
 def _schema_validate(obj, options, bundle_version=None):
     """Set up validation of a single STIX object against its type's schema.
     This does no actual validation; it just returns generators which must be
@@ -717,7 +737,6 @@ def _schema_validate(obj, options, bundle_version=None):
             spec_version property.
     """
     error_gens = []
-
     if 'id' in obj:
         try:
             error_prefix = obj['id'] + ": "
@@ -726,23 +745,7 @@ def _schema_validate(obj, options, bundle_version=None):
     else:
         error_prefix = ''
 
-    if options.version:
-        version = options.version
-    elif options.version is None and 'spec_version' in obj:
-        version = obj['spec_version']
-    else:
-        version = DEFAULT_VER
-
-    if bundle_version == '2.0':
-        version = bundle_version
-
-    # Allow 2.0 objects in 2.1+ bundles (2.1 SCOs don't have 'created')
-    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in obj and
-                        'created' in obj)
-    if _20_in_21_bundle:
-        version = '2.0'
-        output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
-                    % error_prefix)
+    version = find_version(obj, options, bundle_version, error_prefix)
 
     options.set_check_codes(version)
 
@@ -759,7 +762,7 @@ def _schema_validate(obj, options, bundle_version=None):
         error_gens.append((base_sdo_errors, error_prefix))
 
     # Get validator for interop schemas if needed
-    if options.interop and version > '2.0':
+    if options.interop and version != '2.0':
         interop_schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
                                              + version + '/interop/')
         interop_errors = _get_error_generator(obj['type'], obj, interop_schema_dir, version, default=core_schema)
@@ -871,7 +874,8 @@ def validate_instance(instance, options=None):
 
     # Custom validation
     must_checks = _get_musts(options)
-    if options.interop is True:
+    version = find_version(instance, options)
+    if options.interop is True and version != '2.0':
         must_checks.append(interop.interop_created_by_ref)
     should_checks = _get_shoulds(options)
     output.info("Running the following additional checks: %s."
