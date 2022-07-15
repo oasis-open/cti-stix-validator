@@ -66,7 +66,7 @@ NON_INTEROP_STIX = u"""
     "spec_version": "2.1",
     "id": "campaign--0c7b5b88-8ff7-4a4d-aa9d-feb398cd0061",
     "created": "2016-05-12T08:17:27.000Z",
-    "modified": "2016-05-12T08:17:27.000Z"
+    "modified": "2016-05-12T08:17:27.000Z",
     "name": "Spear Phishing"
 }
 """
