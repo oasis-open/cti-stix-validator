@@ -1,5 +1,6 @@
 """Custom jsonschema.IValidator class and validator functions.
 """
+
 from collections.abc import Iterable
 import io
 from itertools import chain
@@ -714,6 +715,7 @@ def find_version(obj, options, bundle_version=None, error_prefix=''):
         version = '2.0'
         output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
                     % error_prefix)
+
     return version
 
 
