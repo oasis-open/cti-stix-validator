@@ -518,7 +518,6 @@ class ObservedDataTestCases(ValidatorTest):
     def test_observable_object_reserved_property(self):
         observed_data = copy.deepcopy(self.valid_object)
         observed_data['action'] = True
-        print(observed_data)
         self.assertFalseWithOptions(observed_data)
 
     def test_windows_registry_key_truncated(self):
