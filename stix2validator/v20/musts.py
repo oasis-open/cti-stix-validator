@@ -5,6 +5,7 @@ from collections.abc import Mapping
 import re
 
 from cpe import CPE
+from datetime import datetime
 from dateutil import parser
 from stix2patterns.v20.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
@@ -71,11 +72,20 @@ def timestamp(instance):
                                                     % (obj['type'], tprop, obj[embed][tprop], str(e)), instance['id'])
 
 
+def compare_timestamps(modified, created):
+    return modified < created or \
+        datetime_from_str(modified) < datetime_from_str(created)
+
+
+def datetime_from_str(str_datetime):
+    return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+
 def modified_created(instance):
     """`modified` property must be later or equal to `created` property
     """
     if 'modified' in instance and 'created' in instance and \
-            instance['modified'] < instance['created']:
+            compare_timestamps(instance['modified'], instance['created']):
         msg = "'modified' (%s) must be later or equal to 'created' (%s)"
         return JSONError(msg % (instance['modified'], instance['created']),
                          instance['id'])
