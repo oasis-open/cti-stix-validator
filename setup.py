@@ -20,7 +20,7 @@ install_requires = [
     'appdirs',
     'colorama',
     'cpe',
-    'jsonschema[format_nongpl]>=4.0.0',
+    'jsonschema[format-nongpl]>=4.6.0',
     'python-dateutil',
     'requests',
     'requests_cache',
@@ -45,10 +45,10 @@ setup(
         'Topic :: Security',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10'
     ],
     keywords="stix stix2 json validation validator stix-validator stix2-validator",
     project_urls={
