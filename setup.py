@@ -26,6 +26,7 @@ install_requires = [
     'requests_cache',
     'simplejson',
     'stix2-patterns>=0.4.1',
+    'attrs<22.0,>21.2',
 ]
 
 setup(

@@ -165,6 +165,7 @@ def parse_args(cmd_args, is_script=False):
         Instance of ``ValidationOptions``
 
     """
+
     parser = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=NewlinesHelpFormatter,
@@ -299,6 +300,14 @@ def parse_args(cmd_args, is_script=False):
     )
 
     parser.add_argument(
+        "--interop",
+        dest="interop",
+        action="store_true",
+        default=False,
+        help="Run validator with interop validation settings"
+    )
+
+    parser.add_argument(
         "--enforce-refs",
         dest="enforce_refs",
         action="store_true",
@@ -359,7 +368,7 @@ class ValidationOptions(object):
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
                  strict_types=False, strict_properties=False, no_cache=False,
-                 refresh_cache=False, clear_cache=False, enforce_refs=False):
+                 refresh_cache=False, clear_cache=False, enforce_refs=False, interop=False):
 
         if cmd_args is not None:
             self.version = cmd_args.version
@@ -377,6 +386,7 @@ class ValidationOptions(object):
             self.refresh_cache = cmd_args.refresh_cache
             self.clear_cache = cmd_args.clear_cache
             self.enforce_refs = cmd_args.enforce_refs
+            self.interop = cmd_args.interop
         else:
             # input options
             self.version = version
@@ -399,6 +409,7 @@ class ValidationOptions(object):
             self.refresh_cache = refresh_cache
             self.clear_cache = clear_cache
 
+            self.interop = interop
         # Set the output level (e.g., quiet vs. verbose)
         if self.silent and self.verbose:
             raise ValueError('Error: Output can either be silent or verbose, but not both.')
