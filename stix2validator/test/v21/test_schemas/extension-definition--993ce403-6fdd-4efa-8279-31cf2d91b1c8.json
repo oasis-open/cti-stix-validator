@@ -1,0 +1,26 @@
+{
+    "properties": {
+        "grade": {
+            "type": "string",
+            "pattern": "^[ABCDF]$"
+        },
+        "extensions": {
+            "patternProperties": {
+                "^extension-definition--993ce403-6fdd-4efa-8279-31cf2d91b1c8$": {
+                    "type": "object",
+                    "properties": {
+                        "extension_type": {
+                           "type": "string",
+                            "enum": ["toplevel-property-extension"]
+                        }
+                    },
+                    "required": ["extension_type"]
+                }
+            }
+        }
+    },
+    "required": [
+        "grade",
+        "extensions"
+    ]
+}

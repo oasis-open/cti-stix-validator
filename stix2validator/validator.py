@@ -569,11 +569,11 @@ def load_validator(schema_path, schema):
     return validator
 
 
-def find_schema(schema_dir, obj_type):
-    """Search the `schema_dir` directory for a schema called `obj_type`.json.
+def find_schema(schema_dir, name):
+    """Search the `schema_dir` directory for a schema called `name`.json.
     Return the file path of the first match it finds.
     """
-    schema_filename = obj_type + '.json'
+    schema_filename = name + '.json'
 
     for root, dirnames, filenames in os.walk(schema_dir):
         if "examples" in root:
@@ -602,11 +602,11 @@ def load_schema(schema_path):
     return schema
 
 
-def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, default='core'):
+def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, default='core'):
     """Get a generator for validating against the schema for the given object type.
 
     Args:
-        type (str): The object type to find the schema for.
+        name (str): The object type or extension id to find the schema for.
         obj: The object to be validated.
         schema_dir (str): The path in which to search for schemas.
         version (str): The version of the STIX specification to validate
@@ -628,7 +628,7 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
                                      + version + '/schemas/')
 
     try:
-        schema_path = find_schema(schema_dir, type)
+        schema_path = find_schema(schema_dir, name)
         schema = load_schema(schema_path)
     except (KeyError, TypeError):
         # Assume a custom object with no schema
@@ -643,6 +643,7 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
                 raise SchemaInvalidError("Cannot locate a schema for the object's "
                                          "type, nor the base schema ({}.json).".format(default))
 
+    type = obj['type']
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
         # If schema_dir is not None the schema is custom and won't need to be modified.
@@ -771,11 +772,19 @@ def _schema_validate(obj, options, bundle_version=None):
         if interop_errors:
             error_gens.append((interop_errors, error_prefix))
 
-    # Get validator for any user-supplied schema
+    # Get validators for any user-supplied schema
     if options.schema_dir:
+        # schemas named by object type
         custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, version, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
+
+        # schemas for extensions
+        extension_ids = obj.get('extensions', dict()).keys()
+        for ext in extension_ids:
+            extension_errors = _get_error_generator(ext, obj, options.schema_dir, version, default=core_schema)
+            if extension_errors:
+                error_gens.append((extension_errors, error_prefix))
 
     # Validate each cyber observable object separately
     if obj['type'] == 'observed-data' and 'objects' in obj:
