@@ -868,8 +868,8 @@ def validate_instance(instance, options=None):
         A dictionary of validation results
 
     """
-    if 'type' not in instance:
-        raise ValidationError("Input must be an object with a 'type' property.")
+    if not _is_stix_obj(instance):
+        raise ValidationError("Input must be an object with 'id' and 'type' properties.")
 
     if not options:
         options = ValidationOptions()
