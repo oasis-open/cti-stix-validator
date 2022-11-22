@@ -204,14 +204,28 @@ class IndicatorTestCases(ValidatorTest):
         indicator['pattern'] = "[windows-registry-key:key LIKE 'HKEY_LOCAL_MACHINE\\\\Foo\\\\Bar%']"
         self.assertTrueWithOptions(indicator)
 
-    def test_additional_schemas(self):
+    def test_additional_schema(self):
         indicator = copy.deepcopy(self.valid_indicator)
         self.assertFalseWithOptions(indicator, schema_dir=self.custom_schemas)
 
         indicator['name'] = "Foobar"
         self.assertTrueWithOptions(indicator, schema_dir=self.custom_schemas)
 
-    def test_additional_schemas_custom_type(self):
+    def test_additional_schema_extension(self):
+        indicator = copy.deepcopy(self.valid_indicator)
+        indicator['name'] = "Foobar"
+        indicator['extensions'] = {'extension-definition--993ce403-6fdd-4efa-8279-31cf2d91b1c8': {
+            "extension_type": "toplevel-property-extension",
+        }}
+        self.assertFalseWithOptions(indicator, schema_dir=self.custom_schemas)
+
+        indicator['grade'] = "a"
+        self.assertFalseWithOptions(indicator, schema_dir=self.custom_schemas)
+
+        indicator['grade'] = "A"
+        self.assertTrueWithOptions(indicator, schema_dir=self.custom_schemas)
+
+    def test_additional_schema_custom_type(self):
         # no schema exists for this type
         new_obj = {
             "type": "x-type",
@@ -240,7 +254,7 @@ class IndicatorTestCases(ValidatorTest):
         new_obj['property2'] = 10
         self.assertTrueWithOptions(new_obj, schema_dir=self.custom_schemas)
 
-    def test_additional_schemas_custom_type_invalid_schema(self):
+    def test_additional_schema_custom_type_invalid_schema(self):
         self.assertFalseWithOptions(ADDTNL_INVALID_SCHEMA, schema_dir=self.custom_schemas)
 
     def test_validate_parsed_json_list_additional_invalid_schema(self):
