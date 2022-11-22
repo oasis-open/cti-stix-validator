@@ -7,7 +7,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'stix2-validator'
-copyright = '2018, OASIS Open'
+copyright = '2018-2022, OASIS Open'
 author = 'OASIS Open'
 
 version = '3.1.1'
