@@ -12,7 +12,7 @@ requirements specified in the STIX 2.1 specification. In addition to
 checking conformance with the `JSON schemas <https://github.com/oasis-
 open/cti-stix2-json-schemas>`_, the validator checks conformance with
 requirements that cannot be specified in JSON schema, as well as with
-established "best practices." This validator is non-normative; in
+established "best practices". This validator is non-normative; in
 cases of conflict with the STIX 2.1 specification, the specification
 takes precedence.
 
