@@ -575,7 +575,7 @@ def find_schema(schema_dir, name):
     """
     schema_filename = name + '.json'
 
-    for root, dirnames, filenames in os.walk(schema_dir):
+    for root, dirnames, filenames in os.walk(schema_dir, followlinks=True):
         if "examples" in root:
             continue
         if schema_filename in filenames:
