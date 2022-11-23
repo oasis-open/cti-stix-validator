@@ -788,6 +788,8 @@ def _schema_validate(obj, options, bundle_version=None):
             extension_errors = _get_error_generator(ext, obj, options.schema_dir, version, default=core_schema)
             if extension_errors:
                 error_gens.append((extension_errors, error_prefix))
+    elif obj.get('extensions'):
+        output.info("{} contains extensions but no additional schemas provided with the --schemas option.".format(obj['id']))
 
     # Validate each cyber observable object separately
     if obj['type'] == 'observed-data' and 'objects' in obj:
