@@ -631,14 +631,17 @@ def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, defaul
         schema_path = find_schema(schema_dir, name)
         schema = load_schema(schema_path)
     except (KeyError, TypeError):
-        # Assume a custom object with no schema
+        # Assume a custom object or extension with no schema
         try:
             schema_path = find_schema(schema_dir, default)
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
             # Only raise an error when checking against default schemas, not custom
             if default_path is False:
+                if 'extension-definition--' in name:
+                    output.info("Could not find schema for {} so it will only be validated against the default schema.".format(name))
                 return None
+
             if schema_path is None:
                 raise SchemaInvalidError("Cannot locate a schema for the object's "
                                          "type, nor the base schema ({}.json).".format(default))
