@@ -207,6 +207,10 @@ def pretty_error(error, verbose=False):
                           "and 'definition' properties with a valid marking "\
                           "definition, or use an extension and the properties "\
                           "it requires"
+                    if verbose:
+                        msg += remove_u(error.message)
+                    else:
+                        msg += " (for more details use --verbose)"
             elif 'type' in error.instance and error.instance['type'] == 'file':
                 if (('is_encrypted' not in error.instance or
                         error.instance['is_encrypted'] is False) and
