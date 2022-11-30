@@ -208,7 +208,7 @@ def pretty_error(error, verbose=False):
                           "definition, or use an extension and the properties "\
                           "it requires"
                     if verbose:
-                        msg += remove_u(error.message)
+                        msg += ".\nComplete error: {}".format(remove_u(error.message))
                     else:
                         msg += " (for more details use --verbose)"
             elif 'type' in error.instance and error.instance['type'] == 'file':
