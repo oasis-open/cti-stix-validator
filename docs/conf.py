@@ -10,8 +10,8 @@ project = 'stix2-validator'
 copyright = '2018-2022, OASIS Open'
 author = 'OASIS Open'
 
-version = '3.1.1'
-release = '3.1.1'
+version = '3.1.2'
+release = '3.1.2'
 
 language = None
 exclude_patterns = ['_build', '_templates', 'Thumbs.db', '.DS_Store']
