@@ -203,9 +203,14 @@ def pretty_error(error, verbose=False):
                     msg = "'definition' must contain a valid statement, TLP, or "\
                           "custom marking definition"
                 else:
-                    msg = "marking definitions must use a valid extension, or "\
-                          "the 'definition_type' and 'definition' properties "\
-                          "with a valid marking definition"
+                    msg = "marking definitions must use the 'definition_type' "\
+                          "and 'definition' properties with a valid marking "\
+                          "definition, or use an extension and the properties "\
+                          "it requires"
+                    if verbose:
+                        msg += ".\nComplete error: {}".format(remove_u(error.message))
+                    else:
+                        msg += " (for more details use --verbose)"
             elif 'type' in error.instance and error.instance['type'] == 'file':
                 if (('is_encrypted' not in error.instance or
                         error.instance['is_encrypted'] is False) and

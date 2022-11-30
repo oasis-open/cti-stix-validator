@@ -85,7 +85,7 @@ Additional Schemas
 The validator uses the `STIX 2 JSON schemas <https://github.com/oasis-open/cti-stix2-
 json-schemas>`_ as the basis for its validation, but you can also validate with
 your own additional schemas. This can help if you want to validate STIX content
-using custom objects, properties, observables, or extensions.
+using extensions or (now deprecated) custom objects, properties, or observables.
 
 To do this use the ``--schemas`` argument:
 
@@ -106,10 +106,22 @@ or in Python, using ``schema_dir``:
 You can see some examples of custom schemas `here <https://github.com/oasis-open/cti-stix-validator/tree/master/stix2validator/test/v21/test_schemas>`_.
 
 .. note::
-  The schema's filename must match the type name of the STIX object type so the
-  validator can parse it correctly. For example, a schema defining a new
-  extension on Indicators should be named `indicator.json`. A schema defining a
-  new object type, "my-cool-thing", would need to be named `my-cool-thing.json`.
+  The schema's filename must match the extension definition id of the extension
+  it describes so the validator can apply it correctly. For example, a schema
+  defining a new extension with an id of
+  ``extension-definition--bfaece0b-efa6-4dfa-8248-3d340e2030f8`` should be named
+  `extension-definition--bfaece0b-efa6-4dfa-8248-3d340e2030f8.json`.
 
 .. note::
-  If you want to add a custom property to an existing object type, your custom schema only needs to contain that property; the validator's built-in schemas are still checked against and will handle the rest.
+  Custom objects and properties using the ``x_`` and ``x-`` prefixes have been
+  deprecated in STIX 2.1. However, if you need a schema for validating them, the
+  validator can parse it as long as the schema's filename matches the type name
+  of the STIX object type it should apply to. For example, a schema defining a
+  new property on Indicators should be named ``indicator.json``. A schema
+  defining a new object type, “my-cool-thing”, would need to be named
+  ``my-cool-thing.json``.
+
+.. note::
+  When using additional schemas, the validator's built-in schemas are still
+  checked against. Thus custom schemas only need to contain the properties that
+  differ from the standard.

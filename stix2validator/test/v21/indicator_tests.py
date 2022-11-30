@@ -226,7 +226,7 @@ class IndicatorTestCases(ValidatorTest):
         self.assertTrueWithOptions(indicator, schema_dir=self.custom_schemas)
 
     def test_additional_schema_custom_type(self):
-        # no schema exists for this type
+        # no schema exists for this type or extension
         new_obj = {
             "type": "x-type",
             "spec_version": "2.1",

@@ -56,7 +56,7 @@ def info(msg):
     if not _VERBOSE:
         return
 
-    logger.debug("[-] %s" % msg)
+    logger.info("[-] %s" % msg)
 
 
 def print_level(log_function, fmt, level, *args):

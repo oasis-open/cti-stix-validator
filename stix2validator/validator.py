@@ -575,7 +575,7 @@ def find_schema(schema_dir, name):
     """
     schema_filename = name + '.json'
 
-    for root, dirnames, filenames in os.walk(schema_dir):
+    for root, dirnames, filenames in os.walk(schema_dir, followlinks=True):
         if "examples" in root:
             continue
         if schema_filename in filenames:
@@ -631,14 +631,17 @@ def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, defaul
         schema_path = find_schema(schema_dir, name)
         schema = load_schema(schema_path)
     except (KeyError, TypeError):
-        # Assume a custom object with no schema
+        # Assume a custom object or extension with no schema
         try:
             schema_path = find_schema(schema_dir, default)
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
             # Only raise an error when checking against default schemas, not custom
             if default_path is False:
+                if 'extension-definition--' in name:
+                    output.info("Could not find schema for {} so it will only be validated against the default schema.".format(name))
                 return None
+
             if schema_path is None:
                 raise SchemaInvalidError("Cannot locate a schema for the object's "
                                          "type, nor the base schema ({}.json).".format(default))
@@ -785,6 +788,11 @@ def _schema_validate(obj, options, bundle_version=None):
             extension_errors = _get_error_generator(ext, obj, options.schema_dir, version, default=core_schema)
             if extension_errors:
                 error_gens.append((extension_errors, error_prefix))
+    elif options.verbose and obj.get('extensions'):
+        keys = obj.get('extensions', {}).keys()
+        if any(key.startswith('extension-definition--') for key in keys):
+            output.info("{} contains extensions but no additional schemas provided "
+                        "with the --schemas option.".format(obj['id']))
 
     # Validate each cyber observable object separately
     if obj['type'] == 'observed-data' and 'objects' in obj:
