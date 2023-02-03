@@ -646,6 +646,9 @@ def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, defaul
                 raise SchemaInvalidError("Cannot locate a schema for the object's "
                                          "type, nor the base schema ({}.json).".format(default))
 
+    if 'extension-definition--' in name and schema_path:
+        output.info("Validating {} against {}".format(name, schema_path))
+
     type = obj['type']
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
