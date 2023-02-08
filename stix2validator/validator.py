@@ -8,8 +8,7 @@ import os
 import re
 import sys
 
-from jsonschema import (Draft202012Validator, RefResolver,
-                        draft202012_format_checker)
+from jsonschema import Draft202012Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
 import simplejson as json
@@ -533,7 +532,7 @@ STIXValidator = extend(Draft202012Validator, {'$ref': ref_store})
 
 
 # Built-in checker only ensures emails contain an '@'; we want a more robust check
-@draft202012_format_checker.checks('email')
+@Draft202012Validator.FORMAT_CHECKER.checks('email')
 def is_email(instance):
     if not isinstance(instance, str):
         return True
@@ -565,7 +564,7 @@ def load_validator(schema_path, schema):
         resolver.store[schema_id] = schema
     # RefResolver creates a new store internally; persist it so we can use the same mappings every time
     SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver, format_checker=draft202012_format_checker)
+    validator = STIXValidator(schema, resolver=resolver, format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validator
 
 
