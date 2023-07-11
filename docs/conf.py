@@ -7,11 +7,11 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = 'stix2-validator'
-copyright = '2018, OASIS Open'
+copyright = '2018-2022, OASIS Open'
 author = 'OASIS Open'
 
-version = '3.0.2'
-release = '3.0.2'
+version = '3.1.3'
+release = '3.1.3'
 
 language = None
 exclude_patterns = ['_build', '_templates', 'Thumbs.db', '.DS_Store']

@@ -1,6 +1,24 @@
 CHANGELOG
 =========
 
+3.1.2 - 2022-11-30
+
+* Minor fixes to extension definitions
+
+3.1.1 - 2022-11-22
+
+* Add schema in released package
+
+3.1.0 - 2022-11-22
+
+* Allow custom schemas to use extension definition ids so that users can use
+  multiple extensions for the same object type or extensions that extend
+  multiple object types.
+* Prevent KeyError in 2.0 bundles with no id
+* Interop validation
+* Improved error messages
+* Deprecated Python 3.6 support
+
 3.0.2 - 2021-12-17
 
 * Updated internal schemas to be more lenient with windows registry key format

@@ -130,6 +130,8 @@ def pretty_error(error, verbose=False):
     elif error.validator == 'pattern' and 'where_sighted_refs' in error.schema_path:
         msg = "'where_sighted_refs' must refer to Identity Objects"
 
+    elif error.validator == 'maxContains' and 'marking-definition' in error.schema['description']:
+        msg = "More than one tlp marking found in marking-definitions. Only one tlp marking is allowed."
     # Reword empty array errors
     elif type(error.instance) is list and len(error.instance) == 0:
         msg = re.sub(r"\[\] is not valid .+$", 'empty arrays are not allowed',
@@ -201,9 +203,14 @@ def pretty_error(error, verbose=False):
                     msg = "'definition' must contain a valid statement, TLP, or "\
                           "custom marking definition"
                 else:
-                    msg = "marking definitions must use a valid extension, or "\
-                          "the 'definition_type' and 'definition' properties "\
-                          "with a valid marking definition"
+                    msg = "marking definitions must use the 'definition_type' "\
+                          "and 'definition' properties with a valid marking "\
+                          "definition, or use an extension and the properties "\
+                          "it requires"
+                    if verbose:
+                        msg += ".\nComplete error: {}".format(remove_u(error.message))
+                    else:
+                        msg += " (for more details use --verbose)"
             elif 'type' in error.instance and error.instance['type'] == 'file':
                 if (('is_encrypted' not in error.instance or
                         error.instance['is_encrypted'] is False) and

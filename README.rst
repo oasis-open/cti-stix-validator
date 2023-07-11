@@ -12,7 +12,7 @@ requirements specified in the STIX 2.1 specification. In addition to
 checking conformance with the `JSON schemas <https://github.com/oasis-
 open/cti-stix2-json-schemas>`_, the validator checks conformance with
 requirements that cannot be specified in JSON schema, as well as with
-established "best practices." This validator is non-normative; in
+established "best practices". This validator is non-normative; in
 cases of conflict with the STIX 2.1 specification, the specification
 takes precedence.
 
@@ -141,9 +141,10 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 
 **Current Maintainers of this TC Open Repository**
 
-.. Initial Maintainers: Greg Back & Ivan Kirillov
+.. Initial Maintainers: Greg Back & Ivan Kirillov & Chris Lenk
 
-*  `Chris Lenk <mailto:clenk@mitre.org>`_; GitHub ID: `https://github.com/clenk <https://github.com/clenk>`_; WWW: `MITRE <https://www.mitre.org>`__
+* `Emily Ratliff <mailto:emily.ratliff@ibm.com>`__; GitHub ID: `https://github.com/ejratl <https://github.com/ejratl>`_; WWW: `IBM <http://www.ibm.com/>`__
+* `Duncan Sparrell <mailto:duncan@sfractal.com>`__; GitHub ID: `https://github.com/sparrell <https://github.com/sparrell>`_; WWW: `sFractal <http://sfractal.com/>`__
 *  `Jason Keirstead <mailto:Jason.Keirstead@ca.ibm.com>`__; GitHub ID: `https://github.com/JasonKeirstead <https://github.com/JasonKeirstead>`_; WWW: `IBM <http://www.ibm.com/>`__
 
 .. _aboutOpenRepos:

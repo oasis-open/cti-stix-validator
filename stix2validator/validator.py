@@ -8,7 +8,7 @@ import os
 import re
 import sys
 
-from jsonschema import Draft7Validator, RefResolver, draft7_format_checker
+from jsonschema import Draft202012Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
 import simplejson as json
@@ -20,6 +20,7 @@ from .util import (DEFAULT_VER, ValidationOptions, clear_requests_cache,
                    init_requests_cache)
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
+from .v21 import interop
 from .v21 import musts as musts21
 from .v21 import shoulds as shoulds21
 
@@ -524,14 +525,14 @@ def ref_store(validator, ref, instance, schema):
         except FileNotFoundError:
             pass
 
-    return Draft7Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
+    return Draft202012Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
 
 
-STIXValidator = extend(Draft7Validator, {'$ref': ref_store})
+STIXValidator = extend(Draft202012Validator, {'$ref': ref_store})
 
 
 # Built-in checker only ensures emails contain an '@'; we want a more robust check
-@draft7_format_checker.checks('email')
+@Draft202012Validator.FORMAT_CHECKER.checks('email')
 def is_email(instance):
     if not isinstance(instance, str):
         return True
@@ -546,7 +547,7 @@ def load_validator(schema_path, schema):
         schema: A Python object representation of the same schema.
 
     Returns:
-        An instance of Draft7Validator.
+        An instance of Draft202012Validator.
 
     """
     global SCHEMA_STORE
@@ -563,17 +564,17 @@ def load_validator(schema_path, schema):
         resolver.store[schema_id] = schema
     # RefResolver creates a new store internally; persist it so we can use the same mappings every time
     SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver, format_checker=draft7_format_checker)
+    validator = STIXValidator(schema, resolver=resolver, format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validator
 
 
-def find_schema(schema_dir, obj_type):
-    """Search the `schema_dir` directory for a schema called `obj_type`.json.
+def find_schema(schema_dir, name):
+    """Search the `schema_dir` directory for a schema called `name`.json.
     Return the file path of the first match it finds.
     """
-    schema_filename = obj_type + '.json'
+    schema_filename = name + '.json'
 
-    for root, dirnames, filenames in os.walk(schema_dir):
+    for root, dirnames, filenames in os.walk(schema_dir, followlinks=True):
         if "examples" in root:
             continue
         if schema_filename in filenames:
@@ -600,11 +601,11 @@ def load_schema(schema_path):
     return schema
 
 
-def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, default='core'):
+def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, default='core'):
     """Get a generator for validating against the schema for the given object type.
 
     Args:
-        type (str): The object type to find the schema for.
+        name (str): The object type or extension id to find the schema for.
         obj: The object to be validated.
         schema_dir (str): The path in which to search for schemas.
         version (str): The version of the STIX specification to validate
@@ -623,24 +624,31 @@ def _get_error_generator(type, obj, schema_dir=None, version=DEFAULT_VER, defaul
     if schema_dir is None:
         default_path = True
         schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
-                                     + version + '/')
+                                     + version + '/schemas/')
 
     try:
-        schema_path = find_schema(schema_dir, type)
+        schema_path = find_schema(schema_dir, name)
         schema = load_schema(schema_path)
     except (KeyError, TypeError):
-        # Assume a custom object with no schema
+        # Assume a custom object or extension with no schema
         try:
             schema_path = find_schema(schema_dir, default)
             schema = load_schema(schema_path)
         except (KeyError, TypeError):
             # Only raise an error when checking against default schemas, not custom
             if default_path is False:
+                if 'extension-definition--' in name:
+                    output.info("Could not find schema for {} so it will only be validated against the default schema.".format(name))
                 return None
+
             if schema_path is None:
                 raise SchemaInvalidError("Cannot locate a schema for the object's "
                                          "type, nor the base schema ({}.json).".format(default))
 
+    if 'extension-definition--' in name and schema_path:
+        output.info("Validating {} against {}".format(name, schema_path))
+
+    type = obj['type']
     if type == 'observed-data' and schema_dir is None:
         # Validate against schemas for specific observed data object types later.
         # If schema_dir is not None the schema is custom and won't need to be modified.
@@ -695,6 +703,28 @@ def _get_shoulds(options):
         return shoulds21.list_shoulds(options)
 
 
+def find_version(obj, options, bundle_version=None, error_prefix=''):
+    if options.version:
+        version = options.version
+    elif options.version is None and 'spec_version' in obj:
+        version = obj['spec_version']
+    else:
+        version = DEFAULT_VER
+
+    if bundle_version == '2.0':
+        version = bundle_version
+
+    # Allow 2.0 objects in 2.1+ bundles (2.1 SCOs don't have 'created')
+    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in obj and
+                        'created' in obj)
+    if _20_in_21_bundle:
+        version = '2.0'
+        output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
+                    % error_prefix)
+
+    return version
+
+
 def _schema_validate(obj, options, bundle_version=None):
     """Set up validation of a single STIX object against its type's schema.
     This does no actual validation; it just returns generators which must be
@@ -715,7 +745,6 @@ def _schema_validate(obj, options, bundle_version=None):
             spec_version property.
     """
     error_gens = []
-
     if 'id' in obj:
         try:
             error_prefix = obj['id'] + ": "
@@ -724,23 +753,7 @@ def _schema_validate(obj, options, bundle_version=None):
     else:
         error_prefix = ''
 
-    if options.version:
-        version = options.version
-    elif options.version is None and 'spec_version' in obj:
-        version = obj['spec_version']
-    else:
-        version = DEFAULT_VER
-
-    if bundle_version == '2.0':
-        version = bundle_version
-
-    # Allow 2.0 objects in 2.1+ bundles (2.1 SCOs don't have 'created')
-    _20_in_21_bundle = (bundle_version == '2.1' and 'spec_version' not in obj and
-                        'created' in obj)
-    if _20_in_21_bundle:
-        version = '2.0'
-        output.info("%sno spec_version so treated as a 2.0 object in a 2.1 bundle."
-                    % error_prefix)
+    version = find_version(obj, options, bundle_version, error_prefix)
 
     options.set_check_codes(version)
 
@@ -756,11 +769,32 @@ def _schema_validate(obj, options, bundle_version=None):
     if base_sdo_errors:
         error_gens.append((base_sdo_errors, error_prefix))
 
-    # Get validator for any user-supplied schema
+    # Get validator for interop schemas if needed
+    if options.interop and version != '2.0':
+        interop_schema_dir = os.path.abspath(os.path.dirname(__file__) + '/schemas-'
+                                             + version + '/interop/')
+        interop_errors = _get_error_generator(obj['type'], obj, interop_schema_dir, version, default=core_schema)
+        if interop_errors:
+            error_gens.append((interop_errors, error_prefix))
+
+    # Get validators for any user-supplied schema
     if options.schema_dir:
+        # schemas named by object type
         custom_sdo_errors = _get_error_generator(obj['type'], obj, options.schema_dir, version, default=core_schema)
         if custom_sdo_errors:
             error_gens.append((custom_sdo_errors, error_prefix))
+
+        # schemas for extensions
+        extension_ids = obj.get('extensions', dict()).keys()
+        for ext in extension_ids:
+            extension_errors = _get_error_generator(ext, obj, options.schema_dir, version, default=core_schema)
+            if extension_errors:
+                error_gens.append((extension_errors, error_prefix))
+    elif options.verbose and obj.get('extensions'):
+        keys = obj.get('extensions', {}).keys()
+        if any(key.startswith('extension-definition--') for key in keys):
+            output.info("{} contains extensions but no additional schemas provided "
+                        "with the --schemas option.".format(obj['id']))
 
     # Validate each cyber observable object separately
     if obj['type'] == 'observed-data' and 'objects' in obj:
@@ -844,8 +878,8 @@ def validate_instance(instance, options=None):
         A dictionary of validation results
 
     """
-    if 'type' not in instance:
-        raise ValidationError("Input must be an object with a 'type' property.")
+    if not _is_stix_obj(instance):
+        raise ValidationError("Input must be an object with 'id' and 'type' properties.")
 
     if not options:
         options = ValidationOptions()
@@ -861,6 +895,9 @@ def validate_instance(instance, options=None):
 
     # Custom validation
     must_checks = _get_musts(options)
+    version = find_version(instance, options)
+    if options.interop is True and version != '2.0':
+        must_checks.append(interop.interop_created_by_ref)
     should_checks = _get_shoulds(options)
     output.info("Running the following additional checks: %s."
                 % ", ".join(x.__name__ for x in chain(must_checks, should_checks)))
