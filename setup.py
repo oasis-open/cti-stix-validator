@@ -20,7 +20,7 @@ install_requires = [
     'appdirs',
     'colorama',
     'cpe',
-    'jsonschema[format-nongpl]>=4.6.0',
+    'jsonschema[format-nongpl]>=4.6.0,<4.18.0',
     'python-dateutil',
     'requests',
     'requests_cache',
