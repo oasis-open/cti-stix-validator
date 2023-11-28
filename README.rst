@@ -144,8 +144,9 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 .. Initial Maintainers: Greg Back & Ivan Kirillov & Chris Lenk
 
 * `Emily Ratliff <mailto:emily.ratliff@ibm.com>`__; GitHub ID: `https://github.com/ejratl <https://github.com/ejratl>`_; WWW: `IBM <http://www.ibm.com/>`__
-* `Duncan Sparrell <mailto:duncan@sfractal.com>`__; GitHub ID: `https://github.com/sparrell <https://github.com/sparrell>`_; WWW: `sFractal <http://sfractal.com/>`__
 *  `Jason Keirstead <mailto:Jason.Keirstead@ca.ibm.com>`__; GitHub ID: `https://github.com/JasonKeirstead <https://github.com/JasonKeirstead>`_; WWW: `IBM <http://www.ibm.com/>`__
+* [Rich Piazza](rpiazza@mitre.org) GitHub ID: [https://github.com/rpiazza](https://github.com/rpiazza) WWW: [MITRE](http://www.mitre.org/)
+
 
 .. _aboutOpenRepos:
 
