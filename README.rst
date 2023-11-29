@@ -145,7 +145,7 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 
 * `Emily Ratliff <mailto:emily.ratliff@ibm.com>`__; GitHub ID: `https://github.com/ejratl <https://github.com/ejratl>`_; WWW: `IBM <http://www.ibm.com/>`__
 *  `Jason Keirstead <mailto:Jason.Keirstead@ca.ibm.com>`__; GitHub ID: `https://github.com/JasonKeirstead <https://github.com/JasonKeirstead>`_; WWW: `IBM <http://www.ibm.com/>`__
-* [Rich Piazza](rpiazza@mitre.org) GitHub ID: [https://github.com/rpiazza](https://github.com/rpiazza) WWW: [MITRE](http://www.mitre.org/)
+* `Rich Piazza <mailto:rpiazza@mitre.org>`_; GitHub ID: `https://github.com/rpiazza <https://github.com/rpiazza)>`_; WWW: `MITRE <http://www.mitre.org/>`_
 
 
 .. _aboutOpenRepos:
