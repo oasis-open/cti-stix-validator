@@ -17,13 +17,10 @@ def get_version():
 
 
 install_requires = [
-    'appdirs',
     'colorama',
     'cpe',
     'jsonschema[format-nongpl]>=4.6.0,<4.18.0',
     'python-dateutil',
-    'requests',
-    'requests_cache',
     'simplejson',
     'stix2-patterns>=0.4.1',
 ]
@@ -67,6 +64,7 @@ setup(
         'dev': [
             'bumpversion',
             'pre-commit',
+            'requests',
         ],
         'test': [
             'coverage',

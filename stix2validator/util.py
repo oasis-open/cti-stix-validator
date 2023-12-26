@@ -7,8 +7,6 @@ import os
 import sys
 import textwrap
 
-from appdirs import AppDirs
-import requests_cache
 
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20
@@ -353,13 +351,6 @@ class ValidationOptions(object):
             those defined in the STIX specification.
         strict_properties: Specifies that no custom properties be used, only
             those defined in the STIX specification.
-        no_cache: Specifies that caching of values from external sources should
-            be disabled.
-        refresh_cache: Specifies that the cache of values from external sources
-            should be cleared before validation, and then re-downloaded during
-            validation.
-        clear_cache: Specifies that the cache of values from external sources
-            should be cleared after validation.
         enforce_refs:Ensures that all SDOs being referenced by the SRO are
             contained within the same bundle
 
@@ -367,8 +358,8 @@ class ValidationOptions(object):
     def __init__(self, cmd_args=None, version=None, verbose=False, silent=False,
                  files=None, recursive=False, schema_dir=None,
                  disabled="", enabled="", strict=False,
-                 strict_types=False, strict_properties=False, no_cache=False,
-                 refresh_cache=False, clear_cache=False, enforce_refs=False, interop=False):
+                 strict_types=False, strict_properties=False, enforce_refs=False,
+                 interop=False):
 
         if cmd_args is not None:
             self.version = cmd_args.version
@@ -382,9 +373,6 @@ class ValidationOptions(object):
             self.strict = cmd_args.strict
             self.strict_types = cmd_args.strict_types
             self.strict_properties = cmd_args.strict_properties
-            self.no_cache = cmd_args.no_cache
-            self.refresh_cache = cmd_args.refresh_cache
-            self.clear_cache = cmd_args.clear_cache
             self.enforce_refs = cmd_args.enforce_refs
             self.interop = cmd_args.interop
         else:
@@ -403,12 +391,6 @@ class ValidationOptions(object):
             self.disabled = disabled
             self.enabled = enabled
             self.enforce_refs = enforce_refs
-
-            # cache options
-            self.no_cache = no_cache
-            self.refresh_cache = refresh_cache
-            self.clear_cache = clear_cache
-
             self.interop = interop
         # Set the output level (e.g., quiet vs. verbose)
         if self.silent and self.verbose:
@@ -496,35 +478,3 @@ def cyber_observable_check(version, requires_objects=False):
         new_function.__name__ = original_function.__name__
         return new_function
     return inner_cyber_observable_check
-
-
-def init_requests_cache(refresh_cache=False):
-    """
-    Initializes a cache which the ``requests`` library will consult for
-    responses, before making network requests.
-
-    :param refresh_cache: Whether the cache should be cleared out
-    """
-    # Cache data from external sources; used in some checks
-    dirs = AppDirs("stix2-validator", "OASIS")
-    # Create cache dir if doesn't exist
-    try:
-        os.makedirs(dirs.user_cache_dir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-    requests_cache.install_cache(
-        cache_name=os.path.join(dirs.user_cache_dir, 'py{}cache'.format(
-            sys.version_info[0])),
-        expire_after=datetime.timedelta(weeks=1))
-
-    if refresh_cache:
-        clear_requests_cache()
-
-
-def clear_requests_cache():
-    """
-    Clears all cached responses.
-    """
-    now = datetime.datetime.utcnow()
-    requests_cache.get_cache().remove_old_entries(now)

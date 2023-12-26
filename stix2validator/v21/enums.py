@@ -1,9 +1,8 @@
 """STIX 2.1 WD04 open vocabularies and other lists
 """
-
-import re
-
-import requests
+import os
+import csv
+import glob
 
 # Enumerations of the default values of STIX open vocabularies
 ATTACK_MOTIVATION_OV = [
@@ -2193,127 +2192,90 @@ CHECK_CODES = {
 
 
 def media_types():
-    """Return a list of the IANA Media (MIME) Types, or an empty list if the
-    IANA website is unreachable.
+    """Return a list of the IANA Media (MIME) Types.
     Store it as a function attribute so that we only build the list once.
     """
     if not hasattr(media_types, 'typelist'):
+        basepath = os.path.abspath(os.path.dirname(__file__))
         tlist = []
-        categories = [
-            'application',
-            'audio',
-            'font',
-            'image',
-            'message',
-            'model',
-            'multipart',
-            'text',
-            'video'
-        ]
-        for cat in categories:
-            try:
-                data = requests.get('http://www.iana.org/assignments/'
-                                    'media-types/%s.csv' % cat)
-            except requests.exceptions.RequestException:
-                return []
-
+        for fpath in glob.glob(basepath + '/assets/mediatype_*.csv'):
             types = []
-            for line in data.iter_lines():
-                if line:
-                    line = line.decode("utf-8")
-                    if line.count(',') > 0:
-                        reg_template = line.split(',')[1]
-                        if reg_template:
-                            types.append(reg_template)
-                        else:
-                            types.append(cat + '/' + line.split(',')[0])
-
+            cat = os.path.basename(fpath).split('_', 1)[1].rsplit('.', 1)[0]
+            with open(fpath, 'r', encoding='utf-8') as fd:
+                reader = csv.DictReader(fd)
+                for row in reader:
+                    name = row.get('Name')
+                    template = row.get('Template')
+                    if template:
+                        types.append(template)
+                    elif name:
+                        types.append(cat + '/' + name)
             tlist.extend(types)
         media_types.typelist = tlist
     return media_types.typelist
 
 
 def char_sets():
-    """Return a list of the IANA Character Sets, or an empty list if the
-    IANA website is unreachable.
+    """Return a list of the IANA Character Sets.
     Store it as a function attribute so that we only build the list once.
     """
     if not hasattr(char_sets, 'setlist'):
+        basepath = os.path.abspath(os.path.dirname(__file__))
         clist = []
-        try:
-            data = requests.get('http://www.iana.org/assignments/character-'
-                                'sets/character-sets-1.csv')
-        except requests.exceptions.RequestException:
-            return []
-
-        for line in data.iter_lines():
-            if line:
-                line = line.decode("utf-8")
-                if line.count(',') > 0:
-                    vals = line.split(',')
-                    if vals[0]:
-                        clist.append(vals[0])
-                    else:
-                        clist.append(vals[1])
-
+        with open(basepath + '/assets/charsets.csv', 'r', encoding='utf-8') as fd:
+            reader = csv.DictReader(fd)
+            for row in reader:
+                preferred_name = row.get('Preferred MIME Name')
+                name = row.get('Name')
+                if preferred_name:
+                    clist.append(preferred_name)
+                elif name:
+                    clist.append(name)
         char_sets.setlist = clist
     return char_sets.setlist
 
-
 def protocols():
     """Return a list of values from the IANA Service Name and Transport
-    Protocol Port Number Registry, or an empty list if the IANA website is
-    unreachable.
+    Protocol Port Number Registry.
     Store it as a function attribute so that we only build the list once.
     """
     if not hasattr(protocols, 'protlist'):
-        plist = []
-        try:
-            data = requests.get('http://www.iana.org/assignments/service-names'
-                                '-port-numbers/service-names-port-numbers.csv')
-        except requests.exceptions.RequestException:
-            return []
+        basepath = os.path.abspath(os.path.dirname(__file__))
+        plist = set()
+        with open(basepath + '/assets/protocols.csv', 'r', encoding='utf-8') as fd:
+            reader = csv.DictReader(fd)
+            for row in reader:
+                name = row.get('Service Name')
+                transport_protocol = row.get('Transport Protocol')
+                if name:
+                    plist.add(name)
+                if transport_protocol:
+                    plist.add(transport_protocol)
 
-        for line in data.iter_lines():
-            if line:
-                line = line.decode("utf-8")
-                if line.count(',') > 0:
-                    vals = line.split(',')
-                    if vals[0]:
-                        plist.append(vals[0])
-                    if len(vals) > 2 and vals[2] and vals[2] not in plist:
-                        plist.append(vals[2])
-
-        plist.append('ipv4')
-        plist.append('ipv6')
-        plist.append('ssl')
-        plist.append('tls')
-        plist.append('dns')
+        plist.add('ipv4')
+        plist.add('ipv6')
+        plist.add('ssl')
+        plist.add('tls')
+        plist.add('dns')
+        plist = sorted(plist)
         protocols.protlist = plist
     return protocols.protlist
 
 
 def ipfix():
     """Return a list of values from the list of IANA IP Flow Information Export
-    (IPFIX) Entities, or an empty list if the IANA website is unreachable.
+    (IPFIX) Entities.
     Store it as a function attribute so that we only build the list once.
     """
     if not hasattr(ipfix, 'ipflist'):
+        basepath = os.path.abspath(os.path.dirname(__file__))
         ilist = []
-        try:
-            data = requests.get('http://www.iana.org/assignments/ipfix/ipfix-'
-                                'information-elements.csv')
-        except requests.exceptions.RequestException:
-            return []
-
-        for line in data.iter_lines():
-            if line:
-                line = line.decode("utf-8")
-                if re.match(r'^\d+(,[a-zA-Z0-9]+){2},', line):
-                    vals = line.split(',')
-                    if vals[1]:
-                        ilist.append(vals[1])
-
+        with open(basepath + '/assets/ipfix-information-elements.csv', 'r', encoding='utf-8') as fd:
+            reader = csv.DictReader(fd)
+            for row in reader:
+                name = row.get('Name')
+                if name:
+                    ilist.append(name)
         ipfix.ipflist = ilist
     return ipfix.ipflist
 
