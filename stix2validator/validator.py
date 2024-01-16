@@ -11,6 +11,7 @@ import sys
 from jsonschema import Draft202012Validator, RefResolver
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
+from referencing import Registry
 import simplejson as json
 
 from . import output
@@ -558,13 +559,8 @@ def load_validator(schema_path, schema):
     else:
         file_prefix = 'file:'
 
-    resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema, store=SCHEMA_STORE)
-    schema_id = schema.get('$id', '')
-    if schema_id:
-        resolver.store[schema_id] = schema
-    # RefResolver creates a new store internally; persist it so we can use the same mappings every time
-    SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver, format_checker=Draft202012Validator.FORMAT_CHECKER)
+    registry = Registry().with_resource(file_prefix + schema_path.replace("\\", "/"),schema)
+    validator = STIXValidator(schema, registry=registry, format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validator
 
 
