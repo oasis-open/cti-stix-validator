@@ -44,10 +44,11 @@ setup(
         'Topic :: Security',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10'
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12'
     ],
     keywords="stix stix2 json validation validator stix-validator stix2-validator",
     project_urls={
