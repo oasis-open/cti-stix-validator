@@ -3,6 +3,7 @@ repos:
     rev: v3.4.0
     hooks:
     -   id: trailing-whitespace
+        exclude: ^stix2validator/(v20|v21)/assets/.*.csv$
     -   id: check-merge-conflict
 -   repo: https://github.com/PyCQA/flake8
     rev: 3.8.4
