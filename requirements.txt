@@ -4,6 +4,7 @@ pytest
 pytest-cov
 sphinx
 sphinx-prompt
+requests
 tox
 
 -e .

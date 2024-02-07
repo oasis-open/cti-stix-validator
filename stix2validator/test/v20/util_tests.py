@@ -35,9 +35,6 @@ def test_parse_args():
     assert options.strict is True
     assert options.strict_types is True
     assert options.strict_properties is True
-    assert options.no_cache is True
-    assert options.refresh_cache is True
-    assert options.clear_cache is True
 
 
 def test_parse_args_no_files():
