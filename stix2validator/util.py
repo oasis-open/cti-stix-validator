@@ -1,12 +1,8 @@
 import argparse
 from argparse import RawDescriptionHelpFormatter
 from collections.abc import Iterable
-import datetime
-import errno
-import os
 import sys
 import textwrap
-
 
 from .output import set_level, set_silent
 from .v20.enums import CHECK_CODES as CHECK_CODES20

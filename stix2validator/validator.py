@@ -16,7 +16,7 @@ import simplejson as json
 from . import output
 from .errors import (NoJSONFileFoundError, SchemaError, SchemaInvalidError,
                      ValidationError, pretty_error)
-from .util import (DEFAULT_VER, ValidationOptions)
+from .util import DEFAULT_VER, ValidationOptions
 from .v20 import musts as musts20
 from .v20 import shoulds as shoulds20
 from .v21 import interop
@@ -408,7 +408,6 @@ def validate_parsed_json(obj_json, options=None):
                                                    object_id=obj_json.get('id', ''),
                                                    errors=[str(ex)])
             results = error_result
-
 
     return results
 

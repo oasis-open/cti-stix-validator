@@ -1,9 +1,9 @@
 """STIX 2.0 open vocabularies and other lists
 """
 
-import os
 import csv
 import glob
+import os
 
 # Enumerations of the default values of STIX open vocabularies
 ATTACK_MOTIVATION_OV = [

@@ -1,8 +1,8 @@
 """STIX 2.1 WD04 open vocabularies and other lists
 """
-import os
 import csv
 import glob
+import os
 
 # Enumerations of the default values of STIX open vocabularies
 ATTACK_MOTIVATION_OV = [
@@ -2233,6 +2233,7 @@ def char_sets():
                     clist.append(name)
         char_sets.setlist = clist
     return char_sets.setlist
+
 
 def protocols():
     """Return a list of values from the IANA Service Name and Transport
