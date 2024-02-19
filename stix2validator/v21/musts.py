@@ -6,6 +6,7 @@ import re
 import uuid
 
 from cpe import CPE
+from datetime import datetime
 from dateutil import parser
 from stix2patterns.v21.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
@@ -107,6 +108,18 @@ def timestamp(instance):
                                                     % (instance['type'], tprop, instance[embed][tprop], str(e)), instance['id'])
 
 
+def compare(first, op, second):
+    comp = getattr(operator, op)
+    return comp(first, second) or comp(
+        datetime_from_str(first),
+        datetime_from_str(second)
+    )
+
+
+def datetime_from_str(str_datetime):
+    return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%S.%fZ')
+
+
 def get_comparison_string(op):
     """Return a string explaining the given comparison operator.
     """
@@ -128,11 +141,9 @@ def timestamp_compare(instance):
     compares.extend(additional_compares)
 
     for first, op, second in compares:
-        comp = getattr(operator, op)
-        comp_str = get_comparison_string(op)
-
         if first in instance and second in instance and \
-                not comp(instance[first], instance[second]):
+                not compare(instance[first], op, instance[second]):
+            comp_str = get_comparison_string(op)
             msg = "'%s' (%s) must be %s '%s' (%s)"
             yield JSONError(msg % (first, instance[first], comp_str, second, instance[second]),
                             instance['id'])
@@ -145,11 +156,9 @@ def observable_timestamp_compare(instance):
     """
     compares = enums.TIMESTAMP_COMPARE_OBSERVABLE.get(instance.get('type', ''), [])
     for first, op, second in compares:
-        comp = getattr(operator, op)
-        comp_str = get_comparison_string(op)
-
         if first in instance and second in instance and \
-                not comp(instance[first], instance[second]):
+                not compare(instance[first], op, instance[second]):
+            comp_str = get_comparison_string(op)
             msg = "In object '%s', '%s' (%s) must be %s '%s' (%s)"
             yield JSONError(msg % (instance['id'], first, instance[first], comp_str, second, instance[second]),
                             instance['id'])
