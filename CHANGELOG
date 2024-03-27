@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+3.2.0 - 2024-03-27
+
+* Updated json schema version
+* Removed deprecated refResolver
+
 3.1.4 - 2023-07-24
 
 * Allow latest attrs package to fix community reported dependency problems
