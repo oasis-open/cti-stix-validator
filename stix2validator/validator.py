@@ -2,15 +2,18 @@
 """
 
 from collections.abc import Iterable
+import copy
 import io
 from itertools import chain
 import os
 import re
 import sys
 
-from jsonschema import Draft202012Validator, RefResolver
+from jsonschema import Draft202012Validator
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
 import simplejson as json
 
 from . import output
@@ -490,38 +493,7 @@ def validate_string(string, options=None):
     return validate(stream, options)
 
 
-SCHEMA_STORE = {}
-
-
-def ref_store(validator, ref, instance, schema):
-    """When validating '$ref' properties, add to global store.
-    """
-    remote_path = validator.resolver._urljoin_cache(validator.resolver.base_uri, ref)
-
-    if remote_path not in validator.resolver.store:
-        # Add local schema to Resolver store if present, so validator will use local
-        # schemas and only download remote refs in local is not present.
-        local_base_uri = validator.resolver._scopes_stack[0]
-
-        # Take out the the 'file:' prefix
-        if os.name == 'nt':
-            local_base_uri = local_base_uri[8:]
-        else:
-            local_base_uri = local_base_uri[5:]
-
-        try:
-            local_filepath = os.path.abspath(os.path.join(local_base_uri, '../'+ref))
-            local_schema = load_schema(local_filepath)
-            schema_id = local_schema.get('$id', '')
-            if schema_id:
-                validator.resolver.store[schema_id] = local_schema
-        except FileNotFoundError:
-            pass
-
-    return Draft202012Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
-
-
-STIXValidator = extend(Draft202012Validator, {'$ref': ref_store})
+STIXValidator = extend(Draft202012Validator)
 
 
 # Built-in checker only ensures emails contain an '@'; we want a more robust check
@@ -530,6 +502,41 @@ def is_email(instance):
     if not isinstance(instance, str):
         return True
     return EMAIL_RE.match(instance)
+
+
+def patch_schema(schema_data: dict, schema_path: str) -> dict:
+    schema_data = copy.copy(schema_data)
+    if "$schema" in schema_data:
+        # Only 'http://json-schema.org/draft/' schemas migrated to https
+        schema_data["$schema"] = schema_data["$schema"].replace("http://json-schema.org/draft/", "https://json-schema.org/draft/")
+    if "$id" in schema_data:
+        schema_data["$id"] = schema_path
+    return schema_data
+
+
+def patch_schema_path(schema_path: str) -> str:
+    if schema_path.startswith("file:"):
+        return schema_path
+    if os.name == 'nt':
+        # win: file:///c:/folder/file.json
+        file_prefix = 'file:///'
+    else:
+        # unix: file:///folder/file.json
+        file_prefix = 'file://'
+    return file_prefix + schema_path.replace("\\", "/")
+
+
+def retrieve_from_filesystem(schema_path: str) -> Resource:
+    if os.name == 'nt':
+        # win: file:///c:/folder/file.json
+        schema_path = schema_path.replace("file:///", "")
+    else:
+        # unix: file:///folder/file.json
+        schema_path = schema_path.replace("file://", "")
+    with open(schema_path, "r") as f:
+        schema = json.load(f)
+    schema = patch_schema(schema, schema_path)
+    return Resource.from_contents(schema)
 
 
 def load_validator(schema_path, schema):
@@ -543,21 +550,12 @@ def load_validator(schema_path, schema):
         An instance of Draft202012Validator.
 
     """
-    global SCHEMA_STORE
-
-    # Get correct prefix based on OS
-    if os.name == 'nt':
-        file_prefix = 'file:///'
-    else:
-        file_prefix = 'file:'
-
-    resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema, store=SCHEMA_STORE)
-    schema_id = schema.get('$id', '')
-    if schema_id:
-        resolver.store[schema_id] = schema
-    # RefResolver creates a new store internally; persist it so we can use the same mappings every time
-    SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver, format_checker=Draft202012Validator.FORMAT_CHECKER)
+    schema_path = patch_schema_path(schema_path)
+    schema = patch_schema(schema, schema_path)
+    registry = Registry(
+        retrieve=retrieve_from_filesystem
+    ).with_resource(schema_path, DRAFT202012.create_resource(schema))
+    validator = STIXValidator(schema,  registry=registry, format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validator
 
 
