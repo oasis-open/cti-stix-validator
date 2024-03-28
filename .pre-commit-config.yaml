@@ -6,7 +6,7 @@ repos:
         exclude: ^stix2validator/(v20|v21)/assets/.*.csv$
     -   id: check-merge-conflict
 -   repo: https://github.com/PyCQA/flake8
-    rev: 3.8.4
+    rev: 5.0.4
     hooks:
     -   id: flake8
         name: Check project styling
