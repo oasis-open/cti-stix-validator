@@ -74,7 +74,10 @@ def timestamp(instance):
 
 def compare_timestamps(modified, created):
     if TIMESTAMP_FORMAT_RE.match(modified) and TIMESTAMP_FORMAT_RE.match(created):
-        return datetime_from_str(modified) < datetime_from_str(created)
+        created_datetime = datetime_from_str(created)
+        modified_datetime = datetime_from_str(modified)
+        if isinstance(created_datetime, datetime) and isinstance(modified_datetime, datetime):
+            return modified_datetime < created_datetime
     return modified < created
 
 

@@ -111,7 +111,10 @@ def timestamp(instance):
 def compare(first, op, second):
     comp = getattr(operator, op)
     if TIMESTAMP_FORMAT_RE.match(first) and TIMESTAMP_FORMAT_RE.match(second):
-        return comp(datetime_from_str(first), datetime_from_str(second))
+        created_datetime = datetime_from_str(first)
+        modified_datetime = datetime_from_str(second)
+        if isinstance(created_datetime, datetime) and isinstance(modified_datetime, datetime):
+            return comp(created_datetime, modified_datetime)
     return comp(first, second)
 
 
