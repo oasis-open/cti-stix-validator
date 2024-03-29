@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+3.1.4 - 2023-07-24
+
+* Allow latest attrs package to fix community reported dependency problems
+
+3.1.3 - 2023-02-15
+
+* Add a debug message indicating which schema validates an extension
+* Fix deprecation warning about jsonschema.draft202012_format_checker
+
 3.1.2 - 2022-11-30
 
 * Minor fixes to extension definitions

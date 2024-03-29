@@ -23,16 +23,6 @@ other "best practice" checks, use :code:`--enable 103` or
 Enabling supersedes disabling. Simultaneously enabling and disabling
 the same check will result in the validator performing that check.
 
-Some checks access Internet resources to determine valid values for
-certain properties. For instance, the 'mime-type' check accesses the
-IANA's list of registered MIME types. These web requests are cached to
-conserve bandwidth, will expire after one week, and are stored in a
-file called 'cache.sqlite' in the same directory the script is run
-from. The cache can be refreshed manually with the :code:`--refresh-cache`
-or :code:`refresh_cache=True`, or cleared with :code:`--clear-cache` or
-:code:`clear_cache=True`. This caching can be disabled entirely with
-:code:`--no-cache` or :code:`no_cache=True`.
-
 Mandatory Checks - STIX 2.1
 ---------------------------
 

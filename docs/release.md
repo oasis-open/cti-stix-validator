@@ -1,7 +1,9 @@
 # Releasing a new version of stix2_validator
 
-These steps will upgrade the \'stix-validator\' package to version
+These steps will upgrade the 'stix-validator' package to version
 3.1.3. Substitute values as necessary.
+
+0. Follow the directions in docs/contributing.rst to ensure that your environment is correct. Especially make note of the git submodule steps.
 
 1.  Make sure that the README file is up-to-date and is consistent with any similar documentation (ReadTheDocs).
 
@@ -13,13 +15,18 @@ git pull
 tox -r
 ```
 
-3.  Update the CHANGELOG (sometimes CHANGES.txt) file with changes since the last release. To help, you can run one of the following:
+3.  Update the CHANGELOG file with changes since the last release. To help, you can run one of the following:
 
 ```bash
-git diff \<old tag\>..master
-git log \<old tag\>..master
-gitk \<old tag\>..master
+git diff <old tag>..master
+git log <old tag>..master
+gitk <old tag>..master
 ```
+
+```bash
+git add CHANGELOG
+```
+
 
 4.  Run bumpversion patch, bumpversion minor, or bumpversion major (as appropriate).
 
@@ -37,13 +44,13 @@ continuing.
 6.  Once Github Actions shows a passing build for the master branch, create a tag for the new release. Push the tag to GitHub as well. (bumpversion may create the tag locally.)
 
 ```bash
-git tag -a \"v3.1.3\" -m \"Version 3.1.3\"
-git push origin \--tags
+git tag -a "v3.1.3" -m "Version 3.1.3"
+git push origin --tags
 ```
 
-7.  Copy the release notes into a new \"Release\" on GitHub. Don\'t forget to publish the \"Release\".
+7.  Copy the release notes into a new "Release" on GitHub. Don't forget to publish the "Release".
 
-8.  Make sure your release directory is \"clean\".
+8.  Make sure your release directory is "clean".
 
 ```bash
 git clean -x -f -d
@@ -57,7 +64,7 @@ twine upload dist/\*
 ```
 
 If the filename does not end with -py2.py3-none-any.whl, it is not
-correctly configured as a \"Universal\" wheel.
+correctly configured as a "Universal" wheel.
 
 10. After the release is up on PyPI, create a temporary virtualenv and was downloaded and installed. If installation works fine, try running some samples or unit tests to make sure everything is working as expected.
 
