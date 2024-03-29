@@ -79,10 +79,15 @@ def compare_timestamps(modified, created):
 
 
 def datetime_from_str(str_datetime):
+    pattern = '%Y-%m-%dT%H:%M:%S.%fZ'
     try:
-        return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%S.%fZ')
+        return datetime.strptime(str_datetime, pattern)
     except ValueError:
-        return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%SZ')
+        pattern = '%Y-%m-%dT%H:%M:%SZ'
+    try:
+        return datetime.strptime(str_datetime, pattern)
+    except ValueError:
+        return str_datetime
 
 
 def modified_created(instance):
