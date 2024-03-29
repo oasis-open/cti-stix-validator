@@ -1,12 +1,12 @@
 """Mandatory (MUST) requirement checking functions
 """
 from collections.abc import Mapping
+from datetime import datetime
 import operator
 import re
 import uuid
 
 from cpe import CPE
-from datetime import datetime
 from dateutil import parser
 from stix2patterns.v21.pattern import Pattern
 from stix2patterns.validator import run_validator as pattern_validator
@@ -17,6 +17,7 @@ from ..output import info
 from ..util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
 
+TIMESTAMP_FORMAT_RE = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
 TYPE_FORMAT_RE = re.compile(r'^\-?[a-z0-9]+(-[a-z0-9]+)*\-?$')
 PROPERTY_FORMAT_RE = re.compile(r'^[a-z0-9_]{3,250}$')
 CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
@@ -30,13 +31,12 @@ CUSTOM_EXT_LAX_PREFIX_RE = re.compile(r"^x\-.+\-ext$")
 def timestamp(instance):
     """Ensure timestamps contain sane months, days, hours, minutes, seconds.
     """
-    ts_re = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
     timestamp_props = ['created', 'modified']
     if instance['type'] in enums.TIMESTAMP_PROPERTIES:
         timestamp_props += enums.TIMESTAMP_PROPERTIES[instance['type']]
 
     for tprop in timestamp_props:
-        if tprop in instance and ts_re.match(instance[tprop]):
+        if tprop in instance and TIMESTAMP_FORMAT_RE.match(instance[tprop]):
             # Don't raise an error if schemas will catch it
             try:
                 parser.parse(instance[tprop])
@@ -51,7 +51,7 @@ def timestamp(instance):
                     continue
                 if obj['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
                     for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[obj['type']]:
-                        if tprop in obj and ts_re.match(obj[tprop]):
+                        if tprop in obj and TIMESTAMP_FORMAT_RE.match(obj[tprop]):
                             # Don't raise an error if schemas will catch it
                             try:
                                 parser.parse(obj[tprop])
@@ -64,13 +64,13 @@ def timestamp(instance):
                             for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                                 if embed == 'extensions':
                                     for ext in obj[embed]:
-                                        if tprop in obj[embed][ext] and ts_re.match(obj[embed][ext][tprop]):
+                                        if tprop in obj[embed][ext] and TIMESTAMP_FORMAT_RE.match(obj[embed][ext][tprop]):
                                             try:
                                                 parser.parse(obj[embed][ext][tprop])
                                             except ValueError as e:
                                                 yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
                                                                 % (obj['type'], ext, tprop, obj[embed][ext][tprop], str(e)), instance['id'])
-                                elif tprop in obj[embed] and ts_re.match(obj[embed][tprop]):
+                                elif tprop in obj[embed] and TIMESTAMP_FORMAT_RE.match(obj[embed][tprop]):
                                     try:
                                         parser.parse(obj[embed][tprop])
                                     except ValueError as e:
@@ -81,7 +81,7 @@ def timestamp(instance):
                 return
             if instance['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
                 for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[instance['type']]:
-                    if tprop in instance and ts_re.match(instance[tprop]):
+                    if tprop in instance and TIMESTAMP_FORMAT_RE.match(instance[tprop]):
                         # Don't raise an error if schemas will catch it
                         try:
                             parser.parse(instance[tprop])
@@ -94,13 +94,13 @@ def timestamp(instance):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[instance['type']][embed]:
                             if embed == 'extensions':
                                 for ext in instance[embed]:
-                                    if tprop in instance[embed][ext] and ts_re.match(instance[embed][ext][tprop]):
+                                    if tprop in instance[embed][ext] and TIMESTAMP_FORMAT_RE.match(instance[embed][ext][tprop]):
                                         try:
                                             parser.parse(instance[embed][ext][tprop])
                                         except ValueError as e:
                                             yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
                                                             % (instance['type'], ext, tprop, instance[embed][ext][tprop], str(e)), instance['id'])
-                            elif tprop in instance[embed] and ts_re.match(instance[embed][tprop]):
+                            elif tprop in instance[embed] and TIMESTAMP_FORMAT_RE.match(instance[embed][tprop]):
                                 try:
                                     parser.parse(instance[embed][tprop])
                                 except ValueError as e:
@@ -110,14 +110,16 @@ def timestamp(instance):
 
 def compare(first, op, second):
     comp = getattr(operator, op)
-    return comp(first, second) or comp(
-        datetime_from_str(first),
-        datetime_from_str(second)
-    )
+    if TIMESTAMP_FORMAT_RE.match(first) and TIMESTAMP_FORMAT_RE.match(second):
+        return comp(datetime_from_str(first), datetime_from_str(second))
+    return comp(first, second)
 
 
 def datetime_from_str(str_datetime):
-    return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%S.%fZ')
+    try:
+        return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%S.%fZ')
+    except ValueError:
+        return datetime.strptime(str_datetime, '%Y-%m-%dT%H:%M:%SZ')
 
 
 def get_comparison_string(op):
