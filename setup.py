@@ -21,6 +21,7 @@ install_requires = [
     'cpe',
     'jsonschema[format-nongpl]>=4.20.0',
     'python-dateutil',
+    'requests',
     'simplejson',
     'stix2-patterns>=0.4.1',
 ]

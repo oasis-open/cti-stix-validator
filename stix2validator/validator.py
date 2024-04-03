@@ -16,6 +16,7 @@ from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
 from referencing import Registry, Resource
 from referencing.jsonschema import DRAFT202012
+import requests
 import simplejson as json
 
 from . import output
@@ -561,11 +562,17 @@ def retrieve_from_filesystem(schema_path_uri: str) -> Resource:
     Returns:
         A resource loaded with the content.
     """
-    schema_path = from_uri_to_path(schema_path_uri)
-    with open(schema_path, "r") as f:
-        schema = json.load(f)
-    schema = patch_schema(schema, schema_path)
-    return Resource.from_contents(schema)
+    if schema_path_uri.startswith("http://") or schema_path_uri.startswith("https://"):
+        response = requests.get(schema_path_uri, allow_redirects=True)
+        schema = response.json()
+        schema = patch_schema(schema, schema_path_uri)
+        return Resource.from_contents(schema)
+    else:
+        schema_path = from_uri_to_path(schema_path_uri)
+        with open(schema_path, "r") as f:
+            schema = json.load(f)
+        schema = patch_schema(schema, schema_path)
+        return Resource.from_contents(schema)
 
 
 def load_validator(schema_path, schema):

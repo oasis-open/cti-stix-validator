@@ -16,6 +16,10 @@ logger = logging.getLogger(__name__)
 EXAMPLE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                        '..', '..', 'schemas-2.1', 'examples',
                        'indicator-to-campaign-relationship.json')
+CUSTOM = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                      'test_examples', 'tlp-amber.json')
+CUSTOM_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                          'test_schemas')
 IDENTITY = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         'test_examples', 'identity.json')
 IDENTITY_CUSTOM = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -57,6 +61,15 @@ def test_run_validation_silent(caplog):
 def test_validate_file(caplog):
     caplog.set_level('INFO')
     results = validate_file(EXAMPLE)
+    assert results.is_valid
+
+    print_results(results)
+    assert 'STIX JSON: Valid' in caplog.text
+
+
+def test_validate_file_custom(caplog):
+    caplog.set_level('INFO')
+    results = validate_file(CUSTOM, options=ValidationOptions(schema_dir=CUSTOM_DIR))
     assert results.is_valid
 
     print_results(results)
