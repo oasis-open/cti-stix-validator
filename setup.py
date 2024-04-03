@@ -19,7 +19,7 @@ def get_version():
 install_requires = [
     'colorama',
     'cpe',
-    'jsonschema[format-nongpl]>=4.6.0,<4.18.0',
+    'jsonschema[format-nongpl]>=4.20.0',
     'python-dateutil',
     'simplejson',
     'stix2-patterns>=0.4.1',
