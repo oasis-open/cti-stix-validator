@@ -550,7 +550,11 @@ def patch_schema(schema_data: dict, schema_path: str) -> dict:
             "http://json-schema.org/draft/", "https://json-schema.org/draft/"
         )
     if "$id" in schema_data:
-        schema_data["$id"] = schema_path
+        schema_path = pathlib.Path(schema_path)
+        if schema_path.is_absolute():
+            schema_data["$id"] = str(schema_path.as_uri())
+        else:
+            schema_data["$id"] = str(schema_path)
     return schema_data
 
 
@@ -596,12 +600,6 @@ def load_validator(schema_path, schema, schema_dir):
     Returns:
         An instance of Draft202012Validator.
     """
-    schema_path = pathlib.Path(schema_path)
-    if schema_path.is_absolute():
-        schema_path = schema_path.as_uri()
-    else:
-        schema_path = schema_path
-    schema_path = str(schema_path)
     schema = patch_schema(schema, schema_path)
     retrieve_callback = functools.partial(retrieve_from_filesystem, schema_dir=schema_dir)
     registry = Registry(
