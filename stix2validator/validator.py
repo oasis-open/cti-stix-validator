@@ -453,7 +453,7 @@ def validate_file(fn, options=None):
         options = ValidationOptions(files=fn)
 
     try:
-        with open(fn) as instance_file:
+        with open(fn, encoding="utf-8") as instance_file:
             file_results.object_results = validate(instance_file, options)
 
     except Exception as ex:
