@@ -1,0 +1,15 @@
+{
+  "allOf": [
+    {
+      "properties": {
+        "foo_value": {
+          "type": "string"
+        }
+      },
+      "required": ["foo_value"]
+    },
+    {
+      "$ref": "bar.json"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "properties": {
+    "bar_value": {
+      "type": "string"
+    }
+  }
+}
