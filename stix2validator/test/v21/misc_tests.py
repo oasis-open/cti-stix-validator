@@ -20,6 +20,10 @@ CUSTOM = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                       'test_examples', 'tlp-amber.json')
 CUSTOM_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                           'test_schemas')
+RELATIVE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                        'test_examples', 'tool.json')
+RELATIVE_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            'test_schemas')
 IDENTITY = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                         'test_examples', 'identity.json')
 IDENTITY_CUSTOM = os.path.join(os.path.dirname(os.path.realpath(__file__)),
@@ -70,6 +74,15 @@ def test_validate_file(caplog):
 def test_validate_file_custom(caplog):
     caplog.set_level('INFO')
     results = validate_file(CUSTOM, options=ValidationOptions(schema_dir=CUSTOM_DIR))
+    assert results.is_valid
+
+    print_results(results)
+    assert 'STIX JSON: Valid' in caplog.text
+
+
+def test_validate_file_custom_relative(caplog):
+    caplog.set_level('INFO')
+    results = validate_file(RELATIVE, options=ValidationOptions(schema_dir=RELATIVE_DIR))
     assert results.is_valid
 
     print_results(results)

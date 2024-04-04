@@ -3,6 +3,7 @@
 
 from collections.abc import Iterable
 import copy
+import functools
 import io
 from itertools import chain
 import os
@@ -553,11 +554,12 @@ def patch_schema(schema_data: dict, schema_path: str) -> dict:
     return schema_data
 
 
-def retrieve_from_filesystem(schema_path_uri: str) -> Resource:
+def retrieve_from_filesystem(schema_path_uri: str, schema_dir: str) -> Resource:
     """Callback to retrieve a schema given its path.
 
     Args:
         schema_path_uri: the schema URI.
+        schema_dir: the optional directory of local schemas.
 
     Returns:
         A resource loaded with the content.
@@ -568,14 +570,23 @@ def retrieve_from_filesystem(schema_path_uri: str) -> Resource:
         schema = patch_schema(schema, schema_path_uri)
         return Resource.from_contents(schema)
     else:
-        schema_path = from_uri_to_path(schema_path_uri)
+        schema_path = pathlib.Path(schema_path_uri)
+        if schema_path.is_absolute() or schema_path_uri.startswith("file://"):
+            is_relative = False
+            schema_path = from_uri_to_path(schema_path_uri)
+        else:
+            is_relative = True
+            schema_path = from_uri_to_path(os.path.join(schema_dir, schema_path_uri))
         with open(schema_path, "r") as f:
             schema = json.load(f)
         schema = patch_schema(schema, schema_path)
-        return Resource.from_contents(schema)
+        if is_relative:
+            return Resource.opaque(schema)
+        else:
+            return Resource.from_contents(schema)
 
 
-def load_validator(schema_path, schema):
+def load_validator(schema_path, schema, schema_dir):
     """Create a JSON schema validator for the given schema.
 
     Args:
@@ -585,10 +596,16 @@ def load_validator(schema_path, schema):
     Returns:
         An instance of Draft202012Validator.
     """
-    schema_path = pathlib.Path(schema_path).as_uri()
+    schema_path = pathlib.Path(schema_path)
+    if schema_path.is_absolute():
+        schema_path = schema_path.as_uri()
+    else:
+        schema_path = schema_path
+    schema_path = str(schema_path)
     schema = patch_schema(schema, schema_path)
+    retrieve_callback = functools.partial(retrieve_from_filesystem, schema_dir=schema_dir)
     registry = Registry(
-        retrieve=retrieve_from_filesystem
+        retrieve=retrieve_callback
     ).with_resource(schema_path, DRAFT202012.create_resource(schema))
     validator = STIXValidator(schema,  registry=registry, format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validator
@@ -694,7 +711,7 @@ def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, defaul
         }
 
     # Don't use custom validator; only check schemas, no additional checks
-    validator = load_validator(schema_path, schema)
+    validator = load_validator(schema_path, schema, schema_dir)
     try:
         error_gen = validator.iter_errors(obj)
     except schema_exceptions.RefResolutionError:
