@@ -25,6 +25,23 @@ class IdentityTestCases(ValidatorTest):
         results = validate_string(VALID_SIGHTING, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        sighting = copy.deepcopy(self.valid_sighting)
+        sighting['created'] = "2016-11-31T01:00:00.000Z"
+        self.assertFalseWithOptions(sighting)
+
+        sighting['created'] = "2016-08-22T14:09:00.124Z"
+        self.assertFalseWithOptions(sighting)
+
+        sighting['modified'] = "2016-08-22T14:09:00.124Z"
+        self.assertTrueWithOptions(sighting)
+
+        sighting['last_seen'] = "2016-08-22T14:09:00.000Z"
+        self.assertFalseWithOptions(sighting)
+
+        sighting['last_seen'] = "2016-08-22T14:09:00.124Z"
+        self.assertTrueWithOptions(sighting)
+
     def test_sighting_of_ref(self):
         sighting = copy.deepcopy(self.valid_sighting)
         sighting['sighting_of_ref'] = "bundle--36ffb872-1dd9-446e-b6f5-d58527e5b5d2"

@@ -1,3 +1,4 @@
+import copy
 import json
 
 from . import ValidatorTest
@@ -23,3 +24,14 @@ class CoATestCases(ValidatorTest):
     def test_wellformed_coa(self):
         results = validate_string(VALID_COURSE_OF_ACTION, self.options)
         self.assertTrue(results.is_valid)
+
+    def test_invalid_timestamp(self):
+        coa = copy.deepcopy(self.valid_course_of_action)
+        coa['created'] = "2016-04-31T20:03:48.000Z"
+        self.assertFalseWithOptions(coa)
+
+        coa['created'] = "2016-04-06T20:03:48.000123Z"
+        self.assertFalseWithOptions(coa)
+
+        coa['modified'] = "2016-04-06T20:03:48.001Z"
+        self.assertTrueWithOptions(coa)

@@ -34,11 +34,25 @@ class IndicatorTestCases(ValidatorTest):
         results = validate_string(VALID_INDICATOR, self.options)
         self.assertTrue(results.is_valid)
 
-    def test_modified_before_created(self):
+    def test_invalid_timestamp(self):
         indicator = copy.deepcopy(self.valid_indicator)
-        indicator['modified'] = "2001-04-06T20:03:48Z"
-        results = validate_parsed_json(indicator, self.options)
-        self.assertEqual(results.is_valid, False)
+        indicator['created'] = "2016-11-31T20:03:48.000Z"
+        self.assertFalseWithOptions(indicator)
+
+        indicator['created'] = "2016-04-06T20:03:48.001Z"
+        self.assertFalseWithOptions(indicator)
+
+        indicator['modified'] = "2016-04-06T20:03:48.001Z"
+        self.assertTrueWithOptions(indicator)
+
+        indicator['valid_until'] = "2016-11-31T20:03:48.000Z"
+        self.assertFalseWithOptions(indicator)
+
+        indicator['valid_until'] = "2016-04-06T20:03:48.001Z"
+        self.assertTrueWithOptions(indicator)
+
+        indicator['valid_from'] = "2016-04-06T20:03:48.002Z"
+        self.assertFalseWithOptions(indicator)
 
     def test_custom_property_name_invalid_character(self):
         indicator = copy.deepcopy(self.valid_indicator)

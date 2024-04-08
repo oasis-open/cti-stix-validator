@@ -31,6 +31,17 @@ class ToolTestCases(ValidatorTest):
         results = validate_string(VALID_TOOL, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        tool = copy.deepcopy(self.valid_tool)
+        tool['created'] = "2016-04-31T20:03:48.000Z"
+        self.assertFalseWithOptions(tool)
+
+        tool['created'] = "2016-04-06T20:03:48.000123Z"
+        self.assertFalseWithOptions(tool)
+
+        tool['modified'] = "2016-04-06T20:03:48.001Z"
+        self.assertTrueWithOptions(tool)
+
     def test_vocab_tool_type(self):
         tool = copy.deepcopy(self.valid_tool)
         tool['tool_types'] += ["multi-purpose"]

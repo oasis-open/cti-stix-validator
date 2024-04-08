@@ -25,6 +25,17 @@ class ThreatActorTestCases(ValidatorTest):
         results = validate_string(VALID_THREAT_ACTOR, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        threat_actor = copy.deepcopy(self.valid_threat_actor)
+        threat_actor['created'] = "2016-11-31T01:00:00.000Z"
+        self.assertFalseWithOptions(threat_actor)
+
+        threat_actor['created'] = "2016-04-06T20:03:48.123Z"
+        self.assertFalseWithOptions(threat_actor)
+
+        threat_actor['modified'] = "2016-04-06T20:03:48.123Z"
+        self.assertTrueWithOptions(threat_actor)
+
     def test_vocab_attack_motivation(self):
         threat_actor = copy.deepcopy(self.valid_threat_actor)
         threat_actor['primary_motivation'] = "selfishness"

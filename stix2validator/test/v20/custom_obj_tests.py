@@ -48,6 +48,17 @@ class CustomObjectTestCases(ValidatorTest):
         results = validate_parsed_json(custom_obj, self.options)
         self.assertEqual(results.is_valid, False)
 
+    def test_invalid_timestamp(self):
+        custom_object = copy.deepcopy(self.valid_custom_object)
+        custom_object['created'] = "2016-11-31T01:00:00.000Z"
+        self.assertFalseWithOptions(custom_object)
+
+        custom_object['created'] = "2016-08-01T01:00:01.000Z"
+        self.assertFalseWithOptions(custom_object)
+
+        custom_object['modified'] = "2016-08-01T01:00:01.000Z"
+        self.assertTrueWithOptions(custom_object)
+
     def test_invalid_type_name(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         custom_obj['type'] = "corpo_ration"

@@ -26,6 +26,27 @@ class IntrusionSetTestCases(ValidatorTest):
         results = validate_string(VALID_INTRUSION_SET, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        intrusion_set = copy.deepcopy(self.valid_intrusion_set)
+        intrusion_set['created'] = "2016-11-31T01:00:00.000Z"
+        self.assertFalseWithOptions(intrusion_set)
+
+        intrusion_set['created'] = "2016-04-06T20:03:48.123Z"
+        self.assertFalseWithOptions(intrusion_set)
+
+        intrusion_set['modified'] = "2016-04-06T20:03:48.123Z"
+        self.assertTrueWithOptions(intrusion_set)
+
+        intrusion_set['first_seen'] = "2016-04-06T20:03:48.123Z"
+        intrusion_set['last_seen'] = "2016-11-31T01:00:00.000Z"
+        self.assertFalseWithOptions(intrusion_set)
+
+        intrusion_set['last_seen'] = "2016-04-06T20:03:48.000Z"
+        self.assertFalseWithOptions(intrusion_set)
+
+        intrusion_set['last_seen'] = "2016-04-06T20:03:48.123Z"
+        self.assertTrueWithOptions(intrusion_set)
+
     def test_country(self):
         intrusion_set = copy.deepcopy(self.valid_intrusion_set)
         intrusion_set['country'] = "USA"

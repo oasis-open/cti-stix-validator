@@ -41,5 +41,17 @@ class IdentityTestCases(ValidatorTest):
 
     def test_invalid_timestamp(self):
         report = copy.deepcopy(self.valid_report)
-        report['published'] = "2016-11-31T08:17:27.000000Z"
+        report['published'] = "2016-11-31T08:17:27.000Z"
         self.assertFalseWithOptions(report)
+
+        report['published'] = "2016-05-21T19:59:11.000Z"
+        self.assertTrueWithOptions(report)
+
+        report['created'] = "2016-11-31T08:17:27.000Z"
+        self.assertFalseWithOptions(report)
+
+        report['created'] = "2016-05-21T19:59:11.123Z"
+        self.assertFalseWithOptions(report)
+
+        report['modified'] = "2016-05-21T19:59:11.123Z"
+        self.assertTrueWithOptions(report)

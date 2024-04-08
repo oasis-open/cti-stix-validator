@@ -92,3 +92,9 @@ class AttackPatternTestCases(ValidatorTest):
 
         attack_pattern['modified'] = "2016-02-29T08:17:27.000Z"
         self.assertTrueWithOptions(attack_pattern)
+
+        attack_pattern['created'] = "2016-02-29T08:17:27.123Z"
+        self.assertFalseWithOptions(attack_pattern)
+
+        attack_pattern['modified'] = "2016-02-29T08:17:27.123Z"
+        self.assertTrueWithOptions(attack_pattern)

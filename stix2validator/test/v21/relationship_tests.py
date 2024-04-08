@@ -99,16 +99,25 @@ class RelationshipTestCases(ValidatorTest):
         del relationship['relationship_type']
         self.assertFalseWithOptions(relationship)
 
-    def test_invalid_stop_time(self):
+    def test_invalid_timestamp(self):
         relationship = copy.deepcopy(self.valid_relationship)
-        relationship['start_time'] = "2016-04-06T20:06:37.000Z"
+        relationship['created'] = "2016-04-31T20:06:37.000Z"
+        self.assertFalseWithOptions(relationship)
+
+        relationship['created'] = "2016-04-06T20:06:37.000123Z"
+        self.assertFalseWithOptions(relationship)
+
+        relationship['modified'] = "2016-04-06T20:06:37.001Z"
+        self.assertTrueWithOptions(relationship)
+
+        relationship['start_time'] = "2016-04-31T20:06:37.000Z"
         relationship['stop_time'] = "2016-04-06T20:06:37.000Z"
         self.assertFalseWithOptions(relationship)
 
-        relationship['stop_time'] = "2016-01-01T00:00:00.000Z"
+        relationship['start_time'] = "2016-04-06T20:06:37.000123Z"
         self.assertFalseWithOptions(relationship)
 
-        relationship['stop_time'] = "2016-05-07T20:06:37.000Z"
+        relationship['stop_time'] = "2016-04-06T20:06:37.001Z"
         self.assertTrueWithOptions(relationship)
 
     def test_enforce_refs(self):

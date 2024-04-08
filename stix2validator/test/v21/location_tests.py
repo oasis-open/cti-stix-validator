@@ -27,6 +27,17 @@ class LocationTestCases(ValidatorTest):
         results = validate_string(VALID_LOCATION, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        location = copy.deepcopy(self.valid_location)
+        location['created'] = "2016-04-31T20:03:00.000Z"
+        self.assertFalseWithOptions(location)
+
+        location['created'] = "2016-04-06T20:03:00.000123Z"
+        self.assertFalseWithOptions(location)
+
+        location['modified'] = "2016-04-06T20:03:00.001Z"
+        self.assertTrueWithOptions(location)
+
     def test_location_lat_long(self):
         location = copy.deepcopy(self.valid_location)
         location['latitude'] = 48.8566

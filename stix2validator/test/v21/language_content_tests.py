@@ -45,3 +45,14 @@ class LanguageContentTestCases(ValidatorTest):
             "a": "boo"
         }
         self.assertFalseWithOptions(lang_content)
+
+    def test_invalid_timestamp(self):
+        lang_content = copy.deepcopy(self.valid_language_content)
+        lang_content['created'] = "2018-02-30T21:31:22.007Z"
+        self.assertFalseWithOptions(lang_content)
+
+        lang_content['created'] = "2018-02-08T21:31:22.007123Z"
+        self.assertFalseWithOptions(lang_content)
+
+        lang_content['modified'] = "2018-02-08T21:31:22.008Z"
+        self.assertTrueWithOptions(lang_content)
