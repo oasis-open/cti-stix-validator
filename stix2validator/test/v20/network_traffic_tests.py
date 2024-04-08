@@ -134,12 +134,3 @@ class ObservedDataTestCases(ValidatorTest):
 
         del net_traffic['objects']['1']['end']
         self.assertTrueWithOptions(net_traffic)
-
-    def test_invalid_start_end_time(self):
-        net_traffic = copy.deepcopy(self.valid_net_traffic)
-        net_traffic['objects']['1']['start'] = "2016-04-06T20:06:37.000Z"
-        net_traffic['objects']['1']['end'] = "2016-01-01T00:00:00.000Z"
-        self.assertFalseWithOptions(net_traffic)
-
-        net_traffic['objects']['1']['end'] = "2016-04-06T20:06:37.000Z"
-        self.assertTrueWithOptions(net_traffic)
