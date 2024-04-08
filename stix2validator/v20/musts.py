@@ -93,14 +93,27 @@ def datetime_from_str(str_datetime):
         return str_datetime
 
 
-def modified_created(instance):
-    """`modified` property must be later or equal to `created` property
+def timestamp_comparison(instance):
+    """
+    Ensure `modified` property is later or equal to `created` property.
+    Same for any present timestamp property.
     """
     if 'modified' in instance and 'created' in instance and \
             compare_timestamps(instance['modified'], instance['created']):
         msg = "'modified' (%s) must be later or equal to 'created' (%s)"
         return JSONError(msg % (instance['modified'], instance['created']),
                          instance['id'])
+    if instance['type'] in enums.TIMESTAMP_PROPERTIES:
+        timestamp_properties = enums.TIMESTAMP_PROPERTIES[instance['type']]
+        if len(timestamp_properties) == 2:
+            first, last = enums.TIMESTAMP_PROPERTIES[instance['type']]
+            if first in instance and last in instance and \
+                    compare_timestamps(instance[last], instance[first]):
+                msg = "'%s' (%s) must be later or equal to '%s' (%s)"
+                return JSONError(
+                    msg % (last, instance[last], first, instance[first]),
+                    instance['id']
+                )
 
 
 def object_marking_circular_refs(instance):
@@ -434,7 +447,7 @@ def list_musts(options):
     """
     validator_list = [
         timestamp,
-        modified_created,
+        timestamp_comparison,
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,
