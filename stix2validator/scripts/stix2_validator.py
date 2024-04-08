@@ -10,17 +10,18 @@ import sys
 from stix2validator import (ValidationError, codes, output, parse_args,
                             print_results, run_validation)
 
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
-
 
 def main():
     # Parse command line arguments
     options = parse_args(sys.argv[1:], is_script=True)
 
+    # Initialize the logger
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(message)s')
+    logger = logging.getLogger(__name__)
+
     # Only print prompt if script is run on cmdline and no input is piped in
     if options.files == sys.stdin and os.isatty(0):
-        logging.info('Input STIX content, then press Ctrl+D: ')
+        logger.info('Input STIX content, then press Ctrl+D: ')
 
     try:
         # Validate input documents

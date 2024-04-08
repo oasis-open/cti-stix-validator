@@ -82,9 +82,9 @@ class ObservedDataTestCases(ValidatorTest):
                 "request_value": "/download.html",
                 "request_version": "http/1.1",
                 "request_header": {
-                    "Accept-Encoding": "gzip,deflate",
-                    "Host": "www.example.com",
-                    "x-foobar": "something"
+                    "Accept-Encoding": ["gzip,deflate"],
+                    "Host": ["www.example.com"],
+                    "x-foobar": ["something"]
                 }
             }
         }

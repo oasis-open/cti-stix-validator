@@ -2,15 +2,22 @@
 """
 
 from collections.abc import Iterable
+import copy
+import functools
 import io
 from itertools import chain
 import os
+import pathlib
 import re
 import sys
+from urllib import parse, request
 
-from jsonschema import Draft202012Validator, RefResolver
+from jsonschema import Draft202012Validator
 from jsonschema import exceptions as schema_exceptions
 from jsonschema.validators import extend
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
+import requests
 import simplejson as json
 
 from . import output
@@ -448,7 +455,7 @@ def validate_file(fn, options=None):
         options = ValidationOptions(files=fn)
 
     try:
-        with open(fn) as instance_file:
+        with open(fn, encoding="utf-8") as instance_file:
             file_results.object_results = validate(instance_file, options)
 
     except Exception as ex:
@@ -490,38 +497,7 @@ def validate_string(string, options=None):
     return validate(stream, options)
 
 
-SCHEMA_STORE = {}
-
-
-def ref_store(validator, ref, instance, schema):
-    """When validating '$ref' properties, add to global store.
-    """
-    remote_path = validator.resolver._urljoin_cache(validator.resolver.base_uri, ref)
-
-    if remote_path not in validator.resolver.store:
-        # Add local schema to Resolver store if present, so validator will use local
-        # schemas and only download remote refs in local is not present.
-        local_base_uri = validator.resolver._scopes_stack[0]
-
-        # Take out the the 'file:' prefix
-        if os.name == 'nt':
-            local_base_uri = local_base_uri[8:]
-        else:
-            local_base_uri = local_base_uri[5:]
-
-        try:
-            local_filepath = os.path.abspath(os.path.join(local_base_uri, '../'+ref))
-            local_schema = load_schema(local_filepath)
-            schema_id = local_schema.get('$id', '')
-            if schema_id:
-                validator.resolver.store[schema_id] = local_schema
-        except FileNotFoundError:
-            pass
-
-    return Draft202012Validator.VALIDATORS['$ref'](validator, ref, instance, schema)
-
-
-STIXValidator = extend(Draft202012Validator, {'$ref': ref_store})
+STIXValidator = extend(Draft202012Validator)
 
 
 # Built-in checker only ensures emails contain an '@'; we want a more robust check
@@ -532,7 +508,89 @@ def is_email(instance):
     return EMAIL_RE.match(instance)
 
 
-def load_validator(schema_path, schema):
+def from_uri_to_path(uri: str) -> str:
+    """Convert a URI to a file path if possible.
+
+    Note: replace with 'Path.from_uri(schema_path_uri)' when Python 3.13.
+
+    Args:
+        uri: the URI, potentially containing a file path.
+
+    Returns:
+        The file path if the URI contains a file path, the URI otherwise.
+    """
+    parsed_url = parse.urlparse(uri)
+    if parsed_url.scheme == "file":
+        return request.url2pathname(parsed_url.path)
+    else:
+        return uri
+
+
+def patch_schema(schema_data: dict, schema_path: str) -> dict:
+    """Patch schemas with two important fixes.
+
+    1) _SPECIFICATIONS dictionary inside referencing.jsonschema is a mapping
+        between URLs and validators; 'DRAFT201909' and 'DRAFT202012' are now
+        only recognized as such if the URLs is https://.
+
+    2) For relative references to work, the $id of the schema needs to point
+        to a valid URI or path, that can later be used as a key to retrieve
+        a loaded resource.
+
+    Args:
+        schema_data: the schema itself.
+        schema_path: the path of the schema (can be both URI or path).
+
+    Returns:
+        The patched schema.
+    """
+    schema_data = copy.copy(schema_data)
+    if "$schema" in schema_data:
+        schema_data["$schema"] = schema_data["$schema"].replace(
+            "http://json-schema.org/draft/", "https://json-schema.org/draft/"
+        )
+    if "$id" in schema_data:
+        schema_path = pathlib.Path(schema_path)
+        if schema_path.is_absolute():
+            schema_data["$id"] = str(schema_path.as_uri())
+        else:
+            schema_data["$id"] = str(schema_path)
+    return schema_data
+
+
+def retrieve_from_filesystem(schema_path_uri: str, schema_dir: str) -> Resource:
+    """Callback to retrieve a schema given its path.
+
+    Args:
+        schema_path_uri: the schema URI.
+        schema_dir: the optional directory of local schemas.
+
+    Returns:
+        A resource loaded with the content.
+    """
+    if schema_path_uri.startswith("http://") or schema_path_uri.startswith("https://"):
+        response = requests.get(schema_path_uri, allow_redirects=True)
+        schema = response.json()
+        schema = patch_schema(schema, schema_path_uri)
+        return Resource.from_contents(schema)
+    else:
+        schema_path = pathlib.Path(schema_path_uri)
+        if schema_path.is_absolute() or schema_path_uri.startswith("file://"):
+            is_relative = False
+            schema_path = from_uri_to_path(schema_path_uri)
+        else:
+            is_relative = True
+            schema_path = from_uri_to_path(os.path.join(schema_dir, schema_path_uri))
+        with open(schema_path, "r") as f:
+            schema = json.load(f)
+        schema = patch_schema(schema, schema_path)
+        if is_relative:
+            return Resource.opaque(schema)
+        else:
+            return Resource.from_contents(schema)
+
+
+def load_validator(schema_path, schema, schema_dir):
     """Create a JSON schema validator for the given schema.
 
     Args:
@@ -541,23 +599,13 @@ def load_validator(schema_path, schema):
 
     Returns:
         An instance of Draft202012Validator.
-
     """
-    global SCHEMA_STORE
-
-    # Get correct prefix based on OS
-    if os.name == 'nt':
-        file_prefix = 'file:///'
-    else:
-        file_prefix = 'file:'
-
-    resolver = RefResolver(file_prefix + schema_path.replace("\\", "/"), schema, store=SCHEMA_STORE)
-    schema_id = schema.get('$id', '')
-    if schema_id:
-        resolver.store[schema_id] = schema
-    # RefResolver creates a new store internally; persist it so we can use the same mappings every time
-    SCHEMA_STORE = resolver.store
-    validator = STIXValidator(schema, resolver=resolver, format_checker=Draft202012Validator.FORMAT_CHECKER)
+    schema = patch_schema(schema, schema_path)
+    retrieve_callback = functools.partial(retrieve_from_filesystem, schema_dir=schema_dir)
+    registry = Registry(
+        retrieve=retrieve_callback
+    ).with_resource(schema_path, DRAFT202012.create_resource(schema))
+    validator = STIXValidator(schema,  registry=registry, format_checker=Draft202012Validator.FORMAT_CHECKER)
     return validator
 
 
@@ -661,7 +709,7 @@ def _get_error_generator(name, obj, schema_dir=None, version=DEFAULT_VER, defaul
         }
 
     # Don't use custom validator; only check schemas, no additional checks
-    validator = load_validator(schema_path, schema)
+    validator = load_validator(schema_path, schema, schema_dir)
     try:
         error_gen = validator.iter_errors(obj)
     except schema_exceptions.RefResolutionError:

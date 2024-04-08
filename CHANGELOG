@@ -1,6 +1,22 @@
 CHANGELOG
 =========
 
+3.2.0 - 2024-04-05
+
+* Updated jsonschema dependency version, removed deprecated refResolver
+  (@ostefano)
+* Enforce requirement that network-traffic.http-request-ext.request_header is a
+  list of strings instead of a singular string
+* Allow -ext extensions in SDOs
+* Fixed bug when loading files containing unicode characters on certain
+  platforms
+* Fixed bug with duplicate log entries when importing the validator script as a
+  library (@ostefano)
+* Switched to including IETF data as package data instead of pulling and
+  caching locally, removed caching options, and removed requests-cache and
+  appdirs dependencies (@vEpiphyte)
+* Dropped support for Python 3.7
+
 3.1.4 - 2023-07-24
 
 * Allow latest attrs package to fix community reported dependency problems

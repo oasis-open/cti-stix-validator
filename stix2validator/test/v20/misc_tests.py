@@ -41,7 +41,7 @@ def test_run_validation(caplog):
 
 
 def test_run_validation_nonexistent_file():
-    options = ValidationOptions(files='asdf.json', version="2.0")
+    options = ValidationOptions(files=['asdf.json'], version="2.0")
     with pytest.raises(NoJSONFileFoundError):
         run_validation(options)
 
