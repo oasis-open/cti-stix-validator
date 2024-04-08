@@ -12,8 +12,8 @@ VALID_OBSERVED_DATA_DEFINITION = u"""
   "created_by_ref": "identity--f431f809-377b-45e0-aa1c-6a4751cae5ff",
   "created": "2016-04-06T19:58:16.000Z",
   "modified": "2016-04-06T19:58:16.000Z",
-  "first_observed": "2015-12-21T19:00:00Z",
-  "last_observed": "2015-12-21T19:00:00Z",
+  "first_observed": "2015-12-21T19:00:00.000Z",
+  "last_observed": "2015-12-21T19:00:00.000Z",
   "number_observed": 50,
   "object_refs": [
     "ipv4-address--efcd5e80-570d-4131-b213-62cb18eaa6a8",
@@ -742,9 +742,15 @@ class ObservedDataTestCases(ValidatorTest):
         self.assertFalseWithOptions(observed_data)
 
     def test_invalid_accessed_timestamp(self):
-        observed_data = copy.deepcopy(self.valid_object)
+        observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['created'] = "2016-11-31T08:17:27.000000Z"
         self.assertFalseWithOptions(observed_data)
+
+        observed_data['created'] = "2016-04-06T19:58:16.000123Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['modified'] = "2016-04-06T19:58:16.001Z"
+        self.assertTrueWithOptions(observed_data)
 
     def test_invalid_extension_timestamp(self):
         observed_data = copy.deepcopy(self.valid_object)
@@ -834,14 +840,13 @@ class ObservedDataTestCases(ValidatorTest):
 
     def test_invalid_seen_time(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-        observed_data['first_observed'] = "2016-04-06T20:06:37.000Z"
-        observed_data['last_observed'] = "2016-04-06T20:06:37.000Z"
-        self.assertTrueWithOptions(observed_data)
-
-        observed_data['last_observed'] = "2016-01-01T00:00:00.000Z"
+        observed_data['first_observed'] = "2015-12-32T19:00:00Z"
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['last_observed'] = "2016-05-07T20:06:37.000Z"
+        observed_data['first_observed'] = "2015-12-21T19:00:00.000123Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['last_observed'] = "2015-12-21T19:00:00.001Z"
         self.assertTrueWithOptions(observed_data)
 
     def test_domain_name_not_deprecated_property(self):

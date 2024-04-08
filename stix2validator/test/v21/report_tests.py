@@ -11,7 +11,7 @@ VALID_REPORT = u"""
   "id": "report--84e4d88f-44ea-4bcd-bbf3-b2c1c320bcb3",
   "created_by_ref": "identity--a463ffb3-1bd9-4d94-b02d-74e4f1658283",
   "created": "2015-12-21T19:59:11.000Z",
-  "modified": "2016-05-21T19:59:11.000Z",
+  "modified": "2016-05-21T08:17:27.000Z",
   "published": "2016-05-21T19:59:11Z",
   "name": "The Black Vine Cyberespionage Group",
   "description": "A simple report with an indicator and campaign",
@@ -42,5 +42,17 @@ class IdentityTestCases(ValidatorTest):
 
     def test_invalid_timestamp(self):
         report = copy.deepcopy(self.valid_report)
-        report['published'] = "2016-11-31T08:17:27.000000Z"
+        report['published'] = "2016-05-32T08:17:27.000Z"
         self.assertFalseWithOptions(report)
+
+        report['published'] = "2016-05-12T19:59:11Z"
+        self.assertTrueWithOptions(report)
+
+        report['created'] = "2016-05-32T08:17:27.000Z"
+        self.assertFalseWithOptions(report)
+
+        report['created'] = "2016-05-21T08:17:27.000123Z"
+        self.assertFalseWithOptions(report)
+
+        report['modified'] = "2016-05-21T08:17:27.001Z"
+        self.assertTrueWithOptions(report)

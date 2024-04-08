@@ -25,6 +25,17 @@ class RelationshipTestCases(ValidatorTest):
         results = validate_string(VALID_RELATIONSHIP, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        relationship = copy.deepcopy(self.valid_relationship)
+        relationship['created'] = "2016-11-31T01:00:00.000Z"
+        self.assertFalseWithOptions(relationship)
+
+        relationship['created'] = "2016-04-06T20:06:37.123Z"
+        self.assertFalseWithOptions(relationship)
+
+        relationship['modified'] = "2016-04-06T20:06:37.123Z"
+        self.assertTrueWithOptions(relationship)
+
     def test_relationship_type(self):
         relationship = copy.deepcopy(self.valid_relationship)
         relationship['relationship_type'] = "SOMETHING"

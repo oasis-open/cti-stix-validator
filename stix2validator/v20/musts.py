@@ -2,6 +2,7 @@
 """
 
 from collections.abc import Mapping
+from datetime import datetime
 import re
 
 from cpe import CPE
@@ -15,6 +16,7 @@ from ..output import info
 from ..util import cyber_observable_check, has_cyber_observable_data
 from .errors import JSONError
 
+TIMESTAMP_FORMAT_RE = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
 CUSTOM_TYPE_PREFIX_RE = re.compile(r"^x\-.+\-.+$")
 CUSTOM_TYPE_LAX_PREFIX_RE = re.compile(r"^x\-.+$")
 CUSTOM_PROPERTY_PREFIX_RE = re.compile(r"^x_.+_.+$")
@@ -24,13 +26,12 @@ CUSTOM_PROPERTY_LAX_PREFIX_RE = re.compile(r"^x_.+$")
 def timestamp(instance):
     """Ensure timestamps contain sane months, days, hours, minutes, seconds.
     """
-    ts_re = re.compile(r"^[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9]|60)(\.[0-9]+)?Z$")
     timestamp_props = ['created', 'modified']
     if instance['type'] in enums.TIMESTAMP_PROPERTIES:
         timestamp_props += enums.TIMESTAMP_PROPERTIES[instance['type']]
 
     for tprop in timestamp_props:
-        if tprop in instance and ts_re.match(instance[tprop]):
+        if tprop in instance and TIMESTAMP_FORMAT_RE.match(instance[tprop]):
             # Don't raise an error if schemas will catch it
             try:
                 parser.parse(instance[tprop])
@@ -44,7 +45,7 @@ def timestamp(instance):
                 continue
             if obj['type'] in enums.TIMESTAMP_OBSERVABLE_PROPERTIES:
                 for tprop in enums.TIMESTAMP_OBSERVABLE_PROPERTIES[obj['type']]:
-                    if tprop in obj and ts_re.match(obj[tprop]):
+                    if tprop in obj and TIMESTAMP_FORMAT_RE.match(obj[tprop]):
                         # Don't raise an error if schemas will catch it
                         try:
                             parser.parse(obj[tprop])
@@ -57,13 +58,13 @@ def timestamp(instance):
                         for tprop in enums.TIMESTAMP_EMBEDDED_PROPERTIES[obj['type']][embed]:
                             if embed == 'extensions':
                                 for ext in obj[embed]:
-                                    if tprop in obj[embed][ext] and ts_re.match(obj[embed][ext][tprop]):
+                                    if tprop in obj[embed][ext] and TIMESTAMP_FORMAT_RE.match(obj[embed][ext][tprop]):
                                         try:
                                             parser.parse(obj[embed][ext][tprop])
                                         except ValueError as e:
                                             yield JSONError("'%s': '%s': '%s': '%s' is not a valid timestamp: %s"
                                                             % (obj['type'], ext, tprop, obj[embed][ext][tprop], str(e)), instance['id'])
-                            elif tprop in obj[embed] and ts_re.match(obj[embed][tprop]):
+                            elif tprop in obj[embed] and TIMESTAMP_FORMAT_RE.match(obj[embed][tprop]):
                                 try:
                                     parser.parse(obj[embed][tprop])
                                 except ValueError as e:
@@ -71,14 +72,48 @@ def timestamp(instance):
                                                     % (obj['type'], tprop, obj[embed][tprop], str(e)), instance['id'])
 
 
-def modified_created(instance):
-    """`modified` property must be later or equal to `created` property
+def compare_timestamps(modified, created):
+    if TIMESTAMP_FORMAT_RE.match(modified) and TIMESTAMP_FORMAT_RE.match(created):
+        created_datetime = datetime_from_str(created)
+        modified_datetime = datetime_from_str(modified)
+        if isinstance(created_datetime, datetime) and isinstance(modified_datetime, datetime):
+            return modified_datetime < created_datetime
+    return modified < created
+
+
+def datetime_from_str(str_datetime):
+    pattern = '%Y-%m-%dT%H:%M:%S.%fZ'
+    try:
+        return datetime.strptime(str_datetime, pattern)
+    except ValueError:
+        pattern = '%Y-%m-%dT%H:%M:%SZ'
+    try:
+        return datetime.strptime(str_datetime, pattern)
+    except ValueError:
+        return str_datetime
+
+
+def timestamp_comparison(instance):
+    """
+    Ensure `modified` property is later or equal to `created` property.
+    Same for any present timestamp property.
     """
     if 'modified' in instance and 'created' in instance and \
-            instance['modified'] < instance['created']:
+            compare_timestamps(instance['modified'], instance['created']):
         msg = "'modified' (%s) must be later or equal to 'created' (%s)"
         return JSONError(msg % (instance['modified'], instance['created']),
                          instance['id'])
+    if instance['type'] in enums.TIMESTAMP_PROPERTIES:
+        timestamp_properties = enums.TIMESTAMP_PROPERTIES[instance['type']]
+        if len(timestamp_properties) == 2:
+            first, last = enums.TIMESTAMP_PROPERTIES[instance['type']]
+            if first in instance and last in instance and \
+                    compare_timestamps(instance[last], instance[first]):
+                msg = "'%s' (%s) must be later or equal to '%s' (%s)"
+                return JSONError(
+                    msg % (last, instance[last], first, instance[first]),
+                    instance['id']
+                )
 
 
 def object_marking_circular_refs(instance):
@@ -412,7 +447,7 @@ def list_musts(options):
     """
     validator_list = [
         timestamp,
-        modified_created,
+        timestamp_comparison,
         object_marking_circular_refs,
         granular_markings_circular_refs,
         marking_selector_syntax,

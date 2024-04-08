@@ -30,6 +30,17 @@ class IdentityTestCases(ValidatorTest):
         results = validate_string(VALID_IDENTITY, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        identity = copy.deepcopy(self.valid_identity)
+        identity['created'] = "2014-08-32T15:50:10.983123Z"
+        self.assertFalseWithOptions(identity)
+
+        identity['created'] = "2014-08-08T15:50:10.983123Z"
+        self.assertFalseWithOptions(identity)
+
+        identity['modified'] = "2014-08-08T15:50:10.984Z"
+        self.assertTrueWithOptions(identity)
+
     def test_vocab_identity_class(self):
         identity = copy.deepcopy(self.valid_identity)
         identity['identity_class'] = "corporation"

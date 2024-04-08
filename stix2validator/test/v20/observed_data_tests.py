@@ -827,6 +827,26 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
+    def test_invalid_timestamp(self):
+        observed_data = copy.deepcopy(self.valid_observed_data)
+        observed_data['created'] = "2016-11-31T08:17:27.000Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['created'] = "2016-04-06T19:58:16.123Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['modified'] = "2016-04-06T19:58:16.123Z"
+        self.assertTrueWithOptions(observed_data)
+
+        observed_data['first_observed'] = "2016-11-31T08:17:27.000Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['first_observed'] = "2015-12-21T19:00:00.123Z"
+        self.assertFalseWithOptions(observed_data)
+
+        observed_data['last_observed'] = "2015-12-21T19:00:00.123Z"
+        self.assertTrueWithOptions(observed_data)
+
     def test_additional_schemas_custom_observable(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
         observed_data['objects']['2'] = {

@@ -31,6 +31,17 @@ class CustomObjectTestCases(ValidatorTest):
         results = validate_string(VALID_CUSTOM_OBJECT, self.options)
         self.assertTrue(results.is_valid)
 
+    def test_invalid_timestamp(self):
+        custom_obj = copy.deepcopy(self.valid_custom_object)
+        custom_obj['created'] = "2021-02-30T09:16:08.989000Z"
+        self.assertFalseWithOptions(custom_obj)
+
+        custom_obj['created'] = "2021-02-20T09:16:08.989123Z"
+        self.assertFalseWithOptions(custom_obj)
+
+        custom_obj['modified'] = "2021-02-20T09:16:08.990Z"
+        self.assertTrueWithOptions(custom_obj)
+
     def test_no_type(self):
         custom_obj = copy.deepcopy(self.valid_custom_object)
         del custom_obj['type']
