@@ -531,17 +531,17 @@ def relationships_strict(instance):
         return
 
     if r_source not in enums.RELATIONSHIPS:
-        return JSONError("'%s' is permitted, but not a suggested relationship type for '%s' objects "
+        return JSONError("'%s' is permitted, but not a suggested relationship type for '%s' object "
                          "for the '%s' relationship." % (r_source, r_type),
                          instance['id'], 'relationship-types')
 
     if r_type not in enums.RELATIONSHIPS[r_source]:
-        return JSONError("'%s' is not a suggested relationship type for '%s' "
+        return JSONError("'%s' is permitted, but not a suggested relationship type for '%s' object "
                          "objects." % (r_type, r_source), instance['id'],
                          'relationship-types')
 
     if r_target not in enums.RELATIONSHIPS[r_source][r_type]:
-        return JSONError("'%s' is not a suggested relationship target object "
+        return JSONError("'%s' is permitted, but not a suggested relationship type for '%s' object "
                          "for '%s' objects with the '%s' relationship."
                          % (r_target, r_source, r_type), instance['id'],
                          'relationship-types')
