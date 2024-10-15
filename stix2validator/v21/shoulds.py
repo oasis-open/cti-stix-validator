@@ -387,7 +387,7 @@ def check_vocab(instance, vocab, code):
 
                 if not is_in:
                     vocab_name = vocab.replace('_', '-').lower()
-                    yield JSONError("%s contains a value not in the %s-ov "
+                    yield JSONError("The value contained in %s is permitted, but is not in the %s-ov "
                                     "vocabulary." % (prop, vocab_name),
                                     instance['id'], code)
 
@@ -531,17 +531,17 @@ def relationships_strict(instance):
         return
 
     if r_source not in enums.RELATIONSHIPS:
-        return JSONError("'%s' is not a suggested relationship source object "
+        return JSONError("'%s' is permitted, but not a suggested relationship source object "
                          "for the '%s' relationship." % (r_source, r_type),
                          instance['id'], 'relationship-types')
 
     if r_type not in enums.RELATIONSHIPS[r_source]:
-        return JSONError("'%s' is not a suggested relationship type for '%s' "
+        return JSONError("'%s' is permitted, but not a suggested relationship type for '%s' "
                          "objects." % (r_type, r_source), instance['id'],
                          'relationship-types')
 
     if r_target not in enums.RELATIONSHIPS[r_source][r_type]:
-        return JSONError("'%s' is not a suggested relationship target object "
+        return JSONError("'%s' is permitted, but not a suggested relationship target object "
                          "for '%s' objects with the '%s' relationship."
                          % (r_target, r_source, r_type), instance['id'],
                          'relationship-types')
