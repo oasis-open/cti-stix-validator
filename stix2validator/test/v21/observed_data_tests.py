@@ -812,11 +812,8 @@ class ObservedDataTestCases(ValidatorTest):
             ]
         self.assertFalseWithOptions(observed_data)
 
-
     def test_invalid_object_refs(self):
         observed_data = copy.deepcopy(self.valid_observed_data)
-
-        print(observed_data)
 
         observed_data['object_refs'] = [
                 "attack-pattern--efcd5e80-570d-4131-b213-62cb18eaa6a8",
@@ -824,16 +821,17 @@ class ObservedDataTestCases(ValidatorTest):
             ]
         self.assertFalseWithOptions(observed_data)
 
-        print(observed_data)
-
         observed_data['object_refs'] = [
                 "ipv4-address--efcd5e80-570d-4131-b213-62cb18eaa6a8",
                 "domain-name--ecb120bf-2694-4902-a737-62b74539a41b"
             ]
         self.assertTrueWithOptions(observed_data)
 
-        print(observed_data['object_refs'])
-
+        observed_data['object_refs'] = [
+                "cabbage",
+                "banana"
+            ]
+        self.assertFalseWithOptions(observed_data)
 
     def test_url(self):
         observed_data = {
