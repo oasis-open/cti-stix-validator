@@ -635,8 +635,8 @@ def find_schema(schema_dir, name):
     """Search the `schema_dir` directory for a schema called `name`.json.
     Return the file path of the first match it finds.
     """
-    if name in _SCHEMAS_FOUND:
-        return _SCHEMAS_FOUND[name]
+    if schema_dir in _SCHEMAS_FOUND and name in _SCHEMAS_FOUND[schema_dir]:
+        return _SCHEMAS_FOUND[schema_dir][name]
 
     schema_filename = name + '.json'
 
@@ -645,7 +645,9 @@ def find_schema(schema_dir, name):
             continue
         if schema_filename in filenames:
             schema_path = os.path.join(root, schema_filename)
-            _SCHEMAS_FOUND[name] = schema_path
+            if schema_dir not in _SCHEMAS_FOUND:
+                _SCHEMAS_FOUND[schema_dir] = dict()
+            _SCHEMAS_FOUND[schema_dir][name] = schema_path
             return schema_path
 
 
