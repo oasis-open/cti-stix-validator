@@ -560,7 +560,9 @@ def patch_schema(schema_data: dict, schema_path: str) -> dict:
 
 _HTTP_SCHEMAS = dict()
 
+
 _FILE_SCHEMAS = dict()
+
 
 def retrieve_from_filesystem(schema_path_uri: str, schema_dir: str) -> Resource:
     """Callback to retrieve a schema given its path.
