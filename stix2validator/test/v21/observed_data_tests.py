@@ -643,8 +643,40 @@ class ObservedDataTestCases(ValidatorTest):
         }
         self.assertFalseWithOptions(observed_data)
 
-        observed_data['languages'][0] = 'eng'
+        # Test with RFC 5646 language code (preferred)
+        observed_data['languages'][0] = 'en'
         self.assertTrueWithOptions(observed_data)
+
+    def test_software_language_iso639_compatibility(self):
+        """Test that ISO 639-2 codes are accepted with warnings for backward compatibility"""
+        import logging
+        import io
+        
+        # Capture log output
+        log_capture = io.StringIO()
+        handler = logging.StreamHandler(log_capture)
+        handler.setLevel(logging.WARNING)
+        logger = logging.getLogger('stix2validator.v21.musts')
+        logger.addHandler(handler)
+        logger.setLevel(logging.WARNING)
+        
+        observed_data = {
+            "type": "software",
+            "id": "software--ff1e0780-358c-5808-a8c7-d0fca4ef6ef4",
+            "name": "word",
+            "languages": ["eng"]  # ISO 639-2 code
+        }
+        
+        # Should be valid (backward compatibility)
+        self.assertTrueWithOptions(observed_data)
+        
+        # Should generate a warning
+        log_output = log_capture.getvalue()
+        self.assertIn("ISO 639-2 language code", log_output)
+        self.assertIn("RFC 5646 language codes are preferred", log_output)
+        
+        # Clean up
+        logger.removeHandler(handler)
 
     def test_software_cpe(self):
         observed_data = {
