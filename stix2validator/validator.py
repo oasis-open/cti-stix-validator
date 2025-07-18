@@ -558,6 +558,12 @@ def patch_schema(schema_data: dict, schema_path: str) -> dict:
     return schema_data
 
 
+_HTTP_SCHEMAS = dict()
+
+
+_FILE_SCHEMAS = dict()
+
+
 def retrieve_from_filesystem(schema_path_uri: str, schema_dir: str) -> Resource:
     """Callback to retrieve a schema given its path.
 
@@ -569,11 +575,17 @@ def retrieve_from_filesystem(schema_path_uri: str, schema_dir: str) -> Resource:
         A resource loaded with the content.
     """
     if schema_path_uri.startswith("http://") or schema_path_uri.startswith("https://"):
+        if schema_path_uri in _HTTP_SCHEMAS:
+            return _HTTP_SCHEMAS[schema_path_uri]
         response = requests.get(schema_path_uri, allow_redirects=True)
         schema = response.json()
         schema = patch_schema(schema, schema_path_uri)
-        return Resource.from_contents(schema)
+        schema_resource = Resource.from_contents(schema)
+        _HTTP_SCHEMAS[schema_path_uri] = schema_resource
+        return schema_resource
     else:
+        if schema_path_uri in _FILE_SCHEMAS:
+            return _FILE_SCHEMAS[schema_path_uri]
         schema_path = pathlib.Path(schema_path_uri)
         if schema_path.is_absolute() or schema_path_uri.startswith("file://"):
             is_relative = False
@@ -585,9 +597,14 @@ def retrieve_from_filesystem(schema_path_uri: str, schema_dir: str) -> Resource:
             schema = json.load(f)
         schema = patch_schema(schema, schema_path)
         if is_relative:
-            return Resource.opaque(schema)
+            schema_resource = Resource.opaque(schema)
         else:
-            return Resource.from_contents(schema)
+            schema_resource = Resource.from_contents(schema)
+        _FILE_SCHEMAS[schema_path_uri] = schema_resource
+        return schema_resource
+
+
+_PATCHED_SCHEMAS = dict()
 
 
 def load_validator(schema_path, schema, schema_dir):
@@ -600,7 +617,11 @@ def load_validator(schema_path, schema, schema_dir):
     Returns:
         An instance of Draft202012Validator.
     """
-    schema = patch_schema(schema, schema_path)
+    if schema_path in _PATCHED_SCHEMAS:
+        schema = _PATCHED_SCHEMAS[schema_path]
+    else:
+        schema = patch_schema(schema, schema_path)
+        _PATCHED_SCHEMAS[schema_path] = schema
     retrieve_callback = functools.partial(retrieve_from_filesystem, schema_dir=schema_dir)
     registry = Registry(
         retrieve=retrieve_callback
@@ -609,17 +630,27 @@ def load_validator(schema_path, schema, schema_dir):
     return validator
 
 
+_SCHEMAS_FOUND = dict()
+
+
 def find_schema(schema_dir, name):
     """Search the `schema_dir` directory for a schema called `name`.json.
     Return the file path of the first match it finds.
     """
+    if schema_dir in _SCHEMAS_FOUND and name in _SCHEMAS_FOUND[schema_dir]:
+        return _SCHEMAS_FOUND[schema_dir][name]
+
     schema_filename = name + '.json'
 
     for root, dirnames, filenames in os.walk(schema_dir, followlinks=True):
         if "examples" in root:
             continue
         if schema_filename in filenames:
-            return os.path.join(root, schema_filename)
+            schema_path = os.path.join(root, schema_filename)
+            if schema_dir not in _SCHEMAS_FOUND:
+                _SCHEMAS_FOUND[schema_dir] = dict()
+            _SCHEMAS_FOUND[schema_dir][name] = schema_path
+            return schema_path
 
 
 def load_schema(schema_path):
