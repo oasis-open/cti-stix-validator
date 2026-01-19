@@ -99,8 +99,8 @@ Mandatory Checks - STIX 2.1
 |                                 | RFC 5646 language code                 | language code.                         |
 +---------------------------------+----------------------------------------+----------------------------------------+
 | software_language               | the 'language' property of software    | The 'languages' property of object     |
-|                                 | objects is a valid ISO 639-2 language  | '<identifier>' contains an invalid     |
-|                                 | code                                   | code ('<lang>').                       |
+|                                 | objects is a valid RFC 5646 language   | '<identifier>' contains an invalid     |
+|                                 | code (ISO 639-2 accepted with warning) | code ('<lang>').                       |
 +---------------------------------+----------------------------------------+----------------------------------------+
 | patterns                        | that the syntax of the pattern of an   | '<object>' is not a valid observable   |
 |                                 | indicator is valid, and that objects   | type name                              |

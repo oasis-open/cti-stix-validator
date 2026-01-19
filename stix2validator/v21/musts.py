@@ -411,16 +411,30 @@ def language(instance):
 
 @cyber_observable_check("2.1")
 def software_language(instance):
-    """Ensure the 'language' property of software objects is a valid ISO 639-2
-    language code.
+    """Ensure the 'language' property of software objects is a valid RFC 5646
+    language code. ISO 639-2 codes are accepted for backward compatibility
+    but will generate warnings.
     """
     if ('type' in instance and instance['type'] == 'software' and
             'languages' in instance):
         for lang in instance['languages']:
-            if lang not in enums.SOFTWARE_LANG_CODES:
+            if lang in enums.LANG_CODES:
+                # Valid RFC 5646 language code
+                continue
+            elif lang in enums.SOFTWARE_LANG_CODES:
+                # ISO 639-2 code - accept but warn
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning("The 'languages' property of object '%s' "
+                               "contains an ISO 639-2 language code ('%s'). "
+                               "RFC 5646 language codes are preferred for STIX 2.1. "
+                               "Consider updating to RFC 5646 format."
+                               % (instance['id'], lang))
+            else:
+                # Invalid language code
                 yield JSONError("The 'languages' property of object '%s' "
-                                "contains an invalid ISO 639-2 language "
-                                " code ('%s')."
+                                "contains an invalid language code ('%s'). "
+                                "Expected RFC 5646 language code."
                                 % (instance['id'], lang), instance['id'])
 
 
