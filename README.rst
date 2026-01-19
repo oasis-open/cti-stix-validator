@@ -144,8 +144,9 @@ repositories/maintainers-guide#additionalMaintainers>`_.
 .. Initial Maintainers: Greg Back & Ivan Kirillov & Chris Lenk
 
 * `Emily Ratliff <mailto:emily.ratliff@ibm.com>`__; GitHub ID: `https://github.com/ejratl <https://github.com/ejratl>`_; WWW: `IBM <http://www.ibm.com/>`__
-*  `Jason Keirstead <mailto:Jason.Keirstead@ca.ibm.com>`__; GitHub ID: `https://github.com/JasonKeirstead <https://github.com/JasonKeirstead>`_; WWW: `IBM <http://www.ibm.com/>`__
 * `Rich Piazza <mailto:rpiazza@mitre.org>`_; GitHub ID: `https://github.com/rpiazza <https://github.com/rpiazza>`_; WWW: `MITRE <http://www.mitre.org/>`_
+* `Alexandre Dulaunoy <mailto:alexandre.dulaunoy@circl.lu>`__; GitHub ID: https://github.com/adulau; WWW: `CIRCL <http://www.circl.lu/>`__
+* `Christian Studer <mailto:christian.studer@circl.lu>`__; GitHub ID: https://github.com/chrisr3d; WWW: `CIRCL <http://www.circl.lu/>`__
 
 
 .. _aboutOpenRepos:
