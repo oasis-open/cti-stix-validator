@@ -426,10 +426,10 @@ def software_language(instance):
                 import logging
                 logger = logging.getLogger(__name__)
                 logger.warning("The 'languages' property of object '%s' "
-                              "contains an ISO 639-2 language code ('%s'). "
-                              "RFC 5646 language codes are preferred for STIX 2.1. "
-                              "Consider updating to RFC 5646 format."
-                              % (instance['id'], lang))
+                               "contains an ISO 639-2 language code ('%s'). "
+                               "RFC 5646 language codes are preferred for STIX 2.1. "
+                               "Consider updating to RFC 5646 format."
+                               % (instance['id'], lang))
             else:
                 # Invalid language code
                 yield JSONError("The 'languages' property of object '%s' "
