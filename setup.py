@@ -35,6 +35,7 @@ setup(
     url="https://github.com/oasis-open/cti-stix-validator",
     author='OASIS Cyber Threat Intelligence Technical Committee',
     author_email='cti-users@lists.oasis-open.org',
+    python_requires=">=3.10",
     maintainer='Chris Lenk',
     maintainer_email='clenk@mitre.org',
     classifiers=[
