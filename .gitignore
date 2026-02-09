@@ -114,3 +114,7 @@ venv.bak/
 
 # External data cache
 cache.sqlite
+
+# mac
+
+.DS_Store

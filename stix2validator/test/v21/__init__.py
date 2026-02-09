@@ -33,7 +33,6 @@ class ValidatorTest(unittest.TestCase):
         else:
             options = ValidationOptions(strict=True, **kwargs)
         results = validate_parsed_json(instance, options)
-        print_results(results)
         self.assertTrue(results.is_valid)
 
     def assertFalseWithOptions(self, instance, **kwargs):
