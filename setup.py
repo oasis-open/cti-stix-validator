@@ -35,6 +35,7 @@ setup(
     url="https://github.com/oasis-open/cti-stix-validator",
     author='OASIS Cyber Threat Intelligence Technical Committee',
     author_email='cti-users@lists.oasis-open.org',
+    python_requires=">=3.10",
     maintainer='Chris Lenk',
     maintainer_email='clenk@mitre.org',
     classifiers=[
@@ -42,11 +43,11 @@ setup(
         'Topic :: Security',
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3.12'
+        'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14'
     ],
     keywords="stix stix2 json validation validator stix-validator stix2-validator",
     project_urls={
