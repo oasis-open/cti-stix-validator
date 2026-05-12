@@ -23,7 +23,7 @@ install_requires = [
     'python-dateutil',
     'requests',
     'simplejson',
-    'stix2-patterns>=0.4.1',
+    'stix2-patterns>=2.1.2',
 ]
 
 setup(
