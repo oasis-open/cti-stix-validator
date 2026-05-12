@@ -84,7 +84,10 @@ def test_validate_file_invalid_comma(caplog):
     assert not results.is_valid
 
     print_results(results)
-    assert 'Fatal Error: Expecting property name' in caplog.text
+    assert (
+        'Fatal Error: Expecting property name' in caplog.text
+        or 'Fatal Error: Illegal trailing comma before end of object' in caplog.text
+    )
 
 
 def test_validate_file_invalid_missing_modified(caplog):
