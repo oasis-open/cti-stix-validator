@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 
 
+from pathlib import Path
+
 from setuptools import find_packages, setup
+from setuptools.command.build_py import build_py as _build_py
+from setuptools.command.sdist import sdist as _sdist
 
 with open('README.rst') as f:
     readme = f.read()
@@ -14,6 +18,46 @@ def get_version():
                 version = line.split()[-1].strip('"')
                 return version
         raise AttributeError("Package does not have a __version__")
+
+
+REQUIRED_SCHEMA_FILES = (
+    Path(
+        'stix2validator/schemas-2.0/schemas/common/'
+        'cyber-observable-core.json'
+    ),
+    Path(
+        'stix2validator/schemas-2.1/schemas/common/'
+        'cyber-observable-core.json'
+    ),
+)
+
+
+def ensure_schemas_present():
+    missing = [
+        str(path)
+        for path in REQUIRED_SCHEMA_FILES
+        if not path.is_file()
+    ]
+
+    if missing:
+        raise RuntimeError(
+            'Required STIX JSON schemas are missing. Initialize the schema '
+            'submodules before building a distribution with:\n\n'
+            '    git submodule update --init --recursive\n\n'
+            'Missing files:\n    ' + '\n    '.join(missing)
+        )
+
+
+class sdist(_sdist):
+    def run(self):
+        ensure_schemas_present()
+        super().run()
+
+
+class build_py(_build_py):
+    def run(self):
+        ensure_schemas_present()
+        super().run()
 
 
 install_requires = [
@@ -58,6 +102,10 @@ setup(
     packages=find_packages(exclude=['*.test.*']),
     install_requires=install_requires,
     include_package_data=True,
+    cmdclass={
+        'sdist': sdist,
+        'build_py': build_py,
+    },
     entry_points={
         'console_scripts': [
             'stix2_validator = stix2validator.scripts.stix2_validator:main',

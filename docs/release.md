@@ -59,7 +59,10 @@ git clean -x -f -d
 9.  Build and publish the new package. This method requires that you have a .pypirc file containing your PyPI credentials, and that your account has appropriate permissions on the PyPI project. See [the Python documentation](http://docs.python.org/2/distutils/packageindex.html#the-pypirc-file) for more information.
 
 ```bash
+git submodule update --init --recursive
 python3 setup.py sdist bdist_wheel
+twine check dist/\*
+python3 tools/check_distribution.py
 twine upload dist/\*
 ```
 
