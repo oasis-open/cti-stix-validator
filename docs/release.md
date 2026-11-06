@@ -48,28 +48,11 @@ git tag -a "v3.1.3" -m "Version 3.1.3"
 git push origin --tags
 ```
 
-7.  Copy the release notes into a new "Release" on GitHub. Don't forget to publish the "Release".
+7.  Copy the release notes into a new "Release" on `oasis-open/cti-stix-validator` on GitHub, selecting the version tag. Publish the release to trigger `.github/workflows/publish-pypi.yml`. The tag must match `stix2validator/version.py`, with an optional `v` prefix (for example, `v3.3.1` or `3.3.1`).
 
-8.  Make sure your release directory is "clean".
+8.  Watch the **Publish release to PyPI** workflow. It checks out the release tag with both schema submodules, builds the wheel and source distribution, checks their metadata and required STIX schemas, then publishes the validated artifacts using PyPI trusted publishing. Approve the `pypi` environment deployment if reviewers are configured. Fork releases do not run the build or publish jobs. Published prereleases also trigger this workflow, so use a matching Python prerelease version when publishing one.
 
-```bash
-git clean -x -f -d
-```
-
-9.  Build and publish the new package. This method requires that you have a .pypirc file containing your PyPI credentials, and that your account has appropriate permissions on the PyPI project. See [the Python documentation](http://docs.python.org/2/distutils/packageindex.html#the-pypirc-file) for more information.
-
-```bash
-git submodule update --init --recursive
-python3 setup.py sdist bdist_wheel
-twine check dist/\*
-python3 tools/check_distribution.py
-twine upload dist/\*
-```
-
-If the filename does not end with -py2.py3-none-any.whl, it is not
-correctly configured as a "Universal" wheel.
-
-10. After the release is up on PyPI, create a temporary virtualenv and was downloaded and installed. If installation works fine, try running some samples or unit tests to make sure everything is working as expected.
+9.  After the release is up on PyPI, create a temporary virtualenv and install the released version. If installation works fine, try running some samples or unit tests to make sure everything is working as expected.
 
 ```bash
 virtualenv mktmpenv
@@ -78,3 +61,21 @@ pip install stix2_validator
 ./mktmpenv/bin/stix2_validator cti-documentation/examples/example_json/poisonivy.json
 deactivate
 ```
+
+## One-time trusted publishing setup
+
+Before publishing the first release with this workflow:
+
+1. Create a GitHub Actions environment named `pypi` in `oasis-open/cti-stix-validator`. Configure any required reviewers and allow deployment from release tags through the environment's deployment rules.
+2. In the existing PyPI project **stix2-validator**, open **Publishing** and add a GitHub trusted publisher with these exact values:
+
+   | Field | Value |
+   | --- | --- |
+   | Owner | `oasis-open` |
+   | Repository | `cti-stix-validator` |
+   | Workflow filename | `publish-pypi.yml` |
+   | Environment name | `pypi` |
+
+The workflow uses GitHub's OpenID Connect identity (`id-token: write`) in the publish job. No PyPI API token or `.pypirc` secret is needed. The build job has only read access to repository contents; the publish job downloads the checked artifacts without executing repository code.
+
+See [PyPI's trusted publishing documentation](https://docs.pypi.org/trusted-publishers/adding-a-publisher/) for publisher registration details. This workflow must be merged into the OASIS repository before tagging the release; merging it into a fork does not configure the upstream publisher.

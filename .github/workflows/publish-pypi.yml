@@ -1,0 +1,64 @@
+name: Publish release to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.repository == 'oasis-open/cti-stix-validator'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          submodules: recursive
+          persist-credentials: false
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Check release version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          python - <<'PY'
+          import os
+          import runpy
+
+          version = runpy.run_path('stix2validator/version.py')['__version__']
+          tag = os.environ['RELEASE_TAG']
+          if tag.removeprefix('v') != version:
+              raise SystemExit(f'Release tag {tag!r} does not match package version {version!r}')
+          PY
+      - name: Install build tools
+        run: python -m pip install --upgrade build twine
+      - name: Build and check distributions
+        run: |
+          python -m build
+          python -m twine check dist/*
+          python tools/check_distribution.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pypi-distributions
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    if: github.repository == 'oasis-open/cti-stix-validator'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/stix2-validator
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pypi-distributions
+          path: dist/
+      - name: Publish to PyPI using trusted publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
