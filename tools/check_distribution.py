@@ -4,7 +4,6 @@ from pathlib import Path
 import tarfile
 import zipfile
 
-
 REQUIRED_FILES = (
     'stix2validator/schemas-2.0/schemas/common/'
     'cyber-observable-core.json',
